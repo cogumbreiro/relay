@@ -1,0 +1,5 @@
+
+Linux 2.6.15:
+
+# remember to edit massive switch statement (CIL didn't convert ranges well)
+drivers/video/cirrusfb.c   cirrusfb_get_mclk : long (long , int , long * )

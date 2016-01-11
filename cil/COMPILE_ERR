@@ -1,0 +1,9 @@
+Jan:
+
+If you get a compilation error like:
+
+File "obj/x86_LINUX/feature_config.ml", line 4, characters 1-3:
+Unbound value ne
+make: *** [obj/x86_LINUX/feature_config.cmo] Error 2
+
+just go into obj/x86_LINUX/feature_config.ml and delete the crap that says "ne"

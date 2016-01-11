@@ -1,0 +1,7 @@
+To "install" this into CIL, 
+
+1) make symlinks into CIL's src/ext folder
+2) add to the makefile's library section (beware of order)
+3) link over the main.ml in the src folder w/ the provided main.ml
+
+Actually, the symlinks should already exist...

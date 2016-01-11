@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %} Run on {{object}}  at  {% endblock %}
+
+{% block content %}
+<div class="module">
+<table width="100%">
+   <caption><big>Run on {{ object }} </big></caption>
+    
+   <tr><td><h4>Changes to analysis</h4>
+      <p> {{ object.changes_to_analysis }}</p>
+       </td></tr>
+   <tr><td><h4>Analysis settings</h4>
+    <p> {{ object.analysis_settings }}</p>
+       </td></tr>
+</table>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+{% include "warnings/util_side.html" %}
+{% endblock %}

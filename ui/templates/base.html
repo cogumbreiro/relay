@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>{% block title %}Relay-race{% endblock %}</title>
+    {% block cssinclude %}
+    <link rel="stylesheet" type="text/css" href="/media2/css/base.css" />
+    {% endblock %}
+    {% block customcss %} {% endblock %}
+  </head>
+
+{% load i18n %}
+  <body>
+  <div id="container">
+  {% block container %}
+    <div id="header">
+      {% block header %}
+        <div id="branding">
+        {% block branding %}{% endblock %}
+        </div>
+
+      {% endblock %}
+    </div>
+
+    {% block breadcrumbs %}<div class="breadcrumbs"><a href="/relay/warnings">{% trans 'Home' %}</a>{% if title %} &rsaquo; {{ title|escape }}{% endif %}</div>{% endblock %}
+
+    <div id="content" class="colMS">
+       <div id="content-related">
+         {% block sidebar %}{% endblock %}
+       </div>
+       <div id="content-main" class="flex">
+         {% block content %}{% endblock %}
+       </div>
+    </div>
+    <!-- END Content -->
+
+    <div id="footer">
+      {% block footer %}
+      <hr>
+      <address>Questions? Contact: 
+            <a href="mailto:jvoung@cs">Jan Voung</a></address>
+      <!-- Created: Sat Mar  3 02:29:02 PST 2007 -->
+      <!-- hhmts start -->
+Last modified: Sun Mar  4 17:57:27 PST 2007
+<!-- hhmts end -->
+      {% endblock %}
+    </div>
+    <!-- END Footer -->
+
+  {% endblock %}
+  </div>
+  </body>
+</html>

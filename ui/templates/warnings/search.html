@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %} Search for run on {{ run }}   {% endblock %}
+
+{% block content %}
+    <h1>Search for run {{ run }}</h1>
+
+    <form method="post">
+      <table> {{form.as_table}} </table>
+      <input type="submit">
+    </form>
+
+{% endblock %}
+

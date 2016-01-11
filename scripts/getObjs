@@ -1,0 +1,26 @@
+#!/usr/bin/python
+# creates a list of space separated .o files
+# useful as input to the cil merger?
+
+import os
+import sys
+
+if len(sys.argv) <> 2:
+    print "One argument: directory name"
+    sys.exit(1)
+    
+dir = os.path.abspath(sys.argv[1])
+testfiles = [];
+
+def appendDir(root):
+    return lambda x: root + os.sep + x
+
+def hasExtension(ext):
+    return lambda x: x[-len(ext):] == ext
+
+for root, dirs, files in os.walk(dir):
+    testfiles.extend ( map (appendDir(root), filter(hasExtension(".o"), files)))
+
+for fname in testfiles:
+    sys.stdout.write(fname + " ")
+

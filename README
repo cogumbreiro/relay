@@ -1,0 +1,75 @@
+Notes on RELAY 0.7.07
+---------------------
+
+What is RELAY?
+--------------
+
+RELAY is a static data race detector for C programs.
+Version 0.7.07 means this is the July 2007 release 
+(the "0." prefix is there to make sure this doesn't 
+sound too advanced and bug-free =P)
+
+
+Installation:
+-------------
+
+see the included INSTALL text file for instructions
+
+
+
+Running RELAY:
+--------------
+
+Pick your favorite C program, or try one of the ones included in the test
+directory. Let's call that program "PUT" (the program under test).
+
+
+1) Pick the files to analyze: We first need a list of the source 
+   files that should be analyzed. The desired files should
+   be listed in a file called "gcc-log.txt" in PUT's directory. 
+   This "gcc-log.txt" file can be written manually, or it filled-in 
+   by a script that intercepts gcc calls from a Makefile. 
+   If PUT has Makefile, run:
+
+   $RELAY_DIR/scripts/intercept.sh make -e
+
+   from the PUT directory.
+
+
+2) Pre-process the source files: We now need to pre-process and generate
+   additional linking information for the source files. First edit
+   the $RELAYROOT value in the script "$RELAY_DIR/scripts/dump-calls.sh" 
+   to point to the location of your RELAY installation. Next, from the PUT 
+   directory, run:
+
+   $RELAY_DIR/scripts/dump-calls.sh
+
+   After this completes, there should be a "ciltrees" directory within
+   the PUT directory. Within ciltrees, there should be a "calls.XYZ"
+   file containing a text representation of the program's callgraph,
+   among other files.
+
+
+3) Now let's run the actual analysis. Change directories to the $RELAY_DIR.
+   We need to run a server process and a worker process. In one terminal, run
+
+   ./server.sh $PUT_DIR/ciltrees
+
+   In another terminal, run:
+
+   ./relay.sh $PUT_DIR/ciltrees
+
+   (sorry, in the future there will be convenience script that runs both)
+
+   The analysis will write a bunch of status messages along with the
+   data race warnings to stdout. Additionally, the warning data will
+   be written to $PUT_DIR/ciltrees/warnings.xml. The data can then be
+   loaded into a database. 
+
+   Scripts in $RELAY_DIR/ui/relay/warnings are available for parsing 
+   the XML and loading it into a database. Additionally, scripts for 
+   filtering-out unlikely race warnings is available. At the moment, however, 
+   this optional component depends on the Django web framework.
+
+   
+

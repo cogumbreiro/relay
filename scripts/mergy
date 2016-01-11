@@ -1,0 +1,42 @@
+#!/usr/bin/python
+
+#call cilly and ask it merge sources
+
+import os
+import sys
+import re
+
+cillyroot = os.environ['CILLYROOT'];
+
+#set CUR_CIL_FILE env variable to tell the cilly routine which file
+#is currently being processed
+matched = False;
+
+#assume file separator char is '/'
+valid_path_chars = "[_a-zA-Z0-9/.-]*?"; #path not required?
+valid_fname_chars = "[_a-zA-Z0-9-]+?";  #excluding the extension
+valid_prefix = valid_path_chars + valid_fname_chars;
+
+#watch out for the order...
+#don't need .h files? inlining already done? src msg wrong though?
+reg = re.compile(valid_prefix + "\.cil\.c|" +
+                 valid_prefix + "\.cpp|" +
+                 valid_prefix + "\.C|" +
+                 valid_prefix + "\.cc|" +
+                 valid_prefix +"\.c");
+
+for a in sys.argv[1:]:
+    mat = reg.search(a);
+    if mat <> None:
+        if matched:
+            print "matched too many sources";
+        else:
+            matched = True;
+            os.environ['CUR_CIL_FILE'] = mat.group(0);
+            
+if (not matched) :
+    print "didn't match any sources";
+
+cillyargs = ['cilly', '--dotrans_alloc', '--merge', '--keepmerged'] + sys.argv[1:];
+
+os.execv(cillyroot + '/cilly', cillyargs);

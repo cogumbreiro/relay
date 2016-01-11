@@ -1,0 +1,41 @@
+
+SymEX
+-----
+Somehow avoid havoc'ing modded values for which a function will never 
+look up the value (during the intra-proc symbolic execution)
+
+
+Stripped down Cil objects:
+--------------------------
+Strip 3 bools from varinfo (vinline, vreferenced, vaddrof), maybe vstorage also
+
+Strip 1 pointer from type (attributes?)
+
+Strip 1 bool from typeinfo (treferenced)
+
+Strip 1 bool, 1 pointer from enuminfo (ereferenced, eattr)
+
+Strip 2 bools, 1 pointer from compinfo (cdefined, creferenced, cattr?), 
+    maybe ckey?
+
+Strip 1 pointer from fieldinfo (fattr?)
+
+Or just load from files, the varinfos based the IDs / cache them?
+
+
+
+
+Stripped down Mapsets
+---------------------
+
+Use something that doesn't take something like 20 bytes per node?
+
+
+Pointer arith
+-------------
+If an integer is used for pointer arith, handle loops more gracefully (like
+array indices) if possible
+
+see: __zzip_parse_root_directory (freshclam_comb.c)
+
+

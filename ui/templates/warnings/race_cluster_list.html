@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %} List of races {% endblock %}
+
+{% block content %}
+
+   {% if object_list %}
+    <h1> Races for run XXX </h1>
+    <ul>
+      {% for rc in object_list %}
+      <li><a href="{{ rc.get_absolute_url }}">
+          Race #{{ rc.id }} 
+          </a></li>
+    {% endfor %}
+    </ul>
+   {% else %}
+    <p>No code bases are available.</p>
+   {% endif %}
+
+{% endblock %}

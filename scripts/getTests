@@ -1,0 +1,31 @@
+#!/usr/bin/python
+# creates a list of .c files from a base directory
+
+import os
+import sys
+
+if len(sys.argv) <> 2:
+    print "One argument: directory name"
+    sys.exit(1)
+    
+dir = os.path.abspath(sys.argv[1])
+testfiles = [];
+
+def appendDir(root):
+    return lambda x: root + os.sep + x
+
+def hasExtension(fname, ext):
+    return fname[-len(ext):] == ext
+
+for root, dirs, files in os.walk(dir):
+    testfiles.extend ( map (appendDir(root), filter(lambda x: hasExtension(x,".c"), files)))
+
+print testfiles
+
+f = "testFiles"
+fp = open(f, 'w')
+
+for f in testfiles:
+    fp.write(f + '\n')
+fp.close()
+

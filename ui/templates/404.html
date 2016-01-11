@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Not found -- 404{% endblock %}
+
+{% block header %}Page not found{% endblock %}
+
+{% block content %}
+    <p>{{ request_path }}, doesn't exist. Yo.</p>
+{% endblock %}

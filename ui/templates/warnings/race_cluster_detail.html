@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %} Warning #{{ object.id }} {% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>Race Warning id: {{ object.id }} </h1>
+    
+    <h2>From program</h2>
+    <p>{{object.program}}</p>
+    <h2>Races (grouped by access 1's line number) </h2>
+    {% regroup object.races.all|dictsort:"access1.occurs_at.line_num" by access1 as acc1_groups %}
+    {% regroup object.races.all|dictsort:"access2.occurs_at.line_num" by access2 as acc2_groups %}
+{# assuming races were just a cross product of a list of acc1 and acc2 #}
+    <table width="100%">
+      <thead>
+        <tr>
+          <th>Acc#</th><th>Lval</th><th>Occurs at</th><th>Locks held</th>
+          <th>Access path</th><th>Loses lock at</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      {% for group in acc1_groups %}
+      <tr class="{% cycle row1,row2 %}">
+        <th>1</th>
+        <td>{% ifchanged group.grouper.lval %} 
+            {{ group.grouper.lval.printed|escape }} {% endifchanged %}</td>
+        <td>{{ group.grouper.occurs_at }}</td>
+        <td>{% ifchanged group.grouper.locks %} 
+              [{% for l in group.grouper.locks.all %} {{ l|escape }} 
+              {% endfor %}] {% endifchanged %}
+        </td>
+        <td>{% ifchanged group.grouper.accessed_through %} 
+            {{ group.grouper.accessed_through }} {% endifchanged %}</td>
+        <td>{% ifchanged group.grouper.accessed_through.empty_ls %}
+              {{ group.grouper.accessed_through.empty_ls }} 
+              {% endifchanged %}</td>
+      {% endfor %}
+
+      {% for group in acc2_groups %}
+      <tr class="{% cycle row1,row2 %}">
+        <th>2</th>
+        <td>{% ifchanged group.grouper.lval %} 
+            {{ group.grouper.lval.printed|escape }} {% endifchanged %}</td>
+        <td>{{ group.grouper.occurs_at }}</td>
+        <td>{% ifchanged group.grouper.locks %} 
+              [{% for l in group.grouper.locks.all %} {{ l|escape }} 
+              {% endfor %}] {% endifchanged %}
+        </td>
+        <td>{% ifchanged group.grouper.accessed_through %} 
+            {{ group.grouper.accessed_through }} {% endifchanged %}</td>
+        <td>{% ifchanged group.grouper.accessed_through.empty_ls %}
+              {{ group.grouper.accessed_through.empty_ls }} 
+              {% endifchanged %}</td>
+      {% endfor %}
+      </tbody>
+    </table>
+</div>
+    <p>Labels:
+      {% if labels %}
+         labels is here!
+      {% endif %}
+      {{ labels }}
+      {% for label in labels %}
+      {{ label }}
+      {% endfor %}
+    </p>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %} Programs checked {% endblock %}
+
+{% block content %}
+
+   {% if object_list %}
+    <h1> Programs checked </h1>
+    <ul>
+      {% for codebase in object_list %}
+      <li><a href="{{ codebase.get_absolute_url }}">
+          {{ codebase }} 
+          </a></li>
+    {% endfor %}
+    </ul>
+   {% else %}
+    <p>No code bases are available.</p>
+   {% endif %}
+
+{% endblock %}
