@@ -49,7 +49,7 @@ let traceSubsystems : string list ref = ref [];;
 
 
 let traceAddSys (subsys : string) : unit =
-  (ignore (printf "traceAddSys %s\n" subsys));
+  (* (ignore (printf "traceAddSys %s\n" subsys)); *)
   traceSubsystems := subsys :: !traceSubsystems
 ;;
 

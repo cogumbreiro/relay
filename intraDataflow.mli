@@ -1,16 +1,14 @@
 
 
-
-val getFunc : int -> Callg.simpleCallN -> Cil.fundec option
-
 class type ['st, 'sum] stateLattice =
   object
     method bottom : 'st
     method combineStates : 'st -> 'st -> 'st
     method initialState : 'st
+    method setInitialState : 'st -> unit
     method isBottom : 'st -> bool
     method printState : 'st -> unit
-    method printSummary : Fstructs.fKey -> unit
+    method printSummary : Summary_keys.sumKey -> unit
     method setTheSums : 'sum Backed_summary.base -> unit
     method stateSubset : 'st -> 'st -> bool
     method sums : 'sum Backed_summary.base
@@ -41,21 +39,26 @@ class type ['a] transFunc =
   object
 
     method curFunc : Cil.fundec
+    method curFunID : Callg.funID
 
-    method handleASM :
-      Cil.attributes * string list * (string * Cil.lval) list *
-      (string * Cil.exp) list * string list * Cil.location ->
+    method setCG : Callg.callG -> unit
+    method curCG : Callg.callG
+
+    method handleASM : Cil.attributes * string list
+      * (string option * string * Cil.lval) list 
+      * (string option * string * Cil.exp) list
+      * string list * Cil.location -> 
       'a -> 'a Dataflow.action
     method handleAssign :
       Cil.lval -> Cil.exp -> Cil.location -> 'a -> 'a Dataflow.action
     method handleCall :
-      Cil.lval option ->
+      Cil.lval option -> Callg.funID list ->
       Cil.exp -> Cil.exp list -> Cil.location -> 'a -> 'a Dataflow.action
     method handleCallExp :
+      Callg.funID list -> Cil.exp -> Cil.exp list -> Cil.location -> 'a -> 'a
+    method handleCallRet : Cil.lval -> Callg.funID list -> 
       Cil.exp -> Cil.exp list -> Cil.location -> 'a -> 'a
-    method handleCallRet :
-      Cil.lval -> Cil.exp -> Cil.exp list -> Cil.location -> 'a -> 'a
-    method handleFunc : Cil.fundec -> unit
+    method handleFunc : Callg.funID -> Cil.fundec -> unit
     method handleGuard : Cil.exp -> 'a -> 'a Dataflow.guardaction
     method handleInstr : Cil.instr -> 'a -> 'a Dataflow.action
     method handleStmt : Cil.stmt -> 'a -> 'a Dataflow.stmtaction
@@ -74,10 +77,11 @@ module type DFTransfer =
 module type IntraProcAnalysis =
   sig
     module T : DFTransfer
+    val initialize : Callg.funID -> Cil.fundec -> T.st -> unit
     val compute : Cil.fundec -> unit
-    val initialize : Cil.fundec -> T.st -> unit
     val getOutState : unit -> T.st
     val curFunc : Cil.fundec ref
+    val curFunID : Callg.funID ref
     val getDataBefore : Cil.prog_point -> T.st
     val getDataAfter : Cil.prog_point -> T.st
     val setDataBefore : Cil.prog_point -> T.st -> unit
@@ -91,7 +95,8 @@ module FlowSensitive :
 module FlowInsensitive :
   functor (S : DFTransfer) -> IntraProcAnalysis with type T.st = S.st
 
-val curCG : Callg.simpleCallN Fstructs.FMap.t ref
+
+val curCG : Callg.callG ref
 val curSCCCG : Scc_cg.sccGraph ref
 
 val checkupSummary :
@@ -104,26 +109,35 @@ val checkupSummary :
   ('c -> 'c -> 'c) ->
   ('b -> 'c -> 'c) -> ('a -> 'c -> 'd) -> bool -> ('c -> unit) -> bool
 
+class type analysis = 
+object
+  method setInspect : bool -> unit
+  method isFinal : Summary_keys.sumKey -> bool 
+  method compute : Callg.funID -> Cil.fundec -> unit
+  method summarize : Summary_keys.sumKey -> Cil.fundec -> bool
+  method flushSummaries : unit -> unit
+end
 
-val runFixpoint : Analysis_dep.analysis list -> Cil.fundec -> bool
+val runFixpoint : analysis list -> Summary_keys.sumKey -> Cil.fundec -> bool
 
 val runNonFixpoint :
-  Analysis_dep.analysis list -> Analysis_dep.analysis list -> 
-  Fstructs.fKey -> Scc_cg.scc -> unit
+  analysis list -> analysis list -> Callg.funID -> Scc_cg.scc -> unit
 
+val warnNoCallees : Cil.exp -> unit
 
 class ['a] idTransFunc : ('a, 'sum) stateLattice -> ['a] transFunc
 
 class ['a] inspectorGadget : ('a, 'sum) stateLattice -> string ->
 object
-  method inspect : bool
-  method inspectInstAfter : Cil.instr -> 'a Dataflow.action -> unit
-  method inspectInstBefore : Cil.instr -> 'a -> unit
-  method inspectStmtAfter : Cil.stmt -> 'a Dataflow.stmtaction -> unit
-  method inspectStmtBefore : Cil.stmt -> 'a -> unit
-  method setInspect : bool -> unit
+  method private inspect : bool
+  method private setInspect : bool -> unit
+  method private inspectInstAfter : Cil.instr -> 'a Dataflow.action -> unit
+  method private inspectInstBefore : Cil.instr -> 'a -> unit
+  method private inspectStmtAfter : Cil.stmt -> 'a Dataflow.stmtaction -> unit
+  method private inspectStmtBefore : Cil.stmt -> 'a -> unit
 end
 
+class ['a] inspectingTransF : ('a, 'sum) stateLattice -> string -> ['a] transFunc
 
 class type ['sum, 'st] summarizer =
   object
@@ -132,7 +146,7 @@ class type ['sum, 'st] summarizer =
     method scopeIt : Cil.fundec -> 'sum -> 'sum
       (* TODO: do we really need more than just summarize? *)
     method summarize :
-      Fstructs.fKey -> Cil.fundec -> (Cil.prog_point -> 'st) -> bool
+      Summary_keys.sumKey -> Cil.fundec -> (Cil.prog_point -> 'st) -> bool
   end
 
 class ['a, 'b] summaryIsState :
@@ -153,7 +167,7 @@ object
     method flushSummaries : unit -> unit
     method setInspect : bool -> unit
     method summarize :
-      Fstructs.fKey -> Cil.fundec -> (Cil.prog_point -> 'b) -> bool
+      Summary_keys.sumKey -> Cil.fundec -> (Cil.prog_point -> 'b) -> bool
   end
 
 (* TODO: make this like the summaryIsOutput -- i.e., make it a summarizer *)

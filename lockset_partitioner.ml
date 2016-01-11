@@ -38,61 +38,43 @@
 
 
 open Cil
+open Logging
 open Fstructs
-
-module IH = Inthash
-module DF = Dataflow
-module RS = Racesummary
-module L = Logging
-module PPSet = Ciltools.PPSet
-module PPHash = Ciltools.PPHash
+open Ciltools
+open Racesummary
 
 let debug = false
 
 module LocSet = Set.Make(
   struct
-    type t = Cil.location
+    type t = location
     let compare = compareLoc
   end)
 
 module LSHash = Hashtbl.Make(
   struct
-    type t = RS.lockState
+    type t = lockState
     let equal a b = Lockset.LS.equal a b
     let hash = Lockset.LS.hash
   end)
-
-module LocHash = Hashtbl.Make(
-  struct
-    type t = location
-    let equal l1 l2 = (compareLoc l1 l2) = 0
-    (*let hash = Hashtbl.hash*)
-    let hash =
-      fun l ->
-        Hashtbl.hash l.line
-        lxor Hashtbl.hash l.file
-        lxor Hashtbl.hash l.byte
-  end
-)
-
 
 type ls2ppTable = PPSet.t LSHash.t
 
 type pp2intTable = int PPHash.t
 
-type int2lsTable = RS.lockState IH.t
+type int2lsTable = lockState Inthash.t
 
 
 let computeTables (data : ls2ppTable) : pp2intTable * int2lsTable =
   let count = ref 0 in
   let pp2int = PPHash.create 20 in
-  let int2ls = IH.create 20 in
+  let int2ls = Inthash.create 20 in
 
   let addPP pp i =
     PPHash.add pp2int pp i in
 
   let processPart ls pps =
-    IH.add int2ls !count ls;
+    Inthash.add int2ls !count ls;
     PPSet.iter (fun pp -> addPP pp !count) pps;
     count := !count + 1 in
 
@@ -100,7 +82,7 @@ let computeTables (data : ls2ppTable) : pp2intTable * int2lsTable =
   pp2int, int2ls
 
 
-class lsPartitioner (getLocks : prog_point -> RS.lockState) = object(self)
+class lsPartitioner (getLocks : prog_point -> lockState) = object(self)
   inherit Pp_visitor.ppVisitor
 
   val data : ls2ppTable =
@@ -139,18 +121,18 @@ end
 type summary = pp2intTable * int2lsTable
 
 let emptySumm () : summary =
-  PPHash.create 0, IH.create 0
+  PPHash.create 0, Inthash.create 0
 
 let printSumm fkey ((pp2int, int2ls) : summary) =
-  L.logStatus ("LSP fkey " ^ string_of_int fkey);
-  IH.iter
+  logStatus ("LSP fkey " ^ string_of_int fkey);
+  Inthash.iter
     (fun i ls ->
-       L.logStatus ("lockset assigned id " ^ (string_of_int i));
-       RS.printLockset ls;
+       logStatus ("lockset assigned id " ^ (string_of_int i));
+       printLockset ls;
     ) int2ls;
   PPHash.iter
     (fun pp i ->
-       L.logStatus ("pp "
+       logStatus ("pp "
          ^ Cildump.string_of_pp pp
          ^ " has ls id "
          ^ string_of_int i)
@@ -161,15 +143,15 @@ exception LsAtPP
 
 let getLocksetAtPP pp ((pp2int, int2ls) : summary) =
   try let i = PPHash.find pp2int pp in
-  try let ls = IH.find int2ls i in
+  try let ls = Inthash.find int2ls i in
     ls
 
   with Not_found -> (* assignment of ls *)
-    L.logError ~prior:1 ("getLocksetAtPP: i not found");
+    logError ~prior:1 ("getLocksetAtPP: i not found");
     raise LsAtPP
 
   with Not_found -> (* assignment of i *)
-    L.logError ~prior:1 ("getLocksetAtPP: pp not found");
+    logError ~prior:1 ("getLocksetAtPP: pp not found");
     raise LsAtPP
 
 module LSPartSum = struct
@@ -192,11 +174,12 @@ let _ = Backed_summary.registerType sums
 
 (** Package up the Lockset partitioning analysis *)
 class lspAnalysis
-  (lockAnalysisSkips : fKey -> bool) 
-  (getLocks : prog_point ->  RS.lockState) = object (self)
-
-    val mutable summary = emptySumm ()
-
+  (lockAnalysisSkips : Summary_keys.sumKey -> bool) 
+  (getLocks : prog_point ->  lockState) : IntraDataflow.analysis = 
+object (self)
+    
+  val mutable summary = emptySumm ()
+    
   method setInspect (yesno:bool) = 
     ()
 
@@ -204,18 +187,15 @@ class lspAnalysis
   method isFinal fkey =
     lockAnalysisSkips fkey
       
-  method compute cfg =
-    L.logStatus "doing lockset partitions";
-    L.flushStatus ();
+  method compute funID cfg =
+    logStatus "doing lockset partitions";
+    flushStatus ();
     let lsp = new lsPartitioner getLocks in
     summary <- lsp#compute cfg
 
   method summarize fkey (_:fundec) : bool =
-    if self#isFinal fkey then
-      sums#addReplace fkey (emptySumm ())
-    else
-      sums#addReplace fkey summary
-    ;
+    if self#isFinal fkey then sums#addReplace fkey (emptySumm ())
+    else sums#addReplace fkey summary;
     false
 
   method flushSummaries () =

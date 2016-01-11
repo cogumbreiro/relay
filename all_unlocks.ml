@@ -3,21 +3,21 @@
 
 open Cil
 open Fstructs
-module L = Logging
+open Logging
+
 module RS = Racesummary
 module LS = Lockset
-
 
 (* AllUnlocks summary info *)
 
 let emptyAUsummary () =
-  Lockset.LS.S.empty
+  LS.LS.S.empty
 
 module AUsum = struct
-  type t = unit Lockset.LS.S.t
+  type t = unit LS.LS.S.t
   type simpleSum = t
   let simplify s = s
-  let desimplify s = Lockset.LS.uniquePart s
+  let desimplify s = LS.LS.uniquePart s
   let initVal = emptyAUsummary ()
   let unknownSummary = emptyAUsummary ()
 
@@ -49,8 +49,8 @@ module AllUnlocksTransF = struct
       self#setInstrPP i;
       let pp = getCurrentPP () in
       let ls = getLocks pp in
-      (* TODO: check if LS is bottom? *)
-      addUnlocks (LS.LS.getMinus ls);
+      if RS.isBottomLS ls then () 
+      else addUnlocks (LS.LS.getMinus ls);
       self#bumpInstr 1;
       DoChildren
 
@@ -58,8 +58,8 @@ module AllUnlocksTransF = struct
       self#setStmtPP s;
       let pp = getCurrentPP () in
       let ls = getLocks pp in
-      (* TODO: check if LS is bottom? *)
-      addUnlocks (LS.LS.getMinus ls);
+      if RS.isBottomLS ls then () 
+      else addUnlocks (LS.LS.getMinus ls);
       DoChildren
 
   end
@@ -75,8 +75,8 @@ end
 
 (** Package up the All Unlocks analysis *)
 class auAnalysis
-  (lockAnalysisSkips : fKey -> bool) 
-  (getLocks : prog_point ->  RS.lockState) = object (self)
+  (lockAnalysisSkips : Summary_keys.sumKey -> bool) 
+  (getLocks : prog_point ->  RS.lockState) : IntraDataflow.analysis = object (self)
 
   method setInspect (yesno:bool) =
     ()
@@ -85,14 +85,14 @@ class auAnalysis
   method isFinal fkey =
     lockAnalysisSkips fkey
       
-  method compute cfg =
-    L.logStatus "doing all-unlocks";
-    L.flushStatus ();
+  method compute funID cfg =
+    logStatus "doing all-unlocks";
+    flushStatus ();
     AllUnlocksTransF.compute cfg getLocks
 
   method summarize fkey (_:fundec) =
     if self#isFinal fkey then begin
-      L.logStatus ("Picking unlock-bits from LS summary for AU summary");
+      logStatus ("Picking unlock-bits from LS summary for AU summary");
       let curSumOut = RS.summOutstate (RS.sum#find fkey) in
       let locks = curSumOut.RS.lState in
       sums#addReplace fkey (LS.LS.getMinus locks);
@@ -109,32 +109,23 @@ end
 
 let lockMapper = new Relative_df.lockTransfer
 
-let getWeakerLS curls i =
+let getWeakerLS curCG curFun curls i =
   let pp = getCurrentPP () in
 
   let applySum actuals ls fkey =
     let au = sums#find fkey in
-    Lockset.LS.unique 
-      (Lockset.LS.S.fold 
+    LS.LS.unique 
+      (LS.LS.S.fold 
          (fun lockLv lockInfo cur ->
             lockMapper#applyUnlocked pp actuals lockLv lockInfo cur
          ) au ls)
   in
 
   match i with
-    Call (_, Lval (Var finfo, NoOffset), actuals, _) ->
-      let fkey, fname = finfo.vid, finfo.vname in
-      applySum actuals curls fkey
-
-  | Call (_, Lval (Mem exp, NoOffset), actuals, _) ->
-      let aliasedFuns = Alias.deref_funptr exp in
-      List.fold_left (fun wls fk -> applySum actuals wls fk) 
-        curls aliasedFuns
+    Call (_, callexp, actuals, _) ->
+      let targs = Callg.callTargsAtPP curCG curFun pp in
+      List.fold_left (fun wls k -> applySum actuals wls k) curls targs
 
   | _ ->
-      L.logError ~prior:1
-        "getWeakerLS: bad instr type";
-      curls
-
-
+      failwith "getWeakerLS: bad instr type"
 

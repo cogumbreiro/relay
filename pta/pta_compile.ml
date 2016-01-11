@@ -46,45 +46,7 @@ open Filetools
 open Pta_types
 
 module HC = Simplehc
-module CLv = Cil_lvals
 module D = Cildump
-
-(* 
-   TODO: Support field-based analysis:
-
-   - for each type T and field f, have a variable representing
-     t.f for all instances t of type T. 
-
-   - how to cheaply track types and offsets 
-     (instead of using original Cil objects?)
-      - create type-representative vars during pre-pass and 
-        generate assignments for those too? that way, the assignments
-        don't need to keep type info?
-      - more work to convert to field-sensitive by doing so though
-      - also, lose any possible interaction between the f-b and 
-        f-i solvers as the f-i solver will not have the same info
-
-   - soundness?
-      - unions
-      - casting?
-         - (struct a)x.f = blah
-         - (struct b)x.f = blah  
-           (where both struct a and b have f as first field)
-         - do a separate cast analysis to conflate fields of types?
-      - ptr arith?
-
-   - how to handle assignment from/to complex lvals?
-      - e.g., x->f1->f2 = y->f3->f4 ?
-      - only look at type of *(x->f1) and *(y->f3)?
-      - what extra info would you get by looking a whole access path?
-
-   - how best to solve constraints if both field-based & field-insens.
-     information are available? interaction w/ iteration for fun ptrs?
-      - do base-case assignments, then basic calls for both before doing 
-        complex & funptr calls? actually, the type-based ones should all
-        be basic assignments?
-
-*)
 
 
 (*************** State management **************)
@@ -99,7 +61,38 @@ let compAssigns = VarH.create 101
 let calls = VarH.create 101
 
 (** List of functions in the file *)
-let funsInFile = ref []
+let funsInFile = Hashtbl.create 101
+
+let combineFunInfo oldInfo newInfo =
+  let fformals = 
+    if oldInfo.funFormals = [] then newInfo.funFormals 
+    else if newInfo.funFormals = [] then oldInfo.funFormals
+    else if newInfo.funFormals <> oldInfo.funFormals then begin
+      prerr_string 
+        ("combineFunInfo formals diff: " ^ string_of_int oldInfo.funId ^ "\n");
+      oldInfo.funFormals
+    end else oldInfo.funFormals
+  in
+  let ftype = 
+    if compareType oldInfo.funType newInfo.funType == 0 
+    then oldInfo.funType else begin
+      prerr_string 
+        ("combineFunInfo ftype diff: " ^ string_of_int oldInfo.funId ^ "\n");
+      prerr_string 
+        ("old: " ^ string_of_type oldInfo.funType ^ 
+           " new: " ^ string_of_type newInfo.funType ^ "\n");
+      oldInfo.funType 
+    end in
+  { oldInfo with funFormals = fformals; funType = ftype; }
+
+
+let addFunInfo finfo =
+  try 
+    let oldInfo = Hashtbl.find funsInFile finfo.funId in
+    let newInfo = combineFunInfo oldInfo finfo in
+    Hashtbl.replace funsInFile newInfo.funId newInfo
+  with Not_found ->
+    Hashtbl.add funsInFile finfo.funId finfo
 
 
 (** Flag: true if assignments should be simplified to have one deref *)
@@ -115,7 +108,7 @@ let nextTempID = ref 0
 
 
 let initState () =
-  funsInFile := [];
+  Hashtbl.clear funsInFile;
   VarH.clear baseAssigns;
   VarH.clear compAssigns;
   VarH.clear calls;
@@ -133,7 +126,7 @@ let saveState (forFile:string) =
   let newFile = getPTAFile forFile in
   let out_chan = open_out_bin newFile in
   Marshal.to_channel out_chan 
-    (!funsInFile, baseAssigns, compAssigns, calls, pseudoToOrig)
+    (funsInFile, baseAssigns, compAssigns, calls, pseudoToOrig)
     [Marshal.Closures] ;
   close_out out_chan
 
@@ -143,7 +136,7 @@ let loadState (f:string) =
   let in_chan = open_in_bin f in
   let funs, baseAss, compAss, callsTab, pseudoTab = 
     (Marshal.from_channel in_chan : 
-       funInfo list * 
+       (vid, funInfo) Hashtbl.t *
        (ptaAssign list) VarH.t * 
        (ptaAssign list) VarH.t *
        (ptaCall list) VarH.t *
@@ -152,18 +145,9 @@ let loadState (f:string) =
   close_in in_chan;
   (funs, baseAss, compAss, callsTab, pseudoTab)
 
-
-let rehashFuns funs =
-  List.map 
-    (fun ({funType = ft; funFormals = ff;} as fi) ->
-       {fi with
-          funType = rehashType ft;
-          funFormals = List.map rehashVar ff;
-       }
-    ) funs
     
 let rehashAssigns ass =
-  let rehashedAss = VarH.create ((VarH.length ass) * 2) in
+  let rehashedAss = VarH.create (VarH.length ass) in
   VarH.iter 
     (fun var assignList ->
        let rehashedAssignList = List.map rehashAssign assignList in
@@ -172,7 +156,7 @@ let rehashAssigns ass =
   rehashedAss
 
 let rehashCalls calls = 
-  let rehashedCalls = VarH.create ((VarH.length calls) * 2) in
+  let rehashedCalls = VarH.create (VarH.length calls) in
   VarH.iter
     (fun var callList ->
        let rehashedCallList = List.map rehashCall callList in
@@ -203,7 +187,7 @@ let curFun : (funInfo ref) = ref dummyFun
 
 let isFunPtrType (t : typ) : bool =
   match t with
-    TPtr (t, _) -> isFunctionType t
+    TPtr (t, _) -> Cil.isFunctionType t
   | _ -> false
       
 let isGlobal v =
@@ -229,7 +213,7 @@ let rec analyze_lval (lv : lval ) : ptaLv list =
 
   | Mem e, off ->
       let lvsInExp = analyze_exp e in
-      let baseT = CLv.typeOfLvalUnsafe (Mem e, NoOffset) in
+      let baseT = Cil_lvals.typeOfLvalUnsafe (Mem e, NoOffset) in
       let ptOff = makeOff baseT off in
       let lvs = List.fold_left 
         (fun curL lv ->
@@ -240,24 +224,17 @@ let rec analyze_lval (lv : lval ) : ptaLv list =
 
 and analyze_exp (e : exp ) : ptaRv list =
   match e with
-    Const (CStr s) ->
-      []
-  | Const _
-  | SizeOf _
-  | SizeOfStr _
-  | AlignOf _
-  | AlignOfE _
-  | SizeOfE _ ->
+    Const (CStr s) -> []
+  | Const _ | SizeOf _ | SizeOfStr _ | AlignOf _ | AlignOfE _ | SizeOfE _ ->
       []
 
   | Lval l ->
       let lvs = analyze_lval l in
-      List.map 
-        (fun lv -> makeRv (PLv lv)) lvs
+      List.map (fun lv -> makeRv (PLv lv)) lvs
 
   | UnOp (op, e, t) ->
       analyze_exp e  (* really shouldn't do pointer stuff w/ unop,
-                      but they could negate  twice and end up with
+                      but they could negate twice and end up with
                       the pointer again... *)
 
   | BinOp (op, e, e', t) -> begin 
@@ -266,37 +243,29 @@ and analyze_exp (e : exp ) : ptaRv list =
       | MinusA -> 
           let left = analyze_exp e in
           let right = analyze_exp e' in
-          left @ right (* lists shouldn't be too long *)
+          left @ right
       | PlusPI
       | IndexPI
-      | MinusPI -> (* maybe should add LAnd, LOr, Shiftlt, Shiftrt ? *)
+      | MinusPI -> 
           analyze_exp e
             (* ignore rhs (since it should be an int) *)
-            
-      | _ -> 
-          (* assume other ops can't be used w/ the pointer part of ptr arith *)
+           
+      | _ ->
+          (* assume other ops can't be used w/ the pointer part of 
+             ptr arith... ugh... not true w/ masking in emacs? 
+             Maybe should add LAnd, LOr, Shiftlt, Shiftrt ?  *)
           []
     end
 
   | CastE (t, e) -> 
       let rvs = analyze_exp e in
-      List.map 
+      List.map
         (fun rv -> 
-           makeRv (PCast 
-                     ((* makeType t *)
-                       dummyTyp, 
-                       rv))) rvs
-
-  | AddrOf l
-  | StartOf l -> (* functions aren't special for now *)
+           makeRv (PCast ((* makeType t *)  dummyTyp, rv))) rvs
+        
+  | AddrOf l | StartOf l -> (* hmm... treat StartOf as AddrOf? *)
       let lvsInLv = analyze_lval l in
-      let rvs = List.fold_left 
-        (fun curL lv ->
-           let rval = makeAddr lv in
-           rval :: curL
-        ) [] lvsInLv
-      in
-      rvs
+      List.fold_left (fun curL lv -> makeAddr lv :: curL) [] lvsInLv
 
 
 let addToCollectionList find replace addonce key value =
@@ -343,7 +312,7 @@ let nextTemp () =
 
 
 (** Map the given lval to its pseudo-variable-lval *)
-let getPseudo lval =
+let getPseudo loc lval =
   try
     let existingTemp = LvalH.find origToPseudo lval in
     let tempLv = makeLv (makeHost (PVar existingTemp), noOffset) in
@@ -356,49 +325,50 @@ let getPseudo lval =
     (* Make an assignment constraint in both directions, to express equality *)
     let tempLv = makeLv (makeHost (PVar tempVar), noOffset) in
     let rval = makeRv (PLv lval) in
-    let () = doAssign tempLv rval Cil.locUnknown in
+    let () = doAssign tempLv rval loc in
     let tempRv = makeRv (PLv tempLv) in
-    let () = doAssign lval tempRv Cil.locUnknown in
+    let () = doAssign lval tempRv loc in
     tempLv
 
-let rec simplifyLval (lv : ptaLv) (derefsLeft : int) : ptaLv =
+let rec simplifyLval loc (lv : ptaLv) (derefsLeft : int) : ptaLv =
   let host, off = lv in
   match host.HC.node with
     PVar _ -> lv
   | PDeref (rv) ->
-      let newRv = simplifyRval rv (derefsLeft - 1) in
+      let newRv = simplifyRval loc rv (derefsLeft - 1) in
       if derefsLeft <= 0 then
         (* Hmm... pseudo var only for host? *)
         let (lvNoOff : ptaLv) = makeLv (makeHost (PDeref newRv), noOffset) in
-        let (pseudo : ptaLv) = addLvalOffset (getPseudo lvNoOff) off in
+        let (pseudo : ptaLv) = addLvalOffset (getPseudo loc lvNoOff) off in
         pseudo
       else
         makeLv (makeHost (PDeref newRv), off)
           
-and simplifyRval (rv : ptaRv) (derefsLeft : int) : ptaRv =
+and simplifyRval loc (rv : ptaRv) (derefsLeft : int) : ptaRv =
   match rv.HC.node with
-    PLv lv -> makeRv (PLv (simplifyLval lv derefsLeft))
-  | PCast (t, r) -> makeRv (PCast (t, simplifyRval r derefsLeft))
+    PLv lv -> makeRv (PLv (simplifyLval loc lv derefsLeft))
+  | PCast (t, r) -> makeRv (PCast (t, simplifyRval loc r derefsLeft))
   | PAddrOf lv -> 
       (* Disallow derefs within an addrOf *)
-      makeRv (PAddrOf (simplifyLval lv 0))
+      makeRv (PAddrOf (simplifyLval loc lv 0))
+
         
 (** Simplify an assignment *)
-let rec simplifyAssign lhs rhs =
+let rec simplifyAssign loc lhs rhs =
   let allowedLDerefs, allowedRDerefs = 
     (* If the RHS is an addrOf thing, don't allow any derefs *)
     if isAddrOf rhs then 0, 0 
       (* Can only allow one deref, usually leave it to the LHS *)
     else if isDeref lhs then 1, 0
     else 1, 1 in
-  let newLHS = simplifyLval lhs allowedLDerefs in
-  let newRHS = simplifyRval rhs allowedRDerefs in
+  let newLHS = simplifyLval loc lhs allowedLDerefs in
+  let newRHS = simplifyRval loc rhs allowedRDerefs in
   (newLHS, newRHS)
 
 
 (** Decide to simplify an assignment, then do the actual assignment *)
 let newAssign (lhs:ptaLv) (rhs:ptaRv) loc =
-  let newL, newR = if !simplify then simplifyAssign lhs rhs
+  let newL, newR = if !simplify then simplifyAssign loc lhs rhs
   else (lhs, rhs) in
   doAssign newL newR loc
 
@@ -415,32 +385,29 @@ let handleAssign (lhs : ptaLv list) (rhs : ptaRv list) loc =
 (* MAKE simplifier connect stuff like ***x to the right temp, otherwise,
    queries directly from the code will not work? *)
 
-let simplifyCallExps cexps =
-  List.map (fun lv -> simplifyLval lv 1) cexps
+let simplifyCallExps loc cexps =
+  List.map (fun lv -> simplifyLval loc lv 1) cexps
 
-let simplifyCallArgs args =
+let simplifyCallArgs loc args =
   List.map 
     (fun (actuals, index) ->
-       (List.map (fun rv -> simplifyRval rv 1) actuals, index)) args
+       (List.map (fun rv -> simplifyRval loc rv 0) actuals, index)) args
 
 
 (** Make a new assignment induced by a function call (i.e., param passing, 
     or return value capture). The [index] is the index of the 
     assigned-to parameter, or a special index for the return value *)
 let newCall (cinfo, args) =
-  let newArgs = if !simplify then simplifyCallArgs args else args in
+  let newArgs = if !simplify then simplifyCallArgs cinfo.cloc args else args in
 
   let newCinfo = if !simplify 
-  then { cinfo with cexp = simplifyCallExps cinfo.cexp; } 
+  then { cinfo with cexp = simplifyCallExps cinfo.cloc cinfo.cexp; } 
   else cinfo in
 
   (* index by call expression's variable *)
   let cVars = baseVars cinfo.cexp in
   let c = (newCinfo, newArgs) in
-  List.iter 
-    (fun cv ->
-       addToCall cv c
-    ) cVars
+  List.iter (fun cv -> addToCall cv c) cVars
 
 
 let analyzeCall retopt fexpr actuals loc =
@@ -453,11 +420,7 @@ let analyzeCall retopt fexpr actuals loc =
            prerr_string "ignoring call expr that's not an lval\n";
            curL
     ) [] callRvs in
-
-
-  let ctyp = CLv.typeOfUnsafe fexpr in
-
-
+  let ctyp = Cil_lvals.typeOfUnsafe fexpr in
   let cinfo = { cexp = callLvs;
                 cloc = loc;
                 ctype = cil_type_to_ptype ctyp;
@@ -476,6 +439,21 @@ let analyzeCall retopt fexpr actuals loc =
      | None ->
          args) in
   let args = List.rev args in
+
+(*
+  (* DEBUG call before simplifiers are applied *)
+  begin
+    print_string ("Constraint for call: " ^ (D.string_of_exp fexpr) ^ " @ " ^
+                    (D.string_of_loc loc) ^ "\n");
+    List.iter 
+      (fun (rvs, index) ->
+         print_string ("   " ^ string_of_int index ^ ": ");
+         List.iter (fun rv -> print_string (string_of_ptaRv rv ^ ", ")) rvs;
+         print_string "\n";
+      ) args;
+    print_string "\n";
+  end;
+*)
   newCall (cinfo, args)
 
 
@@ -554,7 +532,7 @@ let analyze_function (f : fundec ) : unit =
               funType = cil_type_to_ptype f.svar.vtype;
               funFormals = formals;
             };
-  funsInFile := !curFun :: !funsInFile;
+  addFunInfo !curFun;
   
   print_string ("Analyzing function " ^ f.svar.vname ^ "\n");
   analyze_block f.sbody
@@ -583,26 +561,23 @@ let analyze_init (v:varinfo) (i:init) =
 
 let analyze_global (g : global ) : unit =
   match g with
-    GVarDecl (v, loc) -> 
-      () (* no new constraints *)
+    GVarDecl (v, loc) -> (* at least add extern fun sigs (minus the formals) *)
+      if Cil.isFunctionType v.vtype then
+        let info = { funId = v.vid; 
+                     funType = cil_type_to_ptype v.vtype;
+                     funFormals = []; } in
+        addFunInfo info
   | GVar (v, init, loc) ->
-      begin
-        match init.init with
-          Some i ->
-            analyze_init v i
-              
-        | None -> () (* no new constraints *)
-      end
-  | GFun (f, l) ->
-      analyze_function f
-  | _ ->
-      ()
+      (match init.init with
+         Some i -> analyze_init v i
+       | None -> ())
+  | GFun (f, l) -> analyze_function f
+  | _ -> ()
 
 
 let analyze_file (f : file) : unit =
   print_string ("Analyzing file " ^ f.fileName ^ "\n");
   iterGlobals f analyze_global
-
 
 
 (*************** Analyze All *************************)
@@ -633,156 +608,4 @@ let analyzeAllInOne (root :string) : unit =
     ) root;
   saveState (getConstraintFile root);
   initState ()
-
-(*************** Check function info ***********)
-
-(** Table of fun id -> funInfo *)
-let funTable = Hashtbl.create 101
-
-let funcsUninit () =
-  Hashtbl.length funTable == 0
-
-let getFunInfo (id:vid) : funInfo =
-  Hashtbl.find funTable id
-
-let isFunc (id:vid) =
-  Hashtbl.mem funTable id
-
-(** Reload func info and add to the given funTable *)
-let loadFuncTypes root funTable =
-  let filename = getConstraintFile root in
-  let funs, _, _, _, _ = loadFor filename in
-  List.iter 
-    (fun finfo ->
-       Hashtbl.replace funTable finfo.funId finfo
-    ) (rehashFuns funs)
-
-let loadFuncInfo root =
-  if funcsUninit () then begin
-    print_string "Loading function info\n";
-    flush stdout;
-    loadFuncTypes root funTable;
-  end
-
-let printFunTypes () =
-  print_string "Printing function info\n========================\n";
-  Pta_types.printFunTypes funTable
-
-(** true if the lval is based on a global but not a function... *)
-let rec isGlobalLv (lv : ptaLv) : bool =
-  let host, _ = lv in
-  match host.HC.node with
-    PVar v ->
-      (match v.HC.node with
-         PGlobal (id, _) -> not (isFunc id)
-       | _ -> false
-      )
-  | PDeref ptrRv ->
-      isGlobalRv ptrRv
-
-and isGlobalRv (rv : ptaRv) : bool = 
-  match rv.HC.node with
-    PLv lv -> 
-      isGlobalLv lv
-  | PAddrOf lv ->
-      isGlobalLv lv
-  | PCast (_, rv) ->
-      isGlobalRv rv
-
-let isFuncLv (lv : ptaLv) : bool =
-  let host, _ = lv in
-  match host.HC.node with 
-    PVar v ->
-      (match v.HC.node with
-         PGlobal (id, _) -> isFunc id
-       | _ -> false)
-  | PDeref _ -> false
-
-
-(*************** Debug *************************)
-
-(** Assume all constraints in one file *)
-let printConstraints root =
-  print_string "PTA constraints:\n";
-  let numBase = ref 0 in
-  let numComplex = ref 0 in
-  let numCallCons = ref 0 in
-  let numPseudo = ref 0 in
-
-  (* Assume it ran in one-file mode... 
-     TODO: check disk to see if that is the case *)
-  
-  let filename = getConstraintFile root in
-  let _, baseAssign, complexAssign, calls, pseudo = loadFor filename in
-  print_string "Base cons:\n";
-  VarH.iter
-    (fun vinfo aList ->
-       List.iter 
-         (fun a -> printAssignment a; incr numBase) 
-         aList
-    ) baseAssign;
-  
-  print_string "\nComplex cons:\n";
-  VarH.iter
-    (fun vinfo aList ->
-       List.iter 
-         (fun a -> printAssignment a; incr numComplex) aList
-    ) complexAssign;
-
-  print_string "\nCall cons:\n";
-  VarH.iter
-    (fun vinfo callList ->
-       List.iter
-         (fun call -> printCallCons call; incr numCallCons) callList
-    ) calls;
-
-  print_string "\nTemp var -> lvals:\n";
-  VarH.iter
-    (fun vinfo lv ->
-       printVinfo vinfo;
-       print_string " <- ";
-       printPtaLv lv;
-       print_string "\n";
-       incr numPseudo;
-    ) pseudo;
-  Printf.printf "=============================\n Constraint STATS\n";
-  Printf.printf "Base constraints:\t %d\n" !numBase;
-  Printf.printf "Complex constraints:\t %d\n" !numComplex;
-  Printf.printf "Call constraints:\t %d\n" !numCallCons;
-  Printf.printf "Temp constraints:\t %d\n" !numPseudo;
-  print_string "\n\n"
-
-
-(*********** Print variable ids so that we actually understand the output *)
-
-let tempVIDSet = Hashtbl.create 101
-
-let string_of_loc l = 
-  Pretty.sprint 80 (Cil.d_loc () l)
-
-class vidCollector = object
-  inherit nopCilVisitor 
-
-  method vvdec (vi:varinfo) =
-    Hashtbl.replace tempVIDSet vi.vid (vi.vname, vi.vdecl);
-    SkipChildren
-end
-
-let collectVidsFile f =
-  let collector = new vidCollector in
-  visitCilFileSameGlobals collector f
-
-let printVarIDs root =
-  Filetools.walkDir
-    (fun ast filename ->
-       collectVidsFile ast
-    ) root;
-  Hashtbl.iter 
-    (fun vid (vname, vdecl) ->
-       print_string ("vid : " ^ (string_of_int vid) ^ " == " ^
-                       vname ^ " @ ");
-       print_string ((string_of_loc vdecl) ^ "\n");
-    ) tempVIDSet;
-  Hashtbl.clear tempVIDSet
-
 

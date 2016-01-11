@@ -45,6 +45,7 @@ open Symex_types
 
 module L = Logging
 module BS = Backed_summary
+module CLv = Cil_lvals
 module Lv = Lvals
 
 (*********************************************************
@@ -53,7 +54,7 @@ module Lv = Lvals
 
 type sumval = symState
 
-let retSumVar = Lv.mkVarinfo true "$RET" (Cil.TVoid [])
+let retSumVar = CLv.mkVarinfo true "$RET" (Cil.TVoid [])
 
 let retAddr =
   { saHost = Lv.hostOfVar retSumVar;

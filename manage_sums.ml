@@ -41,21 +41,23 @@
 
 
 open Fstructs
+open Summary_keys
+open Callg
+open Scc_cg
 
-module Req = Request
 module BS = Backed_summary
 
 (** Helper function to track where function summaries can be found. 
     Bookkeeping is to be stored in the given [dict]. 
-    The given [sumTyp], [fkey], [tok] has just been discovered *)
-let trackSum dict sumTyp (fkey, tok) =
+    The given [sumTyp], [key], [tok] has just been discovered *)
+let trackSum dict sumTyp (key, tok) =
   let oldList = try Hashtbl.find dict sumTyp with Not_found -> [] in
-  let newList = (fkey, tok) :: oldList in
+  let newList = (key, tok) :: oldList in
   Hashtbl.replace dict sumTyp newList
 
-(* Instead of allowing summaries w/ the same fkey but different summary 
+(* Instead of allowing summaries w/ the same key but different summary 
    type to be written to a different directory, may be simpler to enforce
-   writing all summaries for the same fkey to the same directory...
+   writing all summaries for the same key to the same directory...
    Still need confirmation that the summary for the different analyses
    were actually acquired though... *)
 
@@ -67,10 +69,7 @@ let getDescriptor descrips sumTyp =
 (** Helper function to notify summary managers which summaries are complete,
     and where the files can be found *)
 let completeSums dict =
-  Hashtbl.iter 
-    (fun sumT completed ->
-       sumT#assumeComplete completed
-    ) dict
+  Hashtbl.iter (fun sumT completed -> sumT#assumeComplete completed) dict
 
 
 (** Given a list of funs that need summaries. Acquire them 
@@ -80,7 +79,7 @@ let completeSums dict =
     or you have some method of detecting such summaries on the
     peer and have the peer reply)
 *)
-let prepareSumms (funs : fKey list) (sums : BS.dbManagement list) =
+let prepareSumms (funs : sumKey list) (sums : BS.dbManagement list) =
   (* Identify list of func sums that need to be downloaded *)
   let toGet = ref [] in
   let addToGet fkey styp =
@@ -105,37 +104,33 @@ let prepareSumms (funs : fKey list) (sums : BS.dbManagement list) =
     ) funs;
   (* DL the rest and track *)
   if (!toGet <> []) then begin
-    let acquired = Req.requestSumm !toGet in
+    let acquired = Request.requestSumm !toGet in
     List.iter 
       (fun (fkey, sumTyp, tok) -> 
          let sum = getDescriptor sums sumTyp in
          trackSum availSums sum (fkey, tok)
-      )
-      acquired;
+      ) acquired;
   end
-  else
-    ()
-  ;
+  else () ;
   completeSums availSums
 
+(******************** Higher level versions ******************)
 
-(** Given a list of functions (maybe the functions in the current SCC),
-    check the disk to see if the summaries are already there. If they
-    are, great! Use them. If they aren't, oh well. Just let the 
-    analysis run and recompute them *)
 
-(*
-let discoverSumms funs =
-  let local = List.fold_left 
-    (fun curList fkey ->
-       match BS.discover fkey (fun f -> None) with
-         None -> curList
-       | Some tok -> (fkey, tok) :: curList 
-    ) [] funs in
-  (* Inform each of the summary structures that the summaries are prepared *)
-  RS.sum#assumeComplete local; 
-  (* TODO make this more uniform... actually, have each of the summary
-     classes contain their own BS.discover method, but have them only discover
-     their own summary? *)
-  SS.sum#assumeComplete local
-*)
+let sumKeysOfScc scc curList =
+  FSet.fold (fun f curList -> f :: curList) scc.scc_nodes curList
+    
+let sumKeysOfCallees sccCG scc curList = 
+  IntSet.fold
+    (fun neighSCCID curList ->
+       let neighSCC = IntMap.find neighSCCID sccCG in
+       sumKeysOfScc neighSCC curList
+    ) scc.scc_callees curList
+    
+let prepareSCCCalleeSums sccCG scc sumTyps =
+  let callees = sumKeysOfCallees sccCG scc [] in
+  prepareSumms callees sumTyps
+
+let prepareSCCSums scc sumTyps =
+  let ownFuns = sumKeysOfScc scc [] in
+  prepareSumms ownFuns sumTyps

@@ -1,0 +1,126 @@
+Mon Oct 12 14:20:35 PDT 2009
+incrementing generation number
+incrementing value in gen_num.txt
+
+running server on /home/jan/research/relay-race/racetests/fplock/ciltrees
+Registered summary type: rs
+Server ip is: 127.0.0.1
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: SERVER
+Done reading config file
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+Initializing Andersen's AA info
+Loading function info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/racetests/fplock/ciltrees/.pta_temp.anders
+Old PTA results loaded
+Entry points use roots: true
+trying to clear logs
+Callgraph, etc.
+-----
+Reached end of /home/jan/research/relay-race/racetests/fplock/ciltrees/calls.anders call graph file
+Num funcs: 47
+Scc_cg: Pruned 8 funcs w/out bodies for scc DAG
+Starting server
+-----
+>>> PROGRESS 1/36 SCCs DONE!
+
+>>> PROGRESS 2/36 SCCs DONE!
+
+>>> PROGRESS 3/36 SCCs DONE!
+
+>>> PROGRESS 4/36 SCCs DONE!
+
+>>> PROGRESS 5/36 SCCs DONE!
+
+>>> PROGRESS 6/36 SCCs DONE!
+
+>>> PROGRESS 7/36 SCCs DONE!
+
+>>> PROGRESS 8/36 SCCs DONE!
+
+>>> PROGRESS 9/36 SCCs DONE!
+
+>>> PROGRESS 10/36 SCCs DONE!
+
+>>> PROGRESS 11/36 SCCs DONE!
+
+>>> PROGRESS 12/36 SCCs DONE!
+
+>>> PROGRESS 13/36 SCCs DONE!
+
+>>> PROGRESS 14/36 SCCs DONE!
+
+>>> PROGRESS 15/36 SCCs DONE!
+
+>>> PROGRESS 16/36 SCCs DONE!
+
+>>> PROGRESS 17/36 SCCs DONE!
+
+>>> PROGRESS 18/36 SCCs DONE!
+
+>>> PROGRESS 19/36 SCCs DONE!
+
+>>> PROGRESS 20/36 SCCs DONE!
+
+>>> PROGRESS 21/36 SCCs DONE!
+
+>>> PROGRESS 22/36 SCCs DONE!
+
+>>> PROGRESS 23/36 SCCs DONE!
+
+>>> PROGRESS 24/36 SCCs DONE!
+
+>>> PROGRESS 25/36 SCCs DONE!
+
+>>> PROGRESS 26/36 SCCs DONE!
+
+>>> PROGRESS 27/36 SCCs DONE!
+
+>>> PROGRESS 28/36 SCCs DONE!
+
+>>> PROGRESS 29/36 SCCs DONE!
+
+>>> PROGRESS 30/36 SCCs DONE!
+
+>>> PROGRESS 31/36 SCCs DONE!
+
+>>> PROGRESS 32/36 SCCs DONE!
+
+>>> PROGRESS 33/36 SCCs DONE!
+
+>>> PROGRESS 34/36 SCCs DONE!
+
+>>> PROGRESS 35/36 SCCs DONE!
+
+>>> PROGRESS 36/36 SCCs DONE!
+
+Finished all SCCs
+Received warnings from worker. Status: 1/1
+Sorting races
+
+Printing races
+
+
+
+$$$$$$
+Total Warnings: 0
+Elapsed time (secs): 0.040002
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 2
+Collections -- minor: 12 major: 3 compactions: 0
+Bytes per word: 4
+Mon Oct 12 14:20:36 PDT 2009

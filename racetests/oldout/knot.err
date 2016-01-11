@@ -1,122 +1,41 @@
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-Multiple lock summaries for 4
-makeSimpleLock: Couldn't find global kernel_sem
-makeSimpleLock: Couldn't find global kernel_flag
-Multiple lock summaries for 3
-Checkpoint: No left-over status file
-lookupVal: given null addr
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
-sameHost UnknownLoc
-
+[Er]: Checkpoint: No left-over status file
+[Er]: Checkpoint: No left-over status file
+[Er]: Checkpoint: No left-over status file
+[Er]: Multiple lock summaries for 155.f
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for 154.f
+[Er]: Checkpoint: No left-over status file
+[Er]: regenNodeinfo l:502:buf
+[Er]: nodeInfo not found for: l:502:buf
+[Er]: nodeInfo not found for: l:502:buf
+[Er]: nodeInfo not found for: l:502:buf
+[Er]: regenNodeinfo l:571:thread_return
+[Er]: nodeInfo not found for: l:571:thread_return
+[Er]: nodeInfo not found for: l:571:thread_return
+[Er]: nodeInfo not found for: l:571:thread_return
+[Er]: regenNodeinfo l:498:oldtype
+[Er]: nodeInfo not found for: l:498:oldtype
+[Er]: nodeInfo not found for: l:498:oldtype
+[Er]: nodeInfo not found for: l:498:oldtype
+[Er]: SS call: *fn returned 0 fun(s)
+[Er]: call: *fn returned 0 fun(s)
+[Er]: regenNodeinfo l:546:s___0
+[Er]: nodeInfo not found for: l:546:s___0
+[Er]: nodeInfo not found for: l:546:s___0
+[Er]: nodeInfo not found for: l:546:s___0
+[Er]: regenNodeinfo l:527:buf
+[Er]: nodeInfo not found for: l:527:buf
+[Er]: nodeInfo not found for: l:527:buf
+[Er]: nodeInfo not found for: l:527:buf
+[Er]: regenNodeinfo l:454:ptr
+[Er]: nodeInfo not found for: l:454:ptr
+[Er]: nodeInfo not found for: l:454:ptr
+[Er]: nodeInfo not found for: l:454:ptr
+[Er]: regenNodeinfo l:516:sig
+[Er]: nodeInfo not found for: l:516:sig
+[Er]: nodeInfo not found for: l:516:sig
+[Er]: nodeInfo not found for: l:516:sig
+[Er]: No entry-points file!
+[Er]: No varinfo for id? Cilinfos.NoCilinfo(-2)
+[Er]: regenNodeinfo g:-2

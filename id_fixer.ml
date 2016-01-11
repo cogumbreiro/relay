@@ -37,20 +37,20 @@
 
 
 (** Utility to ensure uniqueness and consistency of varinfo VIDs
-    across different CIL AST object files. Reassigns IDs.
+    and compinfo CKeys across different CIL AST object files. Reassigns IDs.
 
     WARNING: Make a copy of files beforehand. A crash could leave
-    IDs in an unstable state  
-*)
+    IDs in an unstable state  *)
 
 open Cil
+open Pretty
 open Filetools
 open Intrange
+open Cildump
+open Logging
 
 module CF = Cilfiles
-module IH = Inthash
-module D = Cildump
-module L = Logging
+
 
 (**************** "Flags" **************)
 
@@ -84,73 +84,239 @@ let doneFile = ".vids_ckeys_fixed"
 let setDone (root:string) =
   CF.saveRanges (Filename.concat root doneFile)
 
-
 let loadRanges (root:string) = 
   CF.loadRanges (Filename.concat root doneFile)
 
+
+(******* ID -> info index stuff *******)
+
+(* Map from filename -> (map from id -> varinfo / compinfo) *)
+let seenVinfos = Hashtbl.create 173
+let seenCinfos = Hashtbl.create 173
+
+let addIndex curFile map id info =
+  let oldMap = 
+    try Hashtbl.find map curFile 
+    with Not_found -> 
+      let m = Inthash.create 17 in
+      Hashtbl.add map curFile m;
+      m
+  in
+  Inthash.replace oldMap id info
+
+let addVarIndex curFile id vi =
+  addIndex curFile seenVinfos id vi
+
+let addCompIndex curFile id ci =
+  addIndex curFile seenCinfos id ci
+
+let flushIndexes root =
+  (* Write just the varinfos/cinfos to a separate file *)
+  Filetools.walkDir 
+    (fun ast file ->
+       let vinfos = 
+         try Hashtbl.find seenVinfos file 
+         with Not_found -> Inthash.create 0 in
+       let cinfos = 
+         try Hashtbl.find seenCinfos file 
+         with Not_found -> Inthash.create 0 in
+       CF.writeIndexes vinfos cinfos file;
+    ) root
+
 (**************** Visitor to do the work **************)
+  
+let isInlineAttr att =
+  match att with
+    Attr (name, _) -> name = "inline"
+  
+let isInline vi =
+  vi.vinline || List.exists isInlineAttr vi.vattr
+
+
+(* 
+   What's going to happen:
+   
+   All vinfos and compinfos that are supposed to be equal across AST files
+   will be assigned the same key. Sometimes the vinfo/compinfo will
+   need to be merged (e.g., if only one of them has all the cfields).
+
+   Option (1) Update the vinfo/compinfo in all ASTs that reference them.
+   Since within a file, all references to the compinfos share that
+   compinfo, we only need to update the compinfo from the declaration.
+
+   Option (2) Keep one index from the key to the extra vinfo/compinfo 
+   data stored externally, and only ensure that those vinfo/compinfos
+   are up-to-date.
+   
+   Problem with option (1) is we might need to do Option (2) anyway
+   to get the "best" info, before making another pass to update all
+   references to use that "best" info. Problems w/ circular references
+   going across files?
+
+   Problem with option (2) is there's lots of places that use cfields
+   and crap in Cil itself that we would need to change to use indirection
+
+   Option 1 is probably best because the effect is local
+
+*)
+
+
+(** Recursively go through type finding all compinfos that match ckey 
+    of parentCi and changing them to use the parentCi itself *)
+let redirectType t parentCi = 
+  let visitedCi = Inthash.create 17 in
+  let rec helpRedirectType curType =
+    match curType with
+      TVoid _ | TInt _ | TFloat _ | TBuiltin_va_list _ -> curType
+
+    | TNamed (ti, a) ->
+        ti.ttype <- helpRedirectType ti.ttype;
+        curType
+          
+    | TPtr (t, a) ->
+        let newT = helpRedirectType t in
+        if newT == t then curType
+        else TPtr (newT, a)
+          
+    | TArray (bt, sizeExpOpt, a) ->
+        let bt2 = helpRedirectType bt in
+        if bt2 == bt then curType
+        else TArray (bt2, sizeExpOpt, a)
+          (* Not redirecting the size expression for now --
+             should be a constant anyway *)
+
+    | TFun (retT, argsOpt, vaP, a) ->
+        let retT2 = helpRedirectType retT in
+        (match argsOpt with
+           None -> 
+             if retT2 == retT then curType
+             else TFun (retT2, argsOpt, vaP, a)
+         | Some args ->
+             let args2 = List.map 
+               (fun (s, t, a) -> (s, helpRedirectType t, a)) args in
+             TFun (retT2, Some (args2), vaP, a) )
+          
+    | TEnum (ei, a) -> 
+        (* Not redirecting the enum expressions -- should be const anyway? *)
+        curType
+
+    | TComp (ci, a) ->
+        if ci.ckey == parentCi.ckey then
+          if ci == parentCi then curType
+          else TComp (parentCi, a)
+        else begin
+          if Inthash.mem visitedCi ci.ckey then curType
+          else begin
+            Inthash.add visitedCi ci.ckey ();
+            List.iter 
+              (fun fi -> fi.ftype <- helpRedirectType fi.ftype) ci.cfields;
+            curType
+          end
+        end
+  in
+  helpRedirectType t
+
+(** Create a new version of the field where it's fcomp is redirected
+    to the given parent compinfo *)
+let redirectFieldInfo parentCi fi =
+  { fi with
+      fcomp = parentCi;
+      ftype = redirectType fi.ftype parentCi; }
+
+
+(** Merge basic info from fi2 into fi1 *)
+let mergeFieldinfo fi1 fi2 =
+  if compareLoc locUnknown fi1.floc == 0 
+  then fi1.floc <- fi2.floc
+  else if compareLoc fi1.floc fi2.floc <> 0 then begin
+(*
+    if fi1.floc.line = fi2.floc.line && fi1.floc.file = fi2.floc.file then
+      logStatusF "Field %s vs %s different floc? bytes %d vs %d\n"
+        fi1.fname fi2.fname fi1.floc.byte fi2.floc.byte
+    else
+      logStatusF "Field %s vs %s different floc? (%s <> %s)\n" 
+        fi1.fname fi2.fname (string_of_loc fi1.floc) (string_of_loc fi2.floc)
+*) 
+    (* whatever.. it's just the declaration location *)
+  end
+
+let d_fields fields =
+  (seq_to_doc (text ", ") List.iter 
+     (fun f -> text 
+        (f.fname ^ "(" ^ string_of_type (unrollType f.ftype) ^ ")"))
+     fields nil)
+    
+(** Merge info from ci2 into ci1 *)
+let mergeCompinfo ci1 ci2 = begin
+  (* Merge some parts of the fields *)
+  let newFields = 
+    List.fold_left 
+      (fun cur fi2 ->
+         try 
+           let fi1 = List.find (fun fi -> fi.fname = fi2.fname) cur in
+           mergeFieldinfo fi1 fi2;
+           cur
+         with Not_found -> fi2 :: cur
+      ) ci1.cfields ci2.cfields in
+  (* Finally redirect the "fcomp" to the same compinfo *)
+  if List.length newFields == List.length ci1.cfields then ()
+  else begin
+    let newFields = List.map (redirectFieldInfo ci1) newFields in
+    ci1.cfields <- newFields;
+(*
+    logStatusF "Got new fields for %s(%d)\n" ci1.cname ci1.ckey;
+    logStatusD (d_fields ci1.cfields ++ line);
+*)
+  end;
+  ci1.cdefined <- ci1.cdefined || ci2.cdefined;
+  ci1.creferenced <- ci1.creferenced || ci2.creferenced;
+end
+
+
+
+(************************************************************)
 
 let nextGlobVID = ref 1
-
-let nextCompKey = ref 1
-
-
-(* Consistently reassign vids to each global var. For local var,
-   just make sure it doesn't clash *)
-let (seenGlobalVars : ((string * string), int) Hashtbl.t) = Hashtbl.create 173
-
-let (compKeys : (bool * string, int) Hashtbl.t) = Hashtbl.create 173
-
 let getNextVID () =
   let result = !nextGlobVID in
   incr nextGlobVID;
   result
 
+let nextCompKey = ref 1
 let getNextCKey () =
   let result = !nextCompKey in
   incr nextCompKey;
   result
 
 
-let isInline vi =
-  vi.vinline || 
-  List.exists 
-    (fun att ->
-       match att with
-         Attr (name, _) ->
-           name = "inline"
-    ) vi.vattr
+(* Consistently reassign vids to each global var. 
+   For local var, just make sure it doesn't clash *)
+let (seenGlobalVars : ((string * string), int) Hashtbl.t) = Hashtbl.create 173
 
-
+  
+let (compKeys : (string * bool * string, int) Hashtbl.t) = Hashtbl.create 173
+let goldenCompinfos = Hashtbl.create 173
+  
 
 (** A visitor that searches for varinfo IDs and compinfo IDs to make 
     sure that if we make another info, it will not clash w/ any of 
     the IDs in the visited file (or previously loaded files) *)
-class globalIDVisitor = object (self)
+class globalIDVisitor curFile = object (self)
   inherit nopCilVisitor 
     
+  (* Per file data -- only vids are per-file because of possible
+     static linking and global variable name clashes *)
   val seenVIDs = Hashtbl.create 173
-    
-  val mutable seenVinfos = IH.create 173
-    
-  val mutable seenCinfos = IH.create 173
 
-  method getVinfos () =
-    seenVinfos
-
-  method getCinfos () =
-    seenCinfos
-
-  method handleVI (vi:varinfo) =
+  (** Check if the vi found in this file should be linked w/ old ones *)
+  method private handleVI (vi:varinfo) =
     let name = vi.vname in
-    let typs = D.string_of_ftype vi.vtype in
+    let typs = string_of_ftype vi.vtype in
     (try
        (* seenVIDs for this file *)
        let oldID = Hashtbl.find seenVIDs (vi.vid, name, typs) in 
-       vi.vid <- oldID
-         
+       vi.vid <- oldID         
      with Not_found -> begin
-       
        (* Fix the ID (depending on whether it's a global + extern
           or not). Also, do no inline the inlined functions. *)
        let newID = 
@@ -171,11 +337,11 @@ class globalIDVisitor = object (self)
            newID
          end
        in
-       
+
        (* remember the fixed id for this file *)
        Hashtbl.add seenVIDs (vi.vid, name, typs) newID;
        (* make index of varinfos *)
-       IH.add seenVinfos vi.vid vi;
+       addVarIndex curFile vi.vid vi;
      end
     )
 
@@ -187,19 +353,53 @@ class globalIDVisitor = object (self)
     self#handleVI vi;
     DoChildren
 
-  method handleCompinfo ci =
-    try 
-      let oldCKey = Hashtbl.find compKeys (ci.cstruct, ci.cname) in
-      ci.ckey <- oldCKey
+      
+  (** nameSpaces:
+
+      - A global one for normal structs and unions
+      
+      - A "local" one for __anonstruct__XYZ and __anonunion__XYZ. 
+      Easiest way is make them local to the file (since CIL bases the name 
+      on the field/variable name and the order of occurrence in the file). 
+
+      We can reuse more namespaces though. If the __anon is based on a field
+      then we can make a namespace based on the containing struct instead of 
+      the file, which means we can share more, but we would also have to 
+      do a bunch of renaming to get the anon-struct-name the same.
+      
+      OK: made Cil base the __anon naming on the parent structure, also.
+      Less worry about clashes across files.
+  *)
+  method private getNamespace ci =
+(*
+    if Strutil.prefix "__anonstruct" ci.cname ||
+      Strutil.prefix "__anonunion" ci.cname then curFile
+    else 
+*)
+    ""
+
+      
+  (** See if the compinfo found in this file should be linked w/ old ones *)
+  method private handleCompinfo ci =
+(*
+    logStatusF "handleCi %s [%s]\n" ci.cname 
+      (sprint 80 (d_fields ci.cfields));
+*)
+    let nameSpace = self#getNamespace ci in
+    try
+      let oldCKey = Hashtbl.find compKeys (nameSpace, ci.cstruct, ci.cname) in
+      ci.ckey <- oldCKey;
+      let goldCi = Hashtbl.find goldenCompinfos oldCKey in
+      mergeCompinfo goldCi ci
     with Not_found ->
       let newCKey = getNextCKey () in
       ci.ckey <- newCKey;
       (* remember the change *)
-      Hashtbl.add compKeys (ci.cstruct, ci.cname) newCKey;
+      Hashtbl.add compKeys (nameSpace, ci.cstruct, ci.cname) newCKey;
+      Hashtbl.add goldenCompinfos newCKey ci;
       (* make index of compinfos *)
-      IH.add seenCinfos ci.ckey ci
-        (* TODO: beware _anon_structs, which can give different names
-           for the SAME struct !!! *)
+      addCompIndex curFile ci.ckey ci
+
 
   method vglob = function
       GCompTag (ci, _)
@@ -207,30 +407,71 @@ class globalIDVisitor = object (self)
         self#handleCompinfo ci;
         DoChildren
     | _ ->
-        DoChildren    
+        DoChildren
+
 end
 
+(** Take the info golden compinfos, etc. and push it back into the 
+    individual files *)
+class infoFixer = object (self)
+  inherit nopCilVisitor
+
+
+  method private handleCompinfo ci =
+    let goldCi = Hashtbl.find goldenCompinfos ci.ckey in
+    assert (ci.cname = goldCi.cname);
+    ci.cdefined <- goldCi.cdefined;
+    ci.creferenced <- goldCi.creferenced;
+    let ciLen = List.length ci.cfields in
+    let goldLen = List.length goldCi.cfields in
+    if ciLen == goldLen then ()
+    else begin
+      assert (ciLen < goldLen);
+      logStatusF "Merging cfield info for %s\n" ci.cname;
+      ci.cfields <- List.map (redirectFieldInfo ci) goldCi.cfields
+    end
+
+  method vglob = function
+      GCompTag (ci, _)
+    | GCompTagDecl (ci, _) ->
+        self#handleCompinfo ci;
+        DoChildren
+    | _ -> DoChildren
+
+end
 
 
 (**************** Interface **************)
 
+let debugCompinfos () =
+  logStatusF "\n\nGolden compinfos\n====================\n";
+  Hashtbl.iter 
+    (fun ckey ci -> 
+       assert (ci.ckey = ckey);
+       logStatusF "%s(%d): [%s]\n" ci.cname ci.ckey
+         (sprint 80 (d_fields ci.cfields))
+    ) goldenCompinfos;
+  logStatus "========================\n\n"
+            
+    
 
-let doEnsureUniqueIDs (root : string) =
-  L.logStatus "Fixing IDs";
-  L.flushStatus ();
+
+let doEnsureUniqueIDs (root : string) = begin
+  logStatus "Fixing IDs";
+  flushStatus ();
+
+  (* First, choose a canonical ID and start grabbing all the info *)
   Filetools.walkDir 
     (fun ast file ->
+       logStatusF "Fixing file %s\n" file;
+       flushStatus ();
        let startVid = !nextGlobVID in
        let startCkey = !nextCompKey in
-       let vis = new globalIDVisitor in (* must be fresh for every file *)
+
+       let vis = new globalIDVisitor file in (* must be fresh for every file *)
        visitCilFileSameGlobals (vis :> cilVisitor) ast;
        (* Write back the result! *)
        Cil.saveBinaryFile ast file;
-
-       (* Write just the varinfos/cinfos to a separate file *)
-       let vinfos = vis#getVinfos () in
-       let cinfos = vis#getCinfos () in
-       CF.writeIndexes vinfos cinfos file;
 
        (* Record the vid / ckey range *)
        let endVid = !nextGlobVID - 1 in
@@ -239,22 +480,35 @@ let doEnsureUniqueIDs (root : string) =
        CF.addRanges startVid endVid startCkey endCkey ast.fileName;
 
     ) root;
-  L.logStatus "IDs are now fixed";
-  L.flushStatus ()
-  
-    
+
+  (* Now use the info and adjust the ASTs again *)
+  Filetools.walkDir 
+    (fun ast file ->
+       let vis = new infoFixer in 
+       visitCilFileSameGlobals (vis :> cilVisitor) ast;
+       (* Write back the result! *)
+       Cil.saveBinaryFile ast file;
+    ) root;
+
+  (* Ok, now that all the data is known and fixed write out the indexes... *)
+  flushIndexes root;
+  logStatus "IDs are now fixed";
+  flushStatus ();
+  (* debugCompinfos () *)
+end    
 
 let initState () =
   CF.initRanges ();
   Hashtbl.clear seenGlobalVars;
   Hashtbl.clear compKeys
+
   
 
 (** Apply ID fixer to each file rooted at the given path. *)
 let ensureUniqueIDs (root : string) : unit =
   (* Maybe it's already done *)
   if (Sys.file_exists (Filename.concat root doneFile)) then
-    L.logStatus "IDs are already fixed"
+    logStatus "IDs are already fixed"
   else begin
     setInProgress root;
     initState ();

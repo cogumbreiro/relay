@@ -2,18 +2,25 @@
 open Cil
 open Pretty
 
+module E = Errormsg
+
 (** compute use/def information *)
 
 module VS = Set.Make (struct 
                         type t = Cil.varinfo
-                        let compare v1 v2 = Pervasives.compare v1.vid v2.vid
+                        (* Subtraction is safe since vids are always positive*)
+                        let compare v1 v2 = v1.vid - v2.vid
                       end)
 
-(** Set this global to how you want to handle function calls *)
-let getUseDefFunctionRef: (exp -> VS.t * VS.t) ref = 
-  ref (fun _ -> (VS.empty, VS.empty))
+(** Set this global to how you want to handle function calls.
+    This also returns a modified argument list which will be used for the
+    purpose of Use analysis, in case you have a function that needs special
+    treatment of its args. *)
+let getUseDefFunctionRef: (exp -> exp list -> VS.t * VS.t * exp list) ref = 
+  ref (fun func args -> (VS.empty, VS.empty, args))
 
-(** Say if you want to consider a variable use *)
+(** Say if you want to consider a variable use.  This applies to
+  variable reads only; see also considerVariableAddrOfAsUse *)
 let considerVariableUse: (varinfo -> bool) ref = 
   ref (fun _ -> true)
 
@@ -22,15 +29,26 @@ let considerVariableUse: (varinfo -> bool) ref =
 let considerVariableDef: (varinfo -> bool) ref = 
   ref (fun _ -> true)
 
-(** Save if you want to consider a variable addrof as a use *)
+(** Say if you want to consider a variable addrof as a use *)
 let considerVariableAddrOfAsUse: (varinfo -> bool) ref = 
   ref (fun _ -> true)
+
+(** Return any vars that should be considered "used" by an expression,
+    other than the ones it refers to directly.  Deputy uses this for
+    variables in Cast annotations. *)
+let extraUsesOfExpr: (exp -> VS.t) ref =
+  ref (fun _ -> VS.empty)
 
 (* When this is true, only definitions of a variable without
    an offset are counted as definitions. So:
    a = 5; would be a definition, but
-   a[1] = 5; would not *)
+   a[1] = 5; would not.
+   Exception: writing to a union field is considered to be a definition of
+   the union even if this is set to true.*)
 let onlyNoOffsetsAreDefs: bool ref = ref false
+
+(** Should we ignore the contents of sizeof and alignof? *)
+let ignoreSizeof: bool ref = ref true
 
 let varUsed: VS.t ref = ref VS.empty
 let varDefs: VS.t ref = ref VS.empty
@@ -44,9 +62,15 @@ class useDefVisitorClass : cilVisitor = object (self)
     if (!considerVariableDef) v &&
       not(!onlyNoOffsetsAreDefs) then 
       varDefs := VS.add v !varDefs;
+    if (!considerVariableDef) v &&
+      !onlyNoOffsetsAreDefs then
+        varUsed := VS.add v !varUsed;
     SkipChildren
 
-  (** If onlyNoOffsetsAreDefs is true, then we need to see the
+  (** If l is a variable, this means we are in a def, not a use!
+   *  Other cases are handled by vexpr.
+   *  
+   *  If onlyNoOffsetsAreDefs is true, then we need to see the
    *  varinfo in an lval along with the offset. Otherwise just
    *  DoChildren *)
   method vlval (l: lval) =
@@ -56,14 +80,25 @@ class useDefVisitorClass : cilVisitor = object (self)
 	  if (!considerVariableDef) vi then
 	    varDefs := VS.add vi !varDefs;
 	  SkipChildren
+      | (Var vi, Field(fi, NoOffset)) when not fi.fcomp.cstruct ->
+          (* If we are writing to a union field, treat that the same
+             as a write to a union. *)
+	  if (!considerVariableDef) vi then
+	    varDefs := VS.add vi !varDefs;
+	  SkipChildren
       | _ -> DoChildren
     else DoChildren
 
-  method vexpr = function
+  method vexpr (e:exp) =
+    let extra = (!extraUsesOfExpr) e in
+    if not (VS.is_empty extra) then 
+      varUsed := VS.union extra !varUsed;
+    match e with
       Lval (Var v, off) -> 
         ignore (visitCilOffset (self :> cilVisitor) off);
-        if (!considerVariableUse) v then
-          varUsed := VS.add v !varUsed;
+        if (!considerVariableUse) v then begin
+          varUsed := VS.add v !varUsed
+	end;
         SkipChildren (* So that we do not see the v *)
 
     | AddrOf (Var v, off) 
@@ -73,20 +108,45 @@ class useDefVisitorClass : cilVisitor = object (self)
           varUsed := VS.add v !varUsed;
         SkipChildren
 
+    | SizeOfE _
+    | AlignOfE _ when !ignoreSizeof -> SkipChildren
+
     | _ -> DoChildren
 
   (* For function calls, do the transitive variable read/defs *)
-  method vinst = function
-      Call (_, f, _, _) -> begin
-        (* we will call DoChildren to compute the use and def that appear in 
-         * this instruction. We also add in the stuff computed by 
-         * getUseDefFunctionRef *)
-        let use, def = !getUseDefFunctionRef f in
-        varUsed := VS.union !varUsed use;
-        varDefs := VS.union !varDefs def;
-        DoChildren;
-      end
-    | Asm(_,_,slvl,_,_,_) -> List.iter (fun (s,lv) ->
+  method vinst i =
+    let doCall f desto args =
+      (* we will compute the use and def that appear in 
+       * this instruction. We also add in the stuff computed by 
+       * getUseDefFunctionRef *)
+      let use, def, args' = !getUseDefFunctionRef f args in
+      varUsed := VS.union !varUsed use;
+      varDefs := VS.union !varDefs def;
+      
+      (* Now visit the children of  "Call (lvo, f, args', _)" *)
+      let self: cilVisitor = (self :> cilVisitor) in
+      (match desto with None -> ()
+       | Some lv -> ignore (visitCilLval self lv));
+      ignore (visitCilExpr self f);
+      List.iter (fun arg -> ignore (visitCilExpr self arg)) args';
+      SkipChildren
+    in
+    match i with
+      Call (None, (Lval(Var vi, NoOffset) as f), [valist; SizeOf t; adest], _) 
+        (* __builtin_va_arg is special:  in CIL, the left hand side is stored
+           as the last argument. *)
+        when vi.vname = "__builtin_va_arg" ->
+          let dest' = match stripCasts adest with
+              AddrOf lv -> lv
+            | _ -> E.s (bug "bad call to %s" vi.vname)
+          in
+          doCall f (Some dest') [valist; SizeOf t]
+    | Call (_, Lval(Var vi, _), _, _) 
+        when vi.vname = "__builtin_va_arg" ->
+        E.s (bug "bad call to %s" vi.vname)
+    | Call (lvo, f, args, _) -> 
+        doCall f lvo args
+    | Asm(_,_,slvl,_,_,_) -> List.iter (fun (_,s,lv) ->
 	match lv with (Var v, off) ->
 	  if s.[0] = '+' then
 	    varUsed := VS.add v !varUsed;
@@ -176,3 +236,10 @@ let rec computeDeepUseDefStmtKind ?(acc_used=VS.empty)
       !varUsed, !varDefs
   | TryExcept _ | TryFinally _ -> !varUsed, !varDefs
   | Block b -> handle_block b
+
+let computeUseLocalTypes ?(acc_used=VS.empty)
+                         (fd : fundec)
+    =
+  List.fold_left (fun u vi ->
+    ignore(visitCilType useDefVisitor vi.vtype);
+    VS.union u (!varUsed)) acc_used fd.slocals

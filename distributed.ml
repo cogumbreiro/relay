@@ -43,11 +43,12 @@
     Beware: the other components (locking sccs, etc.) are deprecated...
 *)
 
-open Fstructs
-open Readcalls
+open Callg
 open Scc_cg
+open Fstructs
+open Logging
+open Summary_keys
 
-module L = Logging
 
 let sharedDir = ref ""
 
@@ -86,20 +87,17 @@ let init settings cgDir =
   Config.iter 
     (fun fieldName value ->
        let informError () = 
-         L.logError "Corrupt line in distributed settings file:\n";
-         L.logError (fieldName ^ "\n")
+         logError "Corrupt line in distributed settings file:\n";
+         logError (fieldName ^ "\n")
        in
        try 
          (match fieldName with
-            "LOG_PATH" ->
-              path := value;
-          | "CENTRAL" ->
-              usePath := bool_of_string value
-          | _ ->
-              informError ()
+            "LOG_PATH" -> path := value;
+          | "CENTRAL" -> usePath := bool_of_string value
+          | _ -> informError ()
          ) 
        with e ->
-         L.logError ("initSettings: " ^ (Printexc.to_string e));
+         logError ("initSettings: " ^ (Printexc.to_string e));
          informError ();
          raise e
     ) disSettings;
@@ -123,9 +121,8 @@ let sccLockName (scc_num:int) =
   Filename.concat !locksDir (sccLockPrefix ^ (string_of_int scc_num))
     
 (** get file name of file representing done-ness of a file *)
-let funDoneName (k:fKey) =
-  Filename.concat !funDoneDir (funPrefix ^ (string_of_int k))
-  
+let funDoneName k =
+  Filename.concat !funDoneDir (funPrefix ^ (string_of_sumKey k))
 
 
 (**** Lock items. Should only do these through the Request interface ****)
@@ -148,7 +145,7 @@ let lockScc (scc_num:int) : sccLock =
       close_out out_chan;
       raise SccLocked
   with Sys_error s ->
-    L.logError ("Distr: lockScc " ^ s);
+    logError ("Distr: lockScc " ^ s);
     raise SccLocked
       
 (** Unclaim given scc *)
@@ -159,7 +156,7 @@ let unlockScc (scc_num:int) (scc_chan : sccLock) : unit =
     close_out scc_chan;
     Sys.remove (sccLockName scc_num)
   with e ->
-    L.logError ("Distr: unlockScc " ^ (Printexc.to_string e));
+    logError ("Distr: unlockScc " ^ (Printexc.to_string e));
     ()
 
 (**** Record done items ****)
@@ -188,7 +185,7 @@ let isSccDone (scc_num:int) : bool =
 (** convert sockaddr to a string, ignoring port number *)
 let string_of_sockaddr = function
     Unix.ADDR_UNIX s ->
-      L.logError "using unix addrs?";
+      logError "using unix addrs?";
       s
   | Unix.ADDR_INET (ia, port) ->
       Unix.string_of_inet_addr ia
@@ -198,11 +195,9 @@ let sockaddr_of_string s =
 
 (** Record in the logs that the given function has a complete summary,
     and record where to find the disk image. *)
-let recordFunDone (fkey:fKey) (pathAddrs) : unit =
-  let out_chan = (open_out_gen 
-                    [Open_creat; Open_wronly] 
-                    0o666 
-                    (funDoneName fkey)) in
+let recordFunDone key pathAddrs : unit =
+  let out_chan = (open_out_gen [Open_creat; Open_wronly] 0o666 
+                    (funDoneName key)) in
   (try
      List.iter 
        (fun (a, u, p) ->
@@ -212,60 +207,54 @@ let recordFunDone (fkey:fKey) (pathAddrs) : unit =
        ) pathAddrs;
      close_out out_chan
    with e ->
-     L.logError "couldn't record that function is complete";
+     logError "couldn't record that function is complete";
      close_out out_chan;
      raise e
   )
 
 
 (** returns the storage location if the function is done *)
-let isFunDone (fkey:fKey) =
-  let fn = funDoneName fkey in
+let isFunDone key =
+  let fn = funDoneName key in
   if (Sys.file_exists fn) then
-    let in_chan = open_in (funDoneName fkey) in
+    let in_chan = open_in fn in
     let rec loop curPaths = 
       try
         let line = input_line in_chan in
         match completeSplitter line with
           addr :: user :: [path] ->
             loop ((sockaddr_of_string addr, user, path) :: curPaths)
-        | _ ->
-            loop curPaths
-      with End_of_file ->
-        curPaths
+        | _ -> loop curPaths
+      with End_of_file -> curPaths
     in
     let result = 
-      (try
-         Some (loop [])
+      (try Some (loop [])
        with e ->
          (* May have been asked to check if function was done even
             if it's not... We don't know. That's why we asked! *)
-         L.logError ("couldn't read if a function was done: " ^
+         logError ("couldn't read if a function was done: " ^
                        (Printexc.to_string e));
          None
       ) in
     close_in in_chan;
     result
-  else
-    None
+  else None
 
 
 (*************** Higher level completion checks *********)
 
 let neighSCCSNotDone (scc) =
-  IntSet.exists 
-    (fun neighSCCID ->
-       not (isSccDone neighSCCID)
-    ) scc.scc_callees
+  IntSet.exists (fun neighSCCID -> not (isSccDone neighSCCID)) scc.scc_callees
 
+(** Only for bottom up / input-free summaries *)
 let sccFuncsDone (scc) =
   FSet.for_all
-    (fun fkey ->
-       match isFunDone fkey with
+    (fun sumKey ->
+       match isFunDone sumKey with
          None -> false
        | Some (apList) -> true
     ) scc.scc_nodes
-
+    (* TODO: parameterize by CG type *)
 
 (******************* clear on-disk state ****************)
 
@@ -283,15 +272,9 @@ let clearState genNum =
   let fname = Filename.concat !sharedDir genFileName in 
   let clearFunc = 
     (fun () ->  
-       Stdutil.clearDir !sccDoneDir 
-         (fun fname -> 
-            (sccMatch fname 0));
-       Stdutil.clearDir !funDoneDir 
-         (fun fname -> 
-            (funMatch fname 0));    
-       Stdutil.clearDir !locksDir 
-         (fun fname -> 
-            (sccLockMatch fname 0))
+       Stdutil.clearDir !sccDoneDir (fun fname -> (sccMatch fname 0));
+       Stdutil.clearDir !funDoneDir (fun fname -> (funMatch fname 0));    
+       Stdutil.clearDir !locksDir (fun fname -> (sccLockMatch fname 0))
     ) in
   Stdutil.clearDirGen genNum fname clearFunc
        

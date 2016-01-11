@@ -25,7 +25,7 @@ let string_of_anaType (t : analysisType) : string = t
     Does not handle analyses that generate new summaries for new inputs.
     @return true if summary changes. 
 *)
-type intraProcCompute = fKey -> simpleCallN -> bool
+type intraProcCompute = funID -> callN -> bool
 
 
 (** Describe how to "run" the analysis *)
@@ -85,7 +85,7 @@ let addInfo graph anaDesc anaRun anaSumDesc =
 
 
 let addOutEdge graph info dep =
-  info.dependees <- Stdutil.addOnce info.dependees dep
+  info.dependees <- List_utils.addOnce info.dependees dep
 
 let addInEdge graph ana dep =
   match dep with
@@ -94,7 +94,7 @@ let addInEdge graph ana dep =
   | DCallers targ ->
       try
         let targInfo = getInfo graph targ in
-        targInfo.dependers <- Stdutil.addOnce targInfo.dependers ana 
+        targInfo.dependers <- List_utils.addOnce targInfo.dependers ana 
       with Not_found ->
         failwith "Dangling dependence edge?!"
 
@@ -194,32 +194,4 @@ let iterAnas funKey funNode (graph : dependenceGraph) : bool =
          changed
     ) graph false
 
-
-(************************************************************
-  Simpler version for now... 
-************************************************************)
-
-class type analysis = object
- 
-  (* TODO: can we use the type-checker to determine whether
-     the analysis needs fix-pointing *)
-
-  method setInspect : bool -> unit
-
-  method isFinal : fKey -> bool 
-    (* Hide summary type *)
-
-  method compute : Cil.fundec -> unit
-    (* Need to make it a closure w/ the init, state-getting, and
-       summary-updating functionality hidden *)
-
-  method summarize : fKey -> Cil.fundec -> bool
-    (* Need to make it a closure w/ the state-getting and 
-       summary-updating functionality hidden *)
-
-  method flushSummaries : unit -> unit
-    (* Clear summaries from memory during non-fixpoint pass, etc. *)
-
-
-end
 

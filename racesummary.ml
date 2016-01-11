@@ -43,6 +43,7 @@ open Cil
 open Pretty
 open Callg
 open Lockset
+open Logging
 
 open Guarded_access_base
 
@@ -57,8 +58,6 @@ module GA = Guarded_access_clust
 *)
 
 module D = Cildump
-module BS = Backed_summary
-module L = Logging
 module Stat = Mystats
 module Lv = Lvals
 module CLv = Cil_lvals
@@ -364,62 +363,61 @@ let hcSummary s =
 let printLockset ls =
   let buff = Buffer.create 24 in
   if (isBottomLS(ls)) then
-    L.logStatus "LS is $BOTTOM"
+    logStatus "LS is $BOTTOM"
   else begin
     let aSet = LS.getPlus ls in
     Buffer.add_string buff "L+ = ";
     set_to_buf buff aSet;
-    L.logStatusB buff;
+    logStatusB buff;
     Buffer.clear buff;
     let aSet = LS.getMinus ls in
     Buffer.add_string buff "L- = ";
     set_to_buf buff aSet;
-    L.logStatusB buff;
+    logStatusB buff;
     Buffer.clear buff;
   end
 
 
 let printCorrState cs =
   if(isBottomCS(cs)) then
-    L.logStatus "CS is $BOTTOM"
+    logStatus "CS is $BOTTOM"
   else (
-    L.logStatus ("Write Correlations (" ^
+    logStatus ("Write Correlations (" ^
                    (string_of_int (CMap.cardinal cs.writeCorrs)) ^ 
                     "):");
-    L.logStatus "-----";
+    logStatus "-----";
     GA.printCorrMap cs.writeCorrs printLockset;
     
-    L.logStatus ("Read Correlations (" ^ 
+    logStatus ("Read Correlations (" ^ 
                    (string_of_int (CMap.cardinal cs.readCorrs)) ^ 
                    "):");
-    L.logStatus "-----";
+    logStatus "-----";
     GA.printCorrMap cs.readCorrs printLockset;
   )
    
 (** Print the state (lock set and the guarded accesses) *) 
 let printState s = 
   if(isBottomState(s)) then
-    L.logStatus "State is $BOTTOM"
+    logStatus "State is $BOTTOM"
   else (
-    L.logStatus "Lock Diff:";
-    L.logStatus "-----";
+    logStatus "Lock Diff:";
+    logStatus "-----";
     printLockset s.lState;
     printCorrState s.cState;
   )
 
 (** Print only the summary sizes for the given function key k,
     and the summary s *)
-let printSizes k s =
-  let prefix = ("SUMS (fk, lo, un, wr, re):\t" ^ 
-                  (string_of_int k) ^ "\t") in
+let printSizes (funname:string) k s =
+  let prefix = ("SUMS (nm, lo, un, wr, re):\t" ^ funname ^ "\t") in
   if(isBottomState(s)) then
-    L.logStatus (prefix ^ "$BOTTOM")
+    logStatus (prefix ^ "$BOTTOM")
   else (
     let locked = LS.getPlus s.lState in
     let unlocked = LS.getMinus s.lState in
     let writes = s.cState.writeCorrs in
     let reads = s.cState.readCorrs in
-    L.logStatus (prefix ^ 
+    logStatus (prefix ^ 
                    (string_of_int (LS.S.cardinal locked)) ^ "\t" ^
                    (string_of_int (LS.S.cardinal unlocked)) ^ "\t" ^
                    (string_of_int (CMap.cardinal writes)) ^ "\t" ^ 
@@ -447,22 +445,22 @@ let simplifySummary (sum:summary) : simplerSummary =
 let desimplifySummary (simp:simplerSummary) : summary =
   hcSummary simp
     
-let deserializeFromPath fkey path : summary * BS.dbToken=
+let deserializeFromPath key path : summary * Backed_summary.dbToken=
   try 
-    let sum, token = BS.deserializeFromPath fkey "rs" path in
+    let sum, token = Backed_summary.deserializeFromPath key "rs" path in
     (desimplifySummary sum, token) 
     with e ->
-      L.logError ~prior:0 ("RS: deserialization failed for : " ^ 
-                    (string_of_fkey fkey));
+      logError ~prior:0 ("RS: deserialization failed for : " ^ 
+                           (Summary_keys.string_of_sumKey key));
       raise e
         
         
 let deserializeFromFile fname : summary =
   try
-    let s = BS.deserializeFromFile fname "rs" in
+    let s = Backed_summary.deserializeFromFile fname "rs" in
     desimplifySummary s
   with e ->
-    L.logError ~prior:0 ("RS: deserialization failed for : " ^ 
+    logError ~prior:0 ("RS: deserialization failed for : " ^ 
                     (fname));
     raise e
 
@@ -500,10 +498,9 @@ let listMods (st:state) =
          let scope = Lv.getScope lval in
          (lval, scope) :: curList
        with Scope.BadScope as e ->
-         L.logError "listMods: no scope annotation?";
+         logError "listMods: no scope annotation?";
          raise e
-    )
-    st.cState.writeCorrs []
+    ) st.cState.writeCorrs []
 
 let iterMods foo st =
   CMap.iter 
@@ -522,26 +519,24 @@ let foldMods foo acc st =
 
 class virtual corrAsMods = object (self)
 
-  method virtual find : fKey -> summary
+  method virtual find : Summary_keys.sumKey -> summary
 
-  method private findTestSum fkey =
-    let sum = self#find fkey in
-    if isBottomSummary sum then
-      raise Modsummaryi.BottomSummary
-    else
-      sum.sum_out
+  method private findTestSum key =
+    let sum = self#find key in
+    if isBottomSummary sum then raise Modsummaryi.BottomSummary
+    else sum.sum_out
 
-  method getMods fkey = 
-    let outSt = self#findTestSum fkey in
+  method getMods key = 
+    let outSt = self#findTestSum key in
     listMods outSt
 
-  method iterMods fkey foo =
-    let outSt = self#findTestSum fkey in
+  method iterMods key foo =
+    let outSt = self#findTestSum key in
     iterMods foo outSt
 
-  method foldMods : 'a . fKey -> (Lv.aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a =
-    fun fkey foo acc ->
-      let outSt = self#findTestSum fkey in
+  method foldMods : 'a .  Summary_keys.sumKey -> (Lv.aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a =
+    fun key foo acc ->
+      let outSt = self#findTestSum key in
       foldMods foo acc outSt
 
 end
@@ -577,7 +572,7 @@ let corrSplitter = Str.split_delim (Str.regexp (ws ^ "[~]" ^ ws))
     want to bootstrap the function summary for the base lock functions. *)
 let lockset_from_string (descrip:string) =
   let informError (_:unit) = 
-    L.logError "Corrupt lock description in func summary";
+    logError "Corrupt lock description in func summary";
   in
   let curLockset = ref LS.empty in
 
@@ -659,7 +654,7 @@ class raceSummary sumID  = object (self)
   method private fKey_of_fNT cg (fn, ft) =
     FMap.fold
       (fun fid fnode curResults ->
-         (*         if (compareNT (fn,ft) (fnode.name, fnode.typ) == 0) then *)
+         (* if (compareNT (fn,ft) (fnode.name, fnode.typ) == 0) then *)
          if fn = fnode.name then fid :: curResults
          else curResults
       ) cg []
@@ -678,15 +673,15 @@ class raceSummary sumID  = object (self)
              let straints = straints_from_string corrSet in
              let fids = self#fKey_of_fNT cg (funcName, typString) in
              List.iter 
-               (fun fkey ->
+               (fun sumKey ->
                   (* Don't analyze functions w/ pre-specified summaries *)
-                  BS.setFinal fkey (self#sumTyp);
+                  Backed_summary.setFinal sumKey (self#sumTyp);
                   (* Add the pre-specified summary *)
                   let newSumm = try
                     (* If there's an existing entry *)
-                    let exSumm = self#find fkey in
-                    L.logError ("Multiple lock summaries for " ^ 
-                                  string_of_fkey fkey);
+                    let exSumm = self#find sumKey in
+                    logError ("Multiple lock summaries for " ^ 
+                                  Summary_keys.string_of_sumKey sumKey);
                     { exSumm with 
                         sum_out = (combineStates exSumm.sum_out 
                                      (makeState ls 
@@ -699,9 +694,9 @@ class raceSummary sumID  = object (self)
                         (makeCState straints CMap.empty);
                     }
                   in
-                  self#addReplace fkey newSumm;
+                  self#addReplace sumKey newSumm;
                ) fids;
-         | _ -> L.logError ~prior:0
+         | _ -> logError ~prior:0
              ("corrupt lock summary (from config) " ^ details);
       ) lockSettings;
     (* Initialize the rest of the summaries for functions w/ no bodies *)
@@ -711,20 +706,21 @@ class raceSummary sumID  = object (self)
     
 end
 
-let sum = new raceSummary (BS.makeSumType "rs")
+let sum = new raceSummary (Backed_summary.makeSumType "rs")
 
-let _ = BS.registerType (sum :> RaceSum.data)
+let _ = Backed_summary.registerType (sum :> RaceSum.data)
 
-let printSummary fkey summ =
+let printSummary (funname:string) sumKey summ =
   if (isBottomSummary(summ)) then
-    L.logStatus ("$BOTTOM")
+    logStatus ("$BOTTOM")
   else begin
     (* Only print the sizes when running on linux (reduce log space) *)
     if !verboseSum
-    then (printSizes fkey summ.sum_out; printState summ.sum_out)
-    else printSizes fkey summ.sum_out
+    then (printSizes funname sumKey summ.sum_out; printState summ.sum_out)
+    else printSizes funname sumKey summ.sum_out
   end
 
-let findPrintSumm fkey =
-  let summ = sum#find fkey in
-  printSummary fkey summ
+let findPrintSumm funname sumKey =
+  let summ = sum#find sumKey in
+  printSummary funname sumKey summ
+    

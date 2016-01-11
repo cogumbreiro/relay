@@ -45,7 +45,6 @@
 
 
 open Gc_stats
-open Readcalls
 open Callg
 open Cil
 open Pretty
@@ -147,8 +146,8 @@ let inspectFun cg sccCG fname = begin
          (* First get all summaries for all callees... 
             hmm sucks that it tries to communicate (only wanted it
             to seek the disk, really)... *)
-         let () = Manage_sums.prepareSumms fnode.callees 
-           (hardCodedSumTypes ()) in
+         let callees = calleeKeys fnode in
+         let () = Manage_sums.prepareSumms callees (hardCodedSumTypes ()) in
          let _ = Race.RaceBUTransfer.doFunc fk fnode in
          ()
        )
@@ -160,13 +159,12 @@ end
 let doRaceAnal () : unit =
   (* Get Callgraph structures *)
   let cg = readCalls !cgFile in
-  let sccCG = getSCCGraph cg in 
+  let sccCG = Scc_cg.getSCCGraph cg in 
   begin
     initSettings cg;
     
     (* Then do a bottom-up analysis *)
-    let neededFuncs = [] in
-    Race.RaceBUTransfer.initStats cg sccCG neededFuncs;
+    Race.RaceBUTransfer.initStats cg sccCG ;
 
     L.logStatus "Inspecting:";
     L.logStatus "-----";

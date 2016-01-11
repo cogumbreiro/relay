@@ -42,19 +42,19 @@
 
 class funcInspector = object
   
-  val mutable inspect : string list = []
+  val mutable inspect : (string, unit) Hashtbl.t = Hashtbl.create 10
 
   method addInspect fname =
-    inspect <- fname :: inspect
+    Hashtbl.replace inspect fname ()
 
   method clear =
-    inspect <- []
+    Hashtbl.clear inspect
 
   method mem fname =
-    List.mem fname inspect
+    Hashtbl.mem inspect fname
 
   method iter foo =
-    List.iter foo inspect
+    Hashtbl.iter (fun k v -> foo k) inspect
 
 end
 

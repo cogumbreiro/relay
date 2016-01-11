@@ -35,6 +35,13 @@
   
 *)
 
+(* TODO: support import... so that it's easy to customize
+   a config for a test case (add more thread creators?)
+   Or... just move that out of the config file altogether and
+   include in the test cases themselves? 
+
+   TODO: allow comments of the form "# comment"
+*)
 
 (** Parse a config file and give access to key -> value mappings. 
     Example of a well-formatted config file:

@@ -1,7 +1,10 @@
 
 (** Get time/mem statistics for certain function applications.
-    Adapted around CIL's ocamlutil "Stats" to measure wall-clock time
-    instead of user-mode time. *)
+    Adapted around CIL's ocamlutil "Stats". 
+    Extended to
+    - allow measurement of wall-clock time instead of user-mode time. 
+    - properly terminate timer when timed function throws an exception
+*)
 
 let doTime = ref false
 
@@ -63,7 +66,6 @@ let getUserTime () : float =
 (* Get the current wall-clock time *)
 let getWCTime = Unix.gettimeofday
 
-
 let repeatTime getTime limit str f arg = 
   (* Find the right stat *)
   let stat : t = 
@@ -82,45 +84,36 @@ let repeatTime getTime limit str f arg =
   current := stat :: oldcurrent;
   let start = getTime () in
   let rec repeatf count = 
-    let res   = f arg in
+    let res = f arg in
     let diff = getTime () -. start in
     if diff < limit then
       repeatf (count + 1)
     else begin
-      stat.time <- stat.time +. (diff /. float(count));
-      current := oldcurrent;                (* Pop the current stat *)
-      res                                   (* Return the function result *)
+      finishTiming diff count;
+      res
     end
+  and finishTiming diff count = 
+    stat.time <- stat.time +. (diff /. float(count));
+    current := oldcurrent;                (* Pop the current stat *)
   in
-  repeatf 1
+  try repeatf 1
+  with e ->
+    let diff = getTime () -. start in
+    let count = 1 in (* should have gotten the exception on the first repeat*)
+    finishTiming diff count;
+    raise e
 
-
-(* TODO: allow user to choose between user or wall-clock time, or even 
-   not time at all *)
-
+      
 let time str f arg =
-  if !doTime then begin
-    try 
-      repeatTime getWCTime 0.0 str f arg
-    with e ->
-      prerr_string ("Uncaught exc. in Mystats (shouldn't escape like this!): " ^
-                      (Printexc.to_string e) ^ "\n") ;
-      prerr_string ("Currently timing " ^ str ^ "\n");
-      print stdout "STATS:\n";
-      exit 1
-  end 
-  else
-    f arg
+  if !doTime then repeatTime getWCTime 0.0 str f arg
+  else f arg
 
-
-let lastTime = ref 0.0
-let timethis (f: 'a -> 'b) (arg: 'a) : 'b = 
-  let start = getUserTime () in
+let timethis (f: 'a -> 'b) (arg: 'a) : 'b * float =
+  let start = getWCTime () in
   let res = f arg in 
-  lastTime := getUserTime () -. start; 
-  res
+  let time = getWCTime () -. start in
+  res, time
     
-
 (************************************************************)
 
 module type IndexOps = sig
@@ -170,3 +163,4 @@ module IndexedTimer (I:IndexOps) = struct
       
 end
 
+  

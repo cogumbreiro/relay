@@ -51,11 +51,12 @@ module RS = Racesummary
 module SS = Symsummary
 module ST = Sym_types
 module L = Logging
-module FC = Filecache
 module DC = Default_cache
 module A = Alias
 module LP = Lockset_partitioner
 module BS = Backed_summary
+module Par = Pseudo_access
+module NW = Null_warnings
 
 (***************************************************)
 (* Commandline handling                            *)
@@ -167,9 +168,10 @@ let p_au_sizeInfo au =
 
 
 let printSum cg (fname:string) = begin
+  let fkey = Summary_keys.sumKey_of_string (Filename.basename fname) in
   let funcName = 
     try 
-      let fnode = FMap.find (int_of_string (Filename.basename fname)) cg in
+      let fnode = FMap.find fkey cg in
       fnode.name
     with Not_found -> "???" in
   L.logStatusF "Summaries for %s(%s) are:\n\n" funcName fname;
@@ -207,6 +209,38 @@ let printSum cg (fname:string) = begin
    with e ->
      L.logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
   );
+  (try
+     let sum = BS.deserializeFromFile fname "par" in
+     L.logStatus "";
+     L.logStatus "PAR Summary:";
+     Par.printSumm sum fkey
+   with e ->
+     L.logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
+  );
+
+  (try
+     let sum = BS.deserializeFromFile fname "nwarn1" in
+     L.logStatus "";
+     L.logStatus "Null Warn 1 (delayed) summary:";
+     let doc = NW.pReport sum.NW.nDelayed in
+     L.logStatusD doc;
+     L.logStatus "";
+
+     L.logStatus "";
+     L.logStatus "Null Warn 1 (safe) summary:";
+     let doc = NW.pReport sum.NW.nSafe in
+     L.logStatusD doc;
+     L.logStatus "";
+
+     L.logStatus "";
+     L.logStatus "Null Warn 1 (unsafe) summary:";
+     let doc = NW.pReport sum.NW.nUnsafe in
+     L.logStatusD doc;
+     L.logStatus "";
+
+   with e ->
+     L.logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
+  )
 
 end
 
@@ -233,7 +267,7 @@ let initSettings () =
     A.initSettings settings !cgDir;
     DC.makeLCaches (!cgDir);
     let cgFile = Dumpcalls.getCallsFile !cgDir in
-    let cg = Readcalls.readCalls cgFile in
+    let cg = readCalls cgFile in
     cg
   with e -> Printf.printf "Exc. in initSettings: %s\n"
     (Printexc.to_string e) ; raise e

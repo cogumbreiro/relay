@@ -40,13 +40,11 @@
     See {!rootFile} for the name of the user-supplied config file 
     we expect in the call graph directory... *)
 
+open Cil
 open Stdutil
 open Fstructs
 open Callg
-open Cil
-
-module L = Logging
-module Th = Threads
+open Logging
 
 let rootFile = "roots.txt"
  
@@ -71,20 +69,20 @@ let initSettings config =
   Config.iter 
     (fun fieldName value ->
        let informError () = 
-         L.logError "Corrupt line in entry_points settings file:\n";
-         L.logError (fieldName ^ "\n")
+         logError "Corrupt line in entry_points settings file:\n";
+         logError (fieldName ^ "\n")
        in
        try
          (match fieldName with
             "USE_ROOTS" ->
               useEntrypoints := bool_of_string (Strutil.strip value);
-              L.logStatus ("Entry points use roots: " ^ 
+              logStatus ("Entry points use roots: " ^ 
                              string_of_bool !useEntrypoints)
           | _ ->
               informError ()
          ) 
        with e ->
-         L.logError ("initSettings: " ^ (Printexc.to_string e));
+         logError ("initSettings: " ^ (Printexc.to_string e));
          informError ();
          raise e
     ) settings
@@ -92,6 +90,8 @@ let initSettings config =
 (************************************************************)
 
 exception CorruptLine
+
+module Th = Threads
 
 (** Return the set of functions in the call graph that match the 
     entry points read from a listing in cgDir *)
@@ -119,12 +119,12 @@ let getEntries cgDir cg : FSet.t =
         | [] -> () (* skip blank line *)
         | _ -> raise CorruptLine
       with CorruptLine as e ->
-        L.logError ("Entry_points: corrupt input file - " ^ line);
+        logError ("Entry_points: corrupt input file - " ^ line);
         raise e
     done; with End_of_file -> 
       let numEntries = List.length !entries in
-      L.logStatus ("Finished reading in entry points: " ^ 
-        (string_of_int numEntries))
+      logStatus ("Finished reading in entry points: " ^ 
+                   (string_of_int numEntries))
   in
 
   (* return true if the function node matches one of the entry points *)
@@ -143,12 +143,9 @@ let getEntries cgDir cg : FSet.t =
   if (Sys.file_exists fname) then begin
     open_in_for fname readEntries;
     (* Then get the functions from the call graph that match *)
-    FMap.fold (fun fk fn cur -> 
-                 if filterNode fk fn 
-                 then FSet.add fk cur
-                 else cur) cg FSet.empty
+    filterNodes filterNode cg
   end else
-    (L.logError "No entry-points file!";
+    (logError "No entry-points file!";
      FSet.empty)
       
 
@@ -160,19 +157,20 @@ let addRootEntries baseEntries cg sccCG =
 
 (************************************************************)
 
+type rootTagData = funID * callN
+
 type root =
-    Entry of (fKey * simpleCallN)
-  | Thread of (fKey * simpleCallN)
+    Entry of rootTagData
+  | Thread of rootTagData
 
-
-let tagRootsWith cg (tagger : (fKey * simpleCallN) -> 'a) roots : 'a list =
+let tagRootsWith cg (tagger : rootTagData -> 'a) roots : 'a list =
   let (results : 'a list) = FSet.fold 
     (fun fkey cur ->
        try 
          let n = FMap.find fkey cg in 
          tagger (fkey, n) :: cur
        with Not_found -> 
-         L.logError ("tagRootsWith: no node for " ^ (string_of_fkey fkey));
+         logError ("tagRootsWith: no node for " ^ (fid_to_string fkey));
          cur
     ) roots [] in
   results
@@ -183,29 +181,30 @@ class rootGetter cg cgDir = object (self)
   (* Find which functions actually fork new threads *)
   val threadCreatorCallers = Th.findTCCallers cg
 
+  method private getThreadSpawnersFkeys () = 
+    List.fold_left
+      (fun cur tcc -> 
+         FSet.add tcc.Th.tccID cur)
+      FSet.empty threadCreatorCallers
 
 
   (** Get "roots" that are tagged as Thread. These are really just
       functions that spawn the thread roots, not the roots themselves *)
-  method getThreadRoots () : root list =
-    let threadCreators = List.fold_left
-      (fun cur (fkey, _) -> FSet.add fkey cur) 
-      FSet.empty threadCreatorCallers in
+  method getThreadSpawners () : root list =
     (* Tag them *)
-    tagRootsWith cg (fun (fkey, fnode) -> Thread (fkey, fnode)) threadCreators
+    let threadCreators = self#getThreadSpawnersFkeys () in
+    tagRootsWith cg (fun (fid, fnode) -> Thread (fid, fnode)) threadCreators
 
 
   method getEntryFKeys () : FSet.t = 
     (* [a] Get user-specified entry points (in case they aren't roots)
        [b] Find call graph roots that reach spawn sites. *)
     let entryRoots = getEntries cgDir cg in
-    let threadCreatorsRoots = List.fold_left
-      (fun cur (fkey, _) -> FSet.add fkey cur) 
-      FSet.empty threadCreatorCallers in
-    let spawnRoots = rootsThatReach cg threadCreatorsRoots in
+    let threadCreators = self#getThreadSpawnersFkeys () in
+    let spawnRoots = rootsThatReach cg threadCreators in
     let roots = FSet.union entryRoots spawnRoots in
     roots
-         
+      
   (** Get roots that are tagged as Entry, and not already handled as Thread.
       The thread roots themselves will be handled by the spawning functions
       (which are tagged as Thread) *)
@@ -216,7 +215,6 @@ class rootGetter cg cgDir = object (self)
     let threadRoots = Th.getThreadRoots cg threadCreatorCallers in
     let roots = FSet.filter
       (fun f -> not (FSet.mem f threadRoots)) roots in
-
     (* Tag them *)
     tagRootsWith cg (fun (fkey, fnode) -> Entry (fkey, fnode)) roots
 
@@ -228,13 +226,11 @@ class rootGetter cg cgDir = object (self)
     else
       let threadRoots = Th.getThreadRoots cg threadCreatorCallers in
       (* Also need the thread creator callers *)
-      let threadCreators = List.fold_left
-        (fun cur (fkey, _) -> FSet.add fkey cur)
-        FSet.empty threadCreatorCallers in
+      let threadCreators = self#getThreadSpawnersFkeys () in
       FSet.union threadRoots threadCreators
 
   (** Get function keys of relevant roots *)
-  method getUntaggedRoots () : (fKey * simpleCallN) list =
+  method getUntaggedRoots () : (funID * callN) list =
     let roots = self#getRootKeys () in
     tagRootsWith cg (fun (fkey, fnode) -> (fkey, fnode)) roots
       
@@ -242,9 +238,9 @@ class rootGetter cg cgDir = object (self)
   (** Return the list of tagged roots that are relevant to the analysis. *)
   method getRoots () : root list =
     if !useEntrypoints then
-      (self#getThreadRoots ()) @ (self#getEntryRoots ())
+      (self#getThreadSpawners ()) @ (self#getEntryRoots ())
     else
-      self#getThreadRoots ()
+      self#getThreadSpawners ()
 
 end
 
@@ -252,37 +248,48 @@ end
 
 (************* UnCommon Queries **************)
 
-(* Hack alert: This prunes out functions from the callgraph that
-    1) has Static storage 2, or
-    2) starts with a lower case function.
+let getStaticRoots cg = 
+  let roots = getRoots cg in
+  let rootFkeysDeffile = List.fold_left
+    (fun cur (funID, fnode) -> 
+       List_utils.addOnce cur (fid_to_fkey funID, fnode.defFile)
+    ) [] roots in
+  let cfgs =
+    List.fold_left 
+      (fun res (fk, defFile) ->
+         match Cilinfos.getFunc fk defFile with
+         | None -> res
+         | Some cfg -> cfg :: res) [] rootFkeysDeffile in
+  let cfgs2 = List.filter 
+    (fun cfg ->
+       match cfg.svar.vstorage with
+       | Static
+       | Register -> false
+       | _ -> true) cfgs in
+  (cfgs, cfgs2)
+
+
+(* Heuristic: root functions that have static storage *)
+let printNonStaticRoots cg =
+  let cfgs, cfgs2 = getStaticRoots cg in
+  let a, b = List.length cfgs, List.length cfgs2 in
+  logStatusF "%d of %d roots removed because Static\n" (a-b) a;
+  List.iter (fun cfg -> logStatusF "%s\n"  cfg.svar.vname) cfgs2
+
+(* Heuristic: This prunes out root functions from the callgraph that
+   1) has Static storage, or
+   2) function name starts with a lower case letter
    The remaining functions are then printed out.
    This was designed to extract the "thread roots" for the OpenSSL library
- *)
+*)
 let printNonStaticAndUpperCaseRoots cg =
-  let roots = getRoots cg in
-  let cfgs =
-    List.fold_left (fun res (fk, node) ->
-      let file = !Default_cache.astFCache#getFile node.defFile in
-      match Cilinfos.getCFG fk file with
-        | None -> res
-        | Some cfg -> cfg :: res) [] roots in
-  let cfgs2 =  
-    List.filter (fun cfg ->
-      match cfg.svar.vstorage with
-        | Static
-        | Register -> false
-        | _ -> true) cfgs in
+  let cfgs, cfgs2 = getStaticRoots cg in
   let cfgs3 =
     List.filter (fun cfg ->
-      if cfg.svar.vname.[0] <= 'Z' then true
-      else false ) cfgs2 in
-
-    let a, b = List.length cfgs, List.length cfgs3 in
-    L.logStatus (string_of_int (a-b) ^ " of " ^ string_of_int a
-                   ^ " roots removed because Static and/or lowercase");
-    List.iter (fun cfg ->
-      L.logStatus ("non-static-root: " ^ cfg.svar.vname);
-    ) cfgs3;
-
-    roots
-                 
+                   if cfg.svar.vname.[0] <= 'Z' then true
+                   else false ) cfgs2 in
+  
+  let a, b = List.length cfgs, List.length cfgs3 in
+  logStatusF "%d of %d roots removed because Static and/or lowercase\n" (a-b) a;
+  List.iter (fun cfg -> logStatusF "%s\n" cfg.svar.vname) cfgs3
+    

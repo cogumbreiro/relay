@@ -1,44 +1,393 @@
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-makeSimpleLock: Couldn't find global kernel_sem
-makeSimpleLock: Couldn't find global kernel_flag
-Multiple lock summaries for 28
-Multiple lock summaries for 27
-Multiple lock summaries for 29
-Multiple lock summaries for 30
-SH: not target for thread formal ign
-Checkpoint: No left-over status file
-lookupVal: given null addr
-lookupVal: given null addr
-lookupVal: given null addr
-lookupVal: given null addr
-lookupVal: given null addr
-lookupVal: given null addr
-lookupVal: given null addr
-lookupVal: given null addr
-lookupVal: given null addr
-lookupVal: given null addr
-SS handleInstr: res_funptr returned 0 fun(s)
-post: funptr resolved to 0 fun(s): (*(ld->receive_buf))
-post: funptr resolved to 0 fun(s): (*(ld->receive_buf))
-substLval: local variable value stayed in summary?
-substLval: local variable value stayed in summary?
-substLval: local variable ti stayed in summary?
-substLval: local variable oldbit stayed in summary?
-eval bin op, operands are non-Vval
-substExp: trimming ptrArith offset
-substExp encountered unknown exp: (unsigned long )address - 3221225472UL
-substExp: trimming ptrArith offset
-substExp encountered unknown exp: (unsigned long )address - 3221225472UL
-substExp: trimming ptrArith offset
-substExp encountered unknown exp: (unsigned long )address - 3221225472UL
-SS handleInstr: res_funptr returned 0 fun(s)
-post: funptr resolved to 0 fun(s): (*((tty->driver)->flush_buffer))
-post: funptr resolved to 0 fun(s): (*((tty->driver)->flush_buffer))
-handleCallArgs: origTarget constant? (*((int *)0))
-handleCallArgs: origTarget constant? (*((char **)0))
-substActForm returned 0 results for: (*buf)#f1:455
-substActForm returned 0 results for: (*start)#f1:766
-substActForm returned 0 results for: (*eof)#f4:769
+[Er]: Checkpoint: No left-over status file
+[Er]: Checkpoint: No left-over status file
+[Er]: Checkpoint: No left-over status file
+[Er]: Multiple lock summaries for 1556.f
+[Er]: Multiple lock summaries for 626.f
+[Er]: Multiple lock summaries for 633.f
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for 1553.f
+[Er]: Multiple lock summaries for 613.f
+[Er]: Multiple lock summaries for 619.f
+[Er]: Multiple lock summaries for 616.f
+[Er]: Multiple lock summaries for 1550.f
+[Er]: Multiple lock summaries for 622.f
+[Er]: Multiple lock summaries for 631.f
+[Er]: Multiple lock summaries for 1548.f
+[Er]: regenNodeinfo l:6160:ign
+[Er]: nodeInfo not found for: l:6160:ign
+[Er]: nodeInfo not found for: l:6160:ign
+[Er]: nodeInfo not found for: l:6160:ign
+[Er]: Checkpoint: No left-over status file
+[Er]: regenNodeinfo l:3050:dentry
+[Er]: nodeInfo not found for: l:3050:dentry
+[Er]: nodeInfo not found for: l:3050:dentry
+[Er]: nodeInfo not found for: l:3050:dentry
+[Er]: eval bin op, operands are non-Vval
+[Er]: substLval: local variable c stayed in summary?
+[Er]: SS call: *(nfct->destroy) returned 0 fun(s)
+[Er]: call: *(nfct->destroy) returned 0 fun(s)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low & 32UL
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low & 64UL
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: c << 4
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: prevhash + (c << 4)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: c << 4
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: prevhash + (c << 4)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: a - b < 0L
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable value stayed in summary?
+[Er]: substLval: local variable value stayed in summary?
+[Er]: regenNodeinfo l:1860:zone
+[Er]: nodeInfo not found for: l:1860:zone
+[Er]: nodeInfo not found for: l:1860:zone
+[Er]: nodeInfo not found for: l:1860:zone
+[Er]: eval bin op, operands are non-Vval
+[Er]: regenNodeinfo l:1858:zone
+[Er]: nodeInfo not found for: l:1858:zone
+[Er]: nodeInfo not found for: l:1858:zone
+[Er]: nodeInfo not found for: l:1858:zone
+[Er]: eval bin op, operands are non-Vval
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_high << 32
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low | (pte.pte_high << 32)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low & 4UL
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_high << 32
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low | (pte.pte_high << 32)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: csum + addend
+[Er]: regenNodeinfo l:695:sl
+[Er]: nodeInfo not found for: l:695:sl
+[Er]: nodeInfo not found for: l:695:sl
+[Er]: nodeInfo not found for: l:695:sl
+[Er]: substLval: local variable res stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: dev & 1048320U
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: dev & 1048575U
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: csum2 & 16711935U
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: csum + (((csum2 & 16711935U) << 8) + ((csum2 >> 8) & 16711935U))
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:2948:node
+[Er]: nodeInfo not found for: l:2948:node
+[Er]: nodeInfo not found for: l:2948:node
+[Er]: nodeInfo not found for: l:2948:node
+[Er]: eval bin op, operands are non-Vval
+[Er]: regenNodeinfo l:1796:set
+[Er]: nodeInfo not found for: l:1796:set
+[Er]: nodeInfo not found for: l:1796:set
+[Er]: nodeInfo not found for: l:1796:set
+[Er]: regenNodeinfo l:2946:node
+[Er]: nodeInfo not found for: l:2946:node
+[Er]: nodeInfo not found for: l:2946:node
+[Er]: nodeInfo not found for: l:2946:node
+[Er]: eval bin op, operands are non-Vval
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:2944:node
+[Er]: nodeInfo not found for: l:2944:node
+[Er]: nodeInfo not found for: l:2944:node
+[Er]: nodeInfo not found for: l:2944:node
+[Er]: eval bin op, operands are non-Vval
+[Er]: regenNodeinfo l:1793:set
+[Er]: nodeInfo not found for: l:1793:set
+[Er]: nodeInfo not found for: l:1793:set
+[Er]: nodeInfo not found for: l:1793:set
+[Er]: substLval: local variable c stayed in summary?
+[Er]: regenNodeinfo l:1790:set
+[Er]: nodeInfo not found for: l:1790:set
+[Er]: nodeInfo not found for: l:1790:set
+[Er]: nodeInfo not found for: l:1790:set
+[Er]: SS call: *(skb->destructor) returned 0 fun(s)
+[Er]: call: *(skb->destructor) returned 0 fun(s)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: mod->state != 2
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:1780:r
+[Er]: nodeInfo not found for: l:1780:r
+[Er]: nodeInfo not found for: l:1780:r
+[Er]: nodeInfo not found for: l:1780:r
+[Er]: substLval: local variable value stayed in summary?
+[Er]: substLval: local variable c stayed in summary?
+[Er]: regenNodeinfo l:1768:r
+[Er]: nodeInfo not found for: l:1768:r
+[Er]: nodeInfo not found for: l:1768:r
+[Er]: nodeInfo not found for: l:1768:r
+[Er]: regenNodeinfo l:1756:r
+[Er]: nodeInfo not found for: l:1756:r
+[Er]: nodeInfo not found for: l:1756:r
+[Er]: nodeInfo not found for: l:1756:r
+[Er]: substLval: local variable value stayed in summary?
+[Er]: regenNodeinfo l:1732:set
+[Er]: nodeInfo not found for: l:1732:set
+[Er]: nodeInfo not found for: l:1732:set
+[Er]: nodeInfo not found for: l:1732:set
+[Er]: substLval: local variable res stayed in summary?
+[Er]: SS call: *func returned 0 fun(s)
+[Er]: call: *func returned 0 fun(s)
+[Er]: substLval: local variable value stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: x >> 24
+[Er]: eval bin op, operands are non-Vval
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned long )address - 3221225472UL
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable value stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: SS call: *((sb->s_op)->read_inode) returned 0 fun(s)
+[Er]: call: *((sb->s_op)->read_inode) returned 0 fun(s)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: skb->users.counter != 1
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & 4095UL))
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & 4095UL)) + 4
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & 4095UL))
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & 4095UL)) + 4
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & 4095UL))
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & 4095UL)) + 4
+[Er]: SS call: *(hdlc->proto.type_trans) returned 0 fun(s)
+[Er]: call: *(hdlc->proto.type_trans) returned 0 fun(s)
+[Er]: SS call: *(hdlc->proto.detach) returned 0 fun(s)
+[Er]: call: *(hdlc->proto.detach) returned 0 fun(s)
+[Er]: regenNodeinfo l:4478:list
+[Er]: nodeInfo not found for: l:4478:list
+[Er]: nodeInfo not found for: l:4478:list
+[Er]: nodeInfo not found for: l:4478:list
+[Er]: eval bin op, operands are non-Vval
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned long )address - 3221225472UL
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned long )address - 3221225472UL
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned long )address - 3221225472UL
+[Er]: SS call: *(ld->receive_buf) returned 0 fun(s)
+[Er]: call: *(ld->receive_buf) returned 0 fun(s)
+[Er]: substLval: offset mismatch mgsl_struct.irq_spinlock(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.irq_spinlock(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.cmr_value(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.irq_spinlock(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.loopmode_send_done_requested(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.tx_active(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.xmit_cnt(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.xmit_head(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.xmit_tail(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.bus_type(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.cmr_value(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.io_base(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.loopback_bits(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.loopmode_send_done_requested(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.mbre_bit(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.params(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.params(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.tty(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.tx_active(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.xmit_head(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.xmit_tail(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.bh_requested(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.irq_spinlock(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.bh_running(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.cmr_value(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.cts_chkcount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.current_rx_buffer(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.dcd_chkcount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.dsr_chkcount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.loopmode_send_done_requested(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.pending_bh(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.ri_chkcount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.rx_enabled(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.rx_overflow(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.rx_rcc_underrun(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.bus_type(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.cmr_value(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.current_rx_buffer(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.icount(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.intermediate_rxbuffer(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.io_base(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.loopback_bits(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.loopmode_send_done_requested(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.max_frame_size(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.mbre_bit(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.params(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.params(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.params(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.pending_bh(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.rx_buffer_count(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.rx_buffer_list(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.rx_enabled(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.rx_overflow(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.rx_rcc_underrun(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.tty(535) on tty_struct(218) 2
+[Er]: substLval: offset mismatch mgsl_struct.tx_active(535) on tty_struct(218) 2
+[Er]: substLval: local variable c stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: regenNodeinfo l:6141:set
+[Er]: nodeInfo not found for: l:6141:set
+[Er]: nodeInfo not found for: l:6141:set
+[Er]: nodeInfo not found for: l:6141:set
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (vma->vm_end - vma->vm_start) >> 12
+[Er]: regenNodeinfo l:6138:set
+[Er]: nodeInfo not found for: l:6138:set
+[Er]: nodeInfo not found for: l:6138:set
+[Er]: nodeInfo not found for: l:6138:set
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: ~ sum >> 16
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (vma->vm_end - vma->vm_start) >> 12
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: ~ sum >> 16
+[Er]: substLval: local variable dum2 stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: x & 255
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: ~ sum >> 16
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (*x) & 255
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (*x) & 255
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: regenNodeinfo l:4932:__ptr___0
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: regenNodeinfo l:4920:__ptr___0
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: eval PlusA, not used as pointer arith
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:3768:pud
+[Er]: nodeInfo not found for: l:3768:pud
+[Er]: nodeInfo not found for: l:3768:pud
+[Er]: nodeInfo not found for: l:3768:pud
+[Er]: regenNodeinfo l:2030:p
+[Er]: nodeInfo not found for: l:2030:p
+[Er]: nodeInfo not found for: l:2030:p
+[Er]: nodeInfo not found for: l:2030:p
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: SS call: *(p->qproc) returned 0 fun(s)
+[Er]: call: *(p->qproc) returned 0 fun(s)
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:3139:inode
+[Er]: nodeInfo not found for: l:3139:inode
+[Er]: nodeInfo not found for: l:3139:inode
+[Er]: nodeInfo not found for: l:3139:inode
+[Er]: regenNodeinfo l:3137:inode
+[Er]: nodeInfo not found for: l:3137:inode
+[Er]: nodeInfo not found for: l:3137:inode
+[Er]: nodeInfo not found for: l:3137:inode
+[Er]: regenNodeinfo l:3712:page
+[Er]: nodeInfo not found for: l:3712:page
+[Er]: nodeInfo not found for: l:3712:page
+[Er]: nodeInfo not found for: l:3712:page
+[Er]: substLval: local variable c stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: regenNodeinfo l:3708:page
+[Er]: nodeInfo not found for: l:3708:page
+[Er]: nodeInfo not found for: l:3708:page
+[Er]: nodeInfo not found for: l:3708:page
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: iv & 1U
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: iv & 1U
+[Er]: regenNodeinfo l:3126:mapping
+[Er]: nodeInfo not found for: l:3126:mapping
+[Er]: nodeInfo not found for: l:3126:mapping
+[Er]: nodeInfo not found for: l:3126:mapping
+[Er]: regenNodeinfo l:3700:page
+[Er]: nodeInfo not found for: l:3700:page
+[Er]: nodeInfo not found for: l:3700:page
+[Er]: nodeInfo not found for: l:3700:page
+[Er]: eval bin op, operands are non-Vval
+[Er]: eval bin op, operands are non-Vval
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned int )root->prio_tree_node == (unsigned int )((void *)0)
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: regenNodeinfo l:1384:h
+[Er]: nodeInfo not found for: l:1384:h
+[Er]: nodeInfo not found for: l:1384:h
+[Er]: nodeInfo not found for: l:1384:h
+[Er]: eval: unop can't const-fold: ! h->first
+[Er]: regenNodeinfo l:1382:h
+[Er]: nodeInfo not found for: l:1382:h
+[Er]: nodeInfo not found for: l:1382:h
+[Er]: nodeInfo not found for: l:1382:h
+[Er]: eval: unop can't const-fold: ! h->pprev
+[Er]: regenNodeinfo l:3682:page
+[Er]: nodeInfo not found for: l:3682:page
+[Er]: nodeInfo not found for: l:3682:page
+[Er]: nodeInfo not found for: l:3682:page
+[Er]: regenNodeinfo l:1954:timer
+[Er]: nodeInfo not found for: l:1954:timer
+[Er]: nodeInfo not found for: l:1954:timer
+[Er]: nodeInfo not found for: l:1954:timer
+[Er]: eval bin op, operands are non-Vval
+[Er]: regenNodeinfo l:3677:page
+[Er]: nodeInfo not found for: l:3677:page
+[Er]: nodeInfo not found for: l:3677:page
+[Er]: nodeInfo not found for: l:3677:page
+[Er]: regenNodeinfo l:3675:page
+[Er]: nodeInfo not found for: l:3675:page
+[Er]: nodeInfo not found for: l:3675:page
+[Er]: nodeInfo not found for: l:3675:page
+[Er]: substLval: local variable dum2 stayed in summary?
+[Er]: substLval: local variable dum2 stayed in summary?
+[Er]: regenNodeinfo l:3085:dentry
+[Er]: nodeInfo not found for: l:3085:dentry
+[Er]: nodeInfo not found for: l:3085:dentry
+[Er]: nodeInfo not found for: l:3085:dentry
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable c stayed in summary?
+[Er]: No entry-points file!

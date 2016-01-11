@@ -1,5 +1,4 @@
 
-
 val is_volatile_tp : Cil.typ -> bool
 
 val is_volatile_vi : Cil.varinfo -> bool
@@ -50,10 +49,18 @@ val eq_offset_tail : Cil.offset -> Cil.offset -> bool
 
 val predPP : Cil.stmt -> Cil.prog_point list
 
+val getStmtFromPP : Cil.fundec -> Cil.prog_point -> Cil.stmt
+
+val getInstrFromPP : Cil.fundec -> Cil.prog_point -> Cil.instr
+
 module PPHash : Hashtbl.S with type key = Cil.prog_point
 
 module PPSet : Set.S with type elt = Cil.prog_point
 
+val getIndex : Cil.varinfo list -> Cil.varinfo -> int option
+val isFormal : Cil.fundec -> Cil.varinfo -> bool
+
 (************** Deprecated ***************)
 
 module InstrHash : Hashtbl.S with type key = Cil.instr
+

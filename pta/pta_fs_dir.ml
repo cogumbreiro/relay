@@ -4,25 +4,19 @@
     and uses directional constraints. *)
 
 open Pta_types
+open Pta_shared
 open Cil
+open Pretty
 open Cilinfos
+open Pta_cycle
+open Logging
 
+module Stats = Mystats
 module Arr = GrowArray
 module IH = Inthash
 module PC = Pta_compile
 module CLv = Cil_lvals
 
-(************* Debug watchers **************)
-  
-
-let debugFunc fid =
-  if fid = 5840 then 
-    print_string "found func!\n"
-
-let debugCheck id =
-  if id = 45 then
-    print_string "found id!\n"
-      
 
 (***** Choice of set representation ******)
 
@@ -33,8 +27,7 @@ module LVS = S.Make (
   struct
     type t = ptaLv
     let compare a b = compareLv a b
-  end
-)
+  end)
 
 module IDS = S.Make (
   struct
@@ -54,6 +47,7 @@ let listAddOnce eq x curList =
 
 
 let filterTypes = ref true
+let filterNoFP = ref false
 
 let setFilter what =
   filterTypes := what
@@ -63,13 +57,16 @@ let setFilter what =
 let funTypesEq (typ:ctyp) (id:vid) =
   if !filterTypes then
     try
-      let finfo = PC.getFunInfo id in
-(*      compatibleTypes typ finfo.funType *)
-      compatibleTypesNoUnroll typ finfo.funType
-    with Not_found ->
-      false
-  else 
-    true 
+      let finfo = getFunInfo id in
+(*
+      compatibleTypes typ finfo.funType
+*)
+      compatibleFunSig typ finfo.funType
+        (*
+          compatibleTypesNoUnroll typ finfo.funType
+        *)
+    with Not_found -> false
+  else true 
 
 
 (** Add the var id to accum if the given lval matches the function *)
@@ -89,14 +86,13 @@ let lvCanBeFun typ lv accum =
 
 (** true if the set of lvals has an lval based on a global *)
 let hasGlobal lvs =
-  LVS.exists PC.isGlobalLv lvs
+  LVS.exists isGlobalLv lvs
 
     
 (** Function call stuff *)
       
 let getFormal fid index = 
-  debugFunc fid;
-  let finfo = PC.getFunInfo fid in
+  let finfo = getFunInfo fid in
   List.nth finfo.funFormals index
     
 let host_of_formal fid paramIndex =
@@ -106,6 +102,21 @@ let host_of_formal fid paramIndex =
 let host_of_ret fid =
   makeHost (PVar (makeVar (PRet fid)))
     
+let oldWarns = Hashtbl.create 101
+let warnOnce msg =
+  if Hashtbl.mem oldWarns msg then ()
+  else begin
+    Hashtbl.add oldWarns msg ();
+    logError msg;
+  end
+
+let warnExtern prefix fid =
+  warnOnce (Printf.sprintf "%s: extern func %d?\n" prefix fid)
+    
+let warnVarargExtern prefix fid param =
+  warnOnce (Printf.sprintf "%s: vararg or extern func %d (%d)?\n" 
+              prefix fid param)
+
 
 
 (***** Choice of solver ******)
@@ -149,7 +160,6 @@ class virtual ['id] constraintIndexer = object (self)
         self#handleBaseAssign ifAdded { assign with rhs = r; }
 
     | _ -> failwith "baseAssign: rhs not addrOf"
-        
 
   method handleAssign (ifAdded: 'id -> unit) 
     ({ lhs = lhs; rhs = rhs; aloc = loc;} as assign) =
@@ -167,12 +177,18 @@ class virtual ['id] constraintIndexer = object (self)
              self#addSimpleAssign ifAdded lhs rhsLv loc
 
          | PDeref ptr, PVar _ -> (* Complex: *p <- v *)
-             let ptrLv = getLval ptr in
-             self#addComplexL ifAdded ptrLv rhsLv loc
+             (try
+                let ptrLv = getLval ptr in
+                self#addComplexL ifAdded ptrLv rhsLv loc
+              with Not_found ->
+                failwith "PDeref w/ AddrOf in constraint")
                
          | PVar _, PDeref ptr -> (* Complex: v <- *p *)
-             let ptrLv = getLval ptr in
-             self#addComplexR ifAdded lhs ptrLv loc
+             (try
+                let ptrLv = getLval ptr in
+                self#addComplexR ifAdded lhs ptrLv loc
+              with Not_found ->
+                failwith "PDeref w/ AddrOf in constraint")
 
          | PDeref _, PDeref _ -> (* Complex both ways *)
              failwith "handleAssign: didn't simplify!"
@@ -197,12 +213,8 @@ class virtual ['id] constraintIndexer = object (self)
                      let assign = makeAssign formal actual loc in
                      self#handleAssign ifAdded assign) acts
       with 
-        Not_found ->
-          L.logError ("addArgEdges: can't find func info? " ^
-                        (string_of_int fid))
-      | Failure "nth" ->
-          L.logError ("addArgEdges: can't handle varargs? " ^
-                        (string_of_int fid))
+        Not_found -> warnExtern "addArgEdges" fid
+      | Failure "nth" -> warnVarargExtern "addArgEdges" fid paramIndex
     else
       let abstractRet = makeRv (PLv (makeLv (host_of_ret fid, noOffset))) in
       List.iter
@@ -227,8 +239,11 @@ class virtual ['id] constraintIndexer = object (self)
               | _ -> failwith "Non-global func, or non-func used as func"
              )
          | PDeref rv -> (* Indirect: remember funptr to add more edges later *)
-             let lv = getLval rv in
-             self#addFPCall lv (cinfo, args)
+             try
+               let lv = getLval rv in
+               self#addFPCall lv (cinfo, args)
+             with Not_found ->
+               failwith "PDeref w/ AddrOf in funptr constraint"
       ) cinfo.cexp
 
   method addCallEdges calls =
@@ -238,6 +253,7 @@ class virtual ['id] constraintIndexer = object (self)
       ) (PC.rehashCalls calls)
 
 end
+
 
 
 (** Hardekopf and Lin's Lazy Cycle detection solver 
@@ -255,10 +271,7 @@ module LCDSolver = struct
   (* TODO Simplify the unification + cleanup stuff *)
 
   (** Set of nodes *)
-  module NS = S.Make (struct 
-                        type t = nodeID
-                        let compare = Pervasives.compare
-                      end)
+  module NS = Sparsebitv
 
   (** Set of fp calls *)
   module FPS = S.Make 
@@ -290,26 +303,22 @@ module LCDSolver = struct
     | DerefR of nodeID * nodeID
     | FPCall of nodeID * nodeID
 
+  let unifyGeneration = ref 0
+
   type nodeInfo = {
     mutable ptTargets : NS.t;  (** set of nodes this guy points to *)
     mutable oldTargets : NS.t; (** set of nodes already processed for complex *)
-
     mutable subsCons : NS.t;   (** simple constraints (e.g., x <- this) *)
-
     mutable complexL : NS.t;  (** complex constraints w/ deref of this guy on 
                                    the LHS (e.g., *this <- y). *)
     mutable complexR : NS.t;  (** complex constraints w/ deref of this guy on
                                    the RHS (e.g., y <- *this) *)
     mutable fpCalls : FPS.t; (** Set of function pointer calls derefence this *)
-
-    mutable labels : LVS.t;    (** lvals this node represents (can be more 
-                                   than one if unified) *)
-
-    (* temporary data for SCC search *)
-    mutable sccIndex : int;
-    mutable sccRoot : int;
+    mutable labels : LVS.t;  (** lvals this node represents (hmm... can't 
+                                 really be more than one for anders ?) *)
+    mutable lastUpdated : int  (** last unifyGeneration in which NodeSets 
+                                   for this "info" were renamed *)
   }
-
 
   (***************** The state ******************************)
 
@@ -323,10 +332,7 @@ module LCDSolver = struct
       complexR = NS.empty;
       labels = LVS.empty;
       fpCalls = FPS.empty;
-      
-      (* scc crap *)
-      sccIndex = -1;
-      sccRoot = -1;
+      lastUpdated = 0;
     }
 
   let dummyNI = 
@@ -335,17 +341,24 @@ module LCDSolver = struct
          ptTargets = NS.add (-1) n.ptTargets;
      })
 
+  let dummyNI2 = 
+    (let n = freshNodeInfo () in
+     { n with 
+         ptTargets = NS.add (-2) n.ptTargets;
+     })
+
   (** Convert lvals to node ids *)
   let lvToID = LvalH.create 101
-
-  (** ID to equiv. class representative node info *)
-  let idToNodeECR = Arr.make 128 (Arr.Elem dummyNI)
 
   let dummyIndex = -1
 
   (** Forwarding indices... hints to update the NS.t 
       and remove duplicate entries *)
-  let idToNewID = Arr.make 128 (Arr.Elem dummyIndex)
+  let idToNewIDInfo = Arr.make 128 (Arr.Elem (dummyIndex, dummyNI))
+    (* TODO: figure out the needed array size once and for all instead of
+       using this grow array with setg and getg *)
+  let setArr = ref Arr.setg
+  let getArr = ref Arr.getg
 
   (** Constraints on which the the cycle detection has already tested *)
   let cycleBlackList = SimpCS.create 1
@@ -354,39 +367,53 @@ module LCDSolver = struct
 
   (**********************************)
 
-  let setForwarding oldID newID =
-    Arr.setg idToNewID oldID newID;
-    (* Kill info from old *)
-    Arr.setg idToNodeECR oldID dummyNI
+  (* Should update w/ forwarding? *)
+  let hcdTable = ref (Hashtbl.create 0)
 
-  let rec chaseForwarding curID =
-    let forwardID = Arr.getg idToNewID curID in
+
+  let rec checkForwarding curID =
+    let forwardID, _ = !getArr idToNewIDInfo curID in
     if forwardID != dummyIndex && curID != forwardID then begin
-      let finalID = chaseForwarding forwardID in
+      let finalID = checkForwarding forwardID in
       (* path compress *)
       setForwarding curID finalID;
       finalID
     end
     else curID
-    
-  let checkForwarding ifChanged idToCheck =
-    let forwardID = chaseForwarding idToCheck in
-    if idToCheck != forwardID then begin
-      ifChanged idToCheck forwardID;
-      forwardID
-    end else idToCheck
 
+  and setForwarding oldID newID =
+    (* Kill info from old and set forward ID *)
+    assert (oldID <> newID);
+    (* HMM... *)
+    !setArr idToNewIDInfo oldID (newID, dummyNI2);
+    try
+      (* Update HCD stuff *)
+(*
+      let oldHCD = Hashtbl.find !hcdTable oldID in
+      Hashtbl.remove !hcdTable oldID;
+      let newHCD, _ = checkForwarding oldHCD in
+(*      print_string "Forwarding updated HCD table too\n"; *)
+      Hashtbl.replace !hcdTable newID newHCD;
+*)
+      ()
+    with Not_found -> ()
+
+          
   let updateNeighbors neighSetRef oldIndex newIndex =
-    neighSetRef := NS.remove oldIndex !neighSetRef;
-    neighSetRef := NS.add newIndex !neighSetRef
+    neighSetRef := NS.add newIndex (NS.remove oldIndex !neighSetRef)
+      
+  let string_of_pts set =
+    sprint 80 
+      (text "{" ++ seq_to_doc (text ", ")  NS.iter num set nil ++ text "}")
 
-  let ignoreForwarding _ _ = ()
-
+  let printPtSet set =
+    logStatus (string_of_pts set)
+    
   let getNodeID lv =
     try 
       let id = LvalH.find lvToID lv in
-      let newID = checkForwarding 
-        (fun oldID newID -> LvalH.replace lvToID lv newID) id in
+      let newID = checkForwarding id in
+      if newID <> id then LvalH.replace lvToID lv newID;
       newID
     with Not_found ->
       let newID = !curNodeID in
@@ -396,31 +423,74 @@ module LCDSolver = struct
       
   let makeNewNode (id : nodeID) =
     let ni = freshNodeInfo () in
-    Arr.setg idToNodeECR id ni;
+    !setArr idToNewIDInfo id (dummyIndex, ni);
     ni
       
-  let getNodeRef ifChanged (id : nodeID) : (nodeID * nodeInfo) =
-    let newID = checkForwarding ifChanged id in
-    let x = Arr.getg idToNodeECR newID in
-    if x == dummyNI then begin
-      assert (newID == id);
-      let newNode = makeNewNode newID in
-      (newID, newNode)
+  let getNodeRef (id : nodeID) : nodeID =
+    let newID = checkForwarding id in
+    newID
+
+  (************************************************************)
+
+  let updateIDSetHelper nid cur =
+    let newID = getNodeRef nid in
+    if nid <> newID then
+      NS.add newID (NS.remove nid cur)
+    else cur
+
+  let updateIDSet set =
+    NS.fold updateIDSetHelper set set
+      
+  let updatePtSet nodeInfo =
+    nodeInfo.ptTargets <- updateIDSet nodeInfo.ptTargets
+      
+  let updateNSSets nodeInfo = 
+    if nodeInfo.lastUpdated < !unifyGeneration then begin
+      nodeInfo.lastUpdated <- !unifyGeneration;
+      nodeInfo.ptTargets <- updateIDSet nodeInfo.ptTargets;
+      nodeInfo.oldTargets <- updateIDSet nodeInfo.oldTargets;
+      nodeInfo.subsCons <- updateIDSet nodeInfo.subsCons;
+      nodeInfo.complexL <- updateIDSet nodeInfo.complexL;
+      nodeInfo.complexR <- updateIDSet nodeInfo.complexR;
     end
-    else (newID, x)
+            
+  let getNodeInfo id =
+    let newID = getNodeRef id in
+    let _, info = !getArr idToNewIDInfo newID in
+    let info = 
+      if info = dummyNI then begin
+        assert (newID == id);
+        let newNode = makeNewNode newID in
+        newNode
+      end else if info = dummyNI2 then begin
+        (* Should not have forwarded to a dummy node *)
+        failwith "getNodeRef returned dummyNI2"
+      end
+      else info in
+    updateNSSets info;
+    newID, info
       
   let getNode lv : (nodeID * nodeInfo) =
     let id = getNodeID lv in
-    let id, ni = getNodeRef ignoreForwarding id in
+    let id, ni = getNodeInfo id in
     (id, ni)
+
+  let isFuncInfo info =
+    not (LVS.is_empty info.labels) && 
+      LVS.for_all isFuncLv info.labels
+
+  let isFuncID id =
+    let _, info = getNodeInfo id in
+    isFuncInfo info
 
   (*************** workqueues *****************)
 
-  module WQ = Queueset.Make (struct
-                 type t = nodeID
-                 let compare = Pervasives.compare
-               end)
-
+  module WQ = Queueset.Make 
+    (struct
+       type t = nodeID
+       let compare a b = a - b
+     end)
+    
   let work = WQ.create ()
 
   let addToWork id =
@@ -434,7 +504,7 @@ module LCDSolver = struct
   (** Reset constraint graph, indices, and points-to graph *)
   let reset () =
     LvalH.clear lvToID;
-    Arr.clear idToNodeECR;
+    Arr.clear idToNewIDInfo;
     SimpCS.clear cycleBlackList;
     curNodeID := 0
 
@@ -442,28 +512,60 @@ module LCDSolver = struct
   (***** Handle constraints that have been classified ******)
 
   class myIndexer = object (self)
-    inherit [nodeID] constraintIndexer
+    inherit [nodeID] constraintIndexer as super
 
-      
+    val mutable numFiltered = 0
+    method numFiltered = numFiltered
+    val mutable totalCons = 0
+    method totalCons = totalCons
+
+    method handleBaseAssign ifAdded ({ lhs = lhs; rhs = rhs;} as assign ) =
+      totalCons <- totalCons + 1;
+      if !filterNoFP then
+        try
+          if not (hitsFunptrDeepLv lhs || hitsFunptrDeepRv rhs) then
+            numFiltered <- numFiltered + 1
+          else super#handleBaseAssign ifAdded assign 
+        with Not_found ->
+          logError ("handleBaseAssign: can't find func info? ");
+          super#handleBaseAssign ifAdded assign
+      else super#handleBaseAssign ifAdded assign
+        
+    method handleAssign ifAdded ({ lhs = lhs; rhs = rhs;} as assign) =
+      totalCons <- totalCons + 1;
+      if !filterNoFP then
+        try
+          if not (hitsFunptrDeepLv lhs || hitsFunptrDeepRv rhs) then
+            numFiltered <- numFiltered + 1
+          else super#handleAssign ifAdded assign 
+        with Not_found ->
+          logError ("handleAssign: can't find func info? ");
+          super#handleAssign ifAdded assign
+      else super#handleAssign ifAdded assign
+        
     method addBaseAssign ifAdded lhs rhsLv loc =
       let lhsID, lhsNi = getNode lhs in
       let rhsID, rhsNi = getNode rhsLv in
       if not (LVS.mem rhsLv rhsNi.labels) then begin
+(*        Printf.printf "Adding label %s self\n" (string_of_ptaLv rhsLv); *)
         rhsNi.labels <- LVS.add rhsLv rhsNi.labels;
         ifAdded rhsID
       end;
       if not (NS.mem rhsID lhsNi.ptTargets) then begin
+(*      Printf.printf "Adding targ %d to %d\n" rhsID lhsID; *)
         lhsNi.ptTargets <- NS.add rhsID lhsNi.ptTargets;
         ifAdded lhsID
       end
 
     method addSimpleAssignID ifAdded lhsID rhsID rhsInfo =
-      let newLHS = checkForwarding ignoreForwarding lhsID in
-      if not (NS.mem newLHS rhsInfo.subsCons) then begin
+      let newLHS = checkForwarding lhsID in
+      if not (NS.mem newLHS rhsInfo.subsCons) &&
+        not (isFuncID newLHS) then begin
+        (*        Printf.printf "Adding %d to %d subscons\n" newLHS rhsID; *)
         rhsInfo.subsCons <- NS.add newLHS rhsInfo.subsCons;
         ifAdded rhsID;
       end
-
+          
     method addSimpleAssign ifAdded lhs rhs loc =
       let lhsID, _ = getNode lhs in
       let rhsID, rhsInfo = getNode rhs in
@@ -471,8 +573,9 @@ module LCDSolver = struct
 
 
     method addComplexLID ifAdded lhsID lNodeInfo rhsID =
-      let newRHS = checkForwarding ignoreForwarding rhsID in
+      let newRHS = checkForwarding rhsID in
       if not (NS.mem newRHS lNodeInfo.complexL) then begin
+(*        Printf.printf "Adding %d to %d complexL\n" newRHS lhsID; *)
         lNodeInfo.complexL <- NS.add newRHS lNodeInfo.complexL;
         ifAdded lhsID;
       end
@@ -483,8 +586,9 @@ module LCDSolver = struct
       self#addComplexLID ifAdded lID lNodeInfo rID
         
     method addComplexRID ifAdded lhsID rhsID rNodeInfo =
-      let newLHS = checkForwarding ignoreForwarding lhsID in
+      let newLHS = checkForwarding lhsID in
       if not (NS.mem newLHS rNodeInfo.complexR) then begin
+(*        Printf.printf "Adding %d to %d complexR\n" newLHS rhsID; *)
         rNodeInfo.complexR <- NS.add newLHS rNodeInfo.complexR;
         ifAdded rhsID;
       end
@@ -501,158 +605,145 @@ module LCDSolver = struct
 
   end
 
-  let indexer = new myIndexer
+  (** Pre-process constraints to map lvals to IDs and generate the initial
+      node infos (then subsequent accesses don't need to grow the array?) *)
+  let mapLvalsToIDs baseAssigns complexAssigns calls =
+    let lvsToIndex = LvalH.create 10 in
+    (* only collect lvals that are base variables... *)
+    let rec collectLval lv =
+      let host, _ = lv in
+      match host.HC.node with
+        PVar _ -> LvalH.replace lvsToIndex lv ()
+      | PDeref rv -> collectLvalRv rv
+    and collectLvalRv rv = 
+      match rv.HC.node with
+        PLv lv 
+      | PAddrOf lv -> collectLval lv
+      | PCast (_, rv2) -> collectLvalRv rv2
+    in
+    let rec lvalsInRhs rv =
+      match rv.HC.node with
+        PLv lv -> lv
+      | PAddrOf lv -> lv 
+          (* ugh... if it's a function we may need to generate its 
+             parameter and return value lvals ahead of time in case
+             it is called through a function pointer later *)
+      | PCast (_, r) -> lvalsInRhs r
+    in
+    let collectLvalsAssign { lhs = lhs; rhs = rhs; aloc = _; } =
+      let rhsLv = lvalsInRhs rhs in
+      collectLval lhs;
+      collectLval rhsLv;
+    in
+    let collectLvalsAssigns _ assigns =
+      List.iter collectLvalsAssign assigns
+    in
+    VarH.iter collectLvalsAssigns baseAssigns;
+    VarH.iter collectLvalsAssigns complexAssigns;
+    let collectLvalsCall (cinfo, args) = 
+      (* Scan actuals *)
+      List.iter 
+        (fun (acts, _) ->
+           List.iter 
+             (fun rval -> 
+                let lv = lvalsInRhs rval in
+                collectLval lv) acts
+        ) args;
+      (* check parameters and the called lval *)
+      let collectParameter fid (_, paramIndex) =
+        (* generate parameter lvals ... maybe just do it for EVERY known 
+           function instead of the ones that are actually called / had 
+           addr taken ??? *)
+        if (paramIndex <> retIndex) then
+          (try
+             let formal = 
+               makeLv (host_of_formal fid paramIndex, noOffset) in
+             collectLval formal
+           with Failure "nth" -> () (* varargs *) 
+           | Not_found -> () (* external func *)
+          )
+        else 
+          let formalRet = makeLv (host_of_ret fid, noOffset) in
+          collectLval formalRet
+      in
+      List.iter 
+        (fun callLv -> 
+           collectLval callLv;
+           let host, _ = callLv in
+           match host.HC.node with
+             PVar v -> (* Direct call *) 
+               let fid = (match v.HC.node with PGlobal (fid, _) -> fid
+                          | _ -> failwith "Non-global func, or non-func") in
+               List.iter (collectParameter fid) args;
+           | PDeref rv ->
+               (* How about the sub-lval? If we care about flow we
+                  would have seen it... *)
+               (* generated parameters already when checking 
+                  that func had address-taken, and scanned actuals *)
+               ()
+        ) cinfo.cexp;
+    in
+    let collectLvalsCalls _ callList =
+      List.iter collectLvalsCall callList
+    in
+    VarH.iter collectLvalsCalls calls;
+    let sortAndAssignIDs lvals =
+      let listed = Stdutil.mapToList LvalH.fold lvals in
+      let sorted = List.sort 
+        (fun (lv1, _) (lv2, _) -> compareLv lv1 lv2) listed in
+      (* TODO: also generate initial node infos *)
+      List.iter (fun (lv, _) -> ignore (getNodeID lv)) sorted
+    in
+    sortAndAssignIDs lvsToIndex
 
+
+  let indexer = new myIndexer
 
   (** Load the initial constraint and points-to graph from the root directory *)
   let loadConstraints root =
     (* Assume one-file mode. TODO: check *)
     let filename = PC.getConstraintFile root in
-    let _, baseAss, complexAss, calls, pseudo = 
+    let _, baseAss, complexAss, calls, _ = 
       PC.loadFor filename in
+    (* First give ids lvals *)
+    mapLvalsToIDs baseAss complexAss calls;
+    (* Then index the constraints using the ids *)
     indexer#addBaseAssigns baseAss;
     indexer#addAssignEdges complexAss;
-    indexer#addCallEdges calls
+    indexer#addCallEdges calls;
+    Printf.printf "Filtered non-fp cons/total: %d/%d\n\n" 
+      indexer#numFiltered indexer#totalCons;
+    flush stdout
 
   (** Make sure nodes representing functions have the function label *)
-(*  let labelFunctionNodes () =
+  let labelFunctionNodes () =
     Hashtbl.iter 
       (fun fid finfo ->
          let funVar = makeVar (PGlobal (fid, rehashType finfo.funType)) in
          let funLv = makeLv (makeHost (PVar funVar), noOffset) in
          let nid, ninfo = getNode funLv in
          ninfo.labels <- LVS.add funLv ninfo.labels
-      ) PC.funTable
-*)
+      ) Pta_shared.funTable
 
-  let init root =
+  let init root = begin
     reset ();
-    loadConstraints root
-(*    labelFunctionNodes () *)
-
-
-  (*********** Cycle detection optimization crap *********)
-
-  (* Small SCC info bit savings...
-     (but only handles half a billion or so nodes, and pain) *)
-
-  let stackBit = 1 lsl 29
-
-  let notStackBit = lnot stackBit
-
-  let isOnStack nodeInfo =
-    (nodeInfo.sccIndex land stackBit) != 0
-
-  let setIndex info index =
-    assert (index < stackBit);
-    if info.sccIndex == (-1)
-    then info.sccIndex <- index (* must happen before on stack *)
-    else info.sccIndex <- index lor (info.sccIndex land stackBit)
-
-  let getIndex info =
-    info.sccIndex land notStackBit
-
-  let pushStack stack (nodeID, nodeInfo) =
-    nodeInfo.sccIndex <- nodeInfo.sccIndex lor stackBit;
-    Stack.push (nodeID, nodeInfo) stack
-    
-  let popStack stack =
-    let id, info = Stack.pop stack in
-    info.sccIndex <- info.sccIndex land notStackBit;
-    (id, info)
+    loadConstraints root;
+    labelFunctionNodes ()
+  end
       
-  let setRootIndex info index =
-    info.sccRoot <- index
-
-  let getRootIndex info =
-    info.sccRoot
-
-  let notVisted info =
-    info.sccIndex < 0
-
-  let isSccRoot info =
-    (getRootIndex info) == (getIndex info)
-
-  let nonTrivial scc =
-    match scc with
-      [] -> failwith "empty scc?"
-    | [(id,_)] -> 
-        false
-    | _ -> true
-
-  let clearScc scc =
-    List.iter 
-      (fun (nodeID, nodeInfo) -> 
-         nodeInfo.sccIndex <- -1;
-         nodeInfo.sccRoot <- -1;
-      ) scc
-
-  (** Return list of non-trivial sccs found from exploration
-      starting at the startNode *)
-  let detectCycles startID startNode : (nodeID * nodeInfo) list list =
-    let curIndex = ref 0 in
-    let sccStack = Stack.create () in
-    let curSccs = ref [] in
-
-    let rec popScc (rootID, rootNode) nodesInSCC : (nodeID * nodeInfo) list =
-      let (otherID, otherNode) = popStack sccStack in
-      let newScc = (otherID, otherNode) :: nodesInSCC in
-      if otherNode == rootNode then newScc
-      else popScc (rootID, rootNode) newScc
-    in
-
-    let rec visit (nodeID, node) =
-      setIndex node !curIndex;
-      setRootIndex node !curIndex;
-      incr curIndex; (* not checking for overflow *)
-      pushStack sccStack (nodeID, node);
-      (* Might find forwarding that changes neighbor set *)
-      let newNeighs = ref node.subsCons in
-      NS.iter
-        (fun neighID ->
-           let neighID, neigh = getNodeRef 
-             (updateNeighbors newNeighs) neighID in
-           if notVisted neigh then begin
-             visit (neighID, neigh);
-             setRootIndex node 
-               (min (getRootIndex node) (getRootIndex neigh))
-           end else if isOnStack neigh then 
-             setRootIndex node 
-               (min (getRootIndex node) (getIndex neigh))
-       ) node.subsCons;
-      node.subsCons <- !newNeighs;
-      if isSccRoot node then begin
-        let newScc = popScc (nodeID, node) [] in
-        curSccs := newScc :: !curSccs
-      end
-    in
-
-    visit (startID, startNode);
-
-    (* Clear visitation data for next round, and prune trivial sccs *)
-    List.fold_left 
-      (fun cur scc ->
-         clearScc scc;
-         if nonTrivial scc then scc :: cur
-         else cur) [] !curSccs
-
+  (********* Merge cycles **********)
+      
   let mergeSetsWithout2 s1 s2 x y =
     NS.remove y (NS.remove x (NS.union s1 s2))
-(*    NS.union s1 s2
-*)
-
 
   let mergeSetsWithout s1 s2 x =
    (NS.remove x (NS.union s1 s2))
-(*    NS.union s1 s2
-*)
     
   (** Hmm... nodes are only pointer equivalent, not location equivalent,
       so only merge if they aren't locations.
       Do something else when we are able to figure out location equiv.? *)
   let notLocation (_, nodeInfo) =
     LVS.is_empty nodeInfo.labels
-
 
   (** merge info INTO the first structure *)
   let mergeInfo (i1ID, i1) (i2ID, i2) = begin
@@ -664,11 +755,11 @@ module LCDSolver = struct
     i1.complexL <- mergeSetsWithout i1.complexL i2.complexL i2ID;
     i1.complexR <- mergeSetsWithout i1.complexR i2.complexR i2ID;
     i1.fpCalls <- FPS.union i1.fpCalls i2.fpCalls;
-    (* No labels to merge -- assert no labels *)
+    
+    i1.labels <- LVS.union i1.labels i2.labels;
 
     (* No point in flowing to self... *)
     i1.subsCons <- mergeSetsWithout2 i1.subsCons i2.subsCons i1ID i2ID;
-    (* ignore temp scc info fields *)
   end
 
   (** Extract the lowest number ID in the list (that isn't a location). 
@@ -685,59 +776,157 @@ module LCDSolver = struct
                then loop rest (Some x, (curMin, curNode) :: newList)
                else loop rest (curBest, x :: newList)
            | None ->
-               loop rest (Some x, newList)
-               
-          )
+               loop rest (Some x, newList))
     in
     loop l (None, [])
       
-  let unifyScc (scc : (nodeID * nodeInfo) list) =
+  let eqIDInfoPair (id1, _) (id2, _) = id1 == id2
+
+  let getSCCNodes sccIDs =
+    List.fold_left 
+      (fun cur id -> 
+         let newID, node = getNodeInfo id in
+         List_utils.addOnceP eqIDInfoPair cur (newID, node)) [] sccIDs
+
+  let unifyScc (online:bool) (scc : nodeID list) =
     (* Combine info, make the others use the lowest number ID, 
-       and leave crumb indicating the change of address *)
+       and leave forwarding info indicating the change of address *)
+    let scc = getSCCNodes scc in
     let nonLocations = List.filter notLocation scc in
+(*
+    let nonLocations = scc in
+*)
     match extractMinNode nonLocations with
       Some (nodeID, node), rest ->
-        if rest = [] then 
-          ()
+        if rest = [] then ()
         else begin
-          Printf.printf "Collapsing: %d " nodeID;
+          Printf.printf "Collapsing (%b): %d " online nodeID;
+          incr unifyGeneration;
           let id, info = List.fold_left 
             (fun (curID, curInfo) (otherID, otherInfo) ->
                Printf.printf "%d " otherID;
-               mergeInfo (curID, curInfo) (otherID, otherInfo);
                setForwarding otherID curID;
+               mergeInfo (curID, curInfo) (otherID, otherInfo);
+               (* Add black list edges too *)
+               SimpCS.add cycleBlackList (nodeID, otherID) ();
+               SimpCS.add cycleBlackList (curID, otherID) ();
                (curID, curInfo)
-          ) (nodeID, node) rest in
+            ) (nodeID, node) rest in
           print_newline ();
           assert (id == nodeID);
           addToWork id
         end
-    | None, [] -> Printf.printf "No non-locations to collapse\n"
+    | None, [] -> ()
     | _ -> failwith "failed to pick non-location"
 
-  let tryUnify ((lhsID, rhsID) as edge) s1 s2 =
+
+  (********* Offline cycle detection ***********)
+
+  module HCDPrep = struct
+    type id = nodeID
+    let eqID a b = a == b
+    let hashID a = a
+
+    (* No iter Base? *)
+    let iterSimple foo =
+      LvalH.iter (fun _ rhs ->  
+                    let _, rhsNode = getNodeInfo rhs in
+                    NS.iter (fun lhs -> foo rhs lhs) rhsNode.subsCons) lvToID
+
+    let iterComplexL foo = 
+      LvalH.iter (fun _ lhs ->  
+                    let _, lhsNode = getNodeInfo lhs in
+                    NS.iter (fun rhs -> foo rhs lhs) lhsNode.complexL) lvToID
+
+    let iterComplexR foo =
+      LvalH.iter (fun _ rhs ->  
+                    let _, rhsNode = getNodeInfo rhs in
+                    NS.iter (fun lhs -> foo rhs lhs) rhsNode.complexR) lvToID
+  end
+
+  module HCD = Pta_offline_cycle.HCDSolver(HCDPrep)
+
+  (*********** Online cycle detection optimization *********)
+
+  module SCCNodeInfo = struct
+    type id = nodeID
+
+    let iterNeighs foo nodeID =
+      let _, node = getNodeInfo nodeID in
+      NS.iter foo node.subsCons
+ 
+    let eqID a b = a == b
+    let hashID a = a
+    let maxStack = 100
+
+  end
+
+  module CycleD = CycleDetector(SCCNodeInfo)
+
+  (******** Initiate the two cycle detections **********)
+    
+  let shouldTryUnify ((lhsID, rhsID) as edge) s1 s2 =
     if !doCycleDetect then
-      (* TODO: black list the actual nodeinfos or just the IDS? *)
-      if SimpCS.mem cycleBlackList edge then ()
-      else if NS.equal s1 s2 then begin
+      if SimpCS.mem cycleBlackList edge then false
+      else if not (NS.is_empty s1) && (NS.equal s1 s2) then begin
         SimpCS.add cycleBlackList edge ();
-        (* Don't care if IDs changed (even if ID is used in blacklist?) *)
-        let lhsID, lhsNode = getNodeRef ignoreForwarding lhsID in
-        let nonTrivSccs = detectCycles lhsID lhsNode in
-        List.iter unifyScc nonTrivSccs
+        true
       end
-      else ()
-    else ()
-  
+      else false
+    else false
+      
+
+  let detectAndUnify lhsID =
+    (* Don't care if IDs changed (even if ID is used in blacklist?) *)
+    let lhsID, lhsNode = getNodeInfo lhsID in
+    let nonTrivSccs = Stats.time "cycles" (CycleD.detectCycles true) lhsID in
+    List.iter (unifyScc true) nonTrivSccs
+
+  let tempIdToLv = ref (Hashtbl.create 0)
+
+  let getIdToLv () =
+    LvalH.iter 
+      (fun lv id -> Hashtbl.replace !tempIdToLv id lv) lvToID
+
+  let printHCDPairs () =
+    getIdToLv ();
+    Printf.printf "Number of HCD pairs: %d\n" (Hashtbl.length !hcdTable);
+    Hashtbl.iter 
+      (fun id1 id2 -> 
+         let lv1 = Hashtbl.find !tempIdToLv id1 in
+         let lv2 = Hashtbl.find !tempIdToLv id2 in
+         Printf.printf "(%d, %d) --> *%s == %s\n" id1 id2
+           (string_of_ptaLv lv1) (string_of_ptaLv lv2)
+      ) !hcdTable;
+    tempIdToLv := Hashtbl.create 0;
+    Printf.printf "\n\n"
+      
+  let detectOfflineCycles () =
+    Printf.printf "Doing offline cycle detection --\n";
+    flush stdout;
+    let basicCycles, hcdTab = HCD.detectCycles () in
+    List.iter (unifyScc false) basicCycles;
+    hcdTable := hcdTab;
+    printHCDPairs ();
+    Printf.printf "Offline cycles done\n\n";
+    flush stdout
+      
+  let checkForHCD derefedID newTargets =
+    try
+      let otherID = Hashtbl.find !hcdTable derefedID in
+      NS.iter (fun targID -> unifyScc false  [otherID; targID]) newTargets
+    with Not_found -> ()        
+      
   (**************** Solver steps ********************)
 
   (* Function pointer calls *)
 
   let funcsOfTargets typ targIDs : IDS.t =
+    let funFilter = lvCanBeFun typ in
     NS.fold 
       (fun targID cur ->
-         let targID, ni = getNodeRef ignoreForwarding targID in
-         LVS.fold (lvCanBeFun typ) ni.labels cur
+         let targID, ni = getNodeInfo targID in
+         LVS.fold funFilter ni.labels cur
       ) targIDs IDS.empty
   
   let getFuncs typ targets : IDS.t =
@@ -752,9 +941,9 @@ module LCDSolver = struct
   (* Complex constraints *)
 
   let checkFPCall ni nodeID targetsToConsider =
-    if not (FPS.is_empty ni.fpCalls) then
+    if not (FPS.is_empty ni.fpCalls) then begin
       Printf.printf "Doing fp call *%d()\n" nodeID
-    ;
+    end;
     FPS.iter 
       (fun (callinfo, args) ->
          let funs = getFuncs callinfo.ctype targetsToConsider in
@@ -766,29 +955,20 @@ module LCDSolver = struct
       ) ni.fpCalls
       
   let checkComplexR ni targID targInfo =
-    let newComplexR = ref ni.complexR in
     NS.iter 
       (fun lhsID ->
-         let lhsID, _ = 
-           getNodeRef (updateNeighbors newComplexR) lhsID in
          indexer#addSimpleAssignID addToWork lhsID targID targInfo
-      ) ni.complexR;
-    ni.complexR <- !newComplexR
+      ) ni.complexR
 
   let checkComplexL ni targID =
-    let newComplexL = ref ni.complexL in
     NS.iter
       (fun rhsID ->
-         let rhsID, rhsInfo = 
-           getNodeRef (updateNeighbors newComplexL) rhsID in
-         indexer#addSimpleAssignID addToWork targID rhsID rhsInfo
-      ) ni.complexL;
-    ni.complexL <- !newComplexL
+         let newID, rhsInfo = getNodeInfo rhsID in
+         indexer#addSimpleAssignID addToWork targID newID rhsInfo
+      ) ni.complexL
         
   let checkComplexEdges ni nodeID =
     let targetsToConsider = NS.diff ni.ptTargets ni.oldTargets in
-
-    let prunedTargets = ref ni.ptTargets in
 
     let checkR = checkComplexR ni in
     let checkL = checkComplexL ni in
@@ -797,62 +977,102 @@ module LCDSolver = struct
 
     NS.iter 
       (fun targID ->
-         let targID, targInfo = 
-           getNodeRef (updateNeighbors prunedTargets) targID in
-         
+         let newID, targInfo = getNodeInfo targID in
          (* iter on complex assigns *)
-         checkR targID targInfo;
-         
-         checkL targID;
+         checkR newID targInfo;
+         checkL newID;
       ) targetsToConsider;
 
-    ni.ptTargets <- !prunedTargets;
-    ni.oldTargets <- !prunedTargets (* processed them all *)
+    (* check for HCD cycles while we know what the new targets are too *)
+    checkForHCD nodeID targetsToConsider;
+    ni.oldTargets <- ni.ptTargets (* processed them all *)
+
 
   (* Simple assignments *)
 
+  let debugFlow srcID srcInfo destID destInfo =
+(*
+    logStatusF "Flowing %d -> %d (new stuff: %s)\n"
+      srcID destID (string_of_pts 
+                      (NS.diff srcInfo.ptTargets destInfo.ptTargets));
+*)
+    ()
+
   let flowPtsTo ni curNodeID =
-    let newSubs = ref ni.subsCons in
+    let shouldDetect = ref false in
+    (* First make sure IDs are representative *)
+    Stats.time "updatePTS" updatePtSet ni; 
     NS.iter
       (fun destID ->
-         let destID, destInfo = getNodeRef (updateNeighbors newSubs) destID in
+         let newID, destInfo = Stats.time "get" getNodeInfo destID in
          (* Don't flow to functions *)
-         if not (LVS.is_empty destInfo.labels) && 
-           LVS.for_all PC.isFuncLv destInfo.labels then
-             ()
-         else begin(* Check if ptsToSet will be new *)
-           if not (NS.subset ni.ptTargets destInfo.ptTargets) then begin
-             Printf.printf "Flowing pts from %d to %d\n" curNodeID destID;
+         if isFuncInfo destInfo then ()
+         else if newID == curNodeID then () (* Don't flow to self *)
+         else begin (* Check if ptsToSet will be new *)
+           if not (NS.subset ni.ptTargets destInfo.ptTargets)
+           then begin
+             debugFlow curNodeID ni newID destInfo;
              destInfo.ptTargets <- NS.union ni.ptTargets destInfo.ptTargets;
-             addToWork destID;
+             addToWork newID;
            end else
-             tryUnify (destID, curNodeID) ni.ptTargets destInfo.ptTargets
+             shouldDetect := !shouldDetect or 
+               shouldTryUnify (newID, curNodeID) ni.ptTargets destInfo.ptTargets
          end
       ) ni.subsCons;
-    ni.subsCons <- !newSubs
+    if !shouldDetect then detectAndUnify curNodeID
+
+
+  let initializeArrays len =
+    (* Make it 2x just in case... *)
+    ignore (!getArr idToNewIDInfo (2 * len)) ;
+    (* array length should now be fixed so we no longer need to check bounds *)
+    setArr := Arr.set;
+    getArr := Arr.get
+
+  (* Debugging *)
+  let printLvToID () =
+    logStatus "Initial Lval to ID bindings (before cycle collapses):";
+    logStatus "=====================================================";
+    let listed = Stdutil.mapToList LvalH.fold lvToID in
+    let sorted = List.sort (fun (lv1, id1) (lv2, id2) -> 
+                              Pervasives.compare id1 id2) listed in
+    List.iter 
+      (fun (lv, id) -> logStatusF "%s = %d\n" (string_of_ptaLv lv) id) 
+      sorted;
+    logStatus ""
 
   let solve root =
-    PC.loadFuncInfo root; (* Just in case *)
-
+    if !doCycleDetect then
+      Stats.time "offline cycle" detectOfflineCycles ();
+    
     initWork ();
+    printLvToID ();
+
     let initialWork = WQ.length work in
-    Printf.printf "Working with %d lval nodes\n" (LvalH.length lvToID);
+    let numLvals = LvalH.length lvToID in
+    Printf.printf "Working with %d lval nodes\n" numLvals;
     Printf.printf "Solving constraints -- workqueue: %d\n" initialWork;
+    initializeArrays numLvals;
+
     let steps = ref 0 in
     let firstSteps = WQ.length work in
+    let printStatus () =
+      if (!steps > firstSteps && !steps mod 100 == 0) then begin
+        Printf.printf "Iteration %d, work %d, blackList %d\n" 
+          !steps (WQ.length work) (SimpCS.length cycleBlackList);
+        Stats.print stdout "PTA time";
+        flush stdout;
+      end
+    in
     while not (WQ.is_empty work) do
       let curNodeID = WQ.pop work in
-      (* TODO: maybe try seeing if newID is already on the queue? *)
-      let curNodeID, ni = getNodeRef ignoreForwarding curNodeID in
-
-      checkComplexEdges ni curNodeID;
-
-      flowPtsTo ni curNodeID;
-
-      incr steps;
-      if (!steps > firstSteps && !steps mod 50 == 0) then begin
-        Printf.printf "Iteration %d, work %d\n" !steps (WQ.length work);
-        flush stdout;
+      let curNodeID, ni = getNodeInfo curNodeID in
+      if WQ.mem work curNodeID then () (* will get to it later *)
+      else begin
+        Stats.time "add edges" (checkComplexEdges ni) curNodeID;
+        Stats.time "flowPts" (flowPtsTo ni) curNodeID;
+        incr steps;
+        printStatus ();
       end
     done;
     Printf.printf "Took %d iterations, %d more than initial worklist\n"
@@ -935,7 +1155,7 @@ module Final = struct
   let derefID id =
     try Arr.get !idToNode id 
     with (Invalid_argument "index out of bounds") as ex ->
-      L.logError ("derefID: no node for id " ^ (string_of_int id));
+      logError ("derefID: no node for id " ^ (string_of_int id));
       raise ex
 
   let rec convertNode oldID ni =
@@ -954,7 +1174,7 @@ module Final = struct
       oldID
 
   and convertID id =
-    let oldID, oldN = Solver.getNodeRef Solver.ignoreForwarding id in
+    let oldID, oldN = Solver.getNodeInfo id in
     convertNode oldID oldN
 
   and convertTargets ids =
@@ -977,7 +1197,7 @@ module Final = struct
     OldNH.clear oldNodeToID
 
   (**** Fill in reachability info ****)
-
+      
   let markGlobalReach () =
     print_string "Marking global reachability\n";
     flush stdout;
@@ -985,21 +1205,32 @@ module Final = struct
     let rec visit g id = 
       (if (IH.mem visited id) then ()
        else begin
-         IH.add visited id ();
          let node = derefID id in
-         let newG = if (g) then g
-         else hasGlobal node.labels in
-         node.globReach <- node.globReach || newG;
-         NS.iter (visit newG) node.ptTargets
+         if node.globReach then 
+           () (* we already marked it and its targets in a prev pass *)
+         else begin
+           IH.add visited id ();
+           let newG = if (g) then g
+           else hasGlobal node.labels in
+           NS.iter (visit newG) node.ptTargets;
+           node.globReach <- newG;
+         end
        end
       );
     in
-    LvalH.iter 
-      (fun lv id ->
+    let lvsDone = LvalH.fold
+      (fun lv id lvsDone ->
          IH.clear visited;
-         visit (PC.isGlobalLv lv) id
-      ) !lvToID;
-    print_string "Done marking global reachability\n";
+         if isGlobalLv lv then
+           visit true id;
+         (* The rest is already set to false... *)
+         if lvsDone mod 100 == 0 then begin
+           Printf.printf "Lvals marked: %d\n" lvsDone;
+           flush stdout;
+         end;
+         lvsDone + 1
+      ) !lvToID 0 in
+    Printf.printf "Done marking global reachability (%d)\n" lvsDone;
     flush stdout
 
   (**** Rehash to find equivalent nodes, after converting and
@@ -1011,19 +1242,19 @@ module Final = struct
     NS.equal n1.ptTargets n2.ptTargets &&
       LVS.equal n1.labels n2.labels &&
       n1.globReach == n2.globReach
-      (* Hmm... still worried about location equivalence and 
-         cleaning up points-to sets after merging *)
+      (* Hmm... need the nodes to have the same "in-edges"
+         (nodes w/ n1 and n2 in the ptTargets should be the same also) *)
       
   module NewNH = Hashtbl.Make (
     struct
       type t = nodeInfo
-      let equal x y = sameInfo x y
+      let equal x y = x == y (* sameInfo x y *)
       let hash x = Hashtbl.hash_param 32 64 x
     end
   )
     
   (* Hmm... how to prevent non-aliased targetless nodes from being 
-     aliased (both pointer and location aliasing)? *)
+     aliased (both pointer and location aliasing), etc.? *)
     
   let curNewIndex = ref 0 
   let oldNodeToID = ref (NewNH.create 37)
@@ -1107,9 +1338,9 @@ module Final = struct
     markGlobalReach ();
 
     rehashTable ();
-    if (NewNH.length !nodeToID != 0) then
-      L.logError "Warning: working w/ 0 pointer info\n"
-        (* common on small test cases *)
+    if (NewNH.length !nodeToID == 0) then
+      logError "Warning: working w/ 0 pointer info\n"
+        (* possible on small test cases *)
     ;
     
     let outName = getResultsFilename root in
@@ -1169,19 +1400,32 @@ module Final = struct
       (* TODO: handle offsets *)
       let host, off = ptrLv in
       match host.HC.node with
-        PVar _-> 
-          L.logError ("nodeInfo not found for: " ^ string_of_ptaLv ptrLv);
+        PVar v->
+          if isPointerVar v then
+            logError ("nodeInfo not found for: " ^ string_of_ptaLv ptrLv)
+          ;
           NS.empty
             
       | PDeref rv ->
-          let lv = getLval rv in
-          (* Find targets of self (a derefed pointer) by getting targets 
-             of targets of derefed pointer *)
-          let targets = targetNodes lv in
-          NS.fold 
-            (fun tid cur ->
-               NS.union (targetsOfID tid) cur
-            ) targets NS.empty
+          targetNodesExp rv
+
+  and targetNodesExp ptrExp =
+    match ptrExp.HC.node with
+      PLv lv ->
+        (* Find targets of self (a derefed pointer) by getting targets 
+           of targets of derefed pointer *)
+        let targets = targetNodes lv in
+        NS.fold 
+          (fun tid cur -> NS.union (targetsOfID tid) cur) targets NS.empty
+    | PCast (_, e) -> targetNodesExp e
+    | PAddrOf (lv) ->
+        try
+          let id = getIDLv lv in
+          NS.add id NS.empty (* TODO: add id binding for this lv *)
+        with Not_found ->
+          logError ("nodeID not found for: " ^ string_of_ptaLv lv);
+          NS.empty
+           
 
   let resolveFPs typ ptrLv =
     let targets = targetNodes ptrLv in
@@ -1196,13 +1440,13 @@ module Final = struct
       (* TODO: handle offsets *)
       let host, off = ptrLv in
       match host.HC.node with
-        PVar _ ->
-          L.logError ("nodeInfo not found for: " ^ string_of_ptaLv ptrLv);
+        PVar v ->
+          if isPointerVar v then
+            logError ("nodeInfo not found for: " ^ string_of_ptaLv ptrLv);
           accum
 
       | PDeref rv ->
-          let lv = getLval rv in
-          let targets = targetNodes lv in
+          let targets = targetNodesExp rv in
           NS.fold 
             (fun tid cur ->
                foo tid accum
@@ -1228,7 +1472,7 @@ module Final = struct
   let nodeCache = NCache.create 1024
 
   let regenNodeinfo ptrLv =
-    L.logError ("regenNodeinfo " ^ string_of_ptaLv ptrLv);
+    logError ("regenNodeinfo " ^ string_of_ptaLv ptrLv);
     (* try constructing pts to info, etc. *)
     let targets = targetNodes ptrLv in
     (* Hmm... don't store labels w/ generated nodes? 
@@ -1334,7 +1578,7 @@ let chooseOldFile root =
 
 (** Re-analyze or reload analysis state *)
 let analyzeAll (root:string) (fresh:bool) =
-  PC.loadFuncInfo root;
+  loadSharedState root;
 
   let regen () =
     Solver.init root;
@@ -1359,8 +1603,8 @@ let analyzeAll (root:string) (fresh:bool) =
 (** Write out analysis state that may have accumulated as analysis is used *)
 let writeState rootPath =
   let fname = getTempResults rootPath in
-  L.logStatusF "\n\nwriteState: writing new state for Andersen to %s\n\n" fname;
-  L.flushStatus ();
+  logStatusF "\n\nwriteState: writing new state for Andersen to %s\n\n" fname;
+  flushStatus ();
   Final.saveState fname
 
 
@@ -1399,7 +1643,9 @@ module Abs = struct
   let getNodeExp (exp : Cil.exp) : t option =
     let ptRvs = PC.analyze_exp exp in
     let ptLvs = List.fold_left 
-      (fun cur rv -> try (getLval rv) :: cur with Not_found -> cur) [] ptRvs in
+      (fun cur rv -> try (getLval rv) :: cur 
+       with Not_found -> cur) 
+      [] ptRvs in
     getNodeLvs ptLvs
 
   module DCache = Cache.Make (struct 
@@ -1426,42 +1672,40 @@ module Abs = struct
       finalID
 
   let deref_lval lv = 
-    let ptLvs = PC.analyze_lval lv in
-    match getNodeLvs ptLvs with
-      None -> (* raise UnknownLoc *) []
+    match getNodeLval lv with 
+      None -> []
     | Some n -> [deref n]
 
   let deref_exp exp = 
-    let ptRvs = PC.analyze_exp exp in
-    let ptLvs = List.fold_left 
-      (fun cur rv -> try (getLval rv) :: cur with Not_found -> cur) [] ptRvs in
-    match getNodeLvs ptLvs with
+    match getNodeExp exp with
       None -> (* raise UnknownLoc *) []
     | Some n -> [deref n]
 
-  (* TODO: canonicize the abstract nodes some... what if we have
-     a set of them, and the info is redundant? Problem is some of the
-     info may only be "pointer-equivalent" and not "location-equivalent", etc.
+  (* TODO: canonicize the abstract nodes some (reduces number of warnings !)
+     What if we have a set of them, and the info is redundant? 
+     Problem is some of the info may only be "pointer-equivalent" and 
+     not "location-equivalent", etc.
   *)
 
   let lvals_of (abs : t) : Cil.lval list =
     let ptLvs = Final.labelsOfID abs in
     LVS.fold
       (fun lv results  ->
-         try 
-           lv_of_ptaLv lv :: results
-         with Not_found ->
-           results
+         try lv_of_ptaLv lv :: results
+         with Not_found -> results
       ) ptLvs []
       
   let may_alias (abs1 : t) (abs2 : t) =
+    (* this first check allows empty target sets *)
+    abs1 = abs2 ||
     let targs1 = Final.targetsOfID abs1 in
     let targs2 = Final.targetsOfID abs2 in
     not (NS.inter_isEmpty targs1 targs2)
       
   let location_alias (abs1 : t) (abs2 : t) =
-    (* If we check that ids are the same, maybe rehashing/collapsing 
-       shouldn't happen *)
+    (* this first check allows empty label sets, but we may want a non-empty
+       intersection to return a counter-example... *)
+    abs1 = abs2 ||
     let labels1 = Final.labelsOfID abs1 in
     let labels2 = Final.labelsOfID abs2 in
     not (LVS.inter_isEmpty labels1 labels2)
@@ -1513,7 +1757,7 @@ let resolve_funptr (ptrExp:Cil.exp) : vid list =
     try 
       CLv.typeAfterDeref ptrExp    (* if function pointer is given *)
     with CLv.TypeNotFound ->
-      L.logError "Pta: resolve_funptr not given a pointer";
+      logError "Pta: resolve_funptr not given a pointer";
       CLv.typeOfUnsafe ptrExp in   (* if function pointer deref is given *)
   let e_typ = cil_type_to_ptype e_typ in
   let lv_exps = PC.analyze_exp ptrExp in
@@ -1544,13 +1788,14 @@ let deref_exp (ptr : Cil.exp) : Cil.varinfo list =
   lvals_to_vars lvals
 
 
-(* may points to same... not refer to same location... *)
+(* may points to same... not refer to same location...
+   i.e., &*ptr1 == &*ptr2, not &ptr1 == &ptr2 *)
 let may_alias (ptr1 : Cil.exp) (ptr2 : Cil.exp) : bool =
   match Abs.getNodeExp ptr1 , Abs.getNodeExp ptr2 with
     Some abs1, Some abs2 ->
       Abs.may_alias abs1 abs2 
   | _, _ -> 
-      L.logError "Pta_fs_dir may_alias couldn't find node";
+      logError "Pta_fs_dir may_alias couldn't find node";
       false
 
 
@@ -1613,7 +1858,7 @@ module SolverDebug = struct
     true (* not actually tracked *)
 
   let derefID id =
-    let _, nodeInfo = Solver.getNodeRef Solver.ignoreForwarding id in
+    let _, nodeInfo = Solver.getNodeInfo id in
     nodeInfo
 
 end

@@ -44,11 +44,9 @@
 
 open Fstructs
 open Statfs
-
-module L = Logging
-module Stat = Mystats
-
-
+open Logging
+open Summary_keys
+open Callg 
 
 (************************************************************
      Summary Storage Locations
@@ -109,23 +107,25 @@ let string_of_sumType typ =
    Track finalized function summaries (for each analysis)
  ************************************************************)
 
+(* TODO: have each analysis track this for themselves
+   so that we can generalize the key used for lookup *)
+
 (** Table of functions which have finalized summaries wrt to an analysis *)
-let (final_funcs : (fKey, sumType list) Hashtbl.t) = Hashtbl.create 213
+let (final_funcs : (sumKey, sumType list) Hashtbl.t) = Hashtbl.create 213
 
 (** Mark the function's ([f]) summary as finalized 
     for the analysis type [t] *)
-let setFinal (f:fKey) (t:sumType) : unit =
-  let oldList = try Hashtbl.find final_funcs f with Not_found -> [] in
-  let newList = Stdutil.addOnce oldList t in
-  Hashtbl.replace final_funcs f newList
+let setFinal (key:sumKey) (t:sumType) : unit =
+  let oldList = try Hashtbl.find final_funcs key with Not_found -> [] in
+  let newList = List_utils.addOnce oldList t in
+  Hashtbl.replace final_funcs key newList
     
-(** True if the function's ([fkey]) summary is finalized for analysis [t] *)
-let isFinal (fkey:fKey) (t:sumType) : bool =
-  try
-    let curFinal = Hashtbl.find final_funcs fkey in
+(** True if the summary for given [key] is finalized for analysis [t] *)
+let isFinal (key:sumKey) (t:sumType) : bool =
+  try 
+    let curFinal = Hashtbl.find final_funcs key in
     List.mem t curFinal
-  with Not_found ->
-    false
+  with Not_found -> false
 
 
 (************************************************************
@@ -163,7 +163,7 @@ let pathToToken (path:string) : dbToken =
   try
     (* Check if the given path is part of the list of known paths. 
        If not, add to list and convert to a token first *)
-    Stdutil.indexOf (fun sp -> path = sp) !summPaths
+    List_utils.indexOf (fun sp -> path = sp) !summPaths
   with Not_found ->
     let tok = List.length !summPaths in
     summPaths := !summPaths @ [path]; (* add to end so existing toks unfazed *)
@@ -185,25 +185,24 @@ let rec checkPath listLen firstToken curToken : (string * dbToken)=
     (p, curToken)
   else 
     let newToken = nextToken listLen curToken in
-    if (newToken == firstToken) then
-      raise Not_enough_space
-    else
-      checkPath listLen firstToken newToken
+    if (newToken == firstToken) then raise Not_enough_space
+    else checkPath listLen firstToken newToken
 
-
-let getBasename (fid:fKey) (summType:sumType) : string =
-  ((string_of_int fid) ^ "." ^ (string_of_sumType summType))
-    
+let getBasename (id:sumKey) (summType:sumType) : string =
+(* TODO: force each sumType to go in a separate directory too *)
+  ((string_of_sumKey id) ^ separator ^ (string_of_sumType summType))
     
 (** Create the filename used to store a summary *)
-let getFName (fid:fKey) (summType:sumType) (path:string) = 
-  Filename.concat path (getBasename fid summType)
+let getFName (id:sumKey) (summType:sumType) (path:string) = 
+  Filename.concat path (getBasename id summType)
 
 
 (** Get the FID associated w/ the chosen filename *)
-let key_of_name fname : fKey =
+let key_of_name fname : sumKey =
   let base = Filename.basename fname in
-  (int_of_string (Filename.chop_extension base))
+  match splitter base with
+    [fk; sumKey; stype] -> (fkey_of_string fk, sumKey)
+  | _ -> failwith "key_of_name: malformed file name"
 
 
 (** Get the sumType associated w/ the chosen filename *)
@@ -214,9 +213,9 @@ let stype_of_name fname : sumType =
 (** Choose a directory to store the summary, 
     return a token to represent which directory was chosen 
     in the end *)
-let chooseDBPath (fid: fKey) : (string * dbToken) =
+let chooseDBPath (fid: sumKey) : (string * dbToken) =
   let listLen = List.length !summPaths in
-  let tok = fid mod listLen in
+  let tok = (Hashtbl.hash fid) mod listLen in
   let (path, actualTok) = checkPath listLen tok tok in
   (path, actualTok)
 
@@ -233,7 +232,7 @@ let anyDBPath () : (string * dbToken) =
 
 (** See if a summary already exists on disk (we just didn't know about it
     because of restart, or what-not). Raises Not_found if not found. *)
-let find (fid: fKey) (summType:sumType) : (string * dbToken) =
+let findOnDisk (fid: sumKey) (summType:sumType) : (string * dbToken) =
   (* Search all local dbPaths *)
   let p = List.find 
     (fun path ->
@@ -247,22 +246,22 @@ let find (fid: fKey) (summType:sumType) : (string * dbToken) =
 (** Discover any summaries (from disk) for function [f] and analysis
     type [typ] that weren't already known in mem. If it isn't found, 
     invoke the notFoundFunc. *)
-let discover (f:fKey) (typ:sumType) 
-    (notFoundFunc: fKey -> sumType -> dbToken option) : dbToken option =
+let discover (f:sumKey) (typ:sumType) 
+    (notFoundFunc: sumKey -> sumType -> dbToken option) : dbToken option =
   if (isFinal f typ) then 
     None (* no-op, globally known to be finalized (assuming all 
             workers are using the same config + ASTs) *)
   else
     (* Check if some of summary is on disk *)
     try 
-      let path, tok = find f typ in
+      let path, tok = findOnDisk f typ in
       Some tok
     with Not_found ->
       notFoundFunc f typ
 
 
 (** Get the file used to store a summary previously *)
-let getDBFile (fid: fKey) (summType:string) (token: dbToken) : string =
+let getDBFile (fid: sumKey) (summType:string) (token: dbToken) : string =
   let path = pathFromToken token in
   getFName fid summType path
 
@@ -275,17 +274,17 @@ let size_token fid summType token =
   numKB
 
 (** Get a previously serialized summary for a function *) 
-let deserializeFromToken (fkey:fKey) (summType:string) (tok: dbToken) : 'a =
-  let fileName = getDBFile fkey summType tok in
+let deserializeFromToken (key:sumKey) (summType:string) (tok: dbToken) : 'a =
+  let fileName = getDBFile key summType tok in
   Gz_marshal.from_file fileName
  
 
-(** Get a previously serialized summary from a basepath + fkey.
+(** Get a previously serialized summary from a basepath + key.
     Also return the dbToken as reference to the path in the future *)
-let deserializeFromPath (fkey:fKey) (summType:string) (path:string) 
+let deserializeFromPath (key:sumKey) (summType:string) (path:string) 
     : 'a * dbToken =
   let token = pathToToken path in
-  let fileName = getDBFile fkey summType token in
+  let fileName = getDBFile key summType token in
   let result = Gz_marshal.from_file fileName in
   (result, token)
 
@@ -296,13 +295,13 @@ let deserializeFromFile (fname:string) (summType:string) : 'a =
   Gz_marshal.from_file (fname ^ "." ^ summType)
 
 
-(** Store summary [value] for function [fkey] and analysis
+(** Store summary [value] for function [key] and analysis
     type [summType] in file. Return the storage location  *)
-let serializeSummary (fkey:fKey) (summType:string) (value:'a) : dbToken =
+let serializeSummary (key:sumKey) (summType:string) (value:'a) : dbToken =
   (* First, pick a place to store *)
   let listLen = List.length !summPaths in
-  let path, firstToken = chooseDBPath fkey in
-  let fileName = getFName fkey summType path in
+  let path, firstToken = chooseDBPath key in
+  let fileName = getFName key summType path in
   (* Then try, (may fail if there isn't enough space *)
   let rec trySerializing curFName curToken =
     try (* Assume no name collisions *)
@@ -322,16 +321,16 @@ let serializeSummary (fkey:fKey) (summType:string) (value:'a) : dbToken =
   trySerializing fileName firstToken
 
 
-(** Delete summary for function [fkey] and analysis [sumType],
+(** Delete summary for function [key] and analysis [sumType],
     given that it exists on disk in the storage location represented 
     by the [token] *)
-let removeSummary (fkey:fKey) (summType:sumType) (token:dbToken) : unit =
+let removeSummary (key:sumKey) (summType:sumType) (token:dbToken) : unit =
   try
-    let fileName = getDBFile fkey summType token in
+    let fileName = getDBFile key summType token in
     Gz_marshal.remove fileName;
-    L.logStatus ("Deleted summary for: " ^ (string_of_fkey fkey));
+    logStatus ("Deleted summary for: " ^ string_of_sumKey key);
   with (Sys_error x) as e ->
-    L.logError ~prior:0 ("removeSummary failed: " ^ x);
+    logError ~prior:0 ("removeSummary failed: " ^ x);
     raise e
 
 
@@ -377,6 +376,7 @@ module type Summarizeable = sig
 
 end
 
+
 (** Interface to summary database for maintainence, inspection, etc. 
     Things does not depend on the actual summaries *)
 class type dbManagement = object
@@ -398,12 +398,12 @@ class type dbManagement = object
   (** Given a list of functions and storage locations, assume 
       the summaries for those functions can be found at 
       the corresponding locations *)
-  method assumeComplete : ((fKey * dbToken) list) -> unit 
+  method assumeComplete : ((sumKey * dbToken) list) -> unit 
 
   (** Write the summary for the given function to disk *)
-  method flushOne : fKey -> unit
+  method flushOne : sumKey -> unit
     
-  method evictOne : fKey -> unit
+  method evictOne : sumKey -> unit
 
   (** Given a list of functions, find the storage locations of each
       function's summary. May be omitted in the resulting list if
@@ -411,14 +411,14 @@ class type dbManagement = object
       TODO: maybe raise an exception instead. Not sure if it's worth
       the trouble to have some kinds of summaries NOT written to disk 
       (e.g., the initial/bottom summaries) *)
-  method locate : fKey list -> (fKey * dbToken) list
+  method locate : sumKey list -> (sumKey * dbToken) list
     
   method sizeInMem : unit -> int
 
-  method sizesOf : fKey list -> (fKey * int) list
+  method sizesOf : sumKey list -> (sumKey * int) list
 
   (** Initialize the summaries for special functions / external funcs *)
-  method initSummaries : Config.settings -> Callg.simpleCallG -> unit
+  method initSummaries : Config.settings -> callG -> unit
 
 
 end
@@ -427,26 +427,38 @@ end
 class type ['sum] base = object
   inherit dbManagement
     
+  val summs : ('sum sumStub) SM.t
+
   (** Find and return the summary for the given function. If "Not_found",
       return a specified initial value instead of raising the exception *)
-  method find : fKey -> 'sum
+  method find : sumKey -> 'sum
     
   (** Replace an old summary (if any) for the given function w/ a new one *)
-  method addReplace : fKey -> 'sum -> unit
+  method addReplace : sumKey -> 'sum -> unit
         
+  (** Low-level management *)
+  method private addReplaceBase : sumKey -> ('sum sumStub) -> unit
+
+  method private willAdd : sumKey -> unit
+
   (** Load the summary from the given file *)
   method getFromFile : string -> 'sum
         
   (** Low-level serialization. Avoid using, but feel free to extend *)
-  method private serialize : fKey -> 'sum -> dbToken
+  method private serialize : sumKey -> 'sum -> dbToken
     
   (** Low-level deserialization. Avoid using, but feel free to extend *)
-  method private deserialize : fKey -> dbToken -> 'sum * dbToken
+  method private deserialize : sumKey -> dbToken -> 'sum * dbToken
+
+  (** Low-level debug / assertion *)
+  method private checkInit : unit
     
   (** Log an error, given the body of the message *)
   method err : string-> unit
     
-  method fold : 'a. ('sum -> 'a -> 'a) -> 'a -> 'a
+  method fold : 'a. (sumKey -> 'sum -> 'a -> 'a) -> 'a -> 'a
+
+  method foldOnKey : 'a. (sumKey -> 'sum -> 'a -> 'a) -> fKey -> 'a -> 'a
 
 end
 
@@ -479,7 +491,7 @@ module Make (I:Summarizeable) = struct
        all the summaries for each function into one file per function? 
        One map entry per function (reduces number of intermediate index
        nodes, but will have the same number of leaves)? *)
-    val mutable summs = FMap.empty
+    val mutable summs = SM.empty
 
     val mutable initialized = false
 
@@ -488,30 +500,35 @@ module Make (I:Summarizeable) = struct
       sumID
 
     (** Post-reboot cleanup *)
-    method cleanup () = L.logStatus "BS: Not doing any cleanup"
+    method cleanup () = logStatus "BS: Not doing any post-reboot cleanup"
 
     (** Shortcut for tagging, then logging error messages *)
     method err str =
-      L.logError (sumStr ^  ": " ^ str)
+      logError (sumStr ^ ": " ^ str)
 
     (** Serialize the summary (given the associated function ID).
         Return the chosen storage location. *)
-    method private serialize (fkey:fKey) (v:sum) : dbToken =
-      try serializeSummary fkey sumID (I.simplify v);
-      with e -> self#err ("serialization failed: " ^  
-                            (string_of_fkey fkey) ^ " " ^
-                            (Printexc.to_string e));  
+    method private serialize (key:sumKey) (v:sum) : dbToken =
+      try serializeSummary key sumID (I.simplify v);
+      with e -> self#err ("serial. failed: " ^ string_of_sumKey key 
+                          ^ " " ^ (Printexc.to_string e));  
         raise e
 
-    (** Read in the summary for function fkey given the storage 
+    (** Read in the summary for function key given the storage 
         location (token). Returns a new token, which may be different 
         if the summary was moved. *)
-    method private deserialize (fkey:fKey) (token:dbToken) : sum * dbToken =
+    method private deserialize (key:sumKey) (token:dbToken) : sum * dbToken =
       try
-        (I.desimplify (deserializeFromToken fkey sumID token), token)
-      with e -> self#err ("deserialization failed for: " ^ 
-                            (string_of_fkey fkey));
+        (I.desimplify (deserializeFromToken key sumID token), token)
+      with e -> self#err ("deserial. failed for: " ^ string_of_sumKey key
+                          ^ " " ^ (Printexc.to_string e));
         raise e
+
+    (** Low-level debug / assertion *)
+    method private checkInit =
+      if not initialized then begin
+        self#err "Not initialized!"; raise SumNotInitialized
+      end
 
     (** Deserialize a summary, given the filename (w/ extension stripped) *)
     method getFromFile (path:string) : sum =
@@ -519,70 +536,96 @@ module Make (I:Summarizeable) = struct
       with e -> self#err ("deserializeFromFile failed for : " ^ path);
         raise e
 
-    (** Replace the summary stub directly *)
-    method private addReplaceBase (k:fKey) stub : unit =
-      summs <- FMap.add k stub summs
+    (** Call this hook when we bring somethign in from disk, 
+        or introduce the value (not when we dirty the value) *)
+    method private willAdd k =
+      ()
 
+    (** Replace the summary stub directly *)
+    method private addReplaceBase (k:sumKey) stub : unit =
+      summs <- SM.add k stub summs
 
     (** Replace the old value in the summary w/ this one *)          
-    method addReplace (k:fKey) (newVal:sum) : unit =
+    method addReplace (k:sumKey) (newVal:sum) : unit =
       let tok =
         try
-          let stub = FMap.find k summs in
+          let stub = SM.find k summs in
           match stub with
-            OnDiskSumm t -> Some t
+            OnDiskSumm t -> 
+              self#willAdd k;
+              Some t
           | InMemSumm (_, tOpt, _) -> tOpt
         with Not_found -> None
       in
       self#addReplaceBase k (InMemSumm (true, tok, newVal))
 
-    (** Find the summary for function with fkey k. 
+    (** Find the summary for function with key k. 
         Returns I.initVal if it isn't found, and uses that in the future *)
-    method find (k:fKey) : sum =
-      if not initialized then begin
-        self#err "Not initialized!"; raise SumNotInitialized
-      end else try
-        let stub = FMap.find k summs in
-        match stub with
-          OnDiskSumm t ->
-            let v, tok = self#deserialize k t in
-            self#addReplaceBase k (InMemSumm (false, Some tok, v));
-            v
-        | InMemSumm (_, _, v) -> 
-            v
+    method find (k:sumKey) : sum =
+      self#checkInit;
+      try self#doFind k
       with Not_found ->
-        self#addReplaceBase k (InMemSumm (true, None, I.initVal));
-        I.initVal
+        if not (isWildCard k) then
+          (match self#tryFindWildcard k with
+             Some v -> 
+               (* ASSUME that the wildcard val never changes, 
+                  and cache the result under this non-wildcard key... *)
+               self#willAdd k;
+               self#addReplaceBase k (InMemSumm (true, None, v));
+               v
+           | None -> self#findInitial k)
+        else self#findInitial k
 
-    method private doFlush fkey stub =
+    method private doFind k =
+      let stub = SM.find k summs in
+      match stub with
+        OnDiskSumm t ->
+          let v, tok = self#deserialize k t in
+          self#willAdd k;
+          self#addReplaceBase k (InMemSumm (false, Some tok, v));
+          v
+      | InMemSumm (_, _, v) -> v
+
+    method private findInitial k =
+      self#willAdd k;
+      self#addReplaceBase k (InMemSumm (true, None, I.initVal));
+      I.initVal
+          
+    method private tryFindWildcard (fk, str) =
+      try Some (self#doFind (wildCardkey fk))
+      with Not_found -> None
+
+    method private doFlush key stub =
       match stub with
         OnDiskSumm _ -> stub
       | InMemSumm (dirty, Some (oldTok), v) ->
           let newTok = if dirty then
-            self#serialize fkey v
+            self#serialize key v
           else oldTok in
           (OnDiskSumm newTok)
       | InMemSumm (dirty, None, v) ->
           if not dirty then
             self#err "doFlush: Not dirty and not already on disk"
           ;
-          let newTok = self#serialize fkey v in
+          let newTok = self#serialize key v in
           (OnDiskSumm newTok)            
 
     (** Serialize and flush one function summary from memory *)
-    method flushOne fkey =
+    method flushOne key =
       try 
-        let newStub = self#doFlush fkey (FMap.find fkey summs) in
-        summs <- FMap.add fkey newStub summs
-      with Not_found ->
-        ()
+        let newStub = self#doFlush key (SM.find key summs) in
+        self#addReplaceBase key newStub
+      with Not_found -> ()
           
     (** serialize all the summaries and clear from memory *)
     method serializeAndFlush =
-      summs <- FMap.mapi self#doFlush summs
+      summs <- SM.fold 
+        (fun key stub cur ->
+           let newStub = self#doFlush key stub in
+           if stub == newStub then cur
+           else (SM.add key newStub cur)) summs summs
 
-
-    method private doEvict fkey stub = 
+    method private doEvict key stub = 
       match stub with
         InMemSumm (false, Some(t), s) ->
           OnDiskSumm (t)
@@ -590,79 +633,87 @@ module Make (I:Summarizeable) = struct
           stub
       | InMemSumm (true, _, s) ->
           (* write it out anyway *)
-          self#err ("evictSummaries: dirty summs " ^ string_of_fkey fkey);
-          self#doFlush fkey stub
+          self#doFlush key stub
       | InMemSumm (_, None, _) ->
           (* write it out anyway *)
           self#err ("evictSummaries: not already on disk " ^ 
-                      string_of_fkey fkey);
-          self#doFlush fkey stub
+                      string_of_sumKey key);
+          self#doFlush key stub
 
-    method evictOne fkey =
+    method evictOne key =
       try
-        let newStub = self#doEvict fkey (FMap.find fkey summs) in
-        summs <- FMap.add fkey newStub summs
-      with Not_found ->
-        ()
+        let newStub = self#doEvict key (SM.find key summs) in
+        self#addReplaceBase key newStub
+      with Not_found -> ()
 
     (** Clear all in-memory summaries that have already been written out *)
     method evictSummaries =
-      summs <- FMap.mapi
-        (fun fkey summStub ->
-           self#doEvict fkey summStub
-        ) summs
-
+      summs <- SM.mapi self#doEvict summs
 
     (** Assume functions listed in have finished summaries 
         (also given location in which summary is stored)   *)
-    method assumeComplete (fk_toks_list : (fKey * dbToken) list) : unit  =
-      List.iter (fun (f,tok) ->
-                   summs <- FMap.add f (OnDiskSumm tok) summs) fk_toks_list
-
+    method assumeComplete (fk_toks_list : (sumKey * dbToken) list) : unit  =
+      List.iter (fun (f,tok) -> 
+                   self#addReplaceBase f (OnDiskSumm tok)) fk_toks_list
+        
 
     (** Find the locations of the summaries for the given list of functions.
         If the storage location for a function is unknown, it is omitted. *)
-    method locate (fkeys : fKey list) : (fKey * dbToken) list =
+    method locate (keys : sumKey list) : (sumKey * dbToken) list =
       List.fold_left
         (fun res fk -> 
-           try match FMap.find fk summs with
+           try match SM.find fk summs with
              InMemSumm (_, Some(t), _)
            | OnDiskSumm (t) ->
                (fk, t) :: res
            | _ -> res
            with Not_found -> res
-        ) [] fkeys
+        ) [] keys
 
-    method fold : 'a. (sum -> 'a -> 'a) -> 'a -> 'a =
+    method fold : 'a. (sumKey -> sum -> 'a -> 'a) -> 'a -> 'a =
       fun foo accum ->
-        FMap.fold 
-          (fun fkey summStub accum ->
+        SM.fold 
+          (fun key summStub accum ->
              match summStub with
                InMemSumm (_, _, v) -> 
-                 foo v accum
+                 foo key v accum
              | OnDiskSumm t ->
-                 let v, newTok = self#deserialize fkey t in
-                 self#addReplaceBase fkey (OnDiskSumm newTok);
-                 foo v accum
+                 let v, newTok = self#deserialize key t in
+                 self#addReplaceBase key (OnDiskSumm newTok);
+                 foo key v accum
           ) summs accum
 
+    method foldOnKey : 'a. (sumKey -> sum -> 'a -> 'a) -> fKey -> 'a -> 'a =
+      fun foo fkey accum ->
+        (* nasty linear search for entries that match fkey *)
+        SM.fold
+          (fun key summStub accum ->
+             let fkey2 = fkey_of_sumKey key in
+             if fkey = fkey2 then
+               match summStub with
+                 InMemSumm (_, _, v) ->
+                   foo key v accum
+               | OnDiskSumm t ->
+                   let v, newTok = self#deserialize key t in
+                   self#addReplaceBase key (OnDiskSumm newTok);
+                   foo key v accum
+             else accum
+          ) summs accum
 
-    method sizesOf (fkeys : fKey list) : (fKey * int) list =
+    method sizesOf (keys : sumKey list) : (sumKey * int) list =
       List.map 
         (fun fk ->
-           try match FMap.find fk summs with
+           try match SM.find fk summs with
              InMemSumm (_, Some(t), _) 
-           | OnDiskSumm (t) ->
-               (fk, size_token fk sumID t)
+           | OnDiskSumm (t) -> (fk, size_token fk sumID t)
            | InMemSumm (_, _, v) ->
-               self#err ("sizesOf not already on disk: " ^ string_of_fkey fk);
+               self#err ("sizesOf not already on disk: " ^ string_of_sumKey fk);
                (fk, Osize.size_w v)
            with Not_found ->
-             self#err ("sizesOf can't find: " ^ string_of_fkey fk);
+             self#err ("sizesOf can't find: " ^ string_of_sumKey fk);
              (fk, 0)
-        ) fkeys
+        ) keys
 
-          
     method sizeInMem () =
       Osize.size_kb summs
 
@@ -673,14 +724,17 @@ module Make (I:Summarizeable) = struct
       initialized <- true
 
     method private initSumBodyless cg =
+      (* For bodyless functions add a default sum w/ wildcard key value *)
       FMap.iter 
         (fun k n ->
-           if (n.Callg.hasBody) then () (* leave a missing entry *)
+           if (n.hasBody) then () (* leave a missing entry *)
            else begin
              (* no def/body for the func *)
-             if not (isFinal k (self#sumTyp)) then begin
-               self#addReplace k I.unknownSummary;
-               setFinal k (self#sumTyp);
+             let fkey = fid_to_fkey k in
+             let key = wildCardkey fkey in
+             if not (isFinal key (self#sumTyp)) then begin
+               self#addReplace key I.unknownSummary;
+               setFinal key (self#sumTyp);
              end
            end
         ) cg
@@ -707,10 +761,10 @@ let getDescriptors (types : sumType list) =
 let registerType (db : 'a base) : unit =
   let db = (db :> dbManagement) in
   if List.exists (fun x -> db#sumTyp = x#sumTyp) !allSumDBs then
-    L.logError ("BS: Attempting to register " ^ 
-                  (string_of_sumType db#sumTyp) ^ " twice -- ignored\n")
+    failwith ("BS: Attempting to register " ^ 
+                (string_of_sumType db#sumTyp) ^ " twice!!\n")
   else begin
-    L.logStatus ("Registered summary type: " ^ (string_of_sumType db#sumTyp));
+    logStatus ("Registered summary type: " ^ (string_of_sumType db#sumTyp));
     allSumDBs := db :: !allSumDBs
   end
 
@@ -727,12 +781,12 @@ let sizeOfAll () =
 
 
 let printSizeOfAll caption =
-  (* TODO: don't print when sizes aren't supposed to be checked? *)
-  let sizeStr = List.fold_left 
-    (fun acc db ->
-       acc ^ " [" ^ string_of_sumType db#sumTyp ^ ":" ^
-         string_of_int (db#sizeInMem ()) ^ "]") "" !allSumDBs in
-  L.logStatus (caption ^ sizeStr)
+  if !Osize.checkSizes then
+    let sizeStr = List.fold_left 
+      (fun acc db ->
+         acc ^ " [" ^ string_of_sumType db#sumTyp ^ ":" ^
+           string_of_int (db#sizeInMem ()) ^ "]") "" !allSumDBs in
+    logStatus (caption ^ sizeStr)
 
 
 (************************************************************
@@ -750,8 +804,8 @@ let pathFieldName = "PATHS"
 (** Choose the given list of summary storage paths for use *)
 let setPaths paths =
   List.iter Filetools.ensurePath paths;
-  L.logStatus "summary database will use:";
-  List.iter (fun p -> L.logStatus ("\t" ^ p)) paths;
+  logStatus "summary database will use:";
+  List.iter (fun p -> logStatus ("\t" ^ p)) paths;
   summPaths := paths
 
 
@@ -765,7 +819,7 @@ let sanitizePaths paths =
     (fun path -> 
        let p = Strutil.strip path in
        if p = "" then begin
-         L.logError "empty path (cwd) given to backed_summaries? pruning";
+         logError "empty path (cwd) given to backed_summaries? pruning";
          false
        end
        else true) paths
@@ -779,8 +833,8 @@ let setPathSettings settings cgDir =
   Config.iter
     (fun fieldName values ->
        let informError () = 
-         L.logError ~prior:0 "Corrupt value in backing store config:";
-         L.logError values;
+         logError ~prior:0 "Corrupt value in backing store config:";
+         logError values;
        in
        try 
          (match fieldName with
@@ -789,7 +843,7 @@ let setPathSettings settings cgDir =
           | _ -> informError ()
          )
        with e -> 
-         L.logError ("init BS settings: " ^ (Printexc.to_string e));
+         logError ("init BS settings: " ^ (Printexc.to_string e));
          informError ();
          raise e
     ) bsSettings;
@@ -803,8 +857,8 @@ let setPathSettings settings cgDir =
     setPaths (makePaths cgDir)
 
 let initASummary settings cg sum =
-  L.logStatus ("Initializing summary " ^ (string_of_sumType sum#sumTyp));
-  L.flushStatus ();
+  logStatus ("Initializing summary " ^ (string_of_sumType sum#sumTyp));
+  flushStatus ();
   sum#cleanup ();
   sum#initSummaries settings cg
 
@@ -817,3 +871,6 @@ let init settings cgDir cg = begin
   setPathSettings settings cgDir;
   initAllSummaries settings cg
 end
+
+
+

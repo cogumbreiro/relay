@@ -38,6 +38,8 @@ sig
 
   (** Return the number of elements in a queue. *)
   val length : t -> int
+
+  val mem : t -> elt -> bool
 end
 
 

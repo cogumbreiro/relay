@@ -43,11 +43,15 @@ let rec rstrip s =
 
 let strip s = rstrip (lstrip s);;
 
-
-
-
 (********************************************)
-(**** More Str Utils added by Jan Voung *****)
+
+(** More str utils (from a difference source and therefore not GPL'ed 
+    like the above...) *)
+
+let prefix p s = 
+  let lp = String.length p in
+  let ls = String.length s in
+  lp <= ls && String.sub s 0 lp = p
 
 
 (**************** String pool ******************)

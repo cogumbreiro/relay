@@ -1,11 +1,9 @@
 open Messages
-open Fstructs
 open Scc_cg
 
-open Warn_reports
-open Race_reports
-
+open Summary_keys
 open Backed_summary
+
 
 (* setup *)
 
@@ -23,11 +21,11 @@ val initServer : unit -> int
 
 val getSCCWork : unit -> message
 
-val sccDone : scc -> (fKey * string) list -> unit
+val sccDone : scc -> (sumKey * string) list -> unit
 
 exception SummariesNotFound
 
-val requestSumm : (fKey * sumType) list -> (fKey * sumType * dbToken) list
+val requestSumm : (sumKey * sumType) list -> (sumKey * sumType * dbToken) list
 
 val requestData : string -> string -> unit
 
@@ -41,5 +39,5 @@ val unlockWarn : root -> root -> unit
 val notifyWarn : #warnReports -> unit
 *)
 
-val notifyRace : raceTable -> unit
+val notifyRace : Race_reports.raceTable -> unit
 

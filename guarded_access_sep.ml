@@ -331,7 +331,8 @@ let iterGuardedAccs foo accs =
     (fun corr ->
        let pseudoAtts = match corr.corrPseudo with 
            None -> PAS.empty | Some pa -> (PAS.singleton pa) in
-       foo (Accs.Locs.singleton corr.corrAccess) corr.corrLocks pseudoAtts
+       foo (Accs.Locs.singleton corr.corrAccess) corr.corrLocks 
+         locUnknown pseudoAtts
     ) accs
          
 let hasPseudo accs =

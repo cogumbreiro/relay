@@ -44,12 +44,8 @@
     Look into using ocamlgraph instead?
 *)
 
-open Callg
-open Fstructs
-open Readcalls
 open Graph
-
-module L = Logging
+open Logging
 
 
 (************************************************************
@@ -272,7 +268,7 @@ module Make (G:Graph) = struct
         let neighInfo = Hashtbl.find numberings neighk in
         if (curNum <> neighInfo.rootNum) then
           let neighSCC = getSCC neighInfo.rootNum in
-          neighSCC.scc_in <- Stdutil.addOnce neighSCC.scc_in curNum
+          neighSCC.scc_in <- List_utils.addOnce neighSCC.scc_in curNum
       with Not_found ->
         ()
     in
@@ -281,20 +277,20 @@ module Make (G:Graph) = struct
       try
         let neighInfo = Hashtbl.find numberings neighk in
         if (curSCC.scc_num <> neighInfo.rootNum) then
-          curSCC.scc_out <- Stdutil.addOnce curSCC.scc_out neighInfo.rootNum
+          curSCC.scc_out <- List_utils.addOnce curSCC.scc_out neighInfo.rootNum
       with Not_found ->
         ()
     in
     
     let addToGraph (k:key) (info:sccInfo) : unit =
       if (info.rootNum == dummyID) then 
-        L.logError "Scc: Node doesn't have an SCC?";
+        logError "Scc: Node doesn't have an SCC?";
       let curSCC = getSCC info.rootNum in
       try
         let curNode = G.getNode graph k in
         let curSuccs = G.listSuccs graph curNode in
         
-        curSCC.scc_nodes <- Stdutil.addOnce curSCC.scc_nodes k;
+        curSCC.scc_nodes <- List_utils.addOnce curSCC.scc_nodes k;
         List.iter (addOutEdge curSCC) curSuccs;
         List.iter (addInEdge curSCC.scc_num) curSuccs; 
       with Not_found ->

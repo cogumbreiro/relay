@@ -1,2 +1,3 @@
+duppy -c lib.c
 duppy -c knot_comb.c
 

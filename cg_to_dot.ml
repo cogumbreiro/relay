@@ -35,13 +35,10 @@
   
 *)
 
-(** 
-    Convert a callgraph to a dot file (for graphviz). Can slice the 
-    call graph in various ways.
-*)
+(** Convert a callgraph to a dot file (for graphviz). Can slice the 
+    call graph in various ways.  *)
 
 open Gc_stats
-open Readcalls
 open Callg
 open Cil
 open Pretty
@@ -81,17 +78,38 @@ let addLowerBound fname =
 let addUpperBound fname =
   upper := fname :: !upper
 
+(** List of callgraph edges (f1 -> f2) that are deemed infeasible *)
+let infeasiblePairs = ref []
+
+(** Expect input to be "i,foo,bar" *)
+let addInfeasiblePair pairStr =
+  let index, f1, f2 = 
+    match Str.split (Str.regexp ",") pairStr with
+      [i; f1; f2] -> 
+        int_of_string (Strutil.strip i), 
+        Strutil.strip f1, Strutil.strip f2
+    | _ -> failwith "Infeasible edges must be of the form: indx,foo1,foo2"
+  in
+  infeasiblePairs := (index, f1, f2) :: !infeasiblePairs
+        
 let sccToShow = ref (-1)
+let sccOnly = ref false
 
 (** Set the ID of scc ([n]) to display *)
 let setSCC (n:int) : unit = 
   sccToShow := n
 
+let setSCCOnly (n:int) : unit = 
+  sccToShow := n;
+  sccOnly := true
+
 (** Only print the shortest path between the L bound and U bound
     (if there's function each) *)
 let shortestPath = ref false
 
-let shortestPathDist = ref (-1)
+let shortestPathBigHisto = ref false
+
+let isContextSens = ref false
 
 (* Command-line argument parsing *)
   
@@ -101,11 +119,16 @@ let argSpecs =
    ("-l", Arg.String addLowerBound, "lowest parts of call graph needed");
    ("-u", Arg.String addUpperBound, "highest parts of call graph needed");
    ("-s", Arg.Int setSCC, "only show the SCC and it's neighbors");
+   ("-sonly", Arg.Int setSCCOnly, "only show the SCC, not including neighbors");
    ("-p", Arg.Set shortestPath, "show the shortest path from U to L");
-   ("-pstat", Arg.Set_int shortestPathDist, 
-    "get common nodes in shortest paths between nodes in scc w/ given id");
-   ("-o", Arg.Set_string outDir, "name of output directory")]
-
+   ("-pstatL", Arg.Set shortestPathBigHisto, 
+    "get common nodes in shortest paths between nodes in largest scc");
+   ("-o", Arg.Set_string outDir, "name of output directory");
+   ("-i", Arg.String addInfeasiblePair, 
+    "add an infeasible call edge: i, f1, f2");
+   ("-con", Arg.Set isContextSens, "callgraph is context-sensitive");
+  ]
+    
 let anonArgFun (arg:string) : unit = 
   ()
 
@@ -119,7 +142,7 @@ let usageMsg = getUsageString "-cg fname -o outdir [options]\n"
 
 (** Initialize function summaries, and watchlist of special 
     functions (e.g., pthread_create) *)
-let initSettings (cg) =
+let initSettings cg =
   try
     let settings = Config.initSettings !configFile in
     DC.makeLCaches (!cgDir);
@@ -131,99 +154,6 @@ let initSettings (cg) =
     (Printexc.to_string e) ; raise e
 
 
-(******************** Utility functions *********************)
-
-
-let sccLabel (scc:scc) =
-  ("scc #" ^ (string_of_int scc.scc_num))
-
-let sccID (scc:scc) = 
-  ("cluster_" ^ (string_of_int scc.scc_num))
-
-let funAttrs (f:simpleCallN) (fkey: fKey) =
-  ("label=\"{" ^ f.name ^ " | " ^ f.defFile ^ " | " ^ (string_of_fkey fkey) ^ 
-     "}\", tooltip=\"" ^ f.typ ^ "\"")
-    
-let funID (f:simpleCallN) (fkey: fKey) = 
-  (f.name ^ "_" ^ (string_of_fkey fkey))
-    
-let edgeColor max cur =
-  let hue = (string_of_float ((float_of_int cur) /. (float_of_int max))) in
-  let sat = (string_of_float ((Random.float 0.25) +. 0.5)) in
-  let v = (string_of_float ((Random.float 0.5) +. 0.5)) in
-  hue ^ ", " ^ sat ^ ", " ^ v
-
-let randomEdgeColor () = 
-  let hue = (string_of_float (Random.float 1.0)) in
-  let sat = (string_of_float ((Random.float 0.25) +. 0.5)) in
-  let v = (string_of_float ((Random.float 0.5) +. 0.5)) in
-  hue ^ ", " ^ sat ^ ", " ^ v
-
-let writeHeader out_chan = 
-  output_string out_chan "digraph callgraph {\n\n";
-  output_string out_chan "\tcompound=\"true\";\n";
-  output_string out_chan "\tranksep=\"1\";\n";
-  output_string out_chan 
-    "\tnode [shape=\"record\", fontname=\"Verdana\"];\n\n";
-  output_string out_chan "\tfontname=\"Verdana\";\n\n"
-  
-  
-let writeTrailer out_chan =
-  output_string out_chan "}\n";
-  output_string out_chan "\n\n";
-  (* Assume this is the end *)
-  flush out_chan;
-  let written = out_channel_length out_chan in
-  L.logStatusF "Bytes written: %d\n" written
-
-let writeEdges out_chan cg fkey =
-  try
-    let fnode = FMap.find fkey cg in
-    let fid = funID fnode fkey in
-    let numCallees = List.length fnode.callees in
-    let _ = List.fold_left 
-      (fun index neighK  ->
-         try
-           let neighNode = FMap.find neighK cg in
-           let neighID = funID neighNode neighK in
-           let color = edgeColor numCallees index in
-           output_string out_chan ("\t" ^ fid ^ " -> " ^ 
-                                     neighID ^ 
-                                     "[color=\"" ^ color ^ "\"];\n");
-           index + 1
-         with Not_found -> 
-           index + 1
-      ) 0 fnode.callees in
-    output_string out_chan "\n"
-  with Not_found ->
-    ()
-
-let writeEdge out_chan cg (k1, n1, k2, n2) =
-  let fid = funID n1 k1 in
-  let sid = funID n2 k2 in
-  let color = randomEdgeColor () in
-  output_string out_chan ("\t" ^ fid ^ " -> " ^ 
-                            sid ^ "[color=\"" ^ color ^ "\"];\n");
-  output_string out_chan "\n"
-
-let writeNodes out_chan cg iterNodes =
-  iterNodes 
-    (fun fkey -> try
-       let fnode = FMap.find fkey cg in
-       let fattrs = funAttrs fnode fkey in
-       let fid = funID fnode fkey in
-       output_string out_chan ("\t\t" ^ fid ^ " [" ^ fattrs ^ "];\n");
-     with Not_found ->
-       ()
-    )
-
-let writeSccHeader out_chan scc = 
-  let sccL = sccLabel scc in
-  let sccID = sccID scc in 
-  output_string out_chan ("\tsubgraph " ^ sccID ^ 
-                            " {\n\t\tlabel = \"" ^ sccL ^ "\";\n");
-  output_string out_chan ("\t\tgraph [bgcolor=\"#cccccc\"];\n")
-  
     
 (** If a relative [fname] is not given (None), pick an appropriate filename
     for the output dot graph file. Return the full path + filename
@@ -249,496 +179,238 @@ let outFile (fname:string option) : string =
 
 (******************** Dump w/ Scc clusterings *********************)
  
+module CGDot = struct
 
-(** Write the chosen sccs *)
-let writeSccs (iterScc : (scc -> unit) -> unit) cg = 
-  let iterNodes scc func = 
-    FSet.iter func scc.scc_nodes 
-  in
-  let doWrite out_chan =
-    let wEdges = writeEdges out_chan cg in
-    let wSccH = writeSccHeader out_chan in
-    
-    (* start *)
-    writeHeader out_chan;
-    
-    (* Write out the scc clustering of nodes *)  
-    iterScc
-      (fun scc ->
-         wSccH scc;
-         writeNodes out_chan cg (iterNodes scc);
-         output_string out_chan ("\t}\n\n");
-      );
-    
-    (* Write out the function call edges *)
-    iterScc
-      (fun scc -> 
-         FSet.iter wEdges scc.scc_nodes
-      );
-    
-    (* Write out the thread creation edges *)
-    
-    (* finish up *)
-    writeTrailer out_chan
-  in
-  open_out_for (outFile None) doWrite
+  open Dot_lib
+
+  (** Write out the entire call graph *)
+  let writeWholeDotFile cg sccCG  =
+    let iterScc = 
+      (fun iterFunc -> IntMap.iter (fun _ scc -> iterFunc scc) sccCG) in
+    open_out_for (outFile None) (writeSccs iterScc cg)
 
 
-(** Write out the entire call graph *)
-let writeWholeDotFile cg sccCG threadCR  =
-  let iterScc = 
-    (fun iterFunc -> IntMap.iter (fun _ scc -> iterFunc scc) sccCG) in
-  writeSccs iterScc cg
-
-
-(** Write out the !sccToShow and neighbors *)
-let writeSCCDotFile cg sccCG threadCR  =
-  (* get the !sccToShow and sccs it calls *)
-  try 
-    let mainSCC = IntMap.find !sccToShow sccCG in
-    let sccs = 
-      IntSet.fold 
-       (fun neighK curList ->
-          try 
-            let neighSCC = IntMap.find neighK sccCG in
-            neighSCC :: curList
-          with Not_found ->
-            curList
-       ) mainSCC.scc_callees [mainSCC] in
-    let iterScc = (fun iterFunc -> List.iter iterFunc sccs) in
-    writeSccs iterScc cg
-  with Not_found ->
-    L.logError ("Can't find scc " ^ (string_of_int !sccToShow))
-
-
-
-(******************** Pruned call graph *********************)
-
-(** Write the chosen nodes and the accompanying edges *)
-let writeNodesWithEdges iterNodes cg =
-  let doWrite out_chan =
-    let wEdges = writeEdges out_chan cg in
-    
-    (* start *)
-    writeHeader out_chan;
-    
-    (* Write out the nodes *)  
-    writeNodes out_chan cg iterNodes;
-    
-    (* Write out the function call edges *)
-    iterNodes wEdges;
-    
-    (* finish up *)
-    writeTrailer out_chan;
-  in
-  open_out_for (outFile None) doWrite
-
-
-(** Write the chosen nodes and chosen edges *)
-let writeNodesEdges iterNodes iterEdges cg =
-  let doWrite out_chan =
-    let wEdge = writeEdge out_chan cg in
-    
-    (* start *)
-    writeHeader out_chan;
-    
-    (* Write out the nodes *)  
-    writeNodes out_chan cg iterNodes;
-    
-    (* Write out the function call edges *)
-    iterEdges wEdge;
-    
-    (* finish up *)
-    writeTrailer out_chan;
-  in
-  open_out_for (outFile None) doWrite
-
-      
-module StringMap = Map.Make (String)
-
-let addKey (fn, ft) cur =
-  try 
-    let old = StringMap.find fn cur in
-    StringMap.add fn ((fn, ft) :: old) cur
-  with Not_found ->
-    StringMap.add fn [(fn, ft)] cur
-    
-let hasKey (fn, ft) cur =
-  try 
-    let bucket = StringMap.find fn cur in
-    List.exists 
-      (fun k ->
-         compareNT (fn, ft) k == 0) bucket
-  with Not_found ->
-    false
-
-let mapsEQ m1 m2 =
-  StringMap.equal              
-    (fun l1 l2 -> 
-       try 
-         List.for_all2 
-           (fun k1 k2 -> 
-              compareNT k1 k2 == 0
-           ) l1 l2
-       with Invalid_argument _ ->
-         false
-    )
-    m1 m2
-
-let toSet m =
-  StringMap.fold 
-    (fun n klist s ->
-       List.fold_left 
-         (fun curSet k ->
-            FSet.add k curSet
-         ) s klist
-    ) m FSet.empty
-    
-(** Find all sources in the [cg] *)
-let findSources cg : FSet.t = 
-  let m = FMap.fold 
-    (fun fkey node cur ->
-       if (List.mem node.name !upper) then
-         FSet.add fkey cur
-       else
-         cur
-    ) cg FSet.empty in
-  m
-
-(** Find all sinks in the [cg] *)
-let findSinks cg : FSet.t = 
-  let m = FMap.fold
-    (fun fkey node cur ->
-       if (List.mem node.name !lower) then
-         FSet.add fkey cur
-       else
-         cur
-    ) cg FSet.empty in
-  m
-
-
-(** Collect the set of functions that reach the [cur] set of functions *)
-let reachesSinks cg (cur : FSet.t) : FSet.t =
-  let rec iterReaches oldSet = 
-    let newSet, mbChanged = FMap.fold 
-      (fun key v (cur, mbChanged) -> 
-         List.fold_left 
-           (fun (cur, mbChanged) calleeK ->
-              if (FSet.mem calleeK cur) then
-                (FSet.add key cur, true)
-              else
-                (cur, mbChanged)
-           ) (cur, mbChanged) v.callees
-      ) cg (oldSet, false) in
-    if (mbChanged && 
-          (not (FSet.equal oldSet newSet))) then
-      iterReaches newSet
-    else
-      newSet
-  in
-  iterReaches cur
-
-
-(** Just write out the graph of functions that can reach the target *)
-let writeLowerBoundedDotFile cg sccCG threadCR =
-  (* Find the needed nodes *)
-  let baseNodes = findSinks cg in
-  let neededNodes = reachesSinks cg baseNodes in
-  let iterNodes = (fun iterFunc -> FSet.iter iterFunc neededNodes) in
-  writeNodesWithEdges iterNodes cg
-
-
-module ESet = Set.Make(
-  struct
-    type t = fKey * simpleCallN * fKey * simpleCallN
-    let compare (k1,_, k1', _) (k2, _, k2', _) =
-      let f = compareFKey k1 k2 in
-      if (f == 0) then
-        compareFKey k1' k2'
-      else
-        f
-  end
-)
-
-(** Find all callpaths in the [cg] between the [sources] and the [sinks] *)
-let findPaths cg sources sinks : (FSet.t * ESet.t) = 
-  let visited = Hashtbl.create 101 in
-  let neededNodes = Hashtbl.create 101 in
-  let neededEdges = Hashtbl.create 101 in
-  let curPath = ref [] in
-  
-  (* Add the current path assuming it ends at lastFunc *)
-  let addAPath lastFunc =
-    let finalPath = 
-      if (FMap.mem lastFunc cg) then
-        lastFunc :: !curPath
-      else
-        !curPath
-    in
-    List.iter 
-      (fun node ->
-         Hashtbl.replace neededNodes node ();
-      ) finalPath;
-    match finalPath with
-      fst :: tl ->
-        let _ = List.fold_left 
-          (fun prev cur ->
-             Hashtbl.replace neededEdges (cur, prev) ();
-             cur
-          ) fst tl in
-        ()
-    | _ ->
-        ()
-  in
-  
-  (* Add any paths from src to any of the sinks *)
-  let rec addPaths src =
-    if (Hashtbl.mem visited src) then
-      if (Hashtbl.mem neededNodes src) then
-        addAPath src (* Add backedges to nodes in found paths? *)
-      else ()
-    else begin
-      Hashtbl.add visited src ();
-      
-      (try
-         let node = FMap.find src cg in
-         curPath := src :: !curPath;
-         List.iter
-           (fun neighK ->
-              if (List.exists (fun k ->
-                                 compareFKey neighK k == 0) sinks) then begin
-                addAPath neighK
-              end
-              else
-                addPaths neighK
-           ) node.callees;
-         curPath := List.tl !curPath;
-       with Not_found ->
-         ()
-      )
-      ;
-      
-    end
-  in
-  (* Add any paths from any of the sources to any of the sinks *)
-  List.iter 
-    (fun src -> 
-       addPaths src) sources;
-  (
-    Hashtbl.fold 
-      (fun k _ curSet ->
-         FSet.add k curSet
-      ) neededNodes FSet.empty,
-    Hashtbl.fold 
-      (fun (k1, k2) _ curSet ->
-         try 
-           let node1 = FMap.find k1 cg in
-           let node2 = FMap.find k2 cg in
-           ESet.add (k1, node1, k2, node2) curSet
-         with Not_found ->
-           curSet
-      ) neededEdges ESet.empty
-  )
-
-
-
-(** Just write out the graph of functions that can reach the target *)
-let writePathsDotFile cg sccCG threadCR  =
-  (* Find the needed nodes *)
-  let sinkNodes = FSet.elements (findSinks cg) in
-  let sourceNodes = FSet.elements (findSources cg) in
-  let (neededNodes, neededEdges) = findPaths cg sourceNodes sinkNodes in
-  let iterNodes = (fun iterFunc ->
-                     FSet.iter iterFunc neededNodes) in
-  let iterEdges = (fun iterFunc ->
-                     ESet.iter iterFunc neededEdges) in
-  writeNodesEdges iterNodes iterEdges cg
-
-
-
-(** Find shortest path in [cg] between the [source] and the [sink],
-    assuming edge weight of 1 throughout (gonna do BFS)... *)
-let findShortestPaths cg source sink : (FSet.t * ESet.t) = 
-  let neededNodes = Hashtbl.create 101 in
-  let neededEdges = Hashtbl.create 101 in
-  let reverseMap = Hashtbl.create 101 in
-  let visited = Hashtbl.create 101 in
-
-  let addReverseEdge back node =
+  (** Write out the !sccToShow and neighbors *)
+  let writeSCCDotFile cg sccCG =
+    (* get the !sccToShow and sccs it calls *)
     try 
-      let cur = Hashtbl.find reverseMap node in
-      Hashtbl.replace reverseMap node (back :: cur)
+      let mainSCC = IntMap.find !sccToShow sccCG in
+      let sccs = 
+        IntSet.fold 
+          (fun neighK curList ->
+             try 
+               let neighSCC = IntMap.find neighK sccCG in
+               neighSCC :: curList
+             with Not_found ->
+               curList
+          ) mainSCC.scc_callees [mainSCC] in
+      let iterScc = (fun iterFunc -> List.iter iterFunc sccs) in
+      open_out_for (outFile None) (writeSccs iterScc cg)
     with Not_found ->
-      Hashtbl.add reverseMap node [back]
-  in
+      L.logError ("Can't find scc " ^ (string_of_int !sccToShow))
 
-  let addOnceReverse back node =
-    if Hashtbl.mem reverseMap node then ()
-    else Hashtbl.add reverseMap node [back]
-  in
-
-  let worklist = Queue.create () in
-  let found = ref false in
-
-  let findPaths () =
-    Hashtbl.clear visited;
-    Queue.add source worklist;
-    
-    while (not (Queue.is_empty worklist) && not !found) do
-      let next = Queue.take worklist in
-      if (Hashtbl.mem visited next) then ()
-      else begin
-        Hashtbl.add visited next ();
-
-        (try
-           let node = FMap.find next cg in
-           List.iter
-             (fun neighK ->
-                if compareFKey neighK sink == 0 then begin
-                  addReverseEdge next neighK;
-                  found := true
-                end
-                else begin
-                  addOnceReverse next neighK; (* others only have one *)
-                  (* queue it up *)
-                  Queue.add neighK worklist;
-                end
-             ) node.callees;
-         with Not_found ->
-           ()
-        );
-      end
-    done;
-  in
-  
-  (* Add found paths *)
-  let rec addFoundPaths key =
-    try
-      if Hashtbl.mem visited key then ()
-      else begin
-        Hashtbl.add visited key ();
-        let backNodes = Hashtbl.find reverseMap key in
-        (* add self... possibly redundant *)
-        Hashtbl.replace neededNodes key ();
-        (* add neighbors *)
-        List.iter 
-          (fun neighK ->
-             Hashtbl.replace neededNodes neighK ();
-             Hashtbl.replace neededEdges (neighK, key) ();
-             addFoundPaths neighK 
-          ) backNodes
-      end
+  (** Write out the !sccToShow and neighbors *)
+  let writeSCCOnlyDotFile cg sccCG =
+    (* get the !sccToShow and sccs it calls *)
+    try 
+      let mainSCC = IntMap.find !sccToShow sccCG in
+      let sccs = [mainSCC] in
+      let iterScc = (fun iterFunc -> List.iter iterFunc sccs) in
+      open_out_for (outFile None) (writeSccs iterScc cg)
     with Not_found ->
-      ()
-  in
-  
-  findPaths ();
-  Hashtbl.clear visited;
-  addFoundPaths sink;
-  
-  (* Convert the paths *)
-  (
-    Hashtbl.fold 
-      (fun k _ curSet ->
-         FSet.add k curSet
-      ) neededNodes FSet.empty,
-    Hashtbl.fold 
-      (fun (k1, k2) _ curSet ->
-         try 
-           let node1 = FMap.find k1 cg in
-           let node2 = FMap.find k2 cg in
-           ESet.add (k1, node1, k2, node2) curSet
-         with Not_found ->
-           curSet
-      ) neededEdges ESet.empty
-  )
+      L.logError ("Can't find scc " ^ (string_of_int !sccToShow))
 
 
-(** Just write out the graph of functions that can reach the target *)
-let writeShortestPath cg sccCG threadCR  =
-  (* Find the needed nodes *)
-  let sinkNodes = FSet.elements (findSinks cg) in
-  let sourceNodes = FSet.elements (findSources cg) in
-  match sinkNodes, sourceNodes with
-    [sink], [source] ->
+
+  (******************** Pruned call graph *********************)
+        
+  (** Find all sources in the [cg] *)
+  let findSources cg : FSet.t = 
+    FMap.fold 
+      (fun fkey node cur ->
+         if (List.mem node.name !upper) then
+           FSet.add fkey cur
+         else
+           cur
+      ) cg FSet.empty
+
+  (** Find all sinks in the [cg] *)
+  let findSinks cg : FSet.t = 
+    FMap.fold
+      (fun fkey node cur ->
+         if (List.mem node.name !lower) then
+           FSet.add fkey cur
+         else
+           cur
+      ) cg FSet.empty
+
+  (** Collect the set of functions that reach the [cur] set of functions *)
+  let reachesSinks cg (cur : FSet.t) : FSet.t =
+    let rec iterReaches oldSet = 
+      let newSet, mbChanged = FMap.fold 
+        (fun key v (cur, mbChanged) -> 
+           List.fold_left 
+             (fun (cur, mbChanged) calleeK ->
+                if (FSet.mem calleeK cur) then
+                  (FSet.add key cur, true)
+                else
+                  (cur, mbChanged)
+             ) (cur, mbChanged) (calleeKeys v)
+        ) cg (oldSet, false) in
+      if (mbChanged && (not (FSet.equal oldSet newSet))) then
+        iterReaches newSet
+      else
+        newSet
+    in
+    iterReaches cur
+
+
+  (** Just write out the graph of functions that can reach the target *)
+  let writeLowerBoundedDotFile cg =
+    (* Find the needed nodes *)
+    let baseNodes = findSinks cg in
+    let neededNodes = reachesSinks cg baseNodes in
+    let iterNodes = (fun iterFunc -> FSet.iter iterFunc neededNodes) in
+    open_out_for (outFile None) (writeNodesWithEdges iterNodes cg)
+
+
+
+  (** Just write out the graph of functions that can reach the target *)
+  let writePathsDotFile cg  =
+    (* Find the needed nodes *)
+    let sinkNodes = FSet.elements (findSinks cg) in
+    let sourceNodes = FSet.elements (findSources cg) in
+    let (neededNodes, neededEdges) = 
+      findPaths cg sourceNodes sinkNodes in
+    let iterNodes = (fun iterFunc ->
+                       FSet.iter iterFunc neededNodes) in
+    let iterEdges = (fun iterFunc ->
+                       ESet.iter iterFunc neededEdges) in
+    open_out_for (outFile None) (writeNodesEdges iterNodes iterEdges cg)
+
+
+  (** Just write out the graph of functions that can reach the target *)
+  let writeShortestPath cg  =
+    let handlePath sink source =
       let (neededNodes, neededEdges) = 
-        findShortestPaths cg source sink in
+        graphShortestPath cg source sink in
       let iterNodes = (fun iterFunc ->
                          FSet.iter iterFunc neededNodes) in
       let iterEdges = (fun iterFunc ->
                          ESet.iter iterFunc neededEdges) in
-      writeNodesEdges iterNodes iterEdges cg
-  | _ -> failwith "non-singular sources/sinks for writeShortestPath"
+      open_out_for (outFile None) (writeNodesEdges iterNodes iterEdges cg)
+    in
+    (* Find the needed nodes *)
+    let sinkNodes = FSet.elements (findSinks cg) in
+    let sourceNodes = FSet.elements (findSources cg) in
+    match sinkNodes, sourceNodes with
+      [sink], [source] ->
+        handlePath sink source
+    | [], _ -> failwith "empty set of sinks"
+    | _, [] -> failwith "empty set of sources"
+    | sink :: _, source :: _  ->
+        Printf.printf "%d sinks, %d srcs, picking the first\n" 
+          (List.length sinkNodes) (List.length sourceNodes);
+        handlePath sink source
 
 
-let getShortestPathStats cg sccCG =
-  (* TODO: use an all-pairs shortest path algo instead... *)
-  L.logStatusF "Printing shortest path stats for scc# %d\n" !shortestPathDist;
-  try
-    let scc = IntMap.find !shortestPathDist sccCG in
-    let nodes = FSet.elements scc.scc_nodes in
-    let dist = Dis.makeDistro () in
-
+  let getShortestPathStats cg sccCG =
+    (* TODO: use an all-pairs shortest path algo instead ?*)
+    L.logStatus "Printing shortest path stats for biggest Scc\n";
+    let nodes = FSet.elements (findBiggestScc sccCG) in
+    let lenDist = Dis.makeDistro () in
+    let funDist = Dis.makeDistro () in
+    
     let len = List.length nodes in
-    let expectedPairs = (len * (len + 1)) / 2 in
+    let expectedPairs = len in (* Only doing A -> A cycles *)
     let pairsDone = ref 0 in
-    let printStatus () = 
+    let printStatus () =
       if !pairsDone mod 100 == 0 then begin
         L.logStatusF "Pairs done: %d / %d\n" !pairsDone expectedPairs;
         L.flushStatus ();
       end
     in
-
-    listIterPairs 
-      (fun fk1 fk2 ->
+    List.iter 
+      (fun fk ->
          printStatus ();
-         let neededNodes, _ = findShortestPaths cg fk1 fk2 in
+         let neededNodes, _ = graphShortestPath cg fk fk in
          FSet.iter 
            (fun pathK ->
-              if pathK == fk1 || pathK == fk2 then ()
-              else 
-                try
-                  let pathN = FMap.find pathK cg in
-                  Dis.updateDistro dist pathN.name
-                with Not_found -> ()
+              try
+                let pathN = FMap.find pathK cg in
+                Dis.updateDistro funDist (pathN.name, pathK)
+              with Not_found -> ()
            ) neededNodes;
+         Dis.updateDistro lenDist (FSet.cardinal neededNodes);
          incr pairsDone
       ) nodes;
-    Dis.printDistroSortFreq dist (fun x -> x) "Common shortest-path nodes"
-  with Not_found ->
-    L.logError "scc not found!" 
+    Dis.printDistroSortFreq funDist 
+      (fun (name, id) -> Printf.sprintf "%s (%s)" name (fid_to_string id)) 
+      "Common shortest-path nodes";
+    Dis.printDistroSortKey lenDist string_of_int "length of shortest self-cyc"
+
+  (*** TODO: find all the chains if indirect -> indirect -> ... *)
+
+
+  (* Use class as first-class interface *)
+  class dotter = object 
+    
+    method writeSCCDotFile cg sccCG = 
+      writeSCCDotFile cg sccCG
+
+    method writeSCCOnlyDotFile cg sccCG = 
+      writeSCCOnlyDotFile cg sccCG
+
+    method getShortestPathStats cg sccCG =
+      getShortestPathStats cg sccCG
+
+    method writeWholeDotFile cg sccCG =
+      writeWholeDotFile cg sccCG
+
+    method writeLowerBoundedDotFile cg =
+      writeLowerBoundedDotFile cg
+
+    method writeShortestPath cg =
+      writeShortestPath cg
+
+    method writePathsDotFile cg =
+      writePathsDotFile cg 
+
+  end
+
+end
 
 (******************* Dispatching ****************)
+
+let doOutputDot dotter cg sccCG =
+  (* TODO: Figure out what the thread spawn edges in the graph looks like *)
+  
+  (* Write dot file depending on what bounds are given *)
+  (if (!sccToShow >= 0) then
+     if (!sccOnly) then
+       dotter#writeSCCOnlyDotFile cg sccCG
+     else 
+       dotter#writeSCCDotFile cg sccCG
+   else if !shortestPathBigHisto then
+     dotter#getShortestPathStats cg sccCG
+   else if (!lower = []) then
+     dotter#writeWholeDotFile cg sccCG
+   else if (!upper = []) then
+     dotter#writeLowerBoundedDotFile cg 
+   else if (!shortestPath) then
+     dotter#writeShortestPath cg 
+   else
+     dotter#writePathsDotFile cg
+  )
 
 
 (** Convert cg, sccs, etc., to a dot graph *)
 let doDot () : unit = begin
-  (* Get Callgraph structures *)
   let cg = readCalls !cgFile in
-  let sccCG = getSCCGraph cg in
+  let sccCG = Scc_cg.getSCCGraph cg in
   initSettings cg;
-  
-  (* TODO: Figure out what the thread spawn edges in the graph looks like *)
-  let threadCreateToRoot = [] in
-  
-  (* Write dot file depending on what bounds are given *)
-  (if (!sccToShow >= 0) then
-     writeSCCDotFile cg sccCG threadCreateToRoot
-   else if (!lower = []) then
-     writeWholeDotFile cg sccCG threadCreateToRoot
-   else if (!upper = []) then
-     writeLowerBoundedDotFile cg sccCG threadCreateToRoot
-   else if (!shortestPath) then
-     writeShortestPath cg sccCG threadCreateToRoot
-   else
-     writePathsDotFile cg sccCG threadCreateToRoot
-  );
-
-  (* Print statistics *)
-  if !shortestPathDist >= 0 then
-    getShortestPathStats cg sccCG
-  ;
-
+  let dotter = new CGDot.dotter in
+  doOutputDot dotter cg sccCG
 end
 
 

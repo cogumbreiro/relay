@@ -35,28 +35,35 @@
   
 *)
 
-
 (** Module to configure the garbage collector and print out the
     garbage collection statistics *)
 
 open Gc
-module L = Logging
+open Logging
+
+let bytes_to_mbs bytes =
+  Int64.div bytes (Int64.of_int (1024 * 1024))
 
 (** Print time/memory usage statistics *)
 let printStatistics () =
-  L.logStatus ("Elapsed time (secs): " ^ 
-                 (string_of_float (Sys.time ())));
+  let bytes_per_word = Sys.word_size / 8 in
+  logStatusF "Elapsed time (secs): %f\n" (Sys.time ());
   let gcStat = quick_stat () in
-  L.logStatus ("Top heap size (words): " ^
-                 (string_of_int gcStat.top_heap_words));
-  L.logStatus ("Current heap size (words): " ^
-                 (string_of_int gcStat.heap_words));
-  L.logStatus ("Lifetime allocated bytes: " ^
-                 (string_of_float (allocated_bytes ())));
-  L.logStatus ("Collections -- minor: " ^ 
-                 (string_of_int gcStat.minor_collections) ^ 
-                 " major: " ^ (string_of_int gcStat.major_collections) ^ 
-                 " compactions: " ^ (string_of_int gcStat.compactions))
+  logStatusF "Top heap size (MB): %Ld\n"
+    (bytes_to_mbs 
+       (Int64.mul
+          (Int64.of_int gcStat.top_heap_words) 
+          (Int64.of_int bytes_per_word)));
+  logStatusF "Current heap size (MB): %Ld\n"
+    (bytes_to_mbs 
+       (Int64.mul
+          (Int64.of_int gcStat.heap_words)
+          (Int64.of_int bytes_per_word)));
+  logStatusF "Lifetime allocated bytes (MB): %Ld\n" 
+    (bytes_to_mbs (Int64.of_float (allocated_bytes ())));
+  logStatusF "Collections -- minor: %d major: %d compactions: %d\n"
+    gcStat.minor_collections gcStat.major_collections gcStat.compactions;
+  logStatusF "Bytes per word: %d\n" bytes_per_word
     
 (** Change GC settings: heap sizes, and such *)
 let setGCConfig () =
@@ -69,7 +76,7 @@ let gc_dumps = ref 0
 
 (** dump the heap to a file for inspection *)
 let dump_heap () =
-  L.logError ("dumping heap: " ^ (string_of_int !gc_dumps));
+  logError ("dumping heap: " ^ (string_of_int !gc_dumps));
   incr gc_dumps;
   Gc.dump_heap ()
 

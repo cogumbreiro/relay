@@ -59,15 +59,14 @@ let err_log = ref elog'
 
 let withTime = ref false
 
+
 (**** Priority/Verbosity levels ****)
 
 (** Only print warning messages up to this priority (lower number is 
     greater priority (so that it maxes at 0)) *)
 let priority = ref 1
-
+let defaultPrior = 0
 let printPriority = ref false
-
-
 
 
 (************************************************************
@@ -115,7 +114,13 @@ let setErrLog dir =
     (* not previously stderr, close previous err_log *)
     close_out !err_log;
     err_log := open_out fileName
-  )    
+  )
+
+(** Set error log to be the same as stat log. Do not change the stat log
+    or error log after this, otherwise the invariant that they are the
+    same won't be maintained + other bad stuff *)
+let combineLogs () =
+  err_log := !stat_log
 
 (** Toggle time-stamps in log messages *)
 let doWithTime b =
@@ -133,7 +138,9 @@ let timestampOut chan =
 (** Prepend output w/ priority level *)
 let priorityOut chan prior =
   if (!printPriority) then
-    Printf.fprintf chan "<%d>" prior
+    Printf.fprintf chan "[Er]: <%d>" prior
+  else 
+    output_string chan "[Er]: " 
 
 (* Internal status logger *)
 let doStatus doer item =
@@ -154,36 +161,39 @@ let flushStatus () : unit =
   flush !stat_log
 
 
-
 (** Writes an error message (along with a timestamp and newline) *)
-let logError ?(prior=0) =
-  if prior <= !priority then
-    (fun s ->
-       priorityOut !err_log prior;
-       timestampOut !err_log;
-       Printf.fprintf !err_log "%s\n" s;
-       flush !err_log
-    )
-  else 
-    ignore (* Too bad arg still get evaluated? *)
-
-(* No logErrorF for now (wait till we migrate to 3.10), 
-   because we need Printf.ifprintf to consume the args in the 
-   case where the priority is not enough *)
+let logError ?(prior=defaultPrior) s =
+  if prior <= !priority then begin
+    priorityOut !err_log prior;
+    timestampOut !err_log;
+    Printf.fprintf !err_log "%s\n" s;
+    flush !err_log
+  end else ()
+    
+(** logErrorF only works on ocaml 3.10+ because we need Printf.ifprintf 
+    to consume the args in the case where the priority is not enough *)
+let logErrorF ?(prior=defaultPrior) (fmt:('a, out_channel, unit) format) : 'a =
+  if prior <= !priority then begin
+    priorityOut !err_log prior;
+    timestampOut !err_log;
+    Printf.fprintf !err_log fmt
+  end else 
+    Printf.ifprintf !err_log fmt
 
 
 (************************************************************
  Higher-level printing
 ************************************************************)  
 
-(**** Write collections to string buffers ****)
+(**** Write collections to buffers ****)
+
+(* Core *)
 
 let seq_to_ sep iter doElem seq add_to target =
   let firstElem = ref true in
   iter (fun elem ->
           if not (!firstElem) then add_to target sep
-          else firstElem := false
-          ;
+          else firstElem := false;
           add_to target (doElem elem);
        ) seq
 
@@ -191,11 +201,37 @@ let map_to_ sep iter doKeyVal map add_to target =
   let firstElem = ref true in
   iter (fun k v ->
           if not (!firstElem) then add_to target sep
-          else firstElem := false
-          ;
+          else firstElem := false;
           add_to target (doKeyVal k v);
        ) map
+
+
+let seq_to_limit limit sep iter doElem seq add_to target =
+  let firstElem = ref true in
+  let numDone = ref 0 in
+  iter (fun elem ->
+          if !numDone < limit then begin
+            incr numDone;
+            if not (!firstElem) then add_to target sep
+            else firstElem := false;
+            add_to target (doElem elem);
+          end
+       ) seq
+
+let map_to_limit limit sep iter doKeyVal map add_to target =
+  let firstElem = ref true in
+  let numDone = ref 0 in
+  iter (fun k v ->
+          if !numDone < limit then begin
+            incr numDone;
+            if not (!firstElem) then add_to target sep
+            else firstElem := false;
+            add_to target (doKeyVal k v);
+          end
+       ) map
     
+(**** String buffs ****)
+
 let seq_to_buf ?(sep=", ") iter doElem seq buff = 
   seq_to_ sep iter doElem seq Buffer.add_string buff
     (* TODO: Hmm, by using Buffer.add_string, we make it so that
@@ -204,9 +240,16 @@ let seq_to_buf ?(sep=", ") iter doElem seq buff =
 let map_to_buf ?(sep=", ") iter doKeyVal map buff =
   map_to_ sep iter doKeyVal map Buffer.add_string buff
 
+let seq_to_buf_limit ?(sep=", ") iter doElem seq buff lim = 
+  seq_to_limit lim sep iter doElem seq Buffer.add_string buff
+    (* TODO: Hmm, by using Buffer.add_string, we make it so that
+       doElem is not recursive, but returns a string representation? *)
+    
+let map_to_buf_limit ?(sep=", ") iter doKeyVal map buff lim =
+  map_to_limit lim sep iter doKeyVal map Buffer.add_string buff
+
 let logStatusB buf =
   doStatus Buffer.output_buffer buf
-
 
 (**** Same as string buffer operations, but for Pretty.doc ****)
 
@@ -227,5 +270,18 @@ let map_to_doc sep iter doElem map doc =
   map_to_ sep iter doElem map concatToRef result;
   !result
 
+let seq_to_doc_limit sep iter doElem seq doc lim =
+  let result = ref doc in
+  seq_to_limit lim sep iter doElem seq concatToRef result; 
+  !result
+
+let map_to_doc_limit sep iter doElem map doc lim =
+  let result = ref doc in
+  map_to_limit lim sep iter doElem map concatToRef result;
+  !result
+
 let logStatusD doc =
   doStatus (Pretty.fprint ~width:80) doc
+
+let logErrorD ?(prior=defaultPrior) doc = 
+  logError ~prior:prior (Pretty.sprint ~width:80 doc)

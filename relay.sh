@@ -34,7 +34,7 @@ function runAnalysis {
     return $?
 }
 
-MAXTRIES=100
+MAXTRIES=1
 TRIES=0
 retval=127
 until [ $retval -eq "0" ]; do

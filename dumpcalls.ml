@@ -46,18 +46,18 @@
 
 
 open Cil
+open Pp_visitor
 open Sys
 open Pretty
 open Filetools
 open Fstructs
 open Callg
-open Stdutil
+open Logging
 
-module CILCG = Mycallgraph
 
-module D = Cildump
-module A = Alias
-module L = Logging
+(************************************************************
+  Options
+************************************************************)
 
 (** The directory in which the call graph file will be stored.
     Must set this before using the module *)
@@ -67,34 +67,55 @@ let setDumpTo (p:string) =
   dumpTo := p
 
 
-(** The file currently being processed *)
-let curFile = ref ""
+(************************************************************
+ DEBUG
+************************************************************)
 
-let setCurFile (f:string) =
-  curFile := f
+(** Filters to debug imprecision in call graph *)
+class type cgFilter = object
+  method filter : fKey list -> fundec -> fKey -> exp  -> fKey list
+end
 
+(** No filter *)
+class noFilter = object
+  method filter (funs: fKey list) (c:fundec) (f: fKey) (e: exp) = funs
+end
+
+let curFilter = ref (new noFilter)
+
+let rec isIndirect callexp =
+  match callexp with
+    CastE(_, e) -> isIndirect e
+  | Lval (Var(_), _)
+  | AddrOf _
+  | StartOf _ -> false
+  | Lval (Mem(e), off) -> true
+  | _ -> failwith "unknown call expression"
+
+(************************************************************
+ Actual dumper
+************************************************************)
 
 (** Replacement for CIL's call graph computer *)
 module CGComp = struct
   
-  class cgComputer = object(self)
-    inherit nopCilVisitor
+  class cgComputer (filter : cgFilter) curFile = object(self)
+    inherit ppVisitor
       
     (* this is the partial (per-file) call graph we are computing;
      * it is created empty when the object is constructed, and will
      * be added-to during the computation *)
-    val mutable graph: simpleCallG = FMap.empty
+    val mutable graph = emptyCG
+    method getGraph = graph
 
     (* the current function we're in, so when we visit a call node
      * we know who is the caller *)
-    val mutable curFunc: (fKey * simpleCallN) option = None
+    val mutable curFunc: (fundec * callN) option = None
       
-    method getGraph = graph
-
     (* given the name of a function, retrieve its callnode; this
      * will create a node if one doesn't already exist *)
-    method getNode ?(hasBod = false) (info:varinfo) : simpleCallN = begin
-      let id = info.vid in
+    method getNode ?(hasBod = false) (info:varinfo) = begin
+      let id = fkey_to_fid info.vid in
       try
         let ret = FMap.find id graph in
         (* possibly update the hasBody field *)
@@ -104,10 +125,10 @@ module CGComp = struct
         (* make a new node *)
         let ret = {
           name = info.vname;
-          typ = D.string_of_ftype info.vtype;
-          callees = [];
-          callers = [];
-          defFile = "TBD"; 
+          typ = Cildump.string_of_ftype info.vtype;
+          ccallees = [];
+          ccallers = [];
+          defFile = curFile; 
           hasBody = hasBod;
         } in
         
@@ -123,38 +144,51 @@ module CGComp = struct
         | [] -> false
         | _ -> true
       in
-      L.logStatus ("entering function " ^  f.svar.vname);
-      curFunc <- (Some (f.svar.vid, self#getNode ~hasBod:hasBod f.svar));
+      logStatus ("entering function " ^  f.svar.vname);
+      curFunc <- (Some (f, self#getNode ~hasBod:hasBod f.svar));
       DoChildren
     end
-        
+
+    method private vidsToInfos ids =
+      List.fold_left 
+        (fun cur id -> Cilinfos.getVarinfo id :: cur) [] ids
+
+    method private handleFuncs callerK caller calleeIDs calleeInfos indir =
+      (* Make sure nodes exist first *)
+      List.iter (fun vi -> let _ = self#getNode vi in ()) calleeInfos;
+
+      (* Make up a context for each function *)
+      let calleeIDs = List.map fkey_to_fid calleeIDs in
+      let calleeIDs = List.sort compareFunID calleeIDs in
+
+      (* then add 'em *)
+      let pp = getCurrentPP () in
+      let calleeToAdd = 
+        if indir then CIndirect (pp, calleeIDs)
+        else CDirect (pp, (match calleeIDs with [x] -> x 
+                           | _ -> failwith "Too many callees"))
+      in  
+      caller.ccallees <- addCallee calleeToAdd caller.ccallees 
+        (* Don't fill in the callers yet *)
+
+
     (* visit an instruction; we're only interested in calls *)
     method vinst (i:instr) : instr list visitAction = begin
-      (match curFunc, i with
-       | Some(callerK, caller),       (* should always be set to something *)
-         Call(_,callexp,_,_) -> 
-           let handleFunc (finfo:varinfo) =
-             (* get the callee's node *)
-             let callee = (self#getNode finfo) in
-             
-             (* add one entry to each node's appropriate list *)
-             caller.callees <- addOnce caller.callees finfo.vid;
-             callee.callers <- addOnce callee.callers callerK;
-           in
-           let funIDs = A.funsForCall callexp in
-           (* Get the fun infos *)
-           let funInfos = List.fold_left
-             (fun cur fid -> 
-                try 
-                  Cilinfos.getVarinfo fid :: cur
-                with Not_found ->
-                  L.logError ("Dumpcalls no varinfo for fid: " ^ 
-                                (string_of_fkey fid));
-                  cur
-             ) [] funIDs in
-           List.iter handleFunc funInfos
+      self#setInstrPP i;
+      let caller, callerN = match curFunc with 
+          Some(x) -> x
+        | None -> failwith "caller not set?" in
+      let callerK = caller.svar.vid in
+      (match i with
+         Call(_,callexp,_,loc) -> 
+           let funIDs = Alias.funsForCall callexp in
+           let funIDs = filter#filter funIDs caller callerK callexp in
+           let isIndir = isIndirect callexp in
+           self#handleFuncs callerK callerN funIDs 
+             (self#vidsToInfos funIDs) isIndir
        | _ -> ()   (* ignore other kinds instructions *)
-      ); 
+      );
+      self#bumpInstr 1;
       DoChildren
     end
       
@@ -163,74 +197,34 @@ module CGComp = struct
     
   (** Compute the graph for this file. 
       ASSUMES the Alias module has been initialized *)
-  let computeGraph (f:file) : simpleCallG =
+  let computeGraph (f:file) filter curFile =
     begin
-      let obj:cgComputer = (new cgComputer) in
-      
+      let obj:cgComputer = (new cgComputer filter) curFile in
       (* visit the whole file, computing the graph *)
       (visitCilFileSameGlobals (obj :> cilVisitor) f);
-
       obj#getGraph
     end      
       
 end
 
 
-(** Write a function's callgraph info to the outFile
-    The format is "curfile $ fname : ftype_string : id $ 
-    succName1 : succType1 : succID1 $ succName2, ...\n"
-*)
-let writeFuncCalls (cg:simpleCallG) (outFile:out_channel) 
-    (curKey:fKey) (curNode:simpleCallN) =
-
-  let writeNode key node =
-    output_string outFile 
-      (topDelim ^ node.name ^ 
-         delim ^ node.typ ^
-         delim ^ (string_of_int key))
-  in
-  
-  let writeSucc succID =
-    try 
-      let succNode = FMap.find succID cg in
-      writeNode succID succNode
-    with Not_found ->
-      L.logError ("Dumpcalls: No info for callee? " ^ (string_of_fkey succID))
-  in
-
-  begin
-    (* only write it if we have the body *)
-    if (curNode.hasBody) then
-      begin
-        (* File that has function definition *)
-        output_string outFile !curFile;
-
-        (* Function name w/ signature *)
-        writeNode curKey curNode;
-        
-        (* Successor names and sigs *)
-        List.iter writeSucc curNode.callees;
-        output_string outFile "\n";
-      end
-  end
-
 (** Figure out which file to use to store the call graph *)
 let getCallsFile baseDir =
-  let ext = A.identifyFPA () in
+  let ext = Alias.identifyFPA () in
   let cgFile = Filename.concat baseDir ("calls." ^ ext) in 
   cgFile
 
+
 (** Dumps (appends) the call graph using all functions in the file *)
 let dumpCalls (f:file) (fname:string) =
-  setCurFile fname;
   let cgFile = getCallsFile !dumpTo in
   let outFile = (open_out_gen 
                    [Open_creat; Open_wronly; Open_append]
                    0o644 
                    cgFile) in
   try
-    let callG = CGComp.computeGraph f in
-    FMap.iter (writeFuncCalls callG outFile) callG;
+    let callG = CGComp.computeGraph f (!curFilter) fname in
+    writeSomeCalls outFile callG;
     close_out outFile;
   with e -> 
     Printf.printf "Exc. in dumpCalls: %s\n" (Printexc.to_string e); 

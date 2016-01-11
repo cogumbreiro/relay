@@ -137,7 +137,7 @@ let isConst e =
 let makeNullExp () =
   Lv.CConst (CStr "$SSBOT")
 
-let nullVar = Lv.mkVarinfo true "$NULL" (TVoid [])
+let nullVar = CLv.mkVarinfo true "$NULL" (TVoid [])
 
 let nullAddr =
   { saHost = Lv.CMem (Lv.mkLval 

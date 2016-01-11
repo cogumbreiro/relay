@@ -77,6 +77,10 @@ options:
   --sfile=xxx  A system-include file to be patched (treated as \#include <xxx>)
  
   --clean       Remove all files in the destination directory
+  --skipmissing Skip patches for files whose original cannot be found
+  --stdoutpp    For MSVC only, use the "preprocess to stdout" mode. This 
+                is for some versions of MSVC that do not support 
+                well the /P file
   --dumpversion Print the version name used for the current compiler
 
  All of the other arguments are passed to the preprocessor.
@@ -99,6 +103,8 @@ my %option;
      "--patch=s@",         # Patch files
      "--ufile=s@",         # User include files
      "--sfile=s@",         # System include files
+     "--stdoutpp",        # pp to stdout
+     "--skipmissing",
      "--dumpversion",
      "--clean",
      );
@@ -236,10 +242,10 @@ sub lineDirective {
     if($::iswin32) {
         $fileName =~ s|\\|/|g;
     }
-    if($option{mode} eq "MSVC") {
+    if($option{mode} eq "GNUCC" || $option{mode} eq "MSVC") {
         return "#line $lineno \"$fileName\"\n";
     }
-    if($option{mode} eq "GNUCC" || $option{mode} eq "EDG") {
+    if($option{mode} eq "EDG") {
         return "# $lineno \"$fileName\"\n";
     }
     die "lineDirective: invalid mode";
@@ -265,7 +271,11 @@ sub patchOneFile {
 	    $preproccmd .= " 2>/dev/null";
 	}
     } elsif($option{mode} eq "MSVC") {
-        $preproccmd = "cl /nologo /P $ppargs $preprocfile.c";
+        if($option{stdoutpp}) {
+            $preproccmd = "cl /nologo /E $ppargs >$preprocfile.i";
+        } else {
+            $preproccmd = "cl /nologo /P $ppargs $preprocfile.c";
+        }
     } else { die "Invalid --mode"; }
 
     if(system($preproccmd) && $option{mode} eq "MSVC" ) {
@@ -283,11 +293,26 @@ sub patchOneFile {
         }
     }
     close(PPOUT);
-    if($absname eq "") {
-        die "Cannot find the absolute name of $fname1 in $preprocfile.i\n";
-    }
     unlink "$preprocfile.c";
     unlink "$preprocfile.i";
+
+    # Did we find the original file?
+    if($absname eq "") {
+        if($option{skipmissing}) {
+            # Skip this file, mkaing all relevant patches optional
+            print "   Original header file not found; skipping...\n";
+            foreach my $patch (@patches) {
+                my $infile = $patch->{FLAGS}->{file};
+                if(defined $infile && $fname =~ m|$infile$|) {
+                    $patch->{FLAGS}->{optional} = 1;
+                }
+            }
+            return;
+        } else {
+            die "Cannot find the absolute name of $fname1 in $preprocfile.i\n";
+        }
+    }
+
     # If we fail then maybe we are using cygwin paths in a Win32 system
     if($option{mode} eq "GNUCC" && $::iswin32) {
         open(WINNAME, "cygpath -w $absname|")

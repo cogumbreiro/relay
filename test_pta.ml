@@ -38,11 +38,9 @@
 (** Test the pta (post-compile phase) *)
 
 open Gc_stats
-open Readcalls
 open Cil
 open Pretty
 open Fstructs
-open Stdutil
 open Cilfiles
 
 module PTA_Steens = Pta_fi_eq
@@ -89,7 +87,7 @@ let anonArgFun (arg:string) : unit =
 let setRecurseLimit n =
   PLT.CheckAnders.setLimit n
 
-let usageMsg = getUsageString "-cg dirname [options]\n"
+let usageMsg = Stdutil.getUsageString "-cg dirname [options]\n"
   
 let rec argSpecs = 
   [("-cg", Arg.Set_string cgDir, "name of call graph directory");
@@ -107,6 +105,7 @@ let rec argSpecs =
    ("-o", Arg.Set_string PLT.outDir, "write output of why XYZ to given dir");
    ("-wb", Arg.Set_string whyBulk, "answer a batch of queries from file");
    ("-lim", Arg.Int setRecurseLimit, "limit recursive explaination");
+   ("-time", Arg.Set Mystats.doTime, "time execution");
   ]
 
 and parseLvPair lvpair =
@@ -120,11 +119,11 @@ and parseLvPair lvpair =
         
 and whyAliased lvpair =
   let pair = parseLvPair lvpair in
-  inspectAlias := addOnce !inspectAlias pair
+  inspectAlias := List_utils.addOnce !inspectAlias pair
 
 and whyPoints lvpair =
   let pair = parseLvPair lvpair in
-  inspectPtsTo := addOnce !inspectPtsTo pair
+  inspectPtsTo := List_utils.addOnce !inspectPtsTo pair
 
 
 (***************************************************)
@@ -177,28 +176,30 @@ let testAnders () =
     if (!inspectAlias <> [] 
         || !inspectPtsTo <> []
         || !whyBulk <> "") then begin
-      printHeaderDoAnalysis "Anders-Test" PLT.CheckAnders.analyzeAll;
+      printHeaderDoAnalysis "Anders-Test" PLT.CheckAndersShortest.analyzeAll;
 
-      if !printResults then
+      if !printResults then begin
+        L.logStatus "Dumping solver state";
         PTA_Ander.DebugSolver.printPtsToSets () 
           (* TODO: this is still not the same solver in above analyzeAll... *)
-      ;
+      end;
 
-      PLT.CheckAnders.resetStats ();
-      List.iter PLT.CheckAnders.whyAliased !inspectAlias;
-      List.iter PLT.CheckAnders.whyPointsTo !inspectPtsTo;
-      PLT.CheckAnders.printStats ();
+      PLT.CheckAndersShortest.resetStats ();
+      List.iter PLT.CheckAndersShortest.whyAliased !inspectAlias;
+      List.iter PLT.CheckAndersShortest.whyPointsTo !inspectPtsTo;
+      PLT.CheckAndersShortest.printStats ();
 
-      PLT.BulkAnders.bulkQuery !whyBulk;
+      PLT.BulkAnders2.bulkQuery !whyBulk;
 
     end
     else begin
 
       printHeaderDoAnalysis "Andersen" PTA_Ander.analyzeAll;
 
-      if (!printResults) then
+      if (!printResults) then begin
+        L.logStatus "Dumping final state";
         PTA_Ander.DebugFinal.printPtsToSets ()
-      ;
+      end;
 
       if (!printFP) then begin
         let tester = new PTFP.fpTestDriver 
@@ -240,17 +241,18 @@ let main () =
       end
     else
       begin
+        Stdutil.printCmdline ();
         init ();
         if (!printVars) then
-          Pta_compile.printVarIDs !cgDir
+          Pta_shared.printVarIDs !cgDir
         ;
 
         if (!printFTypes) then
-          Pta_compile.printFunTypes ()
+          Pta_shared.printFunTypes !cgDir
         ;
 
         if (!printConstraints) then
-          Pta_compile.printConstraints !cgDir
+          Pta_shared.printConstraints !cgDir
         ;
         
         testSteens ();

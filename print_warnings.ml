@@ -40,11 +40,9 @@
     and the server is up *)
 
 open Gc_stats
-open Readcalls
 open Cil
 open Pretty
 open Fstructs
-open Scc_cg
 open Stdutil
 open Cilfiles
 open Cilinfos
@@ -107,7 +105,7 @@ let initSettings () =
 
     (* Get Callgraph structures after initializing alias analysis *)
     let cgFile = Dumpcalls.getCallsFile !cgDir in
-    let cg = readCalls cgFile in
+    let cg = Callg.readCalls cgFile in
 
     let () = BS.init settings !cgDir cg in
     let _ = FS.init settings in (* ignore thread created *)

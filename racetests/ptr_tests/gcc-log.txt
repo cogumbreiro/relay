@@ -1,4 +1,1 @@
-duppy -c ptrtest.c -o ptrtest.o
-duppy -c lock.c -o lock.o
-duppy -c uselock.c -o uselock.o
-duppy ptrtest.o lock.o uselock.o -o uselock
+duppy -c test_comb.c

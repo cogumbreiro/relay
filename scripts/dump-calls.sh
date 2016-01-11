@@ -3,11 +3,11 @@
 # Dumps the call graph, and cil ASTs to the DUMPROOT specified below
 # Reads the information from "gcc-log"
 # Requires the "duppy" script
-# Remember to change CILLYROOT, DUPPYROOT, etc.
+# Remember to change RELAYROOT
 
 CURROOT=$PWD
 DUMPROOT=$PWD/ciltrees
-RELAYROOT=/home/jan/research/relay
+RELAYROOT=/home/jan/research/relay-race
 DUPPYROOT=$RELAYROOT/scripts
 CILLYROOT=$RELAYROOT/cil/bin
 LOG=$DUMPROOT/log.txt
@@ -23,6 +23,7 @@ mkdir -p $DUMPROOT
 export CURROOT
 export DUMPROOT
 export CILLYROOT
+export RELAYROOT
 SKIP_AFTERCIL=1
 export SKIP_AFTERCIL
 
@@ -41,12 +42,14 @@ duppy ()
 
 STARTTIME=$(date +%s)
 
-(. $CMDS) > /dev/null #| tee $LOG 2>&1
+(. $CMDS) 2>&1 | tee $LOG
 
 # fix variable / struct ids + dump the call graph
 
+cd $RELAYROOT; ./fix_id_cg.exe -cg $DUMPROOT >> $LOG 2>&1
+# hard-coding the calls file...
+cd $RELAYROOT; ./scc_stats.exe -cg $DUMPROOT/calls.steens >> $LOG 2>&1
 
-cd $RELAYROOT; ./fix_id_cg.exe -cg $DUMPROOT
 
 ENDTIME=$(date +%s)
 

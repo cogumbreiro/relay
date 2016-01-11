@@ -1,0 +1,121 @@
+OLD NOTES on different types of locks and lock functions:
+---------------------------------------------------------
+
+types:
+
+spinlock_t
+rwlock_t
+raw_spinlock_t
+raw_rwlock_t
+seqlock_t (has a spinlock_t in it...)
+struct rw_semaphore
+struct sem
+struct semaphore
+
+
+wrapper types:
+
+<from xfs>
+mutex_t 
+sema_t 
+mrlock_t
+lock_t
+
+
+Just need to know the type name???
+Encode r/w lock types?
+
+
+-----------------------------------------------------------
+
+functions:
+
+down_trylock
+read_trylock
+write_trylock
+down
+up
+sema_init
+down_read
+down_write
+down_read_trylock
+down_write_trylock
+downgrade_write
+write_seqlock
+write_sequnlock
+write_tryseqlock //see include/linux/seqlock.h?
+void bit_spin_lock(int bitnum, unsigned long *addr) //not even a lock struct?
+     //see include/linux/bit_spinlock.h
+
+
+
+#defines... how to handle these inlined functions? 
+Re-write them manually.
+
+
+#define spin_lock(lock) \
+do { \
+       preempt_disable(); \
+       if (unlikely(!_raw_spin_trylock(lock))) \
+               __preempt_spin_lock(lock); \
+} while (0)
+
+
+
+
+wrappers functions:
+
+<from xfs>
+mutex_trylock 
+mutex_lock
+mutex_init
+mutex_destroy (does sema_init(sem, -99))
+xfs_qm_dqflock_nowait
+xfs_qm_dqlock_nowait
+xfs_qm_freelist_lock_nowait
+xfs_qm_mplist_nowait
+xfs_qm_dqhashlock_nowait
+xfs_dqunlock_nonotify
+xfs_ilock
+xfs_iunlock
+cpsema (like trylock)
+psema
+vsema
+
+
+
+
+Need to have a summary for these functions. Format summaries like Saturn:
+
+
+S         := name $ TypeSig $ Effects
+TypeSig   := type ( ArgList )
+ArgList   := type ArgL                          (* if empty, say void *)
+ArgL      := , type ArgL | ... | \e
+Effects   := no-op | SumL 
+SumL      := IfaceType name [ TransList ] SumL | \e
+IfaceType := global | param#num | retval
+TransList := Trans Guard TransL 
+TransL    := , Trans Guard TransL | \e
+Trans     := State -> State | no-op
+Guard     := [0] | [1] | \e               (* return value is 0 or non-zero *)
+State     := unlocked | locked | new ?
+
+Any point in making it more flexible like the PREFix LISP-like models?
+(constraint resource_state *stream (FILE open))
+Not checking double-locking errors?
+
+
+---------------------------------------------
+
+other funcs to investigate:
+
+cli, sti, save_flags, restore_flags, local_irq_disable, local_irq_enable
+replaced by
+spin_lock_irqsave, spin_lock_irqrestore in 2.6.xx
+
+---------------------------------------------
+
+
+Mock up pseudo-code / interfaces for different modules 
+like flow-insensitive alias analysis, function summaries, etc...

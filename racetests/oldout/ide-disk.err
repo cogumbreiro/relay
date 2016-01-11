@@ -1,154 +1,394 @@
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-Checkpoint: No left-over status file
-Multiple lock summaries for 5
-Multiple lock summaries for 36
-makeSimpleLock: Couldn't find global kernel_sem
-makeSimpleLock: Couldn't find global kernel_flag
-Multiple lock summaries for 35
-SH: not target for thread formal arg
-Checkpoint: No left-over status file
-substActForm returned 0 results for: drive->wcache#f0:304
-substExp: trimming ptrArith offset
-substExp encountered unknown exp: n << 9
-substExp: trimming ptrArith offset
-substExp encountered unknown exp: n << 9
-substExp: trimming ptrArith offset
-substExp encountered unknown exp: n << 9
-substExp: trimming ptrArith offset
-substExp encountered unknown exp: n << 9
-substActForm returned 0 results for: drive->addressing#f0:301
-substActForm returned 0 results for: drive->bios_cyl#f0:301
-substActForm returned 0 results for: drive->bios_head#f0:301
-substActForm returned 0 results for: drive->bios_sect#f0:301
-substActForm returned 0 results for: drive->capacity64#f0:301
-substActForm returned 0 results for: drive->doorlocking#f0:301
-substActForm returned 0 results for: drive->no_io_32bit#f0:301
-substActForm returned 0 results for: drive->select.b.lba#f0:301
-substActForm returned 0 results for: drive->wcache#f0:301
-substActForm returned 0 results for: drive->addressing#f0:301
-substActForm returned 0 results for: drive->bios_cyl#f0:301
-substActForm returned 0 results for: drive->bios_head#f0:301
-substActForm returned 0 results for: drive->bios_sect#f0:301
-substActForm returned 0 results for: drive->capacity64#f0:301
-substActForm returned 0 results for: drive->ctl#f0:301
-substActForm returned 0 results for: drive->cyl#f0:301
-substActForm returned 0 results for: drive->forced_geom#f0:301
-substActForm returned 0 results for: drive->head#f0:301
-substActForm returned 0 results for: drive->hwif#f0:301
-substActForm returned 0 results for: drive->id#f0:301
-substActForm returned 0 results for: drive->id_read#f0:301
-substActForm returned 0 results for: drive->is_flash#f0:301
-substActForm returned 0 results for: drive->queue#f0:301
-substActForm returned 0 results for: drive->removable#f0:301
-substActForm returned 0 results for: drive->sect#f0:301
-substActForm returned 0 results for: drive->sect0#f0:301
-substActForm returned 0 results for: drive->using_dma#f0:301
-substActForm returned 0 results for: drive->capacity64#f0:172
-substActForm returned 0 results for: drive->sect0#f0:172
-substLval: offset mismatch ide_drive_s.attach(227) on device(38) 2
-substActForm unsubstitutable arg: & dev formal: dev->attach
-substLval: offset mismatch ide_drive_s.head(227) on device(38) 2
-substActForm unsubstitutable arg: & dev formal: dev->head
-substLval: offset mismatch ide_drive_s.hwif(227) on device(38) 2
-substActForm unsubstitutable arg: & dev formal: dev->hwif
-substLval: offset mismatch ide_drive_s.media(227) on device(38) 2
-substActForm unsubstitutable arg: & dev formal: dev->media
-substLval: offset mismatch ide_drive_s.present(227) on device(38) 2
-substActForm unsubstitutable arg: & dev formal: dev->present
-substLval: offset mismatch ide_drive_s.removable(227) on device(38) 2
-substActForm unsubstitutable arg: & dev formal: dev->removable
-substLval: offset mismatch ide_drive_s.select(227) on device(38) 2
-substActForm unsubstitutable arg: & dev formal: dev->select.b.lba
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-SS handleInstr: res_funptr returned 0 fun(s)
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->dma_setup))
-post: funptr resolved to 0 fun(s): (*(hwif->dma_exec_cmd))
-post: funptr resolved to 0 fun(s): (*(hwif->dma_start))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-post: funptr resolved to 0 fun(s): (*(hwif->dma_setup))
-post: funptr resolved to 0 fun(s): (*(hwif->dma_exec_cmd))
-post: funptr resolved to 0 fun(s): (*(hwif->dma_start))
-post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
-SS handleInstr: res_funptr returned 0 fun(s)
-post: funptr resolved to 0 fun(s): (*(hwif->rw_disk))
-post: funptr resolved to 0 fun(s): (*(hwif->rw_disk))
-SS handleInstr: res_funptr returned 0 fun(s)
-post: funptr resolved to 0 fun(s): (*((dev->bus)->suspend))
-substActForm returned 0 results for: drive->wcache#f0:304
-post: funptr resolved to 0 fun(s): (*((dev->bus)->suspend))
+[Er]: Checkpoint: No left-over status file
+[Er]: Checkpoint: No left-over status file
+[Er]: Checkpoint: No left-over status file
+[Er]: Multiple lock summaries for 648.f
+[Er]: Multiple lock summaries for 2786.f
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for 638.f
+[Er]: Multiple lock summaries for 642.f
+[Er]: Multiple lock summaries for 626.f
+[Er]: Multiple lock summaries for 635.f
+[Er]: Multiple lock summaries for 651.f
+[Er]: Multiple lock summaries for 2783.f
+[Er]: regenNodeinfo l:5302:arg
+[Er]: nodeInfo not found for: l:5302:arg
+[Er]: nodeInfo not found for: l:5302:arg
+[Er]: nodeInfo not found for: l:5302:arg
+[Er]: Checkpoint: No left-over status file
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: SS call: *((desc->handler)->disable) returned 0 fun(s)
+[Er]: SS call: *((desc->handler)->set_affinity) returned 0 fun(s)
+[Er]: SS call: *((desc->handler)->enable) returned 0 fun(s)
+[Er]: call: *((desc->handler)->disable) returned 0 fun(s)
+[Er]: call: *((desc->handler)->set_affinity) returned 0 fun(s)
+[Er]: call: *((desc->handler)->enable) returned 0 fun(s)
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: eval: unop can't const-fold: ~ ((unsigned long )gendiskp->dkstats)
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: eval: unop can't const-fold: ~ ((unsigned long )gendiskp->dkstats)
+[Er]: eval bin op, operands are non-Vval
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: n << 9
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: n << 9
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: n << 9
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: n << 9
+[Er]: substLval: offset mismatch ide_drive_s.attach(514) on device(148) 2
+[Er]: substLval: offset mismatch ide_drive_s.head(514) on device(148) 2
+[Er]: substLval: offset mismatch ide_drive_s.hwif(514) on device(148) 2
+[Er]: substLval: offset mismatch ide_drive_s.media(514) on device(148) 2
+[Er]: substLval: offset mismatch ide_drive_s.present(514) on device(148) 2
+[Er]: substLval: offset mismatch ide_drive_s.removable(514) on device(148) 2
+[Er]: substLval: offset mismatch ide_drive_s.select(514) on device(148) 2
+[Er]: regenNodeinfo l:683:sl
+[Er]: nodeInfo not found for: l:683:sl
+[Er]: nodeInfo not found for: l:683:sl
+[Er]: nodeInfo not found for: l:683:sl
+[Er]: eval bin op, operands are non-Vval
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned long )address - 3221225472UL
+[Er]: substLval: local variable value stayed in summary?
+[Er]: SS call: *((sb->s_op)->read_inode) returned 0 fun(s)
+[Er]: call: *((sb->s_op)->read_inode) returned 0 fun(s)
+[Er]: regenNodeinfo l:1809:zone
+[Er]: nodeInfo not found for: l:1809:zone
+[Er]: nodeInfo not found for: l:1809:zone
+[Er]: nodeInfo not found for: l:1809:zone
+[Er]: eval bin op, operands are non-Vval
+[Er]: substLval: local variable value stayed in summary?
+[Er]: regenNodeinfo l:1807:zone
+[Er]: nodeInfo not found for: l:1807:zone
+[Er]: nodeInfo not found for: l:1807:zone
+[Er]: nodeInfo not found for: l:1807:zone
+[Er]: eval bin op, operands are non-Vval
+[Er]: SS call: *((dev->bus)->suspend) returned 0 fun(s)
+[Er]: call: *((dev->bus)->suspend) returned 0 fun(s)
+[Er]: substLval: local variable value stayed in summary?
+[Er]: regenNodeinfo l:2361:node
+[Er]: nodeInfo not found for: l:2361:node
+[Er]: nodeInfo not found for: l:2361:node
+[Er]: nodeInfo not found for: l:2361:node
+[Er]: eval bin op, operands are non-Vval
+[Er]: regenNodeinfo l:2359:node
+[Er]: nodeInfo not found for: l:2359:node
+[Er]: nodeInfo not found for: l:2359:node
+[Er]: nodeInfo not found for: l:2359:node
+[Er]: eval bin op, operands are non-Vval
+[Er]: regenNodeinfo l:2357:node
+[Er]: nodeInfo not found for: l:2357:node
+[Er]: nodeInfo not found for: l:2357:node
+[Er]: nodeInfo not found for: l:2357:node
+[Er]: eval bin op, operands are non-Vval
+[Er]: substLval: local variable value stayed in summary?
+[Er]: substLval: local variable c stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (vma->vm_end - vma->vm_start) >> 12
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (vma->vm_end - vma->vm_start) >> 12
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: mod->state != 2U
+[Er]: substLval: local variable value stayed in summary?
+[Er]: regenNodeinfo l:1744:set
+[Er]: nodeInfo not found for: l:1744:set
+[Er]: nodeInfo not found for: l:1744:set
+[Er]: nodeInfo not found for: l:1744:set
+[Er]: regenNodeinfo l:1741:set
+[Er]: nodeInfo not found for: l:1741:set
+[Er]: nodeInfo not found for: l:1741:set
+[Er]: nodeInfo not found for: l:1741:set
+[Er]: substLval: local variable value stayed in summary?
+[Er]: regenNodeinfo l:1738:set
+[Er]: nodeInfo not found for: l:1738:set
+[Er]: nodeInfo not found for: l:1738:set
+[Er]: nodeInfo not found for: l:1738:set
+[Er]: regenNodeinfo l:1728:r
+[Er]: nodeInfo not found for: l:1728:r
+[Er]: nodeInfo not found for: l:1728:r
+[Er]: nodeInfo not found for: l:1728:r
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: regenNodeinfo l:4585:strat
+[Er]: nodeInfo not found for: l:4585:strat
+[Er]: nodeInfo not found for: l:4585:strat
+[Er]: nodeInfo not found for: l:4585:strat
+[Er]: regenNodeinfo l:4586:strategy_parameter
+[Er]: nodeInfo not found for: l:4586:strategy_parameter
+[Er]: nodeInfo not found for: l:4586:strategy_parameter
+[Er]: nodeInfo not found for: l:4586:strategy_parameter
+[Er]: regenNodeinfo l:1716:r
+[Er]: nodeInfo not found for: l:1716:r
+[Er]: nodeInfo not found for: l:1716:r
+[Er]: nodeInfo not found for: l:1716:r
+[Er]: regenNodeinfo l:1704:r
+[Er]: nodeInfo not found for: l:1704:r
+[Er]: nodeInfo not found for: l:1704:r
+[Er]: nodeInfo not found for: l:1704:r
+[Er]: regenNodeinfo l:3415:pud
+[Er]: nodeInfo not found for: l:3415:pud
+[Er]: nodeInfo not found for: l:3415:pud
+[Er]: nodeInfo not found for: l:3415:pud
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:1680:set
+[Er]: nodeInfo not found for: l:1680:set
+[Er]: nodeInfo not found for: l:1680:set
+[Er]: nodeInfo not found for: l:1680:set
+[Er]: regenNodeinfo l:5141:eof
+[Er]: nodeInfo not found for: l:5141:eof
+[Er]: nodeInfo not found for: l:5141:eof
+[Er]: nodeInfo not found for: l:5141:eof
+[Er]: SS call: *func returned 0 fun(s)
+[Er]: call: *func returned 0 fun(s)
+[Er]: regenNodeinfo l:5126:eof
+[Er]: nodeInfo not found for: l:5126:eof
+[Er]: nodeInfo not found for: l:5126:eof
+[Er]: nodeInfo not found for: l:5126:eof
+[Er]: regenNodeinfo l:5111:eof
+[Er]: nodeInfo not found for: l:5111:eof
+[Er]: nodeInfo not found for: l:5111:eof
+[Er]: nodeInfo not found for: l:5111:eof
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: x >> 24
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:5101:eof
+[Er]: nodeInfo not found for: l:5101:eof
+[Er]: nodeInfo not found for: l:5101:eof
+[Er]: nodeInfo not found for: l:5101:eof
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: regenNodeinfo l:3354:page
+[Er]: nodeInfo not found for: l:3354:page
+[Er]: nodeInfo not found for: l:3354:page
+[Er]: nodeInfo not found for: l:3354:page
+[Er]: regenNodeinfo l:3927:task
+[Er]: nodeInfo not found for: l:3927:task
+[Er]: nodeInfo not found for: l:3927:task
+[Er]: nodeInfo not found for: l:3927:task
+[Er]: regenNodeinfo l:3350:page
+[Er]: nodeInfo not found for: l:3350:page
+[Er]: nodeInfo not found for: l:3350:page
+[Er]: nodeInfo not found for: l:3350:page
+[Er]: regenNodeinfo l:3342:page
+[Er]: nodeInfo not found for: l:3342:page
+[Er]: nodeInfo not found for: l:3342:page
+[Er]: nodeInfo not found for: l:3342:page
+[Er]: eval bin op, operands are non-Vval
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: p->flags & 16384UL
+[Er]: SS call: *(bdi->congested_fn) returned 0 fun(s)
+[Er]: call: *(bdi->congested_fn) returned 0 fun(s)
+[Er]: regenNodeinfo l:2185:p
+[Er]: nodeInfo not found for: l:2185:p
+[Er]: nodeInfo not found for: l:2185:p
+[Er]: nodeInfo not found for: l:2185:p
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: p->flags & 65536UL
+[Er]: regenNodeinfo l:2180:p
+[Er]: nodeInfo not found for: l:2180:p
+[Er]: nodeInfo not found for: l:2180:p
+[Er]: nodeInfo not found for: l:2180:p
+[Er]: regenNodeinfo l:2731:inode
+[Er]: nodeInfo not found for: l:2731:inode
+[Er]: nodeInfo not found for: l:2731:inode
+[Er]: nodeInfo not found for: l:2731:inode
+[Er]: regenNodeinfo l:2729:inode
+[Er]: nodeInfo not found for: l:2729:inode
+[Er]: nodeInfo not found for: l:2729:inode
+[Er]: nodeInfo not found for: l:2729:inode
+[Er]: regenNodeinfo l:3303:page
+[Er]: nodeInfo not found for: l:3303:page
+[Er]: nodeInfo not found for: l:3303:page
+[Er]: nodeInfo not found for: l:3303:page
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: iv & 1U
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: iv & 1U
+[Er]: regenNodeinfo l:2719:mapping
+[Er]: nodeInfo not found for: l:2719:mapping
+[Er]: nodeInfo not found for: l:2719:mapping
+[Er]: nodeInfo not found for: l:2719:mapping
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & ~ (~ ((1UL << 12) - 1UL))))
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & ~ (~ ((1UL << 12) - 1UL)))) + 4
+[Er]: eval bin op, operands are non-Vval
+[Er]: eval bin op, operands are non-Vval
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned int )root->prio_tree_node == (unsigned int )((void *)0)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned int )head->next == (unsigned int )head
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & ~ (~ ((1UL << 12) - 1UL))))
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & ~ (~ ((1UL << 12) - 1UL)))) + 4
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & ~ (~ ((1UL << 12) - 1UL))))
+[Er]: derefLvalHelper: Vtop has no targets (int volatile   *)((4294963200UL - (unsigned long )((3U + apic) << 12)) + (mp_ioapics[apic].mpc_apicaddr & ~ (~ ((1UL << 12) - 1UL)))) + 4
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->dma_setup) returned 0 fun(s)
+[Er]: SS call: *(hwif->dma_exec_cmd) returned 0 fun(s)
+[Er]: SS call: *(hwif->dma_start) returned 0 fun(s)
+[Er]: SS call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: call: *(hwif->dma_setup) returned 0 fun(s)
+[Er]: call: *(hwif->dma_exec_cmd) returned 0 fun(s)
+[Er]: call: *(hwif->dma_start) returned 0 fun(s)
+[Er]: call: *(hwif->OUTB) returned 0 fun(s)
+[Er]: SS call: *(hwif->rw_disk) returned 0 fun(s)
+[Er]: call: *(hwif->rw_disk) returned 0 fun(s)
+[Er]: regenNodeinfo l:3849:page
+[Er]: nodeInfo not found for: l:3849:page
+[Er]: nodeInfo not found for: l:3849:page
+[Er]: nodeInfo not found for: l:3849:page
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned int )head->next == (unsigned int )head
+[Er]: substLval: local variable ti stayed in summary?
+[Er]: regenNodeinfo l:2679:dentry
+[Er]: nodeInfo not found for: l:2679:dentry
+[Er]: nodeInfo not found for: l:2679:dentry
+[Er]: nodeInfo not found for: l:2679:dentry
+[Er]: substLval: local variable c stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: mapping->flags & 1048575
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low & 32UL
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: mapping->flags & 1048575
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low & 64UL
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: mapping->flags & 1048575
+[Er]: regenNodeinfo l:3799:m
+[Er]: nodeInfo not found for: l:3799:m
+[Er]: nodeInfo not found for: l:3799:m
+[Er]: nodeInfo not found for: l:3799:m
+[Er]: regenNodeinfo l:1498:regs
+[Er]: nodeInfo not found for: l:1498:regs
+[Er]: nodeInfo not found for: l:1498:regs
+[Er]: nodeInfo not found for: l:1498:regs
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (*x) & 255
+[Er]: regenNodeinfo l:1496:regs
+[Er]: nodeInfo not found for: l:1496:regs
+[Er]: nodeInfo not found for: l:1496:regs
+[Er]: nodeInfo not found for: l:1496:regs
+[Er]: regenNodeinfo l:2644:dentry
+[Er]: nodeInfo not found for: l:2644:dentry
+[Er]: nodeInfo not found for: l:2644:dentry
+[Er]: nodeInfo not found for: l:2644:dentry
+[Er]: eval bin op, operands are non-Vval
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (*x) & 255
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: c << 4
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: prevhash + (c << 4)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: c << 4
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: prevhash + (c << 4)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_high << 32
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low | (pte.pte_high << 32)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low & 4UL
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_high << 32
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: pte.pte_low | (pte.pte_high << 32)
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: a - b < 0L
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: eval PlusA, not used as pointer arith
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: dev & 1048320U
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: dev & 1048575U
+[Er]: regenNodeinfo l:1995:p
+[Er]: nodeInfo not found for: l:1995:p
+[Er]: nodeInfo not found for: l:1995:p
+[Er]: nodeInfo not found for: l:1995:p
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned int )head->next == (unsigned int )head
+[Er]: substExp: trimming ptrArith offset
+[Er]: substExp encountered unknown exp: (unsigned int )head->next == (unsigned int )head
+[Er]: SS call: *(bdi->unplug_io_fn) returned 0 fun(s)
+[Er]: call: *(bdi->unplug_io_fn) returned 0 fun(s)
+[Er]: regenNodeinfo l:4833:irq
+[Er]: nodeInfo not found for: l:4833:irq
+[Er]: nodeInfo not found for: l:4833:irq
+[Er]: nodeInfo not found for: l:4833:irq
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:3667:dev_id
+[Er]: nodeInfo not found for: l:3667:dev_id
+[Er]: nodeInfo not found for: l:3667:dev_id
+[Er]: nodeInfo not found for: l:3667:dev_id
+[Er]: substLval: local variable dum2 stayed in summary?
+[Er]: eval: unop can't const-fold: ! h->first
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: eval: unop can't const-fold: ! h->pprev
+[Er]: eval bin op, operands are non-Vval
+[Er]: substLval: local variable dum2 stayed in summary?
+[Er]: eval bin op, operands are non-Vval
+[Er]: substLval: local variable oldbit stayed in summary?
+[Er]: regenNodeinfo l:1910:timer
+[Er]: nodeInfo not found for: l:1910:timer
+[Er]: nodeInfo not found for: l:1910:timer
+[Er]: nodeInfo not found for: l:1910:timer
+[Er]: eval bin op, operands are non-Vval
+[Er]: No entry-points file!

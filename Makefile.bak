@@ -1,0 +1,121 @@
+#--- spin-off of Daesob's Makefile --
+
+#--------------------------------------------------
+# User-defined constants
+
+CIL = /home/jan/cil
+CIL_OBJS = $(CIL)/obj/x86_LINUX
+CIL_INCLUDE = $(CIL)/src $(CIL)/src/frontc $(CIL_OBJS)
+
+
+#--------------------------------------------------
+# System-dependent settings
+
+
+
+
+
+#--------------------------------------------------
+# Selection of system-dependent settings
+
+OS_VER_STR = $(shell uname -rs)
+
+ifneq (,$(findstring SunOS,$(OS_VER_STR)))
+	include Makefile.SunOS
+else
+ifneq (,$(findstring Linux, $(OS_VER_STR)))
+	include Makefile.Linux
+else
+endif
+endif
+
+
+#--------------------------------------------------
+# Compiler consts
+
+C_PRE_PROC = gcc -E
+OCAMLOPT = ocamlopt
+OCAMLC = ocamlc
+
+
+
+#--------------------------------------------------
+# TARGETS
+
+SCC = scc
+SCC_EXE = $(addsuffix .exe, $(SCC))
+SCC_OBJ = $(addsuffix .cmx, $(SCC))
+
+
+READ_CALLS = readcalls
+READ_CALLS_OBJ = $(addsuffix .cmx, $(READ_CALLS))
+READ_CALLS_I = $(addsuffix .cmi, $(READ_CALLS))
+
+
+RACE_ANALYSIS = race_anal
+RACE_ANALYSIS_EXE = $(addsuffix .exe, $(RACE_ANALYSIS))
+RACE_ANALYSIS_OBJ = $(addsuffix .cmx, $(RACE_ANALYSIS))
+RACE_ANALYSIS_I = $(addsuffix .cmi, $(RACE_ANALYSIS))
+
+
+TARGETS = $(RACE_ANALYSIS_EXE)
+
+
+#--------------------------------------------------
+# Rules
+
+
+all: $(TARGETS)
+
+race: $(RACE_ANALYSIS_EXE)
+
+$(RACE_ANALYSIS_EXE): stackset.cmx queueset.cmx fstructs.cmx \
+	cache.cmx $(READ_CALLS_OBJ) $(SCC_OBJ) \
+	racesummary.cmx interDataflow.cmx $(RACE_ANALYSIS_OBJ) 
+	$(OCAMLOPT) -ccopt -L$(CIL_OBJS) -o $(RACE_ANALYSIS_EXE) \
+	unix.cmxa str.cmxa $(CIL_OBJS)/cil.cmxa \
+	stackset.cmx queueset.cmx fstructs.cmx \
+	cache.cmx $(READ_CALLS_OBJ) $(SCC_OBJ) \
+	racesummary.cmx interDataflow.cmx $(RACE_ANALYSIS_OBJ) 
+
+race_byte: race_anal.out
+
+race_anal.out : stackset.cmo fstructs.cmo \
+	cache.cmo readcalls.cmo scc.cmo \
+	racesummary.cmo interDataflow.cmo race_anal.cmo
+	$(OCAMLC) -g -ccopt -L$(CIL_OBJS) -o race_anal.out \
+	unix.cma str.cma $(CIL_OBJS)/cil.cma \
+	stackset.cmo fstructs.cmo \
+	cache.cmo readcalls.cmo scc.cmo \
+	racesummary.cmo interDataflow.cmo race_anal.cmo
+
+scc: $(SCC_EXE) 
+
+$(SCC_EXE): stackset.cmx fstructs.cmx $(READ_CALLS_OBJ) $(SCC_OBJ)
+	$(OCAMLOPT) -ccopt -L$(CIL_OBJS) -o $(SCC_EXE) unix.cmxa str.cmxa \
+	$(CIL_OBJS)/cil.cmxa stackset.cmx fstructs.cmx \
+	$(READ_CALLS_OBJ) $(SCC_OBJ) 
+
+%.cmi: %.mli
+	$(OCAMLOPT) -c -I $(CIL_OBJS) $<
+
+%.cmo: %.ml %.cmi #assume they all have cmi file... 
+	$(OCAMLC) -g -c -I $(CIL_OBJS) $<
+
+%.cmx: %.ml %.cmi #assume they all have cmi file... 
+	$(OCAMLOPT) -dtypes -c -I $(CIL_OBJS) $<
+
+
+
+# Additional dependencies
+
+
+# Clean
+clean:
+	-rm -f $(TARGETS)
+	-find . -name '*.cmo' -print | xargs rm -f
+	-find . -name '*.cmx' -print | xargs rm -f
+	-find . -name '*.cmi' -print | xargs rm -f
+	-find . -name '*~' -print | xargs rm -f
+	-find . -name '*.o' -print | xargs rm -f
+

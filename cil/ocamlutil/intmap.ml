@@ -11,7 +11,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-(* $Id: intmap.ml,v 1.2 2005-10-04 21:30:25 necula Exp $ *)
+(* $Id: intmap.ml 9877 2007-11-22 19:20:27Z liblit $ *)
 
 (* specialized to integer keys by George Necula *)
 
@@ -64,7 +64,7 @@ let is_empty = function Empty -> true | _ -> false
 let rec add x data = function
     Empty ->
       Node(Empty, x, data, Empty, 1)
-  | Node(l, v, d, r, h) as t ->
+  | Node(l, v, d, r, h) ->
       if x = v then
         Node(l, x, data, r, h)
       else if x < v then
@@ -106,7 +106,7 @@ let merge t1 t2 =
 let rec remove x = function
     Empty ->
       Empty
-  | Node(l, v, d, r, h) as t ->
+  | Node(l, v, d, r, h) ->
       if x = v then
         merge l r
       else if x < v then

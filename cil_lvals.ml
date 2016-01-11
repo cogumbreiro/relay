@@ -41,10 +41,7 @@
 
 open Cil
 open Fstructs
-
-module D = Cildump
-module E = Errormsg
-module L = Logging
+open Logging
 
 
 (***************************************************
@@ -116,6 +113,10 @@ let rec findTopLvalExp (exp:Cil.exp) : Cil.lval =
   (* Other cases shouldn't occur (non lvalues) *)
   | _ -> raise TopLvalNotFound
 
+let findTopOffsetLvExp exp =
+  let lv = findTopLvalExp exp in
+  match lv with
+    Var _, off | Mem _, off -> off
 
 
 let rec countOpsWithCount curExp curCount : int =  
@@ -149,18 +150,6 @@ let countOpsInExp (exp:Cil.exp) : int =
   countOpsWithCount exp 0
 
 
-let getIndex (formals:varinfo list) (vi:varinfo) : int option =
-  (* Only need to match the first variable name in the lvalexp *)
-  try
-    Some (Stdutil.indexOf 
-            (fun formalVI ->
-               (Ciltools.compare_var vi formalVI == 0)
-            ) formals)
-  with Not_found ->
-    None
-
-
-
 (*****************************************************
  * Unsafe versions of Cil type calculation functions
  * Also ditches attributes
@@ -174,6 +163,56 @@ let rec unrollTypeNoAttrs (t: typ) : typ =
     TNamed (r, a') -> unrollTypeNoAttrs r.ttype
   | x -> x
 
+let (* rec *) dropTypeAttribs t =
+  match t with
+    TVoid [] -> t
+  | TVoid _ -> TVoid []
+  | TInt (_, []) -> t
+  | TInt (ik, _) -> TInt (ik, []) 
+  | TFloat (_, []) -> t
+  | TFloat (fk, _) -> TFloat (fk, [])
+  | TBuiltin_va_list [] -> t
+  | TBuiltin_va_list _ -> TBuiltin_va_list []
+  | TFun (rt, args, vargP, []) -> 
+      (* Just top level is enough *)
+(*      let rt2 = dropTypeAttribs rt in
+      if rt == rt2 then t
+      else TFun (rt2, args, vargP, [])
+*) 
+      t
+  | TFun (rt, args, vargP, _) -> 
+      (* Just top level is enough *)
+      TFun (rt, args, vargP, [])
+  | TEnum (_,[]) -> t
+  | TEnum (ei,_) -> TEnum (ei, [])
+  | TPtr (ptT, []) -> 
+      (* Just top level is enough *)
+(*
+      let ptT2 = dropTypeAttribs ptT in
+      if ptT2 == ptT then t
+      else TPtr (ptT2, [])
+*)
+      t
+  | TPtr (ptT, _) -> 
+      (* Just top level is enough *)
+      TPtr (ptT, [])
+  | TArray (eltT, sz, []) -> 
+      (* Just top level is enough *)
+(*
+      let eltT2 = dropTypeAttribs eltT in
+      if eltT2 == eltT then t
+      else TArray (eltT2, sz, [])
+*)
+      t
+  | TArray (eltT, sz, _) -> 
+      (* Just top level is enough *)
+      TArray (eltT, sz, [])
+  | TNamed (_, []) -> t
+  | TNamed (tinfo, _) -> TNamed (tinfo, [])
+  | TComp (_, []) -> t
+  | TComp (ci, _) -> TComp(ci, [])
+      
+
 let rec typeOffsetUnsafe basetyp =
   function
       NoOffset -> basetyp
@@ -182,10 +221,10 @@ let rec typeOffsetUnsafe basetyp =
           TArray (t, _, _) ->
 	        typeOffsetUnsafe t o
         | TPtr (t, _) ->
-            L.logError "typeOffsetUnsafe: Index offset on a pointer\n";
+            logError "typeOffsetUnsafe: Index offset on a pointer\n";
             typeOffsetUnsafe t o
 	    | t -> 
-            L.logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
+            logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
             typeOffsetUnsafe t o
       end 
     | Field (fi, o) ->
@@ -223,7 +262,7 @@ let rec typeOfUnsafe (e: exp) : typ =
       match unrollTypeNoAttrs (typeOfLvalUnsafe lv) with
         TArray (t,_, _) -> TPtr(t, [])
       | _ -> 
-          E.s (E.bug "typeOfUnsafe: StartOf on a non-array")
+          Errormsg.s (Errormsg.bug "typeOfUnsafe: StartOf on a non-array")
     end
       
 and typeOfInitUnsafe (i: init) : typ = 
@@ -240,19 +279,21 @@ and typeOfLvalUnsafe = function
       | t -> begin
           match off with
             NoOffset ->
-              (* E.s (bug "typeOfLvalUnsafe: Mem on a non-pointer") *)
+              (* Errormsg.s (bug "typeOfLvalUnsafe: Mem on a non-pointer") *)
               TVoid []
           | _ -> typeOffsetUnsafe t off
         end
     end
       
+let typeAfterDerefOfT typ =
+  match unrollTypeNoAttrs typ with
+    TPtr (t,_) -> unrollTypeNoAttrs t
+  | _ -> raise TypeNotFound
+
 
 let typeAfterDeref (exp:Cil.exp) =
-  match unrollTypeNoAttrs (typeOfUnsafe exp) with
-    TPtr (t,_) ->
-      unrollTypeNoAttrs t
-  | _ ->
-      raise TypeNotFound
+  typeAfterDerefOfT (typeOfUnsafe exp) 
+
 
 (** Non-unrolled type stuff *)
 
@@ -283,7 +324,7 @@ and typeOfLvalNoUnroll = function
       | t -> begin
           match off with
             NoOffset ->
-              (* E.s (bug "typeOfLvalUnsafe: Mem on a non-pointer") *)
+              (* Errormsg.s (bug "typeOfLvalUnsafe: Mem on a non-pointer") *)
               TVoid []
           | _ -> typeOffsetNoUnroll t off
         end
@@ -297,10 +338,10 @@ and typeOffsetNoUnroll basetyp =
           TArray (t, _, _) ->
 	        typeOffsetNoUnroll t o
         | TPtr (t, _) ->
-            L.logError "typeOffsetUnsafe: Index offset on a pointer\n";
+            logError "typeOffsetUnsafe: Index offset on a pointer\n";
             typeOffsetNoUnroll basetyp o
 	    | t -> 
-            L.logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
+            logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
             typeOffsetNoUnroll basetyp o
       end 
     | Field (fi, o) ->
@@ -369,22 +410,54 @@ let mkMemChecked (ptrExp:Cil.exp) (offset:Cil.offset) : Cil.lval =
     let canAttach, counter = canAttachOffset hostTyp offset in
     if canAttach then mkMem ptrExp offset
     else raise (OffsetMismatch counter)
-  with E.Error 
+  with Errormsg.Error 
   | Failure _
   | TypeNotFound ->
       raise (OffsetMismatch None)
-
 
 let cZero = Cil.integer 0
 
 let cOne = Cil.integer 1
 
+(** Use our own VID range (all negative numbers instead) so as
+    not to clash with VIDs that have already been assigned! *)
+let nextGlobalVID = ref (-1)
+
+(** Return the next fresh VID. Assume CIL doesn't use negative ints for ids *)
+let newVID () = 
+  let t = !nextGlobalVID in
+  decr nextGlobalVID;
+  t
+
+(** Make variable infos w/ this, not Cil.makeVarinfo, so as not to
+    clash with VIDs that have already been assigned.
+    Caller must set the scope of the variable unless marked global. *)
+let mkVarinfo global name typ =
+  (* Besides the VID counter, the rest of the code should
+     be a clone of the Cil code =/ *)
+  (* Strip const from type for locals *)
+  let vi = 
+    { vname = name;
+      vid   = newVID ();
+      vglob = global;
+      vtype = if global then typ else typeRemoveAttributes ["const"] typ;
+      vdecl = locUnknown;
+      vinline = false;
+      vattr = [];
+      vstorage = NoStorage;
+      vaddrof = false;
+      vreferenced = false;    (* sm *)
+      vdescr = Pretty.nil;
+      vdescrpure = true;
+    } in
+  if global then Scope.setScope Scope.SGlobal vi;
+  (* Assume non-globals set the scope themselves *)
+  vi
+
 (** Canonicize the offset so that array indexing is set to [0]
     @returns   the (possibly) modified offset and a flag indicating whether
                a change was made  *) 
 let rec canonicizeOff (off:Cil.offset) : (Cil.offset * bool) =  
-  (* TODO, use the numeric offset thing done in IMPACT (Cheng, Hwu) that
-     handles unions / funky casts as well? Probably not needed for now... *)
   match off with
     NoOffset -> (NoOffset, false)
   | Field (fi, moreOff) -> 
@@ -501,8 +574,8 @@ and doSimplifyExp (exp:Cil.exp) :
       doSimplifyExp e
 
   | _ ->
-      L.logError ("doSimplifyExp: Shouldn't see this type of exp: "
-                    ^ (D.string_of_exp exp));
+      logError ("doSimplifyExp: Shouldn't see this type of exp: "
+                    ^ (Cildump.string_of_exp exp));
       (exp, [], false)
 
 (** May eliminate redundant parts of lval access path. 
@@ -512,10 +585,22 @@ let simplifyLval (lv:Cil.lval) : Cil.lval * bool =
   let simplerLv, _, changed = doSimplifyLv lv in
   (simplerLv, changed)
     
-    
 
 
+(***************************************************
+ * Omit casts
+ ***************************************************)
 
+(** Omit casts up to an Lval or constant atom *)
+let rec omitCast exp =
+  match exp with
+    CastE (t, e) -> omitCast e
+  | Lval _  | AddrOf _ | StartOf _ | Const _ -> exp
+  | BinOp (op, e1, e2, t) ->
+      BinOp (op, omitCast e1, omitCast e2, t)
+  | UnOp (op, e, t) ->
+      UnOp (op, omitCast e, t)
+  | SizeOf _ | SizeOfE _ | SizeOfStr _ | AlignOf _ | AlignOfE _ -> exp
 
 
 (***************************************************
@@ -588,8 +673,8 @@ and substActFormExp actual expWithFormal : Cil.exp =
   | SizeOf _
   | SizeOfStr _
   | Const _ ->
-      let expStr = D.string_of_exp expWithFormal in 
-      L.logError 
+      let expStr = Cildump.string_of_exp expWithFormal in 
+      logError 
         ("substActFormExp encountered unknown exp: " ^ expStr ^ "\n");
       raise SubstInvalidArg
 
@@ -622,8 +707,8 @@ let rec substActFormDeref actual lvalWithFormal : Cil.lval =
           raise SubstInvalidArg
     end
   | _ -> 
-      let lvStr = D.string_of_lval lvalWithFormal in
-      L.logError 
+      let lvStr = Cildump.string_of_lval lvalWithFormal in
+      logError 
         ("substActFormDeref given unknown formal-based lval: " ^ lvStr ^ "\n");
       raise SubstInvalidArg
 
@@ -662,8 +747,8 @@ and substActFormExpDeref actual expWithFormal : Cil.exp =
   | SizeOf _
   | SizeOfStr _
   | Const _ ->
-      let expStr = D.string_of_exp expWithFormal in 
-      L.logError
+      let expStr = Cildump.string_of_exp expWithFormal in 
+      logError
         ("substActFormExp encountered unknown exp: " ^ expStr ^ "\n");
       raise SubstInvalidArg
 
@@ -685,25 +770,20 @@ end
 
 module LvHash = Weak.Make(HashedLval)
 
-module TyHash = Weak.Make(
-  struct 
-    type t = Cil.typ
-    let equal a b = 
-      (*
-        Ciltools.compare_type a b == 0
-      *)
-      let s1 = D.string_of_type a in
-      let s2 = D.string_of_type b in
-      s1 = s2
-      
-    let hash x = 
-      (* 
-         Ciltools.hash_type
-      *)
-      Hashtbl.hash (D.string_of_type x)
+module HashedTyp = struct
+  type t = Cil.typ
+  let equal a b = 
+    (* Ciltools.compare_type a b == 0  *)
+    let s1 = Cildump.string_of_type a in
+    let s2 = Cildump.string_of_type b in
+    s1 = s2
+        
+  let hash x = 
+    (* Ciltools.hash_type *)
+    Hashtbl.hash (Cildump.string_of_type x)   
+end
 
-  end
-)
+module TyHash = Weak.Make (HashedTyp)
 
 module CIHash = Weak.Make(
   struct
@@ -801,26 +881,26 @@ and distillType t =
       t
 
   | TFun (rt, None, vargP, atts) ->
-      TFun (mergeType rt, None, vargP, [])
+      TFun (mergeType rt, None, vargP, atts)
 
   | TFun (rt, Some (args), vargP, atts) ->
       TFun (mergeType rt, 
             Some (List.map (fun (name, typ, atts) ->
                               (name, mergeType typ, [])) args), 
-            vargP, [])
+            vargP, atts)
 
-  | TEnum (ei,_) ->
+  | TEnum (ei, _) ->
       distillEnuminfo ei;
       t
 
-  | TPtr (ptT, _) ->
-      TPtr (mergeType ptT, [])
+  | TPtr (ptT, atts) ->
+      TPtr (mergeType ptT, atts)
  
-  | TArray (eltT, None, _) ->
-      TArray (mergeType eltT, None, [])
+  | TArray (eltT, None, atts) ->
+      TArray (mergeType eltT, None, atts)
 
-  | TArray (eltT, Some(e), _) ->
-      TArray (mergeType eltT, Some (distillExp e), [])
+  | TArray (eltT, Some(e), atts) ->
+      TArray (mergeType eltT, Some (distillExp e), atts)
       
   | TNamed (tinfo, _) ->
       tinfo.ttype <- mergeType tinfo.ttype;
@@ -879,11 +959,11 @@ and mergeCompinfo ci =
 let printHashStats () =
   let hashStats = Stdutil.string_of_hashstats LvHash.stats 
     goldenLvals "Golden lvals" in
-  L.logStatus hashStats;
+  logStatus hashStats;
   let hashStats = Stdutil.string_of_hashstats TyHash.stats 
     goldenTypes "Golden types" in
-  L.logStatus hashStats;
+  logStatus hashStats;
   let hashStats = Stdutil.string_of_hashstats CIHash.stats 
     goldenCompinfos "Golden compInfos" in
-  L.logStatus hashStats
+  logStatus hashStats
   

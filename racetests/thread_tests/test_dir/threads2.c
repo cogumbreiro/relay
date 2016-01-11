@@ -133,23 +133,10 @@ void modU(void *a) {
 }
 
 
-void reachedByFP(void *a) {
-
-  int c = 0;
-  c++;
-  
-}
-
-void reachedByName(void *b) {
-  int d = 0;
-  d++;
-}
-
 int t2_main(int argc, char *argv[]) {
 
   pthread_t temp_t;
   int A;
-  void (*fp)(void *a);
 
 
   s* s1 = (s*) malloc (sizeof(s));
@@ -170,10 +157,6 @@ int t2_main(int argc, char *argv[]) {
   pthread_create (&temp_t, (void *)0, &modAL2, (void*) &A);
   pthread_create (&temp_t, (void *)0, &modU, (void*) &A);
 
-  fp = &reachedByFP;
-  pthread_create (&temp_t, (void *)NULL, fp, (void*) NULL);
-  pthread_create (&temp_t, (void *)NULL, reachedByName, (void*) NULL);
-  
 
   return 0;
 }

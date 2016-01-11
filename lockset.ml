@@ -192,12 +192,10 @@ let makeSimpleLock (name:string) scope prot =
         (try Hashtbl.find globalLocks name with Not_found ->
            (* Search for the global's varinfo *)
            let baseVar = match varinfo_of_name name with
-               None ->
-                 L.logError
-                   ("makeSimpleLock: Couldn't find global " ^ name);
-                 Lv.mkVarinfo true name t
-             | Some vi ->
-                 vi
+               None -> L.logError
+                 ("makeSimpleLock: Couldn't find global " ^ name);
+                 CLv.mkVarinfo true name t
+             | Some vi -> vi
            in
            (* Make sure variable already had a global scope annotation *)
            let oldScope = Scope.decipherScope baseVar in

@@ -1,10 +1,11 @@
-Sun Aug 10 21:12:39 PDT 2008
-reserved status file: /tmp/temp.LgdLKd
-running analysis on /home/jan/research/relay/racetests/aget/ciltrees
+Mon Oct 12 14:20:39 PDT 2009
+reserved status file: /tmp/temp.geAJZi
+running analysis on /home/jan/research/relay-race/racetests/aget/ciltrees
 Registered summary type: rs
 Registered summary type: ss
 Registered summary type: rss
-Registered summary type: mods
+Args: 
+ ./race_anal.exe -cg /home/jan/research/relay-race/racetests/aget/ciltrees -r -u jan -st /tmp/temp.geAJZi
 Checking for data races
 -----
 Loading Cil Varinfo ID ranges for lookup tables
@@ -22,31 +23,59 @@ Finished parsing config group: SYM_EX
 Done reading config file
 myIP: 127.0.0.1
 using /tmp/relay_scratch to store acquired files
-using: /tmp/temp.LgdLKd to track status
-Initializing Steensgaard AA info
+using: /tmp/temp.geAJZi to track status
+Initializing Andersen's AA info
 Loading function info
-Using old PTA results
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/racetests/aget/ciltrees/.pta_temp.anders
 Old PTA results loaded
-Reached end of /home/jan/research/relay/racetests/aget/ciltrees/calls.cil call graph file
-Num funcs: 77
+Reached end of /home/jan/research/relay-race/racetests/aget/ciltrees/calls.anders call graph file
+Num funcs: 78
 summary database will use:
-	/home/jan/research/relay/racetests/aget/ciltrees/relay_sums
-Initializing summary mods
-Checking left-over state in mods
+	/home/jan/research/relay-race/racetests/aget/ciltrees/relay_sums
 Initializing summary rss
-Checking left-over state in rss
+Checking leftover state: rss
 Initializing summary ss
-Checking left-over state in ss
+Checking leftover state: ss
 Initializing summary rs
-Checking left-over state in rs
-SH: initEscapeable found (1, 1) thread (acts, formals)
+Checking leftover state: rs
+SH: initEscapeable found (1, 2) thread (acts, formals)
 
-Entry points use roots: false
+Entry points use roots: true
 file server will use: 14440
 trying to clear old summaries / local srcs, etc.
-Scc_cg: Pruned 59 funcs w/out bodies for scc DAG
+Scc_cg: Pruned 60 funcs w/out bodies for scc DAG
 Starting bottomup analysis
 -----
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #3
+=================================
+Summarizing function: updateProgressBar : aget_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:3 : 0.000575065612793
+TIMES : FUN:263.f : 0.000566005706787
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: updateProgressBar:263.f
+=======
+
+SUMS (nm, lo, un, wr, re):	updateProgressBar	0	0	1	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 263.f : 111
+>>> PROGRESS 1/18 SCCs DONE!
+
+=================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
@@ -55,33 +84,31 @@ Starting an SCC (1) #14
 Summarizing function: Log : aget_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 0	misses: 0
+Prev ldiffCache hits: 2	misses: 1
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	19	0	0	0	4	
-
-TIMES : SCC:14 : 0.000564813613892
-TIMES : FUN:19 : 0.00055718421936
+TIMES : SCC:14 : 0.0032901763916
+TIMES : FUN:170.f : 0.00327897071838
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 19
+Summary for function: Log:170.f
 =======
 
-SUMS (fk, lo, un, wr, re):	19	0	0	0	4	
+SUMS (nm, lo, un, wr, re):	Log	0	0	0	4	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 19 : 215
->>> PROGRESS 1/18 SCCs DONE!
+SIZES: 170.f : 229
+>>> PROGRESS 2/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #13
+Starting an SCC (1) #12
 =================================
 Summarizing function: handleHttpRetcode : aget_comb.c
 -----
@@ -90,53 +117,20 @@ Prev ldiffCache hits: 10	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	103	0	0	0	3	
-
-TIMES : SCC:13 : 0.00141096115112
-TIMES : FUN:103 : 0.0014021396637
+TIMES : SCC:12 : 0.00129199028015
+TIMES : FUN:264.f : 0.00128388404846
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 103
+Summary for function: handleHttpRetcode:264.f
 =======
 
-SUMS (fk, lo, un, wr, re):	103	0	0	0	3	
+SUMS (nm, lo, un, wr, re):	handleHttpRetcode	0	0	0	3	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 103 : 166
->>> PROGRESS 2/18 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #17
-=================================
-Summarizing function: updateProgressBar : aget_comb.c
------
-doing symstate
-Prev ldiffCache hits: 19	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	102	0	0	1	1	
-
-TIMES : FUN:102 : 0.00087308883667
-TIMES : SCC:17 : 0.000878810882568
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 102
-=======
-
-SUMS (fk, lo, un, wr, re):	102	0	0	1	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 102 : 107
+SIZES: 264.f : 178
 >>> PROGRESS 3/18 SCCs DONE!
 
 =================================
@@ -148,26 +142,24 @@ Starting an SCC (1) #0
 Summarizing function: http_get : aget_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 2	misses: 1
+Prev ldiffCache hits: 19	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	62	0	1	4	12	
-
-TIMES : SCC:0 : 0.00943088531494
-TIMES : FUN:62 : 0.00942301750183
+TIMES : SCC:0 : 0.00958108901978
+TIMES : FUN:217.f : 0.00957202911377
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 62
+Summary for function: http_get:217.f
 =======
 
-SUMS (fk, lo, un, wr, re):	62	0	1	4	12	
+SUMS (nm, lo, un, wr, re):	http_get	0	1	4	12	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 62 : 1442
+SIZES: 217.f : 1521
 >>> PROGRESS 4/18 SCCs DONE!
 
 =================================
@@ -183,29 +175,27 @@ Prev ldiffCache hits: 52	misses: 6
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	183	0	0	1	3	
-
-TIMES : FUN:183 : 0.000900030136108
-TIMES : SCC:2 : 0.000907182693481
+TIMES : FUN:349.f : 0.000932931900024
+TIMES : SCC:2 : 0.000941038131714
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 183
+Summary for function: sigalrm_handler:349.f
 =======
 
-SUMS (fk, lo, un, wr, re):	183	0	0	1	3	
+SUMS (nm, lo, un, wr, re):	sigalrm_handler	0	0	1	3	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 183 : 540
+SIZES: 349.f : 548
 >>> PROGRESS 5/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #4
+Starting an SCC (1) #5
 =================================
 Summarizing function: save_log : aget_comb.c
 -----
@@ -214,53 +204,49 @@ Prev ldiffCache hits: 3	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	184	0	0	0	6	
-
-TIMES : SCC:4 : 0.00389885902405
-TIMES : FUN:184 : 0.00389099121094
+TIMES : SCC:5 : 0.00411200523376
+TIMES : FUN:350.f : 0.00410318374634
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 184
+Summary for function: save_log:350.f
 =======
 
-SUMS (fk, lo, un, wr, re):	184	0	0	0	6	
+SUMS (nm, lo, un, wr, re):	save_log	0	0	2	7	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 184 : 259
+SIZES: 350.f : 1400
 >>> PROGRESS 6/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #3
+Starting an SCC (1) #4
 =================================
 Summarizing function: sigint_handler : aget_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 12	misses: 2
+Prev ldiffCache hits: 13	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	182	1	0	1	8	
-
-TIMES : SCC:3 : 0.00119996070862
-TIMES : FUN:182 : 0.00119400024414
+TIMES : FUN:348.f : 0.0013370513916
+TIMES : SCC:4 : 0.00134515762329
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 182
+Summary for function: sigint_handler:348.f
 =======
 
-SUMS (fk, lo, un, wr, re):	182	1	0	1	8	
+SUMS (nm, lo, un, wr, re):	sigint_handler	1	0	3	9	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 182 : 973
+SIZES: 348.f : 1566
 >>> PROGRESS 7/18 SCCs DONE!
 
 =================================
@@ -272,26 +258,24 @@ Starting an SCC (1) #1
 Summarizing function: signal_waiter : aget_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 8	misses: 2
+Prev ldiffCache hits: 11	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	26	1	0	2	10	
-
-TIMES : SCC:1 : 0.00234699249268
-TIMES : FUN:26 : 0.00233888626099
+TIMES : SCC:1 : 0.00159287452698
+TIMES : FUN:177.f : 0.00158596038818
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 26
+Summary for function: signal_waiter:177.f
 =======
 
-SUMS (fk, lo, un, wr, re):	26	1	0	2	10	
+SUMS (nm, lo, un, wr, re):	signal_waiter	1	0	4	12	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 26 : 1466
+SIZES: 177.f : 1768
 >>> PROGRESS 8/18 SCCs DONE!
 
 =================================
@@ -300,67 +284,92 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #7
 =================================
-Summarizing function: calc_offset : aget_comb.c
+Summarizing function: resume_get : aget_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 14	misses: 2
+Prev ldiffCache hits: 17	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	60	0	0	0	0	
-
-TIMES : SCC:7 : 0.000198125839233
-TIMES : FUN:60 : 0.000192165374756
+TIMES : SCC:7 : 0.0078399181366
+TIMES : FUN:175.f : 0.00783085823059
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 60
+Summary for function: resume_get:175.f
 =======
 
-SUMS (fk, lo, un, wr, re):	60	0	0	0	0	
+SUMS (nm, lo, un, wr, re):	resume_get	0	0	4	17	
 
 SS Sum:
  -> 
-Vval: part * (total / nthreads___0)
-SIZES: 60 : 34
+$SSBOT
+SIZES: 175.f : 2023
 >>> PROGRESS 9/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #8
+Starting an SCC (1) #9
 =================================
 Summarizing function: numofthreads : aget_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 0	misses: 0
+Prev ldiffCache hits: 35	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	61	0	0	0	0	
-
-TIMES : SCC:8 : 0.000252962112427
-TIMES : FUN:61 : 0.000249147415161
+TIMES : FUN:216.f : 0.000380039215088
+TIMES : SCC:9 : 0.000388860702515
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 61
+Summary for function: numofthreads:216.f
 =======
 
-SUMS (fk, lo, un, wr, re):	61	0	0	0	0	
+SUMS (nm, lo, un, wr, re):	numofthreads	0	0	0	0	
 
 SS Sum:
  -> 
 $SSTOP
-SIZES: 61 : 34
+SIZES: 216.f : 34
 >>> PROGRESS 10/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #9
+Starting an SCC (1) #10
+=================================
+Summarizing function: calc_offset : aget_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:10 : 0.00023889541626
+TIMES : FUN:215.f : 0.000231027603149
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: calc_offset:215.f
+=======
+
+SUMS (nm, lo, un, wr, re):	calc_offset	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: part * (total / nthreads___0)
+SIZES: 215.f : 34
+>>> PROGRESS 11/18 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #11
 =================================
 Summarizing function: http_head_req : aget_comb.c
 -----
@@ -369,122 +378,85 @@ Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	59	0	0	1	7	
-
-TIMES : SCC:9 : 0.0120007991791
-TIMES : FUN:59 : 0.0119941234589
+TIMES : FUN:214.f : 0.00939202308655
+TIMES : SCC:11 : 0.00940108299255
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 59
+Summary for function: http_head_req:214.f
 =======
 
-SUMS (fk, lo, un, wr, re):	59	0	0	1	7	
+SUMS (nm, lo, un, wr, re):	http_head_req	0	0	4	5	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 59 : 733
->>> PROGRESS 11/18 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #6
-=================================
-Summarizing function: get : aget_comb.c
------
-doing symstate
-Prev ldiffCache hits: 65	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	23	0	0	10	17	
-
-TIMES : FUN:23 : 0.0103278160095
-TIMES : SCC:6 : 0.0103368759155
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 23
-=======
-
-SUMS (fk, lo, un, wr, re):	23	0	0	10	17	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 23 : 2240
+SIZES: 214.f : 1145
 >>> PROGRESS 12/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #10
+Starting an SCC (1) #8
 =================================
-Summarizing function: resume_get : aget_comb.c
+Summarizing function: get : aget_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 55	misses: 2
+Prev ldiffCache hits: 66	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	24	0	0	4	17	
-
-TIMES : FUN:24 : 0.00513505935669
-TIMES : SCC:10 : 0.00514221191406
+TIMES : SCC:8 : 0.00881695747375
+TIMES : FUN:174.f : 0.00880789756775
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 24
+Summary for function: get:174.f
 =======
 
-SUMS (fk, lo, un, wr, re):	24	0	0	4	17	
+SUMS (nm, lo, un, wr, re):	get	0	0	13	15	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 24 : 1907
+SIZES: 174.f : 2455
 >>> PROGRESS 13/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #11
+Starting an SCC (1) #13
 =================================
 Summarizing function: read_log : aget_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 35	misses: 2
+Prev ldiffCache hits: 56	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	22	0	0	1	5	
-
-TIMES : SCC:11 : 0.00547409057617
-TIMES : FUN:22 : 0.00546598434448
+TIMES : SCC:13 : 0.00394105911255
+TIMES : FUN:173.f : 0.00393104553223
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 22
+Summary for function: read_log:173.f
 =======
 
-SUMS (fk, lo, un, wr, re):	22	0	0	1	5	
+SUMS (nm, lo, un, wr, re):	read_log	0	0	1	5	
 
 SS Sum:
  -> 
 $SSTOP
-SIZES: 22 : 1353
+SIZES: 173.f : 1382
 >>> PROGRESS 14/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #12
+Starting an SCC (1) #15
 =================================
 Summarizing function: usage : aget_comb.c
 -----
@@ -493,29 +465,27 @@ Prev ldiffCache hits: 29	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	18	0	0	0	1	
-
-TIMES : SCC:12 : 0.000430107116699
-TIMES : FUN:18 : 0.000424861907959
+TIMES : FUN:169.f : 0.000483989715576
+TIMES : SCC:15 : 0.000492095947266
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 18
+Summary for function: usage:169.f
 =======
 
-SUMS (fk, lo, un, wr, re):	18	0	0	0	1	
+SUMS (nm, lo, un, wr, re):	usage	0	0	0	1	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 18 : 203
+SIZES: 169.f : 219
 >>> PROGRESS 15/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #16
+Starting an SCC (1) #17
 =================================
 Summarizing function: revstr : aget_comb.c
 -----
@@ -524,29 +494,27 @@ Prev ldiffCache hits: 8	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	101	0	0	1	1	
-
-TIMES : SCC:16 : 0.00147199630737
-TIMES : FUN:101 : 0.0014660358429
+TIMES : SCC:17 : 0.00150513648987
+TIMES : FUN:262.f : 0.00149703025818
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 101
+Summary for function: revstr:262.f
 =======
 
-SUMS (fk, lo, un, wr, re):	101	0	0	1	1	
+SUMS (nm, lo, un, wr, re):	revstr	0	0	1	1	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 101 : 122
+SIZES: 262.f : 128
 >>> PROGRESS 16/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #15
+Starting an SCC (1) #16
 =================================
 Summarizing function: parse_url : aget_comb.c
 -----
@@ -555,29 +523,27 @@ Prev ldiffCache hits: 2	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	17	0	0	8	5	
-
-TIMES : FUN:17 : 0.00667190551758
-TIMES : SCC:15 : 0.00668096542358
+TIMES : SCC:16 : 0.00624084472656
+TIMES : FUN:168.f : 0.00623416900635
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 17
+Summary for function: parse_url:168.f
 =======
 
-SUMS (fk, lo, un, wr, re):	17	0	0	8	5	
+SUMS (nm, lo, un, wr, re):	parse_url	0	0	8	5	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 17 : 1067
+SIZES: 168.f : 1112
 >>> PROGRESS 17/18 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #5
+Starting an SCC (1) #6
 =================================
 Summarizing function: main : aget_comb.c
 -----
@@ -586,22 +552,20 @@ Prev ldiffCache hits: 18	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	35	0	0	22	27	
-
-TIMES : FUN:35 : 0.00674200057983
-TIMES : SCC:5 : 0.00675106048584
+TIMES : FUN:187.f : 0.00711297988892
+TIMES : SCC:6 : 0.00712180137634
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 35
+Summary for function: main:187.f
 =======
 
-SUMS (fk, lo, un, wr, re):	35	0	0	22	27	
+SUMS (nm, lo, un, wr, re):	main	0	0	25	26	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 35 : 4090
+SIZES: 187.f : 4699
 >>> PROGRESS 18/18 SCCs DONE!
 
 =================================
@@ -613,49 +577,27 @@ Bottomup analysis complete
 
 Beginning Thread Analysis:
 -----
-Expected # thread-creation site pairs: 6
+Expected # thread-creation site pairs: 10
 checking a thread-creation pair
-Prev ldiffCache hits: 110	misses: 2
+Prev ldiffCache hits: 112	misses: 2
 
 doing symstate
-Prev ldiffCache hits: 11	misses: 1
+Prev ldiffCache hits: 15	misses: 1
 
 doing symstate
-now checking thread roots: signal_waiter, signal_waiter
+now checking thread roots: signal_waiter(177.f), signal_waiter(177.f)
 New race added to race reports
 New race added to race reports
 New race added to race reports
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 11	misses: 1
+Prev ldiffCache hits: 15	misses: 1
 
 doing symstate
-Prev ldiffCache hits: 11	misses: 1
+Prev ldiffCache hits: 15	misses: 1
 
 doing symstate
-now checking thread roots: signal_waiter, http_get
-New race added to race reports
-New race added to race reports
-done with pair, sending notification
-checking a thread-creation pair
-Prev ldiffCache hits: 13	misses: 3
-
-doing symstate
-Prev ldiffCache hits: 11	misses: 1
-
-doing symstate
-now checking thread roots: signal_waiter, http_get
-done with pair, sending notification
-checking a thread-creation pair
-Prev ldiffCache hits: 13	misses: 3
-
-doing symstate
-Prev ldiffCache hits: 13	misses: 3
-
-doing symstate
-now checking thread roots: http_get, http_get
-New race added to race reports
-New race added to race reports
+now checking thread roots: signal_waiter(217.f), http_get(217.f)
 New race added to race reports
 New race added to race reports
 done with pair, sending notification
@@ -663,10 +605,35 @@ checking a thread-creation pair
 Prev ldiffCache hits: 13	misses: 3
 
 doing symstate
+Prev ldiffCache hits: 15	misses: 1
+
+doing symstate
+now checking thread roots: signal_waiter(217.f), http_get(217.f)
+done with pair, sending notification
+checking a thread-creation pair
 Prev ldiffCache hits: 13	misses: 3
 
 doing symstate
-now checking thread roots: http_get, http_get
+now checking thread roots: signal_waiter(187.f), main(187.f)
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 15	misses: 1
+
+doing symstate
+Prev ldiffCache hits: 13	misses: 3
+
+doing symstate
+now checking thread roots: http_get(217.f), http_get(217.f)
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
 done with pair, sending notification
 checking a thread-creation pair
 Prev ldiffCache hits: 13	misses: 3
@@ -675,319 +642,685 @@ doing symstate
 Prev ldiffCache hits: 13	misses: 3
 
 doing symstate
-now checking thread roots: http_get, http_get
+now checking thread roots: http_get(217.f), http_get(217.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 13	misses: 3
+
+doing symstate
+now checking thread roots: http_get(187.f), main(187.f)
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 13	misses: 3
+
+doing symstate
+Prev ldiffCache hits: 13	misses: 3
+
+doing symstate
+now checking thread roots: http_get(217.f), http_get(217.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 13	misses: 3
+
+doing symstate
+now checking thread roots: http_get(187.f), main(187.f)
+done with pair, sending notification
+checking a thread-creation pair
+now checking thread roots: main(187.f), main(187.f)
 done with pair, sending notification
 completed all thread pairs
+Sorting races
+
+Printing races
+
 ****
 Possible race between access to:
+
+nthreads @ aget_comb.c:172 and
+nthreads @ aget_comb.c:172
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:970:(348.f), aget_comb.c:1137:(350.f), aget_comb.c:1139:(350.f)] and
+	[aget_comb.c:330:(174.f), aget_comb.c:332:(174.f), aget_comb.c:433:(175.f), aget_comb.c:222:(187.f), aget_comb.c:225:(187.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+req @ aget_comb.c:174 and
+req @ aget_comb.c:174
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1136:(350.f)] and
+	[aget_comb.c:188:(187.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+wthread @ aget_comb.c:176 and
+wthread @ aget_comb.c:176
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1137:(350.f)] and
+	[aget_comb.c:335:(174.f), aget_comb.c:435:(175.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
 prev @ aget_comb.c:779 and
 prev @ aget_comb.c:779
 	Cluster ID: 2
 	Escapes? true / true 
 	Accessed at locs:
-	[aget_comb.c:804] and
-	[aget_comb.c:788]
+	[aget_comb.c:788:(263.f)] and
+	[aget_comb.c:804:(263.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 (1)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
 (2)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
 (3)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
 ****
 Possible race between access to:
+
 prev @ aget_comb.c:779 and
 prev @ aget_comb.c:779
 	Cluster ID: 0
 	Escapes? true / true 
 	Accessed at locs:
-	[aget_comb.c:804] and
-	[aget_comb.c:804]
+	[aget_comb.c:804:(263.f)] and
+	[aget_comb.c:804:(263.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
 (1)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 (2)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
 (3)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
 ****
 Possible race between access to:
+
 bwritten @ aget_comb.c:995 and
 bwritten @ aget_comb.c:995
 	Cluster ID: 4
 	Escapes? true / true 
 	Accessed at locs:
-	[aget_comb.c:984, aget_comb.c:1140] and
-	[aget_comb.c:1079, aget_comb.c:1092]
+	[aget_comb.c:984:(349.f), aget_comb.c:1140:(350.f)] and
+	[aget_comb.c:1079:(217.f), aget_comb.c:1092:(217.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
-L+ = {bwritten_mutex#g:195} (1)
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+L+ = {bwritten_mutex#g:363} (1)
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
 ****
 Possible race between access to:
+
 bwritten @ aget_comb.c:995 and
 bwritten @ aget_comb.c:995
-	Cluster ID: 7
+	Cluster ID: 9
 	Escapes? true / true 
 	Accessed at locs:
-	[aget_comb.c:1079, aget_comb.c:1092] and
-	[aget_comb.c:1079, aget_comb.c:1092, aget_comb.c:1094]
+	[aget_comb.c:984:(349.f), aget_comb.c:1140:(350.f)] and
+	[aget_comb.c:1186:(173.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
-L+ = {bwritten_mutex#g:195} (1)
-	made empty at: :-1
+L+ = empty;
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:391 11843 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+bwritten @ aget_comb.c:995 and
+bwritten @ aget_comb.c:995
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1079:(217.f), aget_comb.c:1092:(217.f)] and
+	[aget_comb.c:1079:(217.f), aget_comb.c:1092:(217.f), aget_comb.c:1094:(217.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {bwritten_mutex#g:363} (1)
+LS for 2nd access:
+L+ = empty;
+	made empty at: aget_comb.c:1094
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 
 Different possible paths & LS (first 4):
 
 (0)
 LS for 1st access:
 L+ = empty;
+	made empty at: aget_comb.c:1094
 LS for 2nd access:
-L+ = {bwritten_mutex#g:195} (1)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+L+ = {bwritten_mutex#g:363} (1)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 (1)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 (2)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
+****
+Possible race between access to:
+
+bwritten @ aget_comb.c:995 and
+bwritten @ aget_comb.c:995
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1079:(217.f), aget_comb.c:1092:(217.f), aget_comb.c:1094:(217.f)] and
+	[aget_comb.c:1186:(173.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: aget_comb.c:1094
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {bwritten_mutex#g:363} (1)
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(2)
+LS for 1st access:
+L+ = {bwritten_mutex#g:363} (1)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+bwritten @ aget_comb.c:995 and
+bwritten @ aget_comb.c:995
+	Cluster ID: 16
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1079:(217.f), aget_comb.c:1092:(217.f)] and
+	[aget_comb.c:1188:(173.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {bwritten_mutex#g:363} (1)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+REP:[449].clength and
+REP:[449].clength
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:984:(349.f)] and
+	[aget_comb.c:929:(214.f)]
+
+	Confidence: used PTA nodes lblSet(1, 1)
+
 LS for 1st access:
 L+ = empty;
 LS for 2nd access:
-L+ = {bwritten_mutex#g:195} (1)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
-(3)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
 ****
 Possible race between access to:
-[REP: 123].offset and
-[REP: 123].offset
+
+REP:[446].clength and
+REP:[446].clength
+	Cluster ID: 19
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1094:(217.f)] and
+	[aget_comb.c:386:(174.f)]
+
+	Confidence: used PTA nodes lblSet(2, 2)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+REP:[446].fd and
+REP:[446].fd
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1073:(217.f), aget_comb.c:1075:(217.f), aget_comb.c:1085:(217.f), aget_comb.c:1088:(217.f)] and
+	[aget_comb.c:385:(174.f), aget_comb.c:463:(175.f)]
+
+	Confidence: used PTA nodes lblSet(2, 2)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+REP:[446].foffset and
+REP:[446].foffset
+	Cluster ID: 21
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1021:(217.f), aget_comb.c:1096:(217.f)] and
+	[aget_comb.c:378:(174.f), aget_comb.c:380:(174.f)]
+
+	Confidence: used PTA nodes lblSet(2, 2)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+REP:[446].offset and
+REP:[446].offset
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1071:(217.f), aget_comb.c:1077:(217.f), aget_comb.c:1090:(217.f)] and
+	[aget_comb.c:462:(175.f), aget_comb.c:464:(175.f)]
+
+	Confidence: used PTA nodes lblSet(2, 2)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+REP:[446].offset and
+REP:[446].offset
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1071:(217.f), aget_comb.c:1077:(217.f), aget_comb.c:1090:(217.f)] and
+	[aget_comb.c:1071:(217.f), aget_comb.c:1077:(217.f), aget_comb.c:1090:(217.f)]
+
+	Confidence: used PTA nodes lblSet(2, 2)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
+(1)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
+****
+Possible race between access to:
+
+REP:[446].offset and
+REP:[446].offset
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1071:(217.f), aget_comb.c:1077:(217.f), aget_comb.c:1090:(217.f)] and
+	[aget_comb.c:1081:(217.f), aget_comb.c:1084:(217.f), aget_comb.c:1085:(217.f), aget_comb.c:1088:(217.f), aget_comb.c:1090:(217.f), aget_comb.c:1096:(217.f)]
+
+	Confidence: used PTA nodes lblSet(2, 2)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
+(1)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
+(2)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
+****
+Possible race between access to:
+
+REP:[446].soffset and
+REP:[446].soffset
+	Cluster ID: 22
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1071:(217.f), aget_comb.c:1073:(217.f), aget_comb.c:1075:(217.f), aget_comb.c:1077:(217.f)] and
+	[aget_comb.c:376:(174.f), aget_comb.c:462:(175.f)]
+
+	Confidence: used PTA nodes lblSet(2, 2)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+REP:[446].status and
+REP:[446].status
 	Cluster ID: 5
 	Escapes? true / true 
 	Accessed at locs:
-	[aget_comb.c:1071, aget_comb.c:1077, aget_comb.c:1090] and
-	[aget_comb.c:1071, aget_comb.c:1077, aget_comb.c:1090]
+	[aget_comb.c:972:(348.f)] and
+	[aget_comb.c:399:(174.f), aget_comb.c:480:(175.f)]
 
 	Confidence: used PTA nodes lblSet(2, 2)
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:391 11843 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
-(0)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
-(1)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
 ****
 Possible race between access to:
-[REP: 123].offset and
-[REP: 123].offset
-	Cluster ID: 8
-	Escapes? true / true 
-	Accessed at locs:
-	[aget_comb.c:1071, aget_comb.c:1077, aget_comb.c:1090] and
-	[aget_comb.c:1081, aget_comb.c:1084, aget_comb.c:1085, aget_comb.c:1088, aget_comb.c:1090, aget_comb.c:1096]
 
-	Confidence: used PTA nodes lblSet(2, 2)
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:391 11843 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
-(1)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
-(2)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
-(3)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
-****
-Possible race between access to:
-[REP: 123].status and
-[REP: 123].status
+REP:[446].status and
+REP:[446].status
 	Cluster ID: 1
 	Escapes? true / true 
 	Accessed at locs:
-	[aget_comb.c:972] and
-	[aget_comb.c:972]
+	[aget_comb.c:972:(348.f)] and
+	[aget_comb.c:972:(348.f)]
 
 	Confidence: used PTA nodes lblSet(2, 2)
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
 
 Different possible paths & LS (first 4):
 
 ****
 Possible race between access to:
-[REP: 123].status and
-[REP: 123].status
+
+REP:[446].status and
+REP:[446].status
 	Cluster ID: 3
 	Escapes? true / true 
 	Accessed at locs:
-	[aget_comb.c:972] and
-	[aget_comb.c:1097]
+	[aget_comb.c:972:(348.f)] and
+	[aget_comb.c:1097:(217.f)]
 
 	Confidence: used PTA nodes lblSet(2, 2)
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: aget_comb.c:193 5527 w/ func: signal_waiter
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:193 5478 w/ func: signal_waiter
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
 ****
 Possible race between access to:
-[REP: 123].status and
-[REP: 123].status
-	Cluster ID: 6
+
+REP:[446].status and
+REP:[446].status
+	Cluster ID: 18
 	Escapes? true / true 
 	Accessed at locs:
-	[aget_comb.c:1097] and
-	[aget_comb.c:1097]
+	[aget_comb.c:1097:(217.f)] and
+	[aget_comb.c:399:(174.f), aget_comb.c:480:(175.f)]
 
 	Confidence: used PTA nodes lblSet(2, 2)
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: aget_comb.c:391 11843 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:391 11843 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+REP:[446].status and
+REP:[446].status
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[aget_comb.c:1097:(217.f)] and
+	[aget_comb.c:1097:(217.f)]
+
+	Confidence: used PTA nodes lblSet(2, 2)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: aget_comb.c:391 11794 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:391 11794 w/ func: http_get
 (1)
-	Th. 1 spawned: aget_comb.c:468 14531 w/ func: http_get
-	Th. 2 spawned: aget_comb.c:468 14531 w/ func: http_get
+	Th. 1 spawned: aget_comb.c:468 14482 w/ func: http_get
+	Th. 2 spawned: aget_comb.c:468 14482 w/ func: http_get
 
 
 $$$$$$
-Total Warnings: 9
+Total Warnings: 23
 
 
 Printing Alias assumptions used by warnings
 -----
-nc	5	[REP: 123].offset#g/[REP: 123].offset#g	2	2
-nc	8	[REP: 123].offset#g/[REP: 123].offset#g	2	2
-nc	1	[REP: 123].status#g/[REP: 123].status#g	2	2
-nc	3	[REP: 123].status#g/[REP: 123].status#g	2	2
-nc	6	[REP: 123].status#g/[REP: 123].status#g	2	2
-writeState: Not needed for CIL PTA
-writeState: Not needed for Steens PTA
-Golden lvals hash stats (len, ents, sum/min/median/max bucket)
-	173	103	477	0	3	6	
-Golden lvals hash stats (len, ents, sum/min/median/max bucket)
-	173	0	0	0	0	0	
-Golden types hash stats (len, ents, sum/min/median/max bucket)
-	173	35	93	0	0	3	
-Golden compInfos hash stats (len, ents, sum/min/median/max bucket)
-	173	0	0	0	0	0	
-Elapsed time (secs): 0.180011
-Top heap size (words): 614400
-Current heap size (words): 614400
-Lifetime allocated bytes: 17373936.
-Collections -- minor: 17 major: 4 compactions: 0
+nc	10	REP:[449].clength#g/REP:[449].clength#g	1	1
+nc	19	REP:[446].clength#g/REP:[446].clength#g	2	2
+nc	20	REP:[446].fd#g/REP:[446].fd#g	2	2
+nc	21	REP:[446].foffset#g/REP:[446].foffset#g	2	2
+nc	17	REP:[446].offset#g/REP:[446].offset#g	2	2
+nc	11	REP:[446].offset#g/REP:[446].offset#g	2	2
+nc	14	REP:[446].offset#g/REP:[446].offset#g	2	2
+nc	22	REP:[446].soffset#g/REP:[446].soffset#g	2	2
+nc	5	REP:[446].status#g/REP:[446].status#g	2	2
+nc	1	REP:[446].status#g/REP:[446].status#g	2	2
+nc	3	REP:[446].status#g/REP:[446].status#g	2	2
+nc	18	REP:[446].status#g/REP:[446].status#g	2	2
+nc	12	REP:[446].status#g/REP:[446].status#g	2	2
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/racetests/aget/ciltrees/.pta_temp.anders
+
+Elapsed time (secs): 0.236014
+Top heap size (MB): 2
+Current heap size (MB): 1
+Lifetime allocated bytes (MB): 19
+Collections -- minor: 18 major: 6 compactions: 1
+Bytes per word: 4
+Exhausted tries: 1
 return value is 0
 ran 1 times
-cleared status file: /tmp/temp.LgdLKd
-Sun Aug 10 21:12:39 PDT 2008
+cleared status file: /tmp/temp.geAJZi
+Mon Oct 12 14:20:40 PDT 2009

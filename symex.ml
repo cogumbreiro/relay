@@ -1,18 +1,17 @@
-(** Symbolic execution module. In the end, provides mapping of 
-    lvalues to their value at each program point. Values are in terms
-    of the initial values (at function start). @see symex_types.ml
- *)
+(** Symbolic execution module w/out conservative adjustments for 
+    shared variables and concurrency. 
+
+    In the end, provides mapping of lvalues to their value at each 
+    program point. Values are in terms of the initial values 
+    (at function start). @see symex_types.ml  *)
 
 open Cil
 open Pretty
 open Fstructs
-open Stdutil
 open Symex_base
 open Symex_types
 open Scope
 
-
-module DF = Dataflow
 module A = Alias
 module D = Cildump
 module CLv = Cil_lvals
@@ -33,12 +32,18 @@ module Intra = IntraDataflow
 
 let modSumms = ref (new Modsummaryi.absModSumm)
 
-let setModSumm (newSummaries) =
+let setModSumm newSummaries =
   modSumms := newSummaries
 
-let init (settings:Config.settings) (cg:Callg.simpleCallG) modSum =
-  setModSumm modSum
+(********* NULL Checking stuff ************************************)
 
+module NI = struct
+
+  let isNullHost = isNullHost
+
+end
+
+module NULL = SYMEX_NULL_GEN (NI)
     
 (******************* Summary def'n, ops **********************)
 
@@ -71,13 +76,16 @@ class symLattice : [symState, SS.sumval] Intra.stateLattice = object (self)
   method bottom = bottomSymState
     
   method initialState = emptySymState
+
+  method setInitialState (st:symState) = 
+    failwith "Symex initial state should be constant?";
     
   (***** Debugging *****)
  
   (** Print the summary for the given function to the log. 
       TODO: Move this somewhere else? Hmmm, didn't supply input either? *)
-  method printSummary fkey =
-    SS.printSummary thesums fkey
+  method printSummary sumKey =
+    SS.printSummary thesums sumKey
       
   method printState st =
     printSymState st
@@ -128,7 +136,8 @@ let doPtrArith (expectedTyp:Cil.typ) (ptrTyp:Cil.typ)
   | Vbot, _ -> Vbot
 
   | _, Vbot 
-  | _, Vtop -> (* could be more specific, e.g., all fields in base struct *)  
+  | _, Vtop -> (* could be more specific if we assume memory safety, 
+                  e.g., all fields in base struct *) 
       (* Vtop *)
       v1
 
@@ -170,23 +179,17 @@ let doPtrArith (expectedTyp:Cil.typ) (ptrTyp:Cil.typ)
     and return the deref'ed type *)
 let rec pickDerefedTyp tList =
   match tList with
-    t :: [] -> begin
+    [t] -> begin
       match t with
-        TPtr (TVoid _, _) ->
-          TVoid []
-      | TPtr (t', _) ->
-          t'
-      | _ ->
-          t
+        TPtr (TVoid _, _) -> TVoid []
+      | TPtr (t', _) ->  t'
+      | _ -> t
     end
   | t :: tl -> begin
       match t with
-        TPtr (TVoid _, _) ->
-          pickDerefedTyp tl
-      | TPtr (t', _) ->
-          t'
-      | _ ->
-          pickDerefedTyp tl
+        TPtr (TVoid _, _) -> pickDerefedTyp tl
+      | TPtr (t', _) -> t'
+      | _ -> pickDerefedTyp tl
     end
   | [] -> failwith "pickDerefedTyp: given an empty list!"
 
@@ -941,7 +944,7 @@ let rec mainAliases origExp state v : (bool * (Lv.aExp list)) =
     AddrOffSet.fold 
       (fun target cur ->
          let e = concretizePointerTo target in
-         addOnceP expEqual cur e
+         List_utils.addOnceP expEqual cur e
       ) addrOffSet []
   in
 
@@ -1028,7 +1031,7 @@ let getAliasesLval state lval : (bool * (Lv.aExp list)) =
            try 
              let canonLv = Lv.mkMemChecked aliasPtr off in
              let (simpleH, simpleO), _ = Lv.simplifyLval canonLv in
-             addOnceP expEqual cur (Lv.CLval (simpleH, simpleO))
+             List_utils.addOnceP expEqual cur (Lv.CLval (simpleH, simpleO))
            with
              CLv.OffsetMismatch om ->
                L.logError ("getAliasesLval: " ^ CLv.string_of_offsetMiss om);
@@ -1047,15 +1050,15 @@ let substActForm state actuals lvalWithFormal : bool * Lv.aExp list =
          let substituted = substLval actuals lvalWithFormal in
          let mustAlias, results = getAliasesLval state substituted in
          if results = [] then
-           L.logError ("substActForm returned 0 results for: " ^
-                         (Lv.string_of_lvscope lvalWithFormal))
+           L.logError ~prior:3 ("substActForm returned 0 results for: " ^
+                                  (Lv.string_of_lvscope lvalWithFormal))
          ;
          (mustAlias, results)
        with CLv.SubstInvalidArg -> begin
          let arg = List.nth actuals n in
-         L.logError ("substActForm unsubstitutable arg: " ^
-                       (D.string_of_exp arg) ^ " formal: " ^ 
-                       (Lv.string_of_lval lvalWithFormal));
+         L.logError ~prior:3 ("substActForm unsubstitutable arg: " ^
+                                (D.string_of_exp arg) ^ " formal: " ^ 
+                                (Lv.string_of_lval lvalWithFormal));
          (true, [])
        end
       ) 
@@ -1156,7 +1159,7 @@ let printAddrs caption targets =
   L.logStatusD doc
 
 class symTransFunc (stLat: (symState, SS.sumval) Intra.stateLattice) = 
-  object (self)
+object (self)
   inherit [symState] Intra.idTransFunc stLat as superT
   inherit [symState] Intra.inspectorGadget stLat "Rad SS: "
 
@@ -1172,20 +1175,21 @@ class symTransFunc (stLat: (symState, SS.sumval) Intra.stateLattice) =
       h :: t -> firstPP <- getStmtPP h
     | _ -> ()
 
-  method isFirstStmt pp =
+  method private isFirstStmt pp =
     pp.pp_stmt = firstPP.pp_stmt (* ignore instruction id for now *)
 
-  method handleFunc cfg =
-    superT#handleFunc cfg;
+  method handleFunc funID cfg =
+    superT#handleFunc funID cfg;
     (* TPH.clear topPtrCache; *)
     self#initializeInitial cfg;
-    (* TODO: don't do this hack to set the inspect flag... *)
+    (* TODO: don't do this hack to set the inspect flag... 
+       Actually, it might be cleaner to make them all do this !!! *)
     self#setInspect (Inspect.inspector#mem cfg.svar.vname)
 
     
   (**************** Handling TOP *******************)
    
-  method havocTarget curSt (targHost, targOff) =
+  method private havocTarget curSt (targHost, targOff) =
     assignVar curSt targHost targOff Vtop
  
   (** true if the variable is in scope *)
@@ -1396,12 +1400,12 @@ class symTransFunc (stLat: (symState, SS.sumval) Intra.stateLattice) =
         Stat.time "assign2FI" 
           (self#assignToFITargets baseTyp ptrExp off rhs) midState
     in
-    DF.Done (finalSt)
+    Dataflow.Done (finalSt)
 
 
-  method private doCallRet lv acts loc inState fkey = 
+  method private doCallRet lv acts loc inState key = 
     (* Assume x = malloc has been converted to x = &allocSiteGlobal *)
-    let summary = stLat#sums#find fkey in
+    let summary = stLat#sums#find key in
     let summaryRetVal = SS.getRetValue summary in
     let rhs, midSt = substValue inState acts summaryRetVal in
     try 
@@ -1411,23 +1415,16 @@ class symTransFunc (stLat: (symState, SS.sumval) Intra.stateLattice) =
         (self#assignToFITargets baseTyp ptrExp off rhs) midSt
         
 
-  method handleCallRet lv callexp acts loc inState =
-    match callexp with
-      Lval(Var(va),NoOffset) ->
-        let fkey = va.vid in
-        self#doCallRet lv acts loc inState fkey
-    | _ ->
-        let fkeys = A.funsForCall callexp in
-        List.fold_left 
-          (fun curSt fkey ->
-             let retted = self#doCallRet lv acts loc inState fkey in
-             stLat#combineStates curSt retted
-          ) inState fkeys
-          
+  method handleCallRet lv targs callexp acts loc inState =
+    List.fold_left 
+      (fun curSt sumKey ->
+         let retted = self#doCallRet lv acts loc inState sumKey in
+         stLat#combineStates curSt retted
+      ) bottomSymState targs (* changed from inState *)
 
-  method private doCallArgs actuals loc inState fkey =
+  method private doCallArgs actuals loc inState key =
     try
-      let mods = !modSumms#getMods fkey in
+      let mods = !modSumms#getMods key in
       let toSmash, repNodes = List.fold_left
         (fun (smash, reps) ((sumHost, sumOffset), sumScope) -> 
            match sumScope with
@@ -1511,27 +1508,21 @@ class symTransFunc (stLat: (symState, SS.sumval) Intra.stateLattice) =
         (* All summaries should be initialized *)
         failwith "SS: modSumms#get returned Not_found"
     | Modsummaryi.BottomSummary ->
-        L.logError ("SS: modSumm is BOTTOM for: " ^ (string_of_fkey fkey));
+        L.logError ("SS: modSumm is BOTTOM: " ^ (Callg.fid_to_string key));
         bottomSymState
           
           
-  method handleCallExp callexp acts loc inState =
-    match callexp with
-      Lval(Var(va),NoOffset) ->
-        let fkey = va.vid in
-        Stat.time "rad SS modSums" (self#doCallArgs acts loc inState) fkey
-    | _ ->
-        let fkeys = A.funsForCall callexp in
-        List.fold_left 
-          (fun curSt fkey ->
-             let argged = Stat.time "rad SS modSums" 
-               (self#doCallArgs acts loc inState) fkey in
-             stLat#combineStates curSt argged
-          ) inState fkeys
-          
+  method handleCallExp targs callexp acts loc inState =
+    List.fold_left 
+      (fun curSt sumKey ->
+         let argged = Stat.time "rad SS modSums" 
+           (self#doCallArgs acts loc inState) sumKey in
+         stLat#combineStates curSt argged
+      ) bottomSymState targs (* changed from inState *)
+      
   method handleGuard gexp inState =
     if stLat#isBottom inState then
-      DF.GUnreachable
+      Dataflow.GUnreachable
     else
       begin
         (* TODO: eval expression ? *)
@@ -1543,16 +1534,16 @@ class symTransFunc (stLat: (symState, SS.sumval) Intra.stateLattice) =
           BinOp (Ne, e, Const (ckind), _)
         | BinOp (Ne, Const (ckind), e, _) ->
             (* Saying e != c *)
-            DF.GDefault
+            Dataflow.GDefault
 
         | BinOp (Eq, e, Const (ckind), _)
         | BinOp (Eq, Const (ckind), e, _) ->
             (* Saying e == c *)
-            DF.GDefault
+            Dataflow.GDefault
               
-        | Lval ((_, _) as lval) ->
+        | Lval ((_, _)) ->
             (* Checking if lval is not null *)
-            DF.GDefault
+            Dataflow.GDefault
               
         (* handle !'s in succession *)
         | UnOp (LNot, UnOp (LNot, exp, _), _) ->
@@ -1585,6 +1576,11 @@ end
 
 let fullLattice = new symLattice
 let seqTrans = new symTransFunc fullLattice
+
+let init settings cg modSum =
+  setModSumm modSum;
+  seqTrans#setCG cg
+
 
 class symSummarizer (stLat : (symState, SS.sumval) Intra.stateLattice) 
   (sums : SS.sumval BS.base) : [SS.sumval, symState] Intra.summarizer 
@@ -1669,17 +1665,17 @@ module SymStateFwd = Intra.FlowSensitive (SymStateDF)
 
 (** Initialize the symbolic state before analzying the given func
     and initialize the dataflow facts *)
-let initState (func:Cil.fundec) : unit = begin
+let initState funID (func:Cil.fundec) : unit = begin
   curPtrID := 0;
-  SymStateFwd.initialize func SymStateDF.stMan#initialState
+  SymStateFwd.initialize funID func SymStateDF.stMan#initialState
 end
 
 
 (** Evaluate the symbolic store for a given function.
     Assumes func has CFG info computed (e.g., func.sallstmts is valid)
     Returns true if the return value summary is updated   *)
-let doSymState (func:Cil.fundec) : unit =
-  initState func;
+let doSymState funID (func:Cil.fundec) : unit =
+  initState funID func;
   SymStateFwd.compute func
 
 
@@ -1688,24 +1684,20 @@ class symexAnalysis = object (self)
   
   val summarizer = new symSummarizer fullLattice SS.sum
 
-  method setInspect yesno =
-    seqTrans#setInspect yesno 
-      (* TODO: pick the specific trans func when there's the seq and conc *)
+  method setInspect (yesno:bool) =
+    () (* transFuncs set themselves when you call handleFunc *)
 
-  method isFinal (fk:fKey) =
-    sumIsFinal fk
+  method isFinal key =
+    sumIsFinal key
       
-  method compute cfg =
+  method compute funID cfg =
     L.logStatus "doing symstate";
     L.flushStatus ();
-    Stat.time "Computing rad_symstate DF: " doSymState cfg
+    Stat.time "Computing rad_symstate DF: " (doSymState funID) cfg
       
-  method summarize fkey cfg =
-    if self#isFinal fkey then begin
-      false
-    end
-    else
-      summarizer#summarize fkey cfg SymStateFwd.getDataBefore
+  method summarize key cfg =
+    if self#isFinal key then false
+    else summarizer#summarize key cfg SymStateFwd.getDataBefore
         (* In other phases, can override to not summarize! *)
       
   method flushSummaries () =
@@ -1855,15 +1847,4 @@ let substActForm3 pp actuals lvalWithFormal : Lv.aLval list =
                     (Lv.string_of_lval lvalWithFormal) 
                   ^ " stayed in summary?");
       []
-
-(********* NULL Checking stuff ************************************)
-
-module NI = struct
-
-  let isNullHost = isNullHost
-
-end
-
-module NULL = SYMEX_NULL_GEN (NI)
-
 

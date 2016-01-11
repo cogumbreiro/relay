@@ -141,6 +141,7 @@ class fpTestDriver (testable1 : fpTestable) (testable2 : fpTestable) = object (s
             end else if StringSet.is_empty diff1 && StringSet.is_empty diff2 
             then begin
               print_endline "same!";
+              self#printFSet testable1#name !this;
               numAgree <- numAgree + 1;
             end else begin
               self#printDiffs this testable1#name other testable2#name 

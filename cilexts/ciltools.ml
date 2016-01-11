@@ -304,7 +304,8 @@ and compare_lhost x y =
       compare x y
 
 and compare_type x y =
-  compare (typeSig x) (typeSig y) 
+  if x == y then 0 
+  else compare (typeSig x) (typeSig y) 
 
 and compare_var x y =
   x.vid - y.vid
@@ -692,6 +693,16 @@ let predPP stmt : prog_point list =
 (* TODO: see if we need one for successor program points? *)
 
 
+let getStmtFromPP cfg pp : stmt =
+  List.find (fun stmt -> stmt.sid = pp.pp_stmt) cfg.sallstmts
+
+let getInstrFromPP cfg pp : instr =
+  let parentStmt = getStmtFromPP cfg pp in
+  match parentStmt.skind with
+    Instr il -> List.nth il pp.pp_instr 
+  | _ -> failwith ("getInstrFromPP given non-instr: " ^ string_of_pp pp)
+
+
 (*************** Deprecated InstrHash stuff ***********************)
 
 let compare_instr (i1:instr) (i2:instr) : int =
@@ -725,3 +736,23 @@ module HashedInstr = struct
 end
   
 module InstrHash = Hashtbl.Make (HashedInstr)
+
+(************* Determine if variable is a formal ****************) 
+
+(** Return the index of the first element that satisfies pred *)
+let indexOf pred list = 
+  let rec indexHelp curIndex = function
+      [] -> raise Not_found
+    | x :: l -> if pred x then curIndex else indexHelp (curIndex + 1) l
+  in
+  indexHelp 0 list
+
+let getIndex (formals:varinfo list) (vi:varinfo) : int option =
+  try Some (indexOf 
+              (fun formalVI -> (compare_var vi formalVI == 0)) formals)
+  with Not_found -> None
+    
+let isFormal func vi =
+  match getIndex func.sformals vi with
+    Some (i) -> true
+  | None -> false

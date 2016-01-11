@@ -38,25 +38,19 @@
 (** The intra-procedural portion of the dataflow analysis for 
     finding data races *)
 
-open Callg
 open Cil
 open Pretty
+open Callg
 open Fstructs
-open Scc_cg
-open Messages
-open Cilinfos
 open Manage_sums
 open Lockset
 open Guarded_access_base
+open Logging
+open Racesummary
 
-module IH = Inthash
 module DF = Dataflow
 module Intra = IntraDataflow
 module IDF = InterDataflow
-module A = Alias
-module Sh = Shared
-module RS = Racesummary
-
 
 module SPTA = Symstate2
 
@@ -64,23 +58,13 @@ module SPTA = Symstate2
 module SPTA = Symex
 *)
 
-module Du = Cildump
 module BS = Backed_summary
 module Stat = Mystats
-module L = Logging
 
 module CLv = Cil_lvals
 module Lv = Lvals
 
-module I = Inspect
-
 (* TODO: switch to IntraDataflow framework ! *)
-
-(***************************************************)
-(* State / Utilities :                             *)
-
-(* Current function *)
-let curFunc = ref dummyFunDec
 
 
 (***************************************************)
@@ -92,6 +76,17 @@ let inspect = ref false
 let setInspect yesno =
   inspect := yesno
 
+(* Current function *)
+let curFunc = ref dummyFunDec
+let curFunID = ref dummyFID
+let curCG = ref emptyCG
+let curSCCCG = ref Scc_cg.emptySCCCG
+
+let getFunName fid : string =
+  try
+    let node = FMap.find fid !curCG in
+    node.name
+  with Not_found -> ""
 
 (************************************************************)
 
@@ -102,51 +97,51 @@ module RaceDF = struct
   let debug = ref debug 
       
   (** per program point state -- only need locks to be flow-sensitive *)
-  type t = RS.lockState
+  type t = lockState
 
   (** lockset before a program statement *)
-  let stmtStartData: t IH.t = IH.create 17
+  let stmtStartData: t Inthash.t = Inthash.create 17
 
   (** initializes DF facts -- ASSUMES curFunc is set! *)
   let initStmtStartData (input: t) =
     (* Set all dfFacts to $BOTTOM, except the entry stmt be INPUT  *)
-    IH.clear stmtStartData;
+    Inthash.clear stmtStartData;
     (* Assume first stmt in the list is the entry stmt *)
     match !curFunc.sallstmts with
       hd :: tl ->
-        IH.add stmtStartData hd.sid input;
+        Inthash.add stmtStartData hd.sid input;
         List.iter (fun stmt ->
-                     IH.add stmtStartData stmt.sid RS.bottomLS
+                     Inthash.add stmtStartData stmt.sid bottomLS
                   ) tl
-    | _ ->
-        ()
+    | _ -> ()
 
   let ldiffCache = LSPH.create 7
   let ldiffHits = ref 0
   let ldiffMisses = ref 0
 
   let resetCache () =
-    RS.GA.clearCache ();
+    GA.clearCache ();
     LSPH.clear ldiffCache;
-    L.logStatusF "Prev ldiffCache hits: %d\tmisses: %d\n\n" 
+    logStatusF "Prev ldiffCache hits: %d\tmisses: %d\n\n" 
       !ldiffHits !ldiffMisses;
     ldiffHits := 0;
     ldiffMisses := 0
 
   let printCacheStats () = begin
-    RS.GA.printCacheStats ();
-    L.logStatus (LS.string_of_hashstats "Golden LS");
+    GA.printCacheStats ();
+    logStatus (LS.string_of_hashstats "Golden LS");
   end
 
  
 
   (** Initialize the symbolic state before analzying the given func
       and initialize the dataflow facts *)
-  let initState (func: Cil.fundec) (input: t) : unit =
-    (curFunc := func;
-     initStmtStartData input;
-     resetCache ()
-    )
+  let initState funID (func: Cil.fundec) (input: t) : unit = begin
+    curFunID := funID;
+    curFunc := func;
+    initStmtStartData input;
+    resetCache ()
+  end
 
   let copy (d: t) = d 
 
@@ -158,18 +153,18 @@ module RaceDF = struct
     newD
 
   let combinePredecessors (s: stmt) ~(old: t) (newD: t) : t option =
-    if Stat.time "LS subset" (RS.lStateSubset newD) old then
+    if Stat.time "LS subset" (lStateSubset newD) old then
       None
     else begin
       if !inspect then begin
-        L.logStatus "Inspecting LS: state before combining";
-        L.logStatus ((Du.string_of_stmt s));
-        RS.printLockset old
+        logStatus "Inspecting LS: state before combining";
+        logStatus (Cildump.string_of_stmt s);
+        printLockset old
       end;
-      let comboState = Stat.time "LS union" (RS.combineLStates old) newD in
+      let comboState = Stat.time "LS union" (combineLStates old) newD in
       if !inspect then begin
-        L.logStatus "Inspecting LS: state after combining";
-        RS.printLockset comboState
+        logStatus "Inspecting LS: state after combining";
+        printLockset comboState
       end;
       Some (comboState)
     end
@@ -185,9 +180,9 @@ module RaceDF = struct
     (* Only update if mustAlias *)
     if (mustAlias) then (
       (if (List.length subbedLvs > 1) 
-       then L.logError 
-         ("RS: summary lock maps to multiple @ " ^ 
-            (!curFunc.svar.vname) ^ ":" ^ (Du.string_of_pp pp))
+       then 
+         logErrorF "RS: summary lock maps to multiple @ %s:%s\n" 
+           (!curFunc.svar.vname) (Cildump.string_of_pp pp)
       );
       List.fold_left
         (fun curLS subbedLv ->
@@ -220,12 +215,9 @@ module RaceDF = struct
       let appLock = applyLocked pp actuals in
       let appUn   = applyUnlocked pp actuals in
       let didLocked = 
-        LS.S.fold appLock
-          (LS.getPlus lockDiff) curLS in
+        LS.S.fold appLock (LS.getPlus lockDiff) curLS in
       let didUnlocked = 
-        LS.unique (LS.S.fold appUn
-                     (LS.getMinus lockDiff) didLocked)
-      in
+        LS.unique (LS.S.fold appUn (LS.getMinus lockDiff) didLocked) in
       LSPH.add ldiffCache (curLS, lockDiff) didUnlocked;
       incr ldiffMisses;
       didUnlocked
@@ -233,14 +225,13 @@ module RaceDF = struct
 
   (** Transform input state according to function summary *)
   let findApplyLSumm pp actuals fkey inSt =
-    let fsumm = RS.sum#find fkey in
-    let sumState = (RS.summOutstate fsumm).RS.lState in
-    if (RS.isBottomLS (sumState) || RS.isBottomLS (inSt)) then
-      RS.bottomLS
+    let fsumm = sum#find fkey in
+    let sumState = (summOutstate fsumm).lState in
+    if (isBottomLS (sumState) || isBottomLS (inSt)) then
+      bottomLS
     else begin
       let apply = applyLDiff pp actuals in
-      let newLocks = Stat.time "LS ldiff"
-        (apply inSt) sumState in
+      let newLocks = Stat.time "LS ldiff" (apply inSt) sumState in
       newLocks
     end
       (* All known functions should have summary initialized *)
@@ -248,53 +239,30 @@ module RaceDF = struct
 
   (** Transform flow-sensitive state according to function summary.
       Assumes {!Cil.getCurrentPP} will return the current prog_point. *) 
-  let postSens (curInstr: instr) (callSite:Cil.location) (callexp:Cil.exp)
-      (actuals:Cil.exp list) (inState:t) : t =
+  let postSens curInstr callSite targs
+      (callexp:Cil.exp) (actuals:Cil.exp list) (inState:t) : t =
     (* Don't need this check? Already done in doInstr *)
-    if (RS.isBottomLS (inState)) then
-      RS.bottomLS
-    else match callexp with
-      (* Direct call *)
-      Lval (Var (finfo), NoOffset ) ->
-        let fkey = finfo.vid in
-        let pp = getCurrentPP () in (* not callSite *)
-        findApplyLSumm pp actuals fkey inState 
-
-    (* Indirect call : Try to apply all summaries of aliased funcs *)
-    | Lval(Mem(derefExp), NoOffset) -> (* Current AA is field insens. *)
-        let aliasedFuns = A.deref_funptr derefExp in
-        (* What to do if we don't know what the FP leads to? *)
-        if (aliasedFuns = []) then begin
-          L.logError ("post: funptr resolved to 0 fun(s): " ^
-                          (Du.string_of_exp callexp));
-          inState
-        end
-        else
-          let pp = getCurrentPP () in
-          List.fold_left 
-            (fun curState fkey ->
-               let newState = findApplyLSumm pp actuals fkey inState in
-               RS.combineLStates curState newState
-            ) RS.bottomLS aliasedFuns
-            
-    (* Other? *)
-    | _ -> 
-        L.logError "LS postSens: Unknown callexp structure";
-        inState
-
-
+    if (isBottomLS (inState)) then
+      bottomLS
+    else 
+      let pp = getCurrentPP () in
+      List.fold_left 
+        (fun curState sumKey ->
+           let newState = findApplyLSumm pp actuals sumKey inState in
+           combineLStates curState newState
+        ) bottomLS targs
 
   (** Update flow sensitive facts for the instruction *)
   let doInstr (i: instr) (inSt: t) =
     if !inspect then begin
-      L.logStatus "Inspecting LS: state before instr";
-      L.logStatus ((Du.string_of_instr i));
-      RS.printLockset inSt;
+      logStatus "Inspecting LS: state before instr";
+      logStatus (Cildump.string_of_instr i);
+      printLockset inSt;
     end;
     
     (* If the input state is bottom, the next state should also
      * be bottom *)
-    if (RS.isBottomLS (inSt)) then
+    if (isBottomLS (inSt)) then
       DF.Default
     else begin
       match i with 
@@ -303,14 +271,19 @@ module RaceDF = struct
         end
           
       | Call (retval_option, callexp, actuals, loc) ->
-          let funned =  
-            Stat.time "LS post" (postSens i loc callexp actuals) 
-              inSt in
-          if !inspect then begin
-            L.logStatus "Inspecting LS: state after instr";
-            RS.printLockset funned;
-          end;
-          DF.Done (funned) (* post most likely changed state *)
+          let pp = getCurrentPP () in
+          let targs = callTargsAtPP !curCG !curFunID pp in
+          if targs = [] then begin
+            Intra.warnNoCallees callexp;
+            DF.Default
+          end else
+            let funned =  
+              Stat.time "LS post" (postSens i loc targs callexp actuals) inSt in
+            if !inspect then begin
+              logStatus "Inspecting LS: state after instr";
+              printLockset funned;
+            end;
+            DF.Done (funned) (* post most likely changed state *)
       | Asm _ -> 
           (* Unsoundly handling ASM *)
           DF.Default
@@ -324,10 +297,10 @@ module RaceDF = struct
 
   (** Find from flow-sensitive state preceding statement S, given the table.
       Returns BOTTOM if not found *)
-  let getStmtData (data: t IH.t) (s: stmt) : t = 
-    try IH.find data s.sid
+  let getStmtData (data: t Inthash.t) (s: stmt) : t = 
+    try Inthash.find data s.sid
     with Not_found -> 
-      RS.bottomLS
+      bottomLS
 
   (* TODO use value of the guard *)  
   let doGuard (gexp: Cil.exp) (d: t) =
@@ -347,7 +320,7 @@ module RaceDF = struct
     begin
       Printf.printf "*** DF info preceding statement: %s\n" 
         (sprint 80 (d_stmt () stmt));
-      RS.printLockset data;
+      printLockset data;
     end
       
       
@@ -372,32 +345,38 @@ let getLocksAfter = RaceForwardDF.getDataAfter
 (********** Update read / write accesses flow insensitively *****)
   
 class ['st] readWriteAnalyzer = object (self)
+
+  val mutable curFunID = dummyFID
+
+  method setFunID fid =
+    curFunID <- fid
   
   (** Walk through the Cil expression and add any refs to the state,
       also returns true if the state changed 
       Eagerly filters lvals that should be considered *)
   method addRefs curLS (s: 'st) (loc:Cil.location) (exp:Cil.exp) : 'st =
-    if (RS.isBottomLS (curLS)) then
+    if (isBottomLS (curLS)) then
       s
     else match exp with
       Lval(Var(vi) as host, off) -> (* No derefs; only count if global *)
-        if Sh.varShareable vi then
+        if Shared.varShareable vi then
           let newOff, _ = CLv.canonicizeOff off in
-          RS.addReadCorr curLS s (Lv.abs_of_lval (host, newOff)) 
-            loc !curFunc.svar.vid
+          addReadCorr curLS s (Lv.abs_of_lval (host, newOff)) 
+            loc curFunID
         else
           s
             
     | Lval((Mem(ptrExp), off) as lv) -> (* Has deref, count if glob or form *)
         let pp = getCurrentPP () in
         let mustPt, targets = SPTA.derefLvalAt pp lv in
+        let targets = SPTA.NULL.filterNullsLvals targets in
         (* Add correlation regardless of must/may point to status *)
         List.fold_left 
           (fun curSt curLv ->
-             match Sh.isShareableAbs !curFunc curLv with
+             match Shared.isShareableAbs !curFunc curLv with
                None -> curSt
              | Some(scope) ->
-                 RS.addReadCorr curLS curSt curLv loc !curFunc.svar.vid
+                 addReadCorr curLS curSt curLv loc curFunID
           ) s targets
           
     | BinOp(_,lhs,rhs,_) ->
@@ -416,15 +395,15 @@ class ['st] readWriteAnalyzer = object (self)
   (** Add any shared writes to the state. Eagerly filters lvals 
       that should be considered *)
   method handleAssignLeft curLS (s: 'st) (loc:Cil.location) (lv:Cil.lval) : 'st =
-    if(RS.isBottomLS (curLS)) then
+    if(isBottomLS (curLS)) then
       s (* unreachable *)
     else match lv with
       (* [COPY]  x = newVal *)
       (Var(vi) as host, off) ->
-        if Sh.varShareable vi then
+        if Shared.varShareable vi then
           let newOff, _ = CLv.canonicizeOff off in
-          RS.addWriteCorr curLS s (Lv.abs_of_lval (host, newOff)) 
-            loc !curFunc.svar.vid
+          addWriteCorr curLS s (Lv.abs_of_lval (host, newOff)) 
+            loc curFunID
         else
           s
             
@@ -432,14 +411,15 @@ class ['st] readWriteAnalyzer = object (self)
     | (Mem(ptrExp),_) -> begin
         let pp = Cil.getCurrentPP () in
         let mustPt, targets = SPTA.derefLvalAt pp lv in
+        let targets = SPTA.NULL.filterNullsLvals targets in
         (* Add correlation regardless of must/may point to status *)
         List.fold_left 
           (fun curSt curLv ->
-             match Sh.isShareableAbs !curFunc curLv with
+             match Shared.isShareableAbs !curFunc curLv with
                None -> curSt
              | Some(scope) ->
-                 RS.addWriteCorr curLS curSt curLv 
-                   loc !curFunc.svar.vid 
+                 addWriteCorr curLS curSt curLv 
+                   loc curFunID
           ) s targets
       end
         (* TODO, check refs done in determining target of write? *)
@@ -450,17 +430,18 @@ end (* TODO: make the summary application part of the class? *)
 module FITransF = struct
 
   (** type of flow insensitive state *)
-  type t = RS.corrState
+  type t = corrState
 
-  let fiState = ref RS.emptyCS
+  let fiState = ref emptyCS
 
   (** Initialize the symbolic state before analzying the given func
       and initialize the dataflow facts *)
-  let initState (func: Cil.fundec) (input: t) : unit =
-    (curFunc := func;
-     fiState := input;
-     RS.GA.clearCache ();
-    )
+  let initState funID (func: Cil.fundec) (input: t) : unit = begin
+    curFunID := funID;
+    curFunc := func;
+    fiState := input;
+    GA.clearCache ();
+  end
 
     
   (*** Correlation / Access summary application ***)
@@ -474,12 +455,12 @@ module FITransF = struct
     let updateLS = Stat.time "LS ldiff" 
       (RaceDF.applyLDiff pp actuals curLocks) in
     let newCorr = Stat.time "LS updateAcc" 
-      (RS.GA.updateAcc corrInfo) updateLS in
+      (GA.updateAcc corrInfo) updateLS in
     (* Next, merge this new constraint w/ any existing one *)
     Stat.time "LS updateCorr" 
       (List.fold_left
          (fun curConstMap curLval -> (* TODO, track callSite also? *)
-            RS.GA.updateCorr curLval newCorr curConstMap
+            GA.updateCorr curLval newCorr curConstMap
          ) curCMap) lvalNames
 
 
@@ -493,60 +474,38 @@ module FITransF = struct
 
   (** Augment flow insensitive access correlation state *)
   let findApplyCSumm pp actuals curLocks fkey inSt =
-    let fsumm = RS.sum#find fkey in
-    let sumState = (RS.summOutstate fsumm).RS.cState in
-    if (RS.isBottomCS (sumState) || RS.isBottomLS (curLocks)) then
+    let fsumm = sum#find fkey in
+    let sumState = (summOutstate fsumm).cState in
+    if (isBottomCS (sumState) || isBottomLS (curLocks)) then
       inSt
     else begin
       if !inspect then begin
-        L.logStatus "findApplyCSumm sum:";
-        RS.printCorrState sumState;
+        logStatus "findApplyCSumm sum:";
+        printCorrState sumState;
       end;
       let apply = applyCDiff pp actuals curLocks in
       let newWriteCorrs = Stat.time "LS cdiff" 
-        (apply sumState.RS.writeCorrs) inSt.RS.writeCorrs in
+        (apply sumState.writeCorrs) inSt.writeCorrs in
       let newReadCorrs = Stat.time "LS cdiff" 
-        (apply sumState.RS.readCorrs) inSt.RS.readCorrs in
-      RS.makeCState newWriteCorrs newReadCorrs
+        (apply sumState.readCorrs) inSt.readCorrs in
+      makeCState newWriteCorrs newReadCorrs
     end
       (* All known functions should have summary initialized *)
 
 
   (** Transform flow-insensitive state according to function summary.
       Assumes {!Cil.getCurrentPP} will return the current prog_point. *) 
-  let postInsens (curInstr: instr) (callSite:Cil.location) (callexp:Cil.exp)
-      (actuals:Cil.exp list) curLocks (inState:t) : t =
+  let postInsens curInstr callSite targs
+      (callexp:Cil.exp) (actuals:Cil.exp list) curLocks (inState:t) : t =
     (* First check if instruction is reachable *)
-    if (RS.isBottomLS (curLocks)) then
+    if (isBottomLS (curLocks)) then
       inState
-    else match callexp with
-      (* Direct call *)
-      Lval (Var (finfo), NoOffset ) ->
-        let fkey = finfo.vid in
-        let pp = getCurrentPP () in
-        findApplyCSumm pp actuals curLocks fkey inState 
-          
-    (* Indirect call : Try to apply all summaries of aliased funcs *)
-    | Lval(Mem(derefExp), NoOffset) -> (* Current AA is field insens. *)
-        let aliasedFuns = A.deref_funptr derefExp in
-        (* What to do if we don't know what the FP leads to? *)
-        if (aliasedFuns = []) then begin
-          L.logError ("post: funptr resolved to 0 fun(s): " ^
-                        (Du.string_of_exp callexp));
-          inState
-        end
-        else
-          let pp = getCurrentPP () in
-          List.fold_left 
-            (fun curState fkey ->
-               findApplyCSumm pp actuals curLocks fkey curState 
-            ) inState aliasedFuns
-            
-    (* Other? *)
-    | _ ->
-        L.logError "RS postInsens: Unknown callexp structure";
-        inState
-
+    else 
+      let pp = getCurrentPP () in
+      List.fold_left 
+        (fun curState sumKey ->
+           findApplyCSumm pp actuals curLocks sumKey curState 
+        ) inState targs
 
   (** Visitor for recording all guarded accesses *)
   class guardedAccessSearcher rwChecker getLocks = object (self)
@@ -556,8 +515,8 @@ module FITransF = struct
       let didLHS = rwChecker#handleAssignLeft curLocks !fiState loc lval in
       let didRHS = rwChecker#addRefs curLocks didLHS loc rhs in
       { 
-        RS.writeCorrs = didRHS.RS.writeCorrs;
-        RS.readCorrs = didRHS.RS.readCorrs;
+        writeCorrs = didRHS.writeCorrs;
+        readCorrs = didRHS.readCorrs;
       }
 
     (* Visit instruction for flow insensitive facts *)
@@ -567,13 +526,13 @@ module FITransF = struct
       let curLocks = getLocks pp in
 
       if !inspect then begin
-        L.logStatus "Inspecting RS: state before instr";
-        L.logStatus ((Du.string_of_instr i));
-        RS.printCorrState !fiState;
+        logStatus "Inspecting RS: state before instr";
+        logStatus (Cildump.string_of_instr i);
+        printCorrState !fiState;
       end;
 
       (* Use lockset info to see if stmt is even reachable *)
-      let result = if (RS.isBottomLS (curLocks)) then
+      let result = if (isBottomLS (curLocks)) then
         DoChildren
       else begin 
         match i with 
@@ -583,8 +542,8 @@ module FITransF = struct
                 (self#handleAssign lval rhs loc curLocks) !fiState in
             fiState := finalSt;
             if !inspect then begin
-              L.logStatus "Inspecting RS: state after instr";
-              RS.printCorrState !fiState;
+              logStatus "Inspecting RS: state after instr";
+              printCorrState !fiState;
             end;
             DoChildren
           end
@@ -603,21 +562,22 @@ module FITransF = struct
                 didLHS actuals in
             let tempState = 
               {
-                RS.writeCorrs = reffedArgs.RS.writeCorrs;
-                RS.readCorrs = reffedArgs.RS.readCorrs;
+                writeCorrs = reffedArgs.writeCorrs;
+                readCorrs = reffedArgs.readCorrs;
               } in
+            let targs = callTargsAtPP !curCG !curFunID (getCurrentPP ()) in
             let funned =  
-              Stat.time "LS post" (postInsens i loc callexp actuals curLocks) 
-                tempState in
+              Stat.time "LS post" 
+                (postInsens i loc targs callexp actuals curLocks) tempState in
             let finalSt = 
               { 
-                RS.writeCorrs = funned.RS.writeCorrs;
-                RS.readCorrs = funned.RS.readCorrs;
+                writeCorrs = funned.writeCorrs;
+                readCorrs = funned.readCorrs;
               } in
             fiState := finalSt;
             if !inspect then begin
-              L.logStatus "Inspecting RS: state after instr";
-              RS.printCorrState !fiState;
+              logStatus "Inspecting RS: state after instr";
+              printCorrState !fiState;
             end;
             DoChildren
               
@@ -637,13 +597,13 @@ module FITransF = struct
 
 
       if !inspect then begin
-        L.logStatus "Inspecting RS: state before stmt";
-        L.logStatus ((Du.string_of_stmt s));
-        RS.printCorrState !fiState;
+        logStatus "Inspecting RS: state before stmt";
+        logStatus (Cildump.string_of_stmt s);
+        printCorrState !fiState;
       end;
 
       (* Check if stmt is even reachable (by checking LS) *)
-      if (RS.isBottomLS (curLocks)) then
+      if (isBottomLS (curLocks)) then
         DoChildren
       else
         match s.skind with
@@ -653,13 +613,13 @@ module FITransF = struct
             let reffed = rwChecker#addRefs curLocks !fiState loc e in
             let finalSt = 
               { reffed with
-                  RS.readCorrs = reffed.RS.readCorrs;
+                  readCorrs = reffed.readCorrs;
               } in
             fiState := finalSt;
 
             if !inspect then begin
-              L.logStatus "Inspecting RS: state after stmt";
-              RS.printCorrState !fiState;
+              logStatus "Inspecting RS: state after stmt";
+              printCorrState !fiState;
             end;
 
             DoChildren
@@ -682,7 +642,7 @@ end
 let combRetStates (curState:RaceDF.t) (s:stmt) : RaceDF.t =
   let combineS () =
     let newState = RaceDF.getStmtData RaceDF.stmtStartData s in
-    RS.combineLStates curState newState
+    combineLStates curState newState
   in
   (* Consider Return statements *)
   match (s.skind, s.succs) with
@@ -698,58 +658,53 @@ class raceAnalysis rwChecker = object (self)
   method setInspect yesno =
     inspect := yesno
 
-  method isFinal (fk:fKey) = 
-    BS.isFinal fk RS.sum#sumTyp
+  method isFinal key = 
+    BS.isFinal key sum#sumTyp
       
-  method compute cfg =
+  method compute funID cfg =
     (* TODO: get rid of input *)
-    let input = RS.emptyState in
-    RaceDF.initState cfg input.RS.lState;
-    FITransF.initState cfg input.RS.cState;
+    let input = emptyState in
+    RaceDF.initState funID cfg input.lState;
+    FITransF.initState funID cfg input.cState;
+    rwChecker#setFunID funID;
     Stat.time "Race/Lockset DF: " 
       (fun () ->
          (* Compute locksets *)
-         L.logStatus "doing lockset";
-         L.flushStatus ();
+         logStatus "doing lockset";
+         flushStatus ();
          RaceForwardDF.compute cfg.sallstmts;
          
          (* Update read/write correlation info *)
-         L.logStatus "doing guarded access";
-         L.flushStatus ();
+         logStatus "doing guarded access";
+         flushStatus ();
          let gaVisitor = new FITransF.guardedAccessSearcher 
            rwChecker getLocksBefore in
          ignore (visitCilFunction (gaVisitor :> cilVisitor) cfg);
       ) ()
 
   method private doSummarize fkey cfg =
-    if self#isFinal fkey then
-      false
+    if self#isFinal fkey then false
     else begin
       (* Get the possibly-new output state for this function *)
-      let outLocks = List.fold_left combRetStates RS.bottomLS cfg.sallstmts in
+      let outLocks = List.fold_left combRetStates bottomLS cfg.sallstmts in
       let outCorrs = !FITransF.fiState in
       (* Assemble *)
-      let outState = RS.makeState outLocks outCorrs in
+      let outState = makeState outLocks outCorrs in
 
       (* Ignore input for race summaries... any exposure of state 
          will screw up the ability to collect in these in a list *)
-      let input = RS.emptyState in
-      let newSummary = (RS.makeSumm input outState) in
+      let input = emptyState in
+      let newSummary = (makeSumm input outState) in
+      let funname = getFunName fkey in
       let changed = Intra.checkupSummary fkey cfg newSummary 
-        RS.sum#find
-        RS.isBottomSummary
-        RS.sumSubset
-        RS.combineSummary
-        RS.scopeSummary
-        RS.sum#addReplace
+        sum#find
+        isBottomSummary
+        sumSubset
+        combineSummary
+        scopeSummary
+        sum#addReplace
         !inspect
-        (RS.printSummary fkey) in
-
-        (* DEBUG *)
-      let finalSumm = RS.sum#find fkey in
-      RS.printSummary fkey finalSumm;
-(*      RaceDF.printCacheStats (); *)
-       (* /DEBUG *)
+        (printSummary funname fkey) in
       changed
     end
 
@@ -757,7 +712,7 @@ class raceAnalysis rwChecker = object (self)
     Stat.time "LS summarize" (self#doSummarize fkey) cfg
 
   method flushSummaries () =
-    RS.sum#serializeAndFlush
+    sum#serializeAndFlush
 
 end
 
@@ -782,13 +737,9 @@ module RaceBUTransfer = struct
 
   let sccsTotal = ref 0
 
-  let curCG = ref FMap.empty
-
-  let curSCCCG = ref IntMap.empty
-
-  let initStats (cg:simpleCallG) (sccCG: sccGraph) (finalFuncs:fKey list) : unit = 
+  let initStats cg sccCG : unit = 
     (curCG := cg;
-    Intra.curCG := cg;
+     Intra.curCG := cg;
      curSCCCG := sccCG;
      Intra.curSCCCG := sccCG;
 
@@ -797,37 +748,33 @@ module RaceBUTransfer = struct
      sccsDone := 0;
     )
 
-      
-  let updateStats (lastSCC:scc) = 
-    (* Progress *)
+  let updateStats lastSCC = 
     incr sccsDone;
-    L.logStatus (">>> PROGRESS " ^ (string_of_int !sccsDone) ^ "/" ^
-                    (string_of_int !sccsTotal) ^ " SCCs DONE!\n");
+    logStatusF ">>> PROGRESS %d/%d SCCs DONE!\n\n" !sccsDone !sccsTotal
 
   (**** State management / calculation ****)
 
-  type state = RS.state
+  type state = Racesummary.state
 
   let flushSummaries () =
-    RS.sum#serializeAndFlush;
+    sum#serializeAndFlush;
     SPTA.SS.sum#serializeAndFlush
 
-  let doFunc ?(input:state = RS.emptyState) (fk: fKey) (f:simpleCallN) 
-      : state IDF.interResult =
-    let fn, defFile = f.name, f.defFile in
-    L.logStatus ("Summarizing function: " ^ fn ^ " : " ^ defFile);
-    L.logStatus "-----";
-    L.flushStatus ();
-    match Intra.getFunc fk f with
+  let doFunc ?(input:state = emptyState) fid callN : state IDF.interResult =
+    let fn, defFile = callN.name, callN.defFile in
+    logStatusF "Summarizing function: %s : %s\n" fn defFile;
+    logStatus "-----";
+    flushStatus ();
+    match Cilinfos.getFunc (fid_to_fkey fid) defFile with
       Some cfg ->
-        if Intra.runFixpoint needsFixpoint cfg then
+        if Intra.runFixpoint needsFixpoint fid cfg then
           IDF.NewOutput (input, input) (* TODO: change return type *)
         else
           IDF.NoChange
           
     | None ->
         (* Don't have function definition *)
-        L.logError ("doFunc can't get CFG for: " ^ 
+        logError ("doFunc can't get CFG for: " ^ 
                         (string_of_fNT (fn, defFile)));
         IDF.NoChange 
 
@@ -838,72 +785,56 @@ module RaceBUTransfer = struct
 
   (* TODO: find out what sums are used instead of hardcoding? *)
   let hardCodedSumTypes ()  =
-    BS.getDescriptors [RS.sum#sumTyp;
+    BS.getDescriptors [sum#sumTyp;
                        SPTA.SS.sum#sumTyp;]
-      
+    
+
   (** Prepare to start an scc, acquiring the required summaries *)
-  let sccStart (scc:scc)  = begin
+  let sccStart scc = begin
     (* Get all summaries for all callees *)
-    let callees = IntSet.fold
-      (fun neighSCCID curList ->
-         let neighSCC = IntMap.find neighSCCID !curSCCCG in
-         FSet.fold
-           (fun f curList ->
-              f :: curList
-           ) neighSCC.scc_nodes curList
-      ) scc.scc_callees [] in
-    L.logStatus "Acquiring needed summaries";
-    L.flushStatus ();
-    prepareSumms callees (hardCodedSumTypes ());
-    (* Try to re-use summaries that are already on disk? 
-       May only be partial summaries, but we can still use them. *)
-(*    discoverSumms (FSet.elements scc.scc_nodes) fSummaries;
-*)
+    logStatus "Acquiring needed summaries";
+    flushStatus ();
+    prepareSCCCalleeSums !curSCCCG scc (hardCodedSumTypes ());
   end
 
-  let printSize (fk, size) =
-    L.logStatusF "SIZES: %s : %d\n" (string_of_fkey fk) size
+  let printSize (k, size) =
+    logStatusF "SIZES: %s : %d\n" (fid_to_string k) size
 
   let printSizes fkSize =
     List.iter printSize fkSize
 
   (** Scc is summarized. Do the bookkeeping / cleanup *) 
-  let sccDone (scc:scc) (byThisGuy:bool) =
+  let sccDone scc (byThisGuy:bool) =
     let summPaths = if (byThisGuy) then
-      (try
-         (* Debugging *)
-         FSet.iter 
-           (fun fkey ->
-              L.logStatus ("Summary for function: " ^ 
-                              (string_of_fkey fkey));
-              L.logStatus "=======\n";
-              RS.findPrintSumm fkey;
-              SPTA.SS.printSummary SPTA.SS.sum fkey;
-           ) scc.scc_nodes;
-         
-         (* Serialize and record where each fun was placed *)
-         flushSummaries ();
+      let sccKeys = sumKeysOfScc scc [] in
+      (* Debugging *)
+      List.iter 
+        (fun key ->
+           let name = getFunName key in
+           logStatusF "Summary for function: %s:%s\n" name (fid_to_string key);
+           logStatus "=======\n";
+           findPrintSumm name key;
+           SPTA.SS.printSummary SPTA.SS.sum key;
+        ) sccKeys;
+      
+      (* Serialize and record where each fun was placed *)
+      flushSummaries ();
 
-         let scc_nodes = FSet.elements scc.scc_nodes in
-         let sum_sizes = RS.sum#sizesOf scc_nodes in
-         printSizes sum_sizes;
-
-         (* Find out where the summaries were stored *)
-         (* TODO: force them to pick the same directory 
-            (which they do unless on partition runs out of space) *)
-         let tokenMap = RS.sum#locate scc_nodes in
-         
-         (* Notify others that the functions are now summarized *)
-         List.fold_left
-           (fun paths (fkey, tok) ->
-              let path = BS.pathFromToken tok in
-              (fkey, path) :: paths
-           ) [] tokenMap
-       with e ->
-         L.logError ("Caught exception in sccDone?" ^ 
-                         (Printexc.to_string e));
-         raise e
-      ) else [] in
+      let sum_sizes = sum#sizesOf sccKeys in
+      printSizes sum_sizes;
+      
+      (* Find out where the summaries were stored *)
+      (* TODO: force them to pick the same directory 
+         (which they do unless on partition runs out of space) *)
+      let tokenMap = sum#locate sccKeys in
+      
+      (* Notify others that the functions are now summarized *)
+      List.fold_left
+        (fun paths (key, tok) -> 
+           let path = BS.pathFromToken tok in
+           (key, path) :: paths
+        ) [] tokenMap
+    else [] in
     updateStats scc; (* and possibly delete obsolete summaries *)
     summPaths
     (* RFC.clear !astFCache *)

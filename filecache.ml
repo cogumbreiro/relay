@@ -106,7 +106,7 @@ end
 
 (** Loader for cil files (given absolute filename) *)
 let cilLoader fname =
-  Stat.time "load ast" Cil.loadBinaryFile fname
+  Cil.loadBinaryFile fname
 
 
 (** Loader for varinfo files *)

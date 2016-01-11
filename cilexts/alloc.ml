@@ -1,5 +1,5 @@
 
-(** Library of tests/operations on allocation functions *)
+(** Tests/operations on allocation functions *)
 
 let allocFNs = ["kmalloc";
                 "malloc";
@@ -8,12 +8,15 @@ let allocFNs = ["kmalloc";
                 "__builtin_alloca";
                 "xalloc";
                 "vmalloc";
-                "kmem_cache_alloc"; (* assume race-free *)
-                "mempool_alloc";    (* assume race-free *)
+                "valloc";
+                "kmem_cache_alloc";
+                "mempool_alloc";
+                (* __alloc_percpu ?*)
 
                 (* Apache *)
                 "apr_palloc";
                 "apr_pcalloc";
+                "apr_bucket_alloc";
 
                 (* OpenSSL *)
                 "CRYPTO_malloc";
@@ -24,12 +27,16 @@ let allocFNs = ["kmalloc";
 
                ]
 
+let allocFuns = Hashtbl.create 10
+
+let _ = 
+  List.iter (fun vname -> Hashtbl.add allocFuns vname ()) allocFNs
+    
 (** Tests if given string is the name of an allocation function
     @param name      string to test
     @return true if string is the name of an allocator function  *)
 let isAlloc (fname:string) =
-  List.mem fname allocFNs
+  Hashtbl.mem allocFuns fname
 
-(* TODO add interface for reading in more... if list grows, 
-   switch to a hash table? *)
+(* TODO add interface for reading in more... *)
 

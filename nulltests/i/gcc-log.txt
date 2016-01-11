@@ -1,1 +1,1 @@
-duppy -c i.c -o ./i.o
+duppy -c test.c -o ./test.o

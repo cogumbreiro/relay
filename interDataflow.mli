@@ -1,6 +1,8 @@
-open Callg
 open Fstructs
+open Summary_keys
+open Callg
 open Scc_cg
+open Backed_summary
 
 (** A framework for inter-procedural data flow analysis built on
  *  the CIL intra-procedural framework *)
@@ -11,23 +13,23 @@ type 't interResult =
     NoChange (* No change *)
   | NewOutput of ('t * 't) (* New output summary for pair (in,out) *)
 
-(** Info needed by the inter-proc driver 
- *  Note: user manages the summary datastructure 
- *)
+(* TODO: make this work w/ context-sensitive callgraphs *)
+
+(** Info needed by the inter-proc driver *)
 module type ProcTransfer = sig
   
   type state (** The type of the data propagated from function to function. 
               *  May be imperative. *)
 
-  val doFunc: ?input:state -> fKey -> simpleCallN -> state interResult
+  val doFunc: ?input:state -> funID -> callN -> state interResult
   (** Analyze the function, given an input state, possibly getting 
    *  a new output state *)
 
-  val filterFunc: simpleCallN -> bool
+  val filterFunc: callN -> bool
   (** TRUE if the function should NOT be put on the worklist,
    *  when it normally should be put on the worklist *)
 
-  val sccDone: scc -> bool -> (fKey * string) list
+  val sccDone: scc -> bool -> (sumKey * string) list
   (** Callback function to inform user that an SCC is now fix-pointed *)
 
   val sccStart: scc -> unit
@@ -40,7 +42,7 @@ end
 (** Interface to Dataflow driver *)
 module type S = sig
   
-  val compute : simpleCallG -> sccGraph -> unit
+  val compute : callG -> sccGraph -> unit
 
 end
 

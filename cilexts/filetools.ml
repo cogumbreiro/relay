@@ -86,9 +86,10 @@ let rec walkDir (apply:Cil.file -> string -> unit) (root:string) =
          let ast = getFile file in
          apply ast file
        with 
-         End_of_file
-       | Failure _ ->
+         End_of_file ->
            prerr_string ("walkDir is skipping file: " ^ file ^ "\n");
+       | Failure s ->
+           Printf.fprintf stderr "walkDir hit error %s w/ file %s\n" s file;
     ) files;
   
   (* Descend into other dirs *)

@@ -43,15 +43,13 @@
 *)
 
 open Fstructs
-open Scc_cg
+open Summary_keys
 open Callg
+open Scc_cg
 open Messages
+open Logging
 
-module Req = Request
 module Stat = Mystats
-module L = Logging
-
-module Checkp = Checkpoint
 
 (** Type of value returned by intra-procedural analysis and used
     by the inter-procedural engine to propagate info and do fixed-point 
@@ -67,14 +65,14 @@ module type ProcTransfer = sig
     
   type state (** The type of the data propagated from function to function. *)
 
-  val doFunc: ?input:state -> fKey -> simpleCallN -> state interResult
+  val doFunc: ?input:state -> funID -> callN -> state interResult
   (** Analyze the function, given an input state, possibly 
       getting a new output state *)
 
-  val filterFunc: simpleCallN -> bool
+  val filterFunc: callN -> bool
   (** TRUE if the function should be put on the worklist *)
 
-  val sccDone: scc -> bool -> (fKey * string) list
+  val sccDone: scc -> bool -> (sumKey * string) list
   (** Callback function to inform user that an SCC is now fix-pointed *)
 
   val sccStart: scc -> unit
@@ -91,10 +89,9 @@ end
 module type S = sig
 
   (** Run the analysis on the entire program (given the callgraph) *)
-  val compute : simpleCallG -> sccGraph -> unit
+  val compute : callG -> sccGraph -> unit
 
 end
-
 
 (* Time individual functions and the scc *)
 module FunIndex = struct
@@ -102,25 +99,19 @@ module FunIndex = struct
   type t = string
       
   let hash (s:t) = Hashtbl.hash s
-    
-  let equal (s1:t) (s2:t) = 
-    s1 = s2
-
+  let equal (s1:t) (s2:t) = s1 = s2
   let to_string (s:t) = s
-    
   let getTime () = Stat.getWCTime ()
-
   let prefix = "TIMES : "
 
 end
-
 
 
 module BottomUpDataflow = functor (T : ProcTransfer) -> struct
 
   
   (* Module for worklist of functions *)
-  module FQ = Queueset.Make(OrderedFKeys)
+  module FQ = Queueset.Make(CompKey)
 
   module FunTime = Stat.IndexedTimer(FunIndex)
 
@@ -128,27 +119,26 @@ module BottomUpDataflow = functor (T : ProcTransfer) -> struct
   let funWork = FQ.create ()
   
   (** Reference to the call graph *)
-  let theCG = ref FMap.empty
+  let theCG = ref emptyCG
     
   (** Propagate new data to the target function, where the new
       data is meant as input to the target function *)
-  let propagateIn (newData:T.state) (targetFunc:fKey) : unit =
-    L.logError "progateIn not implemented"
-      
+  let propagateIn (newData:T.state) (targetFunc:funID) : unit =
+    logError "progateIn not implemented"
       
   (** Propagate new data to the target function, where the new data is
       the output of a source function *) 
-  let propagateOut (newData:T.state) (targetFunc:fKey) : unit =
+  let propagateOut (newData:T.state) (targetFunc:funID) : unit =
     try 
       let node = FMap.find targetFunc !theCG in
       if (T.filterFunc node) then begin
           FQ.addOnce targetFunc funWork;
       end
     with Not_found ->
-      L.logError ("Function not in callgraph: " ^ (string_of_fkey targetFunc))
+      logError ("Function not in callgraph: " ^ (fid_to_string targetFunc))
         
   (** Process funWork until a fixed-point is reached *) 
-  let fixedPoint (curSCC:scc) =
+  let fixedPoint curSCC =
     while (not (FQ.is_empty funWork)) do
       (* Do one iteration *)
       let curKey = FQ.pop funWork in 
@@ -156,19 +146,17 @@ module BottomUpDataflow = functor (T : ProcTransfer) -> struct
         let curNode =
           try FMap.find curKey !theCG
           with Not_found ->
-            (L.logError ("Function not in callgraph: " ^ 
-                          (string_of_fkey curKey));
-             raise Not_found)  
+            (logErrorF "Function not in callgraph: %s\n" (fid_to_string curKey);
+             raise Not_found)
         in
-        let funLabel = "FUN:" ^ string_of_fkey curKey in
+        let funLabel = "FUN:" ^ fid_to_string curKey in
         match (FunTime.time funLabel (T.doFunc curKey) curNode) with
             NoChange -> ()
           | NewOutput (i,o) -> 
-              let mayNotify = curNode.callers in
+              let mayNotify = curNode.ccallers in
               let toNotify = List.filter 
-                (fun nk -> 
-                   FSet.mem nk curSCC.scc_nodes
-                ) mayNotify in
+                (fun nk -> FSet.mem nk curSCC.scc_nodes)
+                mayNotify in
               List.iter (propagateOut o) toNotify
       end;
       Stat.print stdout "STATS:\n";
@@ -177,18 +165,18 @@ module BottomUpDataflow = functor (T : ProcTransfer) -> struct
 
   (** Complete the work related to an SCC *)
   let doSCC curSCC =
-    Checkp.record curSCC "Race";
+    Checkpoint.record curSCC "Race";
     (* Add functions to work queue *)
     FSet.iter (fun k -> FQ.addOnce k funWork) curSCC.scc_nodes;
 
     Stat.time "sccStart" T.sccStart curSCC;
 
     let sccSize = (string_of_int (FQ.length funWork)) in
-    L.logStatus ("=================================");
-    L.logStatus ("Starting an SCC (" ^ sccSize ^ ") #" ^ 
+    logStatus ("=================================");
+    logStatus ("Starting an SCC (" ^ sccSize ^ ") #" ^ 
                    (string_of_int curSCC.scc_num));
-    L.logStatus ("=================================");          
-    L.flushStatus ();
+    logStatus ("=================================");          
+    flushStatus ();
 
     FunTime.reset ();
 
@@ -196,48 +184,47 @@ module BottomUpDataflow = functor (T : ProcTransfer) -> struct
     (try
        FunTime.time sccLabel fixedPoint curSCC;
      with e ->
-       L.logError "InterDF: fixed-pointing died?";
+       logError "InterDF: fixed-pointing died?";
        raise e
     );
 
     FunTime.printTimes ();
 
-    L.logStatus ("=================================");
-    L.logStatus ("Finished an SCC (" ^ sccSize ^ ")");
-    L.logStatus ("=================================");
+    logStatus ("=================================");
+    logStatus ("Finished an SCC (" ^ sccSize ^ ")");
+    logStatus ("=================================");
     
     (* Inform client, then server that an SCC is now summarized *)
     let summPaths = T.sccDone curSCC true in
-    Req.sccDone curSCC summPaths;
-    L.logStatus ("=================================");
-    Checkp.complete curSCC "Race"
-
+    Request.sccDone curSCC summPaths;
+    logStatus ("=================================");
+    Checkpoint.complete curSCC "Race"
 
 
   (** Check if there was previously unfinished business *)
   let checkRecoverCrash sccCG =
-    match Checkp.whatsLeft () with
+    match Checkpoint.whatsLeft () with
       None -> ()
     | Some (scc_num, analysisType) -> (* ignore analysisType for now *)
         try
           let scc = IntMap.find scc_num sccCG in
-          L.logStatus ("Recovering scc: " ^ (string_of_int scc_num));
+          logStatus ("Recovering scc: " ^ (string_of_int scc_num));
           doSCC scc
         with Not_found as e ->
-          L.logError "Failed to recover scc (Not_found?)";
+          logError "Failed to recover scc (Not_found?)";
           raise e
 
       
   (** Iterate through the call graph in bottom-up order and
       compute the fixedpoint of summaries *)
-  let compute (cg: simpleCallG) (sccCG:sccGraph) =
+  let compute cg sccCG =
     let isDone = ref false in
     theCG := cg;
     checkRecoverCrash sccCG;
     while (not (!isDone)) do
-      L.logStatus "getting next SCC from server";
-      L.flushStatus ();
-      match Req.getSCCWork () with
+      logStatus "getting next SCC from server";
+      flushStatus ();
+      match Request.getSCCWork () with
         MSCCReady curSCC ->
           doSCC curSCC
 

@@ -28,6 +28,6 @@ val varShareable : varinfo -> bool
      Less coarse but still coarse FI-AA-based 
 **************************************************)
 
-val initEscapeable : simpleCallG -> unit
-
+val initEscapeable : callG -> unit
+  
 val escapeableAbs : aLval -> bool

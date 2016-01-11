@@ -28,7 +28,7 @@ sig
 
   (** add to back, unless it's already on the queue *) 
   val addOnce : elt -> t -> unit
-    
+
   (** true if the queue is empty *)
   val is_empty : t -> bool
 
@@ -38,6 +38,9 @@ sig
 
   (** Return the number of elements in a queue. *)
   val length : t -> int
+
+  val mem : t -> elt -> bool
+
 end
 
 
@@ -89,6 +92,9 @@ struct
 
   let length q =
     Queue.length q.queue
+
+  let mem qs v =
+    QSet.mem v qs.set
 
 end
   

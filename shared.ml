@@ -42,15 +42,14 @@
 *)
 
 open Cil
+open Logging
 open Fstructs
 open Callg
 open Scope
 
-module L = Logging
 module CLv = Cil_lvals
 module Lv = Lvals
 module A = Alias
-module Th = Threads
 module DC = Default_cache
 module Stat = Mystats
 
@@ -89,7 +88,7 @@ let isShareable (curFunc:Cil.fundec) (lval:Cil.lval) : scope option =
           (* TODO: don't filter yet; we need it for the mod analysis *)
           Some(SGlobal)
         else 
-          (match (CLv.getIndex curFunc.sformals vi) with
+          (match (Ciltools.getIndex curFunc.sformals vi) with
              Some (n) -> Some (SFormal n)
            | None -> None
           )
@@ -110,10 +109,11 @@ let isShareableAbs (curFunc:Cil.fundec) lval : scope option =
   | SGlobal -> Some (SGlobal)
       
 
+(************************************************************
+   Less coarse but still coarse Flow-insensitive-AA-based 
+************************************************************)
 
-(*************************************************
-     Less coarse but still coarse FI-AA-based 
-**************************************************)
+module Th = Threads
 
 let threadActuals = ref []
 let threadFormals = ref []
@@ -124,35 +124,35 @@ let reachFromForms = ref 0
 let reachFromGlob = ref 0
 
 let printEscStats () =
-  L.logStatusF "Reach from global %d" !reachFromGlob;
-  L.logStatusF "Reach from actual %d" !reachFromActs;
-  L.logStatusF "Reach from formal %d" !reachFromForms
+  logStatusF "Reach from global %d" !reachFromGlob;
+  logStatusF "Reach from actual %d" !reachFromActs;
+  logStatusF "Reach from formal %d" !reachFromForms
 
 let sameNode n1 n2 = 
   A.Abs.compare n1 n2 == 0
 
 let addOnceNode ls n =
-  Stdutil.addOnceP sameNode ls n
+  List_utils.addOnceP sameNode ls n
 
 let collectThreadActuals curList argExp =
   try
     (* Convert argument to the absNode representing its target
        (reachability is reflexive) *)
     let targs = A.Abs.deref_exp argExp in
-    List.fold_left (fun cur n -> addOnceNode cur n) curList targs
+    List.fold_left addOnceNode curList targs
   with A.UnknownLoc ->
-    L.logError ("SH: no target for thread argument " ^ 
-                 (Cildump.string_of_exp argExp));
+    logError ("SH: no target for thread argument " ^ 
+                (Cildump.string_of_exp argExp));
     curList 
-  
+      
 let collectThreadFormals curList formalVar =
   let lval = (Var formalVar, NoOffset) in
   try
     let targ = A.Abs.getNodeLval lval in
     addOnceNode curList targ
   with A.UnknownLoc ->
-    L.logError ("SH: not target for thread formal " ^
-                 (Cildump.string_of_lval lval));
+    logError ("SH: not target for thread formal " ^
+                (Cildump.string_of_lval lval));
     curList
 
 let initEscapeable cg =
@@ -161,7 +161,7 @@ let initEscapeable cg =
   let thActuals, thFormals = Th.getThreadActuals cg thCreators in
   threadActuals := List.fold_left collectThreadActuals [] thActuals;
   threadFormals := List.fold_left collectThreadFormals [] thFormals;
-  L.logStatusF "SH: initEscapeable found (%d, %d) thread (acts, formals)\n\n" 
+  logStatusF "SH: initEscapeable found (%d, %d) thread (acts, formals)\n\n" 
     (List.length !threadActuals) (List.length !threadFormals)
 
 let debugEscapeableNode n =
@@ -203,5 +203,3 @@ let escapeableAbs aLv : bool =
       *)
       (*       escapeableNode n *)
       true
-
-  

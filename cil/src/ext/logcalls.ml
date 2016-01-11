@@ -21,9 +21,13 @@ let makePrintfFunction () : varinfo =
     match !printf with 
       Some v -> v
     | None -> begin 
-        let v = makeGlobalVar !printFunctionName 
-                     (TFun(voidType, Some [("format", charPtrType, [])],
-                             true, [])) in
+(*
+        let t = (TFun(voidType, Some [("format", charPtrType, [])],
+                      true, [])) in
+*)
+        let t = (TFun(intType, Some [("format", charConstPtrType, [])],
+                      true, [])) in
+        let v = makeGlobalVar !printFunctionName t in
         printf := Some v;
         addProto := true;
         v
@@ -42,7 +46,7 @@ let d_string (fmt : ('a,unit,doc,string) format4) : 'a =
 
 let currentFunc: string ref = ref ""
 
-class logCallsVisitorClass = object
+class logCallsVisitorClass = object (self)
   inherit nopCilVisitor
 
   (* Watch for a declaration for our printer *)
@@ -83,8 +87,10 @@ class logCallsVisitorClass = object
   method vstmt (s : stmt) = begin
     match s.skind with
       Return _ -> 
-        let pre = mkPrint (d_string "exit %s\n" !currentFunc) [] in 
-        ChangeTo (mkStmt (Block (mkBlock [ mkStmtOneInstr pre; s ])))
+        let pre = mkPrint (d_string "EXIT: %s\n" !currentFunc) [] in
+        let preStmt = mkStmtOneInstr pre in
+        self#shiftLabels preStmt s;
+        ChangeTo (mkStmt (Block (mkBlock [ preStmt; s ])))
     | _ -> DoChildren
 
 (*
@@ -109,6 +115,14 @@ class logCallsVisitorClass = object
     | _ -> DoChildren
 *)
   end
+
+  (** If we insert stmts before others, we may need to shift labels to the
+      new "first" stmt in the sequence  *)
+  method private shiftLabels (pre : stmt) (stmt : stmt) =
+    if stmt.labels <> [] then begin
+      pre.labels <- stmt.labels;
+      stmt.labels <- [];
+    end
 end
 
 let logCallsVisitor = new logCallsVisitorClass
@@ -126,7 +140,7 @@ let logCalls (f: file) : unit =
         (* do the body *)
         ignore (visitCilFunction logCallsVisitor fdec);
         (* Now add the entry instruction *)
-        let pre = mkPrint (d_string "enter %s\n" !currentFunc) [] in 
+        let pre = mkPrint (d_string "ENTER: %s\n" !currentFunc) [] in 
         fdec.sbody <- 
           mkBlock [ mkStmtOneInstr pre;
                     mkStmt (Block fdec.sbody) ]
@@ -222,9 +236,9 @@ let feature : featureDescr =
     fd_description = "generation of code to log function calls";
     fd_extraopt = [
       ("--logcallprintf", Arg.String (fun s -> printFunctionName := s), 
-       "the name of the printf function to use");
+       " the name of the printf function to use");
       ("--logcalladdproto", Arg.Unit (fun s -> addProto := true), 
-       "whether to add the prototype for the printf function")
+       " whether to add the prototype for the printf function")
     ];
     fd_doit = logCalls;
     fd_post_check = true

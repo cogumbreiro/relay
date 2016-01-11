@@ -38,11 +38,9 @@
 (** Load filtered races and mark the corresponding pseudo accesses NotRacy *)
 
 open Gc_stats
-open Readcalls
 open Callg
 open Cil
 open Fstructs
-open Scc_cg
 open Stdutil
 open Cilfiles
 open Cilinfos
@@ -91,7 +89,7 @@ let usageMsg = getUsageString "-cg dirname [options]\n"
 
 (** Initialize function summaries, and watchlist of special 
     functions (e.g., pthread_create) *)
-let initSettings () : simpleCallG =
+let initSettings () : unit =
   try
     let settings = Config.initSettings !configFile in
     DC.makeLCaches (!cgDir);
@@ -100,11 +98,10 @@ let initSettings () : simpleCallG =
     Th.initSettings settings;
     (* Get Callgraph structures *)
     let cgFile = Dumpcalls.getCallsFile !cgDir in
-    let cg = readCalls cgFile in
+    let cg = Ci_cg.SCCCG.readCalls cgFile in
     let () = BS.init settings !cgDir cg in
     Dis.init settings !cgDir;
     SPTA.init settings cg (RS.sum :> Modsummaryi.absModSumm);
-    cg
 
   with e -> Printf.printf "Exc. in initSettings: %s\n"
     (Printexc.to_string e) ; raise e
@@ -115,16 +112,17 @@ let prepareSummaries cluster_id_2_pakey =
   let toPrepare = 
     Hashtbl.fold 
       (fun cid fk2pakey cur ->
-         FMap.fold (fun fkey _ cur -> FSet.add fkey cur) fk2pakey cur
-      ) cluster_id_2_pakey FSet.empty in
+         Ci_cg.SCCCG.FMap.fold 
+           (fun fkey _ cur -> List_utils.addOnce cur (BS.inputFreeSumKey fkey)) 
+           fk2pakey cur
+      ) cluster_id_2_pakey [] in
   Manage_sums.prepareSumms 
-    (FSet.elements toPrepare)
-    (BS.getDescriptors [Pseudo_access.sums#sumTyp])
+    toPrepare (BS.getDescriptors [Pseudo_access.sums#sumTyp])
 
 
 (** Initiate analysis *)
 let doAnal () : unit =
-  let cg = initSettings () in
+  let () = initSettings () in
   begin
 
     (* Read in the race cluster id -> pakey mapping *)

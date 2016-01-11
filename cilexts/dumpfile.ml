@@ -11,12 +11,15 @@ open Filetools
 module Dum = Cildump
 
 (* Requires an ENV variable to be defined given *)
-let dumpTo = 
-  try
-    ref (Sys.getenv "DUMPROOT")  
-  with Not_found ->
-    prerr_string "Dumpfile: Can't find DUMPROOT environ var\n";
-    ref "/tmp"
+let dumpTo = ref ""
+let getDumpTo () = 
+  (if !dumpTo = "" then
+     try
+       dumpTo := (Sys.getenv "DUMPROOT");
+     with Not_found ->
+       prerr_string "Dumpfile: Can't find DUMPROOT environ var\n";
+       dumpTo := "/tmp";);
+  !dumpTo
 
 let dumpHelp = "path to dump results"
 
@@ -27,19 +30,26 @@ let strip1Slash (s:string) =
     s
 
 (* Requires an argument stating the currently processed file *)
-let curFile = 
-  try
-    ref (strip1Slash (Sys.getenv "CUR_CIL_FILE"))
-  with Not_found ->
-    prerr_string "Dumpfile: Can't find CUR_CIL_FILE environ var\n";
-    ref "/tmp"
+let curFile = ref ""
+let getCurFile () =
+  (if !curFile = "" then
+     try
+       curFile := (strip1Slash (Sys.getenv "CUR_CIL_FILE"));
+     with Not_found ->
+       prerr_string "Dumpfile: Can't find CUR_CIL_FILE environ var\n";
+       curFile := "/tmp");
+  !curFile
 
 let getTargetFile (_:unit) =
-  Filename.concat !dumpTo !curFile
+  Filename.concat (getDumpTo ()) (getCurFile ())
 
 let makeCFG fundec =
-  Cil.prepareCFG fundec;
-  Cil.computeCFGInfo fundec false    
+  if fundec.smaxstmtid = None && fundec.sallstmts = [] then begin
+    Printf.printf "Making cfg for %s\n" fundec.svar.vname;
+    Cil.prepareCFG fundec;
+    Cil.computeCFGInfo fundec false;
+  end else
+    Printf.printf "Skipping cfg for %s\n" fundec.svar.vname
 
 (* dumps the pre-processed / parsed file *) 
 let dumpFile (f:file) =
@@ -49,7 +59,7 @@ let dumpFile (f:file) =
     if Sys.file_exists dumpToFile then
       prerr_string ("Dumpfile: File " ^ dumpToFile ^ " already exists\n")      
     ;
-    f.fileName <- !curFile; (* store relative path/file name *)
+    f.fileName <- (getCurFile ()); (* store relative path/file name *)
     ensurePath (Filename.dirname dumpToFile);
     let outFile = (open_out_gen 
                      [Open_creat; Open_wronly] 

@@ -1,53 +1,51 @@
 open Fstructs
+open Summary_keys
 
 type dbToken
-
 type sumType
 
+(********)
 
+val dummyToken : dbToken
 val string_of_token : dbToken -> string
 val token_of_string : string -> dbToken
 
+val init : Config.settings -> string -> Callg.callG -> unit 
 
-val dummyToken : dbToken
+val getBasename : sumKey -> sumType -> string
 
-val init : Config.settings -> string -> Callg.simpleCallG -> unit 
-
-val getBasename : fKey -> sumType -> string
-
-val getFName : fKey -> sumType -> string -> string
+val getFName : sumKey -> sumType -> string -> string
 
 val pathFromToken : dbToken -> string
 
 val pathToToken : string -> dbToken
 
-val chooseDBPath : fKey -> string * dbToken
+val chooseDBPath : sumKey -> string * dbToken
 
 val anyDBPath : unit -> string * dbToken
 
-val find : fKey -> sumType -> string * dbToken
+val discover : sumKey -> sumType -> 
+  (sumKey -> sumType -> dbToken option) -> dbToken option
 
-val discover : fKey -> sumType -> (fKey -> sumType -> dbToken option) -> dbToken option
-
-val deserializeFromPath : fKey -> string -> string -> 'a * dbToken
+val deserializeFromPath : sumKey -> string -> string -> 'a * dbToken
 
 val deserializeFromFile : string -> string -> 'a
 
-val removeSummary : fKey -> sumType -> dbToken -> unit
+val removeSummary : sumKey -> sumType -> dbToken -> unit
 
-val setFinal : fKey -> sumType -> unit
+val setFinal : sumKey -> sumType -> unit
 
-val isFinal : fKey -> sumType -> bool
+val isFinal : sumKey -> sumType -> bool
 
 val clearState : int -> unit
 
 (**********************************************************)
 
-val key_of_name : string -> fKey
+val key_of_name : string -> sumKey
 
 val stype_of_name : string -> sumType
 
-val possibleNames : fKey -> string list
+val possibleNames : sumKey -> string list
 
 
 
@@ -76,6 +74,16 @@ module type Summarizeable = sig
 
 end
 
+(* Only expose this sumStub so that inheriters can inspect *)
+type 'a sumStub = (* parameter is summary type *)
+    InMemSumm of (bool * dbToken option * 'a)
+      (** dirty bit, 
+          old storage location on disk if any, 
+          Summary (of type 'a) *)
+
+  | OnDiskSumm of dbToken
+      (** Summary is on disk, stored at the path represented by dbToken *)
+
 
 (** Interface to summary database for maintainence, inspection, etc. 
     Things does not depend on the actual summaries *)
@@ -98,21 +106,21 @@ class type dbManagement = object
   (** Given a list of functions and storage locations, assume 
       the summaries for those functions can be found at 
       the corresponding locations *)
-  method assumeComplete : ((fKey * dbToken) list) -> unit 
+  method assumeComplete : ((sumKey * dbToken) list) -> unit 
 
   (** Write the summary for the given function to disk *)
-  method flushOne : fKey -> unit
+  method flushOne : sumKey -> unit
     
-  method evictOne : fKey -> unit
+  method evictOne : sumKey -> unit
 
-  method locate : fKey list -> (fKey * dbToken) list
+  method locate : sumKey list -> (sumKey * dbToken) list
     
   method sizeInMem : unit -> int
 
-  method sizesOf : fKey list -> (fKey * int) list
+  method sizesOf : sumKey list -> (sumKey * int) list
 
   (** Initialize the summaries for special functions / external funcs *)
-  method initSummaries : Config.settings -> Callg.simpleCallG -> unit
+  method initSummaries : Config.settings -> Callg.callG -> unit
 
 end
   
@@ -120,26 +128,38 @@ end
 class type ['sum] base = object
   inherit dbManagement
     
+  val summs : ('sum sumStub) SM.t
+
   (** Find and return the summary for the given function. If "Not_found",
       return a specified initial value instead of raising the exception *)
-  method find : fKey -> 'sum
+  method find : sumKey -> 'sum
     
   (** Replace an old summary (if any) for the given function w/ a new one *)
-  method addReplace : fKey -> 'sum -> unit
+  method addReplace : sumKey -> 'sum -> unit
         
+  (** Low-level management *)
+  method private addReplaceBase : sumKey -> ('sum sumStub) -> unit
+  method private willAdd : sumKey -> unit
+
   (** Load the summary from the given file *)
   method getFromFile : string -> 'sum
         
   (** Low-level serialization. Avoid using, but feel free to extend *)
-  method private serialize : fKey -> 'sum -> dbToken
+  method private serialize : sumKey -> 'sum -> dbToken
     
   (** Low-level deserialization. Avoid using, but feel free to extend *)
-  method private deserialize : fKey -> dbToken -> 'sum * dbToken
+  method private deserialize : sumKey -> dbToken -> 'sum * dbToken
+
+  (** Low-level debug / assertion *)
+  method private checkInit : unit
+
     
   (** Log an error, given the body of the message *)
   method err : string-> unit
     
-  method fold : 'a. ('sum -> 'a -> 'a) -> 'a -> 'a
+  method fold : 'a. (sumKey -> 'sum -> 'a -> 'a) -> 'a -> 'a
+
+  method foldOnKey : 'a. (sumKey -> 'sum -> 'a -> 'a) -> fKey -> 'a -> 'a
 
 end
 

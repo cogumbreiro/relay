@@ -1,4 +1,1 @@
-cd /home/jan/research/relay-race/tests/ide-disk
-duppy -Wall -W -pedantic -DDEBUG=y -g -c -o ide-disk_comb.o ide-disk_comb.c
-cd /home/jan/research/relay-race/tests/ide-disk
-duppy ide-disk_comb.o -pthread
+duppy -c ide-disk_comb.c

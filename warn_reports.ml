@@ -52,6 +52,8 @@ class type warnReports = object ('a)
 
   method saveToXML : string -> unit
 
+  method clear : unit
+
 end
 
 
@@ -105,17 +107,17 @@ module MakeRep (W:WarnCluster) = struct
   type warnData = warnCluster KH.t
 
   class report 
-    ?(maxWarningsPerKey = 20) 
+    ?(maxWarningsPerKey = 20) ?(limitWarnings = false)
     ?(initialData = KH.create 17) () = object (self : 'self)
 
     val mutable data : warnData = initialData
-    val mutable maxWarningsPK = maxWarningsPerKey
-    val mutable limitWarnings = false
+    val mutable limitWarnings = limitWarnings
+    val mutable maxWarningsPerKey = maxWarningsPerKey
 
     (* 
        TODO: count num warnings in case of limiting? 
-       Any issues w/ detecting duplicates?
-    *)
+       Sort elements within clusters to make it easier to DIFF?
+       Give each cluster a unique ID and add that to the XML output? *)
 
     method getData = data
 
@@ -145,7 +147,7 @@ module MakeRep (W:WarnCluster) = struct
               newR :: from2 t (left - 1)
       in
       let limit = if limitWarnings 
-      then maxWarningsPK - List.length cluster1
+      then maxWarningsPerKey - List.length cluster1
       else List.length cluster2 in
       cluster1 @ (from2 cluster2 limit)
 
@@ -191,7 +193,7 @@ module MakeRep (W:WarnCluster) = struct
            try
              let ownClust = KH.find onlyMe k in
              let oneClust, twoClust = self#diffCluster ownClust otherClust in
-             if oneClust != [] || twoClust != [] then 
+             if oneClust <> [] || twoClust <> [] then 
                KH.add diff k (BothButDiff (oneClust, twoClust))
              ;
              KH.remove onlyMe k; 
@@ -212,7 +214,7 @@ module MakeRep (W:WarnCluster) = struct
       try
         let oldCluster = KH.find data k in
         if limitWarnings && 
-          List.length oldCluster >= maxWarningsPK then false
+          List.length oldCluster >= maxWarningsPerKey then false
         else if (List.exists 
                    (fun oldD -> W.equalData d oldD) oldCluster) then false
         else
@@ -232,45 +234,44 @@ module MakeRep (W:WarnCluster) = struct
       let doc = KH.fold
         (fun key cluster doc ->
            doc ++ text "<cluster>" ++ line ++
-             List.fold_left
-             (fun doc info ->
-                (doc ++ text "<data>" ++ line) ++
-                  W.pDataXML info ++
-                  (text "</data" ++ line)
-             ) nil cluster ++
-             text "</cluster>" ++ line
+             indent 1 (List.fold_left
+                         (fun doc info -> 
+                            (doc ++ W.pDataXML info ++ line)) nil cluster)
+           ++ text "</cluster>" ++ line
         ) data doc
       in
-      doc ++ text "</run>" ++ line ++
-        text "</xml>" 
-
-    method serializeChan oc : unit =
-      Marshal.to_channel oc (maxWarningsPK, data) [Marshal.Closures]
+      doc ++ text "</run>" ++ line ++ text "</xml>" 
+        
+    method private serializeChan oc : unit =
+      Marshal.to_channel oc 
+        (maxWarningsPerKey, limitWarnings, data) [Marshal.Closures]
       
     method serialize (fname:string) : unit =
       open_out_bin_for fname self#serializeChan
 
-    method deserializeChan ic =
-      let (maxWarns, d) = Marshal.from_channel ic in
-      maxWarningsPK <- maxWarns;
+    method private deserializeChan ic =
+      let (maxWarns, limitWarns, d) = Marshal.from_channel ic in
+      maxWarningsPerKey <- maxWarns;
+      limitWarnings <- limitWarns;
       data <- d
       
     method deserialize (fname:string) =
       open_in_bin_for fname self#deserializeChan
+
+    method private writeXMLTo oc =
+      let doc = self#pXML () in
+      fprint oc 80 doc
         
     method saveToXML (fname:string) = 
-      let doWrite oc =
-        let doc = self#pXML () in
-        fprint oc 80 doc;
-      in
-      open_out_for fname doWrite
+      open_out_for fname self#writeXMLTo
         
     end
     
   (** Deserializers that return new objects *)
   let deserializeChan ic =
-    let (maxWarns, d) = Marshal.from_channel ic in
-    (new report ~maxWarningsPerKey:maxWarns ~initialData:d ())
+    let (maxWarns, limitWarn, d) = Marshal.from_channel ic in
+    (new report 
+       ~maxWarningsPerKey:maxWarns ~limitWarnings:limitWarn ~initialData:d ())
       
   let deserialize (fname:string) =
     open_in_bin_for fname deserializeChan

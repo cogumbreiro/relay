@@ -43,8 +43,15 @@ open Cil
 module L = Logging
 module Lv = Cil_lvals
 
-
 exception UnknownOffset
+
+(* TODO: cache results? *)
+module OffConvCache = Cache.Make 
+  (struct
+     type t = typ
+     let equal a b = a == b || Ciltools.compare_type a b == 0
+     let hash t = Ciltools.hash_type t
+   end)
 
 (** Given a type and the number of bits of offset, return the field offset. 
     May raise UnknownOffset if the bits don't make sense *)
@@ -53,27 +60,113 @@ let rec bitsToOffset (t:typ) (bits:int) : offset =
     (* TODO Need a way to handle offsets that are "behind" the named struct *)
     NoOffset
   else 
+    try
+      let t = Lv.unrollTypeNoAttrs t in
+      (* first see if the bits offset is a multiple of the sizeof base 
+         object (may be striding an array) *)
+      let baseSize = bitsSizeOf t in
+      let bits = if baseSize == 0 then bits else bits mod baseSize in
+      if (bits == 0) then
+        NoOffset
+      else match t with
+        TComp (ci, _) ->
+          (* Check if bits offset matches the offset of one of the fields *)
+          (try
+             let fi = List.find
+               (fun fi ->
+                  let base, width = bitsOffset t (Field (fi, NoOffset)) in
+                  (bits >= base) && (bits < base + width)
+               ) ci.cfields in
+             let base, width = bitsOffset t (Field (fi, NoOffset)) in
+             Field (fi, if (bits == base) then NoOffset
+                    else bitsToOffset fi.ftype (bits - base))
+           with Not_found -> raise UnknownOffset)
+      | _ ->
+         raise UnknownOffset
+    with SizeOfError _ ->
+      raise UnknownOffset
+
+
+let rec bitsToOffsetNoWrap (t:typ) (bits:int) : offset = 
+  if (bits < 0) then raise UnknownOffset
+  else 
+    try
+      let t = Lv.unrollTypeNoAttrs t in
+      let baseSize = bitsSizeOf t in
+      if (bits == 0) then NoOffset
+      else if bits >= baseSize then raise UnknownOffset
+      else match t with
+        TComp (ci, _) ->
+          (* Check if bits offset matches the offset of one of the fields *)
+          (try
+             let fi = List.find
+               (fun fi ->
+                  let base, width = bitsOffset t (Field (fi, NoOffset)) in
+                  (bits >= base) && (bits < base + width)
+               ) ci.cfields in
+             let base, width = bitsOffset t (Field (fi, NoOffset)) in
+             Field (fi, 
+                    if (bits == base) then NoOffset
+                    else bitsToOffsetNoWrap fi.ftype (bits - base))
+           with Not_found -> 
+             raise UnknownOffset (* Still? *)
+          )
+      | _ ->
+          raise UnknownOffset
+    with SizeOfError _ ->
+      raise UnknownOffset
+
+
+(** Find ALL offsets that match the given bits from the given type.
+    No modding and all that crap *)
+let rec bitsToOffsetAll (t:typ) (bits:int) : offset list = 
+  if (bits < 0) then raise UnknownOffset
+  else 
     let t = Lv.unrollTypeNoAttrs t in
-    (* first see if the bits offset is a multiple of the sizeof base 
-     object (may be striding an array) *)
-    let baseSize = bitsSizeOf t in
-    let bits = bits mod baseSize in (* assume baseSize != 0!!! *)
-    if (bits == 0) then
-      NoOffset
-    else match t with
+    match t with
       TComp (ci, _) ->
         (* Check if bits offset matches the offset of one of the fields *)
-        let fi = List.find
-          (fun fi ->
-             let base, width = bitsOffset t (Field (fi, NoOffset)) in
-             (bits >= base) && (bits < base + width)
-          ) ci.cfields in
-        let base, width = bitsOffset t (Field (fi, NoOffset)) in
-        Field (fi, 
-               if (bits == base) then NoOffset
-             else bitsToOffset fi.ftype (bits - base)
-              )
-    | t ->
-        (* otherwise, not sure what to do... *)
-        L.logError "bitsToOffset: can't compute field on non-struct\n";
+        List.fold_left
+          (fun cur fi ->
+             try                
+               let base, width = bitsOffset t (Field (fi, NoOffset)) in
+               if (bits >= base) && (bits < base + width) 
+               then begin 
+                 (* Include current if possible *)
+                 let cur = if bits == base 
+                 then Field (fi, NoOffset) :: cur 
+                 else cur in
+                 (* But try more, in case there's an embedded record
+                    at the very beginning of the current record *)
+                 try 
+                   let moreOffs = bitsToOffsetAll fi.ftype (bits - base) in
+                   List.fold_left (fun cur more -> Field (fi, more) :: cur)
+                     cur moreOffs
+                 with UnknownOffset -> cur
+               end
+               else cur
+             with SizeOfError _ -> cur
+          ) [] ci.cfields
+    | _ ->
         raise UnknownOffset
+
+
+
+(************************************************************)
+(* Canonicization... *)
+
+let rec canonicizeOff keepConst (off:Cil.offset) : (Cil.offset * bool) =  
+  match off with
+    NoOffset -> (NoOffset, false)
+  | Field (fi, moreOff) -> 
+      let (rest, changed) = canonicizeOff keepConst moreOff in
+      (Field (fi, rest), changed)
+  | Index (indExp, moreOff) ->
+      (* Convert the index to 0 if non-constant, but leave if constant *)
+      let (rest, changed) = canonicizeOff keepConst moreOff in
+      (match isInteger indExp with
+         Some _ -> 
+           if keepConst 
+           then (Index (indExp, rest), changed)
+           else (Index (Cil_lvals.cZero, rest), true)
+       | None -> (Index (Cil_lvals.cZero, rest), true))

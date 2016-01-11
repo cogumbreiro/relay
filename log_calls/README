@@ -1,0 +1,16 @@
+Small library to link into a program if you want to log all function calls 
+(e.g., to build a dynamic callgraph).
+
+To build a dynamic callgraph
+ - log all calls to gcc with "./scripts/intercept.sh make -e"
+ - edit the outputted "stripped-log.txt" file to link in
+   the logging library (single-threaded version or pthread version)
+ - use the stripped-log to build w/ calls to the logger (based on
+   "./cil/src/ext/logcalls2.ml" and "./scripts/log_call_from_log.sh"
+
+If you use the multi-threaded version you may want to run the
+script "separate_logs.sh" to split up each of the threads
+(after you rename the thread IDs in the logs to be a
+ multiple of 10 instead of random numbers)
+
+Enjoy.

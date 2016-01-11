@@ -40,12 +40,15 @@
 
 
 open Cil
+open Pretty
+open Cildump
 open Callg
 open Fstructs
 open Manage_sums
-open Cilinfos
 open Messages
 open Entry_points
+open Logging
+
 
 module A = Alias
 module Lv = Lvals
@@ -57,7 +60,6 @@ module SPTA = Race.SPTA
 module Req = Request
 module FC = Filecache
 module DC = Default_cache
-module L = Logging
 
 
 type iterCorrTypes = WW | WR | RW
@@ -121,13 +123,13 @@ class virtual ['s] rootChecker = object(self)
   (** Check the all possible states for two given roots.  *)
   method checkRoot r1 r2 =
     if (self#requestWork r1 r2) then
-      (L.logStatus "checking a thread-creation pair";
-       L.flushStatus ();
+      (logStatus "checking a thread-creation pair";
+       flushStatus ();
        let stateList1 = self#getStates r1 in
        let stateList2 = self#getStates r2 in
        self#iterStates stateList1 stateList2;
-       L.logStatus "done with pair, sending notification";
-       L.flushStatus ();
+       logStatus "done with pair, sending notification";
+       flushStatus ();
        self#notifyWork r1 r2;
       )
     else
@@ -182,7 +184,7 @@ end
 
 (* DEPRECATED
      for the case where all roots have the same summary type,
-     pairs of roots are a superset of unordered pairs of roots,
+     ordered pairs of roots are a superset of unordered pairs of roots,
      so this should never be used in this case.
      it may make sense to use this if root1 and root2 take
      different summary types.  but right now, checking pairs
@@ -196,10 +198,7 @@ class virtual ['s] ordRootChecker = object (self)
   method iterRoots roots =
     List.iter 
       (fun r1 ->
-         List.iter
-           (fun r2 ->
-              self#checkRoot r1 r2
-           ) roots
+         List.iter (fun r2 -> self#checkRoot r1 r2) roots
       ) roots;
     self#notifyDone
 
@@ -228,7 +227,7 @@ class virtual netChecker = object (self)
     | MDone
     | MLocked -> false
     | _ ->             
-        L.logError "unexpected reply for lockWarn";
+        logError "unexpected reply for lockWarn";
         false
 
   (** Helper to release summaries from memory *)
@@ -239,8 +238,7 @@ class virtual netChecker = object (self)
 
   (** Notify server that requested work is now done *)
   method notifyWork r1 r2 =
-    let _ = Req.unlockWarn 
-              (self#translateRoot r1) (self#translateRoot r2) in
+    Req.unlockWarn (self#translateRoot r1) (self#translateRoot r2);
     self#evictSumms
 
 
@@ -248,9 +246,9 @@ class virtual netChecker = object (self)
       TODO check if sending number of roots needed *)
   method requestStart roots =
     let numPairs = self#numPairs roots in
-    L.logStatus ("Expected # thread-creation site pairs: " ^ 
+    logStatus ("Expected # thread-creation site pairs: " ^ 
                    (string_of_int numPairs));
-    L.flushStatus ();
+    flushStatus ();
     Req.reqWarnBarrier numPairs
 
 (* Expect user to implement method #notifyDone *)
@@ -267,16 +265,15 @@ end
 **************************************************************)
 
 type state = 
-    Cil.location * string * fKey * RS.corrState
+    Cil.location * string * funID * RS.corrState
 
 type sumDB = BS.dbManagement
 
 (* debugging *)
 let printFuns flist =
-  let buff = Buffer.create 12 in
-  List.iter (fun fkey -> Buffer.add_string buff 
-               ((string_of_fkey fkey) ^ "; ")) flist;
-  L.logStatus (Buffer.contents buff)
+  let doc = seq_to_doc (text ", ") List.iter 
+    (fun fid -> text (fid_to_string fid)) flist nil ++ line in
+  logStatusD doc
 
 
 (** A visitor that searches for function calls to thread creation 
@@ -294,32 +291,29 @@ class virtual threadRootStateCollector cg = object (self)
   (** Prepare to load (possibly download) summaries needed by the
       thread creator [tc] *)
   method private prepareTCSumms tc = 
-    prepareSumms tc.callees (self#hardCodedSumTypes ())
+    let callees = calleeKeys tc in 
+    prepareSumms callees (self#hardCodedSumTypes ())
 
 
   (** Handle a given call (at instruction [i], file position [loc],
       and within function [f]) to a thread creation function. 
       The target thread functions are believed to be [funs] and
-      are supplied the argument list args *)
+      are supplied the argument list [args] *)
   method handleThreadRoots i loc f funs args =
     (try prepareSumms funs (self#hardCodedSumTypes ())
      with Req.SummariesNotFound ->
-       (* Maybe the function isn't even in the callgraph (no function body) *)
-       let buff = Buffer.create 80 in
-       Buffer.add_string buff ("roots: no summary for: " ^ 
-                                 (Du.string_of_exp f));
-       List.iter 
-         (fun fkey -> Buffer.add_string buff ((string_of_fkey fkey) ^ ", ")) 
-         funs;
-       L.logError (Buffer.contents buff)
+       (* Maybe the function isn't even in the callgraph (no function body).
+          Can still continue w/ a dummy summary. *)
+       let doc = seq_to_doc (text ", ") List.iter 
+         (fun fid -> text (fid_to_string fid)) funs nil ++ line in
+       logErrorD doc
     );
     try
       let pp = getCurrentPP () in
       let locks = RS.emptyLS in
       let appCSum = Race.FITransF.findApplyCSumm pp args locks in
       List.iter 
-        (fun fkey ->
-           (* Try to apply mapping *)
+        (fun fkey -> (* Try to apply mapping *)
            try
              let fnode = FMap.find fkey cg in
              (* Record creation site info *)
@@ -330,36 +324,32 @@ class virtual threadRootStateCollector cg = object (self)
                let corrs = appCSum fkey RS.emptyCS in
                (loc, fnode.name, fkey, corrs) :: stateList
            with Not_found ->
-             L.logError ("handleThreadRoots: no callgraph node for " ^ 
-                           (string_of_fkey fkey))
+             logError ("handleThreadRoots: no callgraph node for " ^ 
+                         (fid_to_string fkey))
                (* No fnode? *)
         ) funs
     with 
-      Not_found ->
-        L.logError "handleThreadRoots: Not_found?!"
+      Not_found -> logError "handleThreadRoots: Not_found?!"
 
   (** Return a list of states for each thread root spawned by the TC site *)
   method collectTRStates (tk, tc) : state list = 
     try 
-      let ast = !DC.astFCache#getFile tc.defFile in
-      A.setCurrentFile ast;
-      match getCFG tk ast with
+      match Cilinfos.getFunc (fid_to_fkey tk) tc.defFile with
         Some func ->
           stateList <- [];
           self#prepareTCSumms tc;
-          Race.RaceDF.initState func RS.emptyLS;
+          Race.RaceDF.initState tk func RS.emptyLS;
           (* Re-run the SymState so that function summaries can be applied *)
-          let _ = Race.ssAna#compute func in
+          let _ = Race.ssAna#compute tk func in
           let _ = Cil.visitCilFunction (self :> cilVisitor) func in
           stateList
-      | None -> 
-          []
+      | None -> []
     with
       FC.File_not_found fname ->
-        L.logError ("collectTRStates: can't find " ^ fname);
+        logError ("collectTRStates: can't find " ^ fname);
         []
     | Not_found ->
-        L.logError "collectTRStates: Not_found?!";
+        logError "collectTRStates: Not_found?!";
         []
 
 
@@ -375,9 +365,7 @@ class virtual entrypointStateCollector = object (self)
 
   (** Add the state of a given entry point function 
       ([entK, entN] -- key and node) to the list of curStates  *)
-  method collectEntryStates (entK, entN) : state list =
-    (* incomplete to assume LS = {} for these entry points, 
-       but it's sound and that's all we can do... *)
+  method collectEntryStates ((entK, entN) : (funID * callN)) : state list =
     let () = prepareSumms [entK] (self#hardCodedSumTypes ()) in
     let summ = RS.sum#find entK in
     [(entryLoc, entN.name, entK, (RS.summOutstate summ).RS.cState)]
@@ -449,7 +437,8 @@ class virtual ordAccessChecker cg cgDir = object (self)
 
   (** Indicate that we are beginning to check a pair of root states *)
   method startState (loc1, fn1, fk1) (loc2, fn2, fk2) =
-    L.logStatus ("now checking thread roots: " ^ fn1 ^ ", " ^ fn2)
+    logStatusF "now checking thread roots: %s(%s), %s(%s)\n"
+      fn1 (fid_to_string fk1) fn2 (fid_to_string fk2)
       
   (** Check a pair of root states *)
   method checkStates 
@@ -480,12 +469,11 @@ let  printTRootSumms cg tcList =
       let stateList = sc#collectTRStates (tcKey, tc) in
       List.iter 
         (fun (loc, fn, _, state) ->
-           L.logStatus ("Found thread creation at: " ^ 
-                          (Du.string_of_loc loc));
-           L.logStatus ("Initial function is: " ^ fn);
-           L.logStatus ("and state:");
+           logStatus ("Found thread creation at: " ^ (string_of_loc loc));
+           logStatus ("Initial function is: " ^ fn);
+           logStatus ("and state:");
            if(RS.isBottomCS (state)) then
-             L.logStatus "state is $BOTTOM"
+             logStatus "state is $BOTTOM"
            else
              () (* RS.printState state; *)
         ) stateList;
@@ -494,5 +482,3 @@ let  printTRootSumms cg tcList =
       loop tl
   in
   loop tcList
-
-

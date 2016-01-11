@@ -12,7 +12,7 @@
   
   1. Redistributions of source code must retain the above copyright 
   notice, this list of conditions and the following disclaimer.
-
+  
   2. Redistributions in binary form must reproduce the above 
   copyright notice, this list of conditions and the following disclaimer 
   in the documentation and/or other materials provided with the distribution.
@@ -38,19 +38,20 @@
 
 
 open Cil
+open Callg
 open Fstructs
+open Logging
+open Cildump
+open Summary_keys
 
 module IH = Inthash
-module DF = Dataflow
-module L = Logging
-module D = Cildump
 module RS = Racesummary
+module BS = Backed_summary
 module GA = Guarded_access_base
 module Lv = Lvals
 module LP = Lockset_partitioner
-module LSHash = Lockset_partitioner.LSHash
-module LocHash = Lockset_partitioner.LocHash
-module LvalHash = Lvals.LvalHash
+module LSHash = LP.LSHash
+module LvalHash = Lv.LvalHash
 
 
 let markPseudoLocation loc =
@@ -65,7 +66,7 @@ type racy = Racy | NotRacy
 
 type paKey = GA.pseudoAttrib
 
-type paKeyHead = fKey * GA.origLvId
+type paKeyHead = funID * GA.origLvId
 type paKeyTail = GA.targetLvId
 
 let smashPaKey (x, y) z : paKey =
@@ -75,11 +76,11 @@ let getPaKeyHead (x, y, z) : paKeyHead =
   (x, y)
 
 let string_of_pakeyhead (x, y) =
-  "(" ^ string_of_int x ^
+  "(" ^ fid_to_string x ^
   "," ^ string_of_int y ^ ")"
 
 let string_of_pakey (x, y, z) =
-  "(" ^ string_of_int x ^
+  "(" ^ fid_to_string x ^
   "," ^ string_of_int y ^
   "," ^ string_of_int z ^ ")"
 
@@ -160,7 +161,7 @@ let computePaKey2LvalsTable (par : paRegions) =
   ht
 
 
-let printPaRegions (par : paRegions) fkey =
+let printPaRegions (par : paRegions) key =
   let processTarget targetLv (i, stat) =
     Lvals.string_of_lval targetLv ^ "["
       ^ string_of_int i ^ "] "
@@ -177,29 +178,30 @@ let printPaRegions (par : paRegions) fkey =
       ) targetStatus;
     "  " ^ Lvals.string_of_lval origLv ^ "["
       ^ string_of_int (snd pakey) ^ "] -> {" ^ !str ^ "}" in
-
+  
   let processLockset ls (loc, paBindings) =
-    L.logStatus ("Lockset has reprloc " ^ D.string_of_loc loc);
+    logStatus ("Lockset has reprloc " ^ string_of_loc loc);
     RS.printLockset ls;
     let str = ref "" in
     LvalHash.iter
       (fun a b ->
          str := !str ^ processPaBinding a b ^ "; "
       ) paBindings;
-    L.logStatus !str in
-
-  L.logStatus ("PAR summary for fkey " ^ string_of_fkey fkey);
+    logStatus !str in
+  
+  logStatus ("PAR summary for key " ^ fid_to_string key);
   LSHash.iter
     (fun ls (loc, paBindings) ->
        processLockset ls (loc, paBindings)
     ) par
-
+    
 
 let emptySumm () : paRegions * paKeyHead2LsTable * paKey2LvalsTable =
   LSHash.create 0, PaKeyHeadHash.create 0, PaKeyHash.create 0
 
-let printSumm (par, _) =
-  printPaRegions par (-1)
+let printSumm (par, _) key =
+  printPaRegions par key (* JAN changed signature... 
+                            will need to see where to change callers *)
 
 let wrapSummary par =
   par, computePaKeyHead2LsTable par, computePaKey2LvalsTable par
@@ -235,7 +237,7 @@ let areTargetsSafe targetStatus =
     ) targetStatus true 
   in
 (*
-    L.logStatus ("areTargetsSafe " ^
+    logStatus ("areTargetsSafe " ^
       match result with
         true -> "true"
       | false -> "false");
@@ -244,12 +246,12 @@ let areTargetsSafe targetStatus =
 
 let markedRacy = Hashtbl.create 17
 
-let markRacyAccess pardb ((fkey, _ , _) as pakey) =
+let markRacyAccess pardb ((sumKey, _ , _) as pakey) =
   if Hashtbl.mem markedRacy (pakey, pardb#sumTyp) then ()
   else begin
     Hashtbl.replace markedRacy (pakey, pardb#sumTyp) ();
     let tryMark () =
-      let par, pakey2ls, pakey2lvals = pardb#find fkey in
+      let par, pakey2ls, pakey2lvals = pardb#find sumKey in
       let ls = PaKeyHeadHash.find pakey2ls (getPaKeyHead pakey) in
       let oLv, tLv = PaKeyHash.find pakey2lvals pakey in
       let reprloc, paBindings = LSHash.find par ls in
@@ -258,20 +260,20 @@ let markRacyAccess pardb ((fkey, _ , _) as pakey) =
       LvalHash.replace targetStatus tLv (pakt, Some Racy);
       LvalHash.replace paBindings oLv (pakh, targetStatus);
       LSHash.replace par ls (reprloc, paBindings);
-      pardb#addReplace fkey (wrapSummary par);
-      pardb#flushOne fkey;
-      L.logStatus ("markRacyAccess " ^ string_of_pakey pakey);
+      pardb#addReplace sumKey (wrapSummary par);
+      pardb#flushOne sumKey;
+      logStatus ("markRacyAccess " ^ string_of_pakey pakey);
     in
     try tryMark ()
     with Not_found ->
-     (* Just in case the sums weren't prepared *)
-      Manage_sums.prepareSumms [fkey] 
-        (Backed_summary.getDescriptors [pardb#sumTyp]);
+      (* Just in case the sums weren't prepared *)
+      Manage_sums.prepareSumms [sumKey] (BS.getDescriptors [pardb#sumTyp]);
       try tryMark () 
       with Not_found ->
-        L.logError ~prior:1 ("markRacyAccess: Not_found " ^ string_of_pakey pakey
-          ^ " " ^ Backed_summary.string_of_sumType pardb#sumTyp)
- end
+        logError ~prior:1 ("markRacyAccess: Not_found " ^ 
+                               string_of_pakey pakey ^ " " ^ 
+                               BS.string_of_sumType pardb#sumTyp)
+  end
 
   
 (* TODO parametrize pardb *)
@@ -279,8 +281,8 @@ let bulkSetPA (fkAndPk: PaKeySet.t FMap.t) status =
   let pakeyNotFounds = ref 0 in
   let pakeysTouched = ref PaKeySet.empty in
   FMap.iter 
-    (fun fkey pks ->
-       let par, pakey2ls, pakey2lvals = sums#find fkey in
+    (fun sumKey pks ->
+       let par, pakey2ls, pakey2lvals = sums#find sumKey in
        PaKeySet.iter
          (fun pakey ->
             try
@@ -293,12 +295,12 @@ let bulkSetPA (fkAndPk: PaKeySet.t FMap.t) status =
               LvalHash.replace paBindings oLv (pakh, targetStatus);
               LSHash.replace par ls (reprloc, paBindings);
               pakeysTouched := PaKeySet.add pakey !pakeysTouched;
-            with Not_found -> L.logError ~prior:1 
+            with Not_found -> logError ~prior:1 
               ("bulkSetPA: pakey " ^ (string_of_pakey pakey) ^ " Not_found");
               incr pakeyNotFounds
          ) pks;
-       sums#addReplace fkey (wrapSummary par);
-       sums#flushOne fkey
+       sums#addReplace sumKey (wrapSummary par);
+       sums#flushOne sumKey
     ) fkAndPk;
   (!pakeysTouched, !pakeyNotFounds)
   (* TODO: reuse some code? *)
@@ -309,10 +311,10 @@ exception FilterPAError
 (** Read in the cluster_ids of races that are filtered, 
     and change their status to NotRacy *)
 let overruleFiltered removedFile cluster_to_pakey =
-  L.logStatusF "Reading filtered races from %s\n" removedFile;
+  logStatusF "Reading filtered races from %s\n" removedFile;
 
   let parseError line =
-    L.logError ("Error parsing: " ^ line);
+    logError ("Error parsing: " ^ line);
     raise FilterPAError
   in
 
@@ -328,7 +330,7 @@ let overruleFiltered removedFile cluster_to_pakey =
       | _ -> parseError line
     done
     with End_of_file ->
-      L.logStatus "Done reading filtered races"
+      logStatus "Done reading filtered races"
   in
   Stdutil.open_in_for removedFile doRead;
 
@@ -349,13 +351,13 @@ let overruleFiltered removedFile cluster_to_pakey =
          pakeysTouched := PaKeySet.union !pakeysTouched morePakeys;
          pakey_not_found := !pakey_not_found + moreNotFounds
        with Not_found ->
-         L.logError ("Can't find pakeys for: " ^ (string_of_int cid));
+         logError ("Can't find pakeys for: " ^ (string_of_int cid));
          incr cid_no_pakey
     ) filtered_ids;
-  L.logStatusF "Race clusters filtered: %d\n" !filtered_clusters;
-  L.logStatusF "Cluster ids w/ no pakeys: %d\n" !cid_no_pakey;
-  L.logStatusF "Pakeys touched: %d\n" (PaKeySet.cardinal !pakeysTouched);
-  L.logStatusF "Cluster id has pakeys, but not the requested: %d\n\n" 
+  logStatusF "Race clusters filtered: %d\n" !filtered_clusters;
+  logStatusF "Cluster ids w/ no pakeys: %d\n" !cid_no_pakey;
+  logStatusF "Pakeys touched: %d\n" (PaKeySet.cardinal !pakeysTouched);
+  logStatusF "Cluster id has pakeys, but not the requested: %d\n\n" 
     !pakey_not_found
     
 
@@ -375,4 +377,3 @@ let overruleAllRacyAccesses fkey =
   ) par;
   sums#addReplace fkey (wrapSummary par);
   sums#flushOne fkey
-    

@@ -51,37 +51,15 @@
 
 
 open Cil
+open Cildump
+open Logging
+open Fstructs
+open Summary_keys
 open Callg
 open Scc_cg
-open Fstructs
 
-module IH = Inthash
-module A = Alias
-module Stat = Mystats
-module L = Logging
-module Du = Cildump
-module FC = Filecache
-module DC = Default_cache
 module BS = Backed_summary
-
 module DF = Dataflow
-module IDF= InterDataflow
-
-
-
-(*******************************************************************)
-(* Util functions                                                  *)
-
-
-(** Get the AST + CFG for the given function *)
-let getFunc fKey fNode : fundec option =
-  try 
-    let ast = !DC.astFCache#getFile fNode.defFile in
-    A.setCurrentFile ast;
-    Cilinfos.getCFG fKey ast
-  with FC.File_not_found fname ->
-    L.logError ("getFunc/CFG: can't find " ^ fname);
-    None
 
 
 (************************************************************
@@ -92,17 +70,19 @@ let getFunc fKey fNode : fundec option =
 (** Expected interface for operations on the dataflow state *)
 class type ['st, 'sum] stateLattice = object
 
-  method  stateSubset : 'st -> 'st -> bool 
+  method stateSubset : 'st -> 'st -> bool 
     
-  method  combineStates : 'st -> 'st -> 'st
+  method combineStates : 'st -> 'st -> 'st
     
-  method  isBottom : 'st -> bool
+  method isBottom : 'st -> bool
     
-  (***** Special values of the state *****)
+  (***** Special values of the state + ops *****)
 
-  method  bottom : 'st
+  method bottom : 'st
     
-  method  initialState : 'st
+  method initialState : 'st
+
+  method setInitialState : 'st -> unit
     
   (***** Debugging *****)
  
@@ -112,7 +92,7 @@ class type ['st, 'sum] stateLattice = object
  
   (** Print the summary for the given function to the log. 
       TODO: Move this somewhere else? Hmmm, didn't supply input either? *)
-  method printSummary : fKey -> unit   
+  method printSummary : sumKey -> unit   
 
   (* rkc: hack alert, to allow Radar to plug in seq or adj summary database *)
   (* val mutable sumtyp : BS.sumType *)
@@ -165,11 +145,8 @@ class type ['st, 'relSt, 'part, 'key, 'info, 'sum] relativeState = object
   method fold_rel : 'a . ('key -> 'info -> 'a -> 'a) ->  'part -> 'a -> 'a 
 
   (* rkc: Exposing some more operations from MapSet *)
-  (*method mem : 'a . ('key -> 'part -> bool)*)
   method mem : 'key -> 'part -> bool
-  (*method cardinal : 'a . ('part -> int)*)
   method cardinal : 'part -> int
-  (*method find : 'a . ('key -> 'part -> 'a)*)
   method find : 'key -> 'part -> 'info
   (*method iter : 'a . (('key -> 'a -> unit) -> 'part -> unit)*)
   method iter : ('key -> 'info -> unit) -> 'part -> unit
@@ -182,26 +159,29 @@ end
 class type ['st] transFunc = object
 
   method curFunc : fundec
+  method curFunID : funID
+  method setCG : callG -> unit
+  method curCG : callG
 
   (** Set up transfer func to analyze the given function *)
-  method handleFunc : fundec -> unit
+  method handleFunc : funID -> fundec -> unit
 
   (** Analyze assignment instructions of the form [lv := exp] *)
   method handleAssign : lval -> exp -> location -> 'st -> 'st DF.action 
     
   (** Analyze function calls of the form [lv := callexp(acts)] *)
-  method handleCall : lval option -> exp -> exp list -> location -> 'st ->
+  method handleCall : lval option -> funID list -> exp -> exp list -> location -> 'st ->
     'st DF.action
 
   (** Analyze the call itself in a func call of form [lv := callexp(acts)] *)
-  method handleCallExp : exp -> exp list -> location -> 'st -> 'st 
+  method handleCallExp : funID list -> exp -> exp list -> location -> 'st -> 'st 
 
   (** Analyze the return value of a function call [lv := callexp(acts)] *)
-  method handleCallRet : lval -> exp -> exp list -> location -> 'st -> 'st 
+  method handleCallRet : lval -> funID list -> exp -> exp list -> location -> 'st -> 'st 
     
   (** Analyze inline assembly code *)
   method handleASM : attributes * string list  
-    * (string * lval) list * (string * exp) list
+    * (string option * string * lval) list * (string option * string * exp) list
     * string list * location -> 
     'st -> 'st DF.action
     
@@ -259,17 +239,19 @@ module type IntraProcAnalysis = sig
  
   module T : DFTransfer
 
-  (** Compute fixed-point on a control-flow graph *)
-  val compute : fundec -> unit
-
   (** initialize everything *)
-  val initialize : fundec -> T.st ->  unit
+  val initialize : funID -> fundec -> T.st ->  unit
+
+  (** Compute fixed-point on a control-flow graph *)
+  val compute : fundec -> unit 
+    (* make it unit -> unit ??? *)
 
   (** return the "output" state *)
   val getOutState : unit -> T.st
 
   (* Ravi: exposing this for when initialize needs to get extended *)
   val curFunc : fundec ref
+  val curFunID : funID ref
 
   (* TODO determine if all of these need to be exposed *)
   val getDataBefore : prog_point -> T.st
@@ -281,8 +263,7 @@ module type IntraProcAnalysis = sig
   val sizeOfState : unit -> int
 
 end
-  (* TODO: make this functor return a class in the form of
-     Analysis_dep.analysis instead *)
+  (* TODO: make this functor return a class of type "analysis" instead *)
 
 
 (**************************************************
@@ -299,6 +280,7 @@ module FlowSensitive (S:DFTransfer) : IntraProcAnalysis with type T.st  = S.st =
 
   (** The function being analyzed *)
   let curFunc = ref dummyFunDec
+  let curFunID = ref dummyFID
 
 
   (******************************
@@ -316,14 +298,14 @@ module FlowSensitive (S:DFTransfer) : IntraProcAnalysis with type T.st  = S.st =
     (@see dataflow.ml)
   **************************************************)
   module CilTrans = struct
-    
+
     let debug = ref S.debug
 
     let name = S.name
 
     type t = S.st
 
-    let stmtStartData : t IH.t = IH.create 37
+    let stmtStartData : t Inthash.t = Inthash.create 37
 
     let pretty () (d: t) =
       (* TODO, use this instead of own print functions for inspect? *)
@@ -332,20 +314,19 @@ module FlowSensitive (S:DFTransfer) : IntraProcAnalysis with type T.st  = S.st =
     (** initializes DF facts -- ASSUMES curFunc is set! *)
     let initStmtStartData (input: t) =
       (* Set all state to $BOTTOM, except set entry stmt state to INPUT  *)
-      IH.clear stmtStartData;
+      Inthash.clear stmtStartData;
       (* Assume first stmt in the list is the entry stmt *)
       match !curFunc.sallstmts with
         hd :: tl ->
-          IH.add stmtStartData hd.sid input;
+          Inthash.add stmtStartData hd.sid input;
           List.iter (fun stmt -> 
-                       IH.add stmtStartData stmt.sid S.stMan#bottom) tl
-      | _ ->
-          ()
+                       Inthash.add stmtStartData stmt.sid S.stMan#bottom) tl
+      | _ -> ()
 
     (** @return the dataflow fact at statement [s]. If it is not set,
         return $BOTTOM *)
-    let getStmtData (data: t IH.t) (s: stmt) : t = 
-      try IH.find data s.sid
+    let getStmtData (data: t Inthash.t) (s: stmt) : t = 
+      try Inthash.find data s.sid
       with Not_found -> S.stMan#bottom
     
 
@@ -360,13 +341,10 @@ module FlowSensitive (S:DFTransfer) : IntraProcAnalysis with type T.st  = S.st =
 
     let doInstr (i: instr) (inSt: t) =
       (* If the input state is bottom, the next state should also be bottom *)
-      if (S.stMan#isBottom inSt) then
-        DF.Default
-      else 
-        !S.transF#handleInstr i inSt
+      if (S.stMan#isBottom inSt) then DF.Default
+      else !S.transF#handleInstr i inSt
           
-    let filterStmt _ = 
-      true
+    let filterStmt _ = true
 
     let doGuard (gexp: Cil.exp) (d: t) =
       !S.transF#handleGuard gexp d
@@ -383,10 +361,11 @@ module FlowSensitive (S:DFTransfer) : IntraProcAnalysis with type T.st  = S.st =
   (******** Output functor signature *******)
 
   (** Prepare analysis *)
-  let initialize (func:fundec) (input:state) : unit =
+  let initialize (funID: funID) (func:fundec) (input:state) : unit =
     curFunc := func;
+    curFunID := funID;
     CilTrans.initStmtStartData input;
-    !S.transF#handleFunc func
+    !S.transF#handleFunc funID func
 
 
   (** @return the dataflow fact at the given prog_point. 
@@ -416,11 +395,11 @@ module FlowSensitive (S:DFTransfer) : IntraProcAnalysis with type T.st  = S.st =
          match (s.skind, s.succs) with
            Return _, _ ->
              let n = CilTrans.getStmtData CilTrans.stmtStartData s in
-               S.stMan#combineStates curState n
+             S.stMan#combineStates curState n
          | _, _ -> 
              curState
       ) S.stMan#bottom !curFunc.sallstmts
-
+      
   let sizeOfState () =
     Osize.size_kb CilTrans.stmtStartData
 
@@ -431,25 +410,27 @@ end
    One-pass flow insensitive intra-proc analysis
 **************************************************)
 
-
 (** Functor to make a intra-procedural analysis that is 
     one-pass and flow-insensitive *)
-module FlowInsensitive (S:DFTransfer) : IntraProcAnalysis with type T.st=S.st = struct
-
+module FlowInsensitive (S:DFTransfer) : IntraProcAnalysis with type T.st = S.st = 
+struct
+  
   module T = S
   
   type state = T.st
 
   let curFunc = ref dummyFunDec
+  let curFunID = ref dummyFID
 
   let fiState = ref S.stMan#bottom
 
   (** Initialize the analysis for function [func] *)
-  let initialize func input =
+  let initialize fid func input =
     curFunc := func;
+    curFunID := fid;
     fiState := input;
     (* Initialize transfer func *)
-    !S.transF#handleFunc func
+    !S.transF#handleFunc fid func
 
 
   (** Class to manage flow-insensitive updates, delegating some tasks 
@@ -516,10 +497,8 @@ end
 ************************************************************)
 
 (**** Must initialize the Call graph references first... ****)
-
-let curCG = ref FMap.empty
-
-let (curSCCCG : sccGraph ref) = ref IntMap.empty
+let curCG = ref emptyCG
+let curSCCCG = ref emptySCCCG
 
 (**** Timer state ****)
   
@@ -562,7 +541,7 @@ let checkupSummary fkey cfg newSummary getOld isBottom subset combine
       let scopedOut = scopeIt cfg newSummary in
       replace fkey scopedOut;
       if inspect then
-        (L.logStatus "Old summ is BOTTOM, replacing w/:";
+        (logStatus "Old summ is BOTTOM, replacing w/:";
          printSum scopedOut;
         );
         true
@@ -574,15 +553,15 @@ let checkupSummary fkey cfg newSummary getOld isBottom subset combine
         false
       else begin
         if inspect then (
-          L.logStatus "Trying to combine outState and curSummary";
-          L.logStatus "scoped outState";
+          logStatus "Trying to combine outState and curSummary";
+          logStatus "scoped outState";
           printSum scopedOut;
-          L.logStatus "\n\ncurSumOut";
+          logStatus "\n\ncurSumOut";
           printSum curSummary;
         );
         let combOut = combine curSummary scopedOut in
         if inspect then (
-          L.logStatus "Finished combining (not printing result)";
+          logStatus "Finished combining (not printing result)";
         );
         replace fkey combOut;
         true
@@ -591,14 +570,42 @@ let checkupSummary fkey cfg newSummary getOld isBottom subset combine
     let _ = getOld fkey in (* just to make sure it's on disk *)
     false
 
-module AD = Analysis_dep
+
+(************************************************************
+  Simple version of analysis w/out dependencies expressed 
+************************************************************)
+
+class type analysis = object
+ 
+  (* TODO: can we use the type-checker to determine whether
+     the analysis needs fix-pointing ? 
+
+     What the hell did I mean? Did I mean some lists will be lists
+     of fixpointing analyses and other lists will be 1-pass analyses?  *)
+
+  method setInspect : bool -> unit
+
+  method isFinal : sumKey -> bool 
+    (* Hide summary type *)
+
+  method compute : funID -> Cil.fundec -> unit
+    (* Need to make it a closure w/ the init, state-getting, and
+       summary-updating functionality hidden *)
+
+  method summarize : sumKey -> Cil.fundec -> bool
+    (* Need to make it a closure w/ the state-getting and 
+       summary-updating functionality hidden *)
+
+  method flushSummaries : unit -> unit
+    (* Clear summaries from memory during non-fixpoint pass, etc. *)
+
+end
+
 
 (** Do the intra-procedural analyses that need fixpointing (on one func).
     @return true if one of the summaries is new. *)
-let runFixpoint (needsFixpoint:AD.analysis list) (cfg:fundec) : bool = 
-  let (fn, ft) = (cfg.svar.vname,
-                  Cildump.string_of_ftype cfg.svar.vtype) in
-  let fkey = cfg.svar.vid in
+let runFixpoint (needsFixpoint:analysis list) sumKey (cfg:fundec) : bool = 
+  let fn = cfg.svar.vname in
   let inspect = Inspect.inspector#mem fn in
   List.fold_left
     (fun changed analysis ->
@@ -606,17 +613,17 @@ let runFixpoint (needsFixpoint:AD.analysis list) (cfg:fundec) : bool =
          registerTimeout ();
          
          analysis#setInspect inspect; 
-         if not (analysis#isFinal fkey) then
-           analysis#compute cfg
+         if not (analysis#isFinal sumKey) then
+           analysis#compute sumKey cfg
          ;
          (* NOTE: assume summarize checks isFinal also... but why bother? *)
-         let result = analysis#summarize fkey cfg in
+         let result = analysis#summarize sumKey cfg in
          
          unregisterTimeout ();
          changed || result
        with AnalysisTimeout ->
          unregisterTimeout ();
-         L.logError "timed out!";  
+         logError "timed out!";  
          (* TODO: identify the analysis that timed out *)
          changed
     ) false needsFixpoint
@@ -624,55 +631,53 @@ let runFixpoint (needsFixpoint:AD.analysis list) (cfg:fundec) : bool =
 
 
 (** Do the intra-procedural analyses that don't need fixpointing (on scc) *)
-let runNonFixpoint (nonFixpoint:AD.analysis list) (pre_req:AD.analysis list) 
-    (prevFkey:fKey) (scc:scc) : unit =
+let runNonFixpoint (nonFixpoint: analysis list) (pre_req: analysis list) 
+    (prevFID:funID) (scc:scc) : unit =
   
-  let runOn fkey cfg =
+  let runOn sumKey cfg =
     List.iter 
       (fun analysis ->
-         if not (analysis#isFinal fkey) then
-           analysis#compute cfg
-         ;
-         let changed = analysis#summarize fkey cfg in
-         if changed then L.logError "runNonFixpoint: Why did summary change?"
+         if not (analysis#isFinal sumKey) then analysis#compute sumKey cfg ;
+         let changed = analysis#summarize sumKey cfg in
+         if changed then logError "runNonFixpoint: Why did summary change?"
       ) nonFixpoint
   in
   
-  let fillDependencies fkey cfg =
+  let fillDependencies sumKey cfg =
     List.iter 
       (fun analysis ->
-         if not (analysis#isFinal fkey) then begin
-           analysis#compute cfg;
+         if not (analysis#isFinal sumKey) then begin
+           analysis#compute sumKey cfg;
            analysis#flushSummaries ();
          end
       ) pre_req
   in
   
-  let getCFGAndDo fkey foo =
-    (try 
-       let fnode = FMap.find fkey !curCG in
-       (match getFunc fkey fnode with
-          Some cfg -> foo fkey cfg
-        | None -> ()
-       )
-     with Not_found -> 
-       L.logError ("intraDataflow: runNonFixpoint can't find CFG for " ^ 
-                     (string_of_fkey prevFkey));
-    )
+  let getCFGAndDo fid foo =
+    try 
+      let fnode = FMap.find fid !curCG in
+      let fkey = fid_to_fkey fid in
+      match Cilinfos.getFunc fkey fnode.defFile with
+        Some cfg -> foo fid cfg
+      | None -> () 
+    with Not_found -> 
+      logErrorF "intraDataflow: runNonFixpoint can't find CFG for %s\n" 
+        (fid_to_string prevFID); 
   in
     
 
   (* First run the dude that already had its dataflow tables filled *)
-  getCFGAndDo prevFkey runOn;
+  getCFGAndDo prevFID runOn;
   
   (* Then run the rest *)
-  let theRest = (FSet.remove prevFkey scc.scc_nodes) in
-  FSet.iter (fun fk -> 
-               getCFGAndDo fk 
-                 (fun fk cfg -> 
-                    fillDependencies fk cfg;
-                    runOn fk cfg)
-            ) theRest
+  let theRest = FSet.remove prevFID scc.scc_nodes in
+  FSet.iter 
+    (fun fk ->
+       getCFGAndDo fk 
+         (fun k cfg -> 
+            fillDependencies k cfg;
+            runOn k cfg)
+    ) theRest
     
 
 
@@ -690,39 +695,56 @@ let runNonFixpoint (nonFixpoint:AD.analysis list) (pre_req:AD.analysis list)
 
 (*************** Simple transfer functions ***************)
 
+let warnNoCallees callExp =
+  logErrorF "call: %s returned 0 fun(s)\n" (string_of_exp callExp);
+  (match callExp with Lval (Var (va), _) ->
+     logError "DIRECT CALL 0 funs!"  | _ -> ())
 
-(** Dataflow functions where each transfer func is the identity func *)
-class ['state] idTransFunc (stMan : ('state, 'b) stateLattice) = object (self) 
-
+(** Dataflow functions where each transfer func is the identity func.
+    Also manages updates to the global pp tracker. 
+    Assumes intraproc dataflow engine (like the CIL one) will call
+    handleInstr sequentially (instead of jumping around) *)
+class ['state] idTransFunc (stMan : ('state, 'b) stateLattice) 
+  : ['state] transFunc = 
+object (self)
+  
+  val mutable curCG = emptyCG
+  method setCG cg = curCG <- cg
+  method curCG = curCG
 
   (** the function currently analyzed *)
-  val mutable curFunc = Cil.dummyFunDec
+  val mutable curFunc = dummyFunDec
+  val mutable curFunID = dummyFID
 
   method curFunc = curFunc
+  method curFunID = curFunID
 
-  method handleFunc func =
+  method handleFunc funID func =
+    curFunID <- funID;
     curFunc <- func
 
-  method handleAssign lv exp loc inState =
+  method handleAssign lv exp loc (inState:'state) =
     DF.Default
     
-  method handleCallExp callexp acts loc (inState:'state) : 'state =
+  method handleCallExp targs callexp acts loc (inState:'state) : 'state =
     inState
 
-  method handleCallRet lv callexp acts loc (inState:'state) : 'state =
+  method handleCallRet lv targs callexp acts loc (inState:'state) : 'state =
     inState
-
       
-  method handleCall retOpt callexp acts loc inState =
-    let newstate = self#handleCallExp callexp acts loc inState in
+  method handleCall retOpt targs callexp acts loc (inState:'state) =
+    let newstate = self#handleCallExp targs callexp acts loc inState in
     if (stMan#isBottom newstate) then
       DF.Done newstate
     else match retOpt with
-      Some lv -> DF.Done (self#handleCallRet lv callexp acts loc newstate)
-    | None    -> DF.Done newstate
+      Some lv -> 
+        DF.Done (self#handleCallRet lv targs callexp acts loc newstate)
+    | None ->
+        DF.Done newstate
 
 
-  method handleASM (atts, templs, cos, cis, clobs, loc) inState =
+  method handleASM (atts, templs, cos, cis, clobs, loc) 
+    (inState:'state) : 'state DF.action =
     DF.Default
 
   method handleInstr (i:Cil.instr) (inState:'state) : 'state DF.action =
@@ -730,11 +752,17 @@ class ['state] idTransFunc (stMan : ('state, 'b) stateLattice) = object (self)
       Set (lval, rhs, loc) ->
         self#handleAssign lval rhs loc inState
     | Call (retval_option, callexp, actuals, loc) ->
-        self#handleCall retval_option callexp actuals loc inState
+        let pp = getCurrentPP () in
+        let targs = Callg.callTargsAtPP curCG curFunID pp in
+        if targs = [] then begin
+          warnNoCallees callexp;
+          DF.Default 
+        end else
+          (* or should we let the handling of 0 targs to the client? *)
+          self#handleCall retval_option targs callexp actuals loc inState
     | Asm  (attrs,  templates, con_out_list, con_in_list, clobbered, loc) -> 
         self#handleASM (attrs, templates, con_out_list, 
                         con_in_list, clobbered, loc) inState
-
 
   (** Given a guard and an input state, return the new state for 
       this branch or None if no change is needed *)
@@ -752,73 +780,90 @@ class ['st] inspectorGadget
   (stMan : ('st, 'sum) stateLattice) analysisName = object (self)
   
   val mutable inspect = false
+  method private inspect = inspect
+
   val name = analysisName
     
   val mutable prevState = stMan#bottom
 
-  (* TODO: just provide a full wrapper around doInstr and doStmt
-     that calls the xxxBefore and xxxAfter routines at the right time *)
-
-  method setInspect yesno = 
-    if yesno then
-      L.logStatusF "inspectorGadget inspecting!\n"
-    ;
+  method private setInspect yesno = 
+    if yesno then logStatusF "inspectorGadget inspecting!\n";
     inspect <- yesno
 
-  method inspect = inspect
-
-  method inspectInstBefore i st =
+  method private inspectInstBefore i st =
     if inspect then 
-      (L.logStatus (name ^ " before instr: ");
-       L.logStatus ((Du.string_of_instr i));
+      (logStatus (name ^ " before instr: ");
+       logStatus ((string_of_instr i));
        stMan#printState st;
        prevState <- st
       )
    
-  (* TODO: actually compare state to see if it changed instead of
-   * trusting that the return values indicate change / no change *)
-  method inspectInstAfter (i:instr) (result : 'st DF.action) =
+  method private inspectInstAfter (i:instr) (result : 'st DF.action) =
     if inspect then
       (match result with
          DF.Default -> 
-           L.logStatus (name ^ " after instr: No change\n")
+           logStatus (name ^ " after instr: No change\n")
        | DF.Done newSt -> 
            if stMan#stateSubset newSt prevState then
-             L.logStatus (name ^ " after instr: No change\n")
+             logStatus (name ^ " after instr: No change\n")
            else begin
-             L.logStatus (name ^ " after instr: \n");
+             logStatus (name ^ " after instr: \n");
              stMan#printState newSt
            end
        | DF.Post f -> 
-           L.logStatus (name ^ " after instr: Post (not eval'ed)\n");
-      )
+           logStatus (name ^ " after instr: Post (not eval'ed)\n"); )
     
 
-  method inspectStmtBefore s st =
+  method private inspectStmtBefore s st =
     if inspect then 
-      (L.logStatus (name ^ " before stmt: ");
-       L.logStatus ((Du.string_of_stmt s));
+      (logStatus (name ^ " before stmt: ");
+       logStatus ((string_of_stmt s));
        stMan#printState st;
        prevState <- st
       )
 
-  method inspectStmtAfter (s:stmt) (result: 'st DF.stmtaction) =
+  method private inspectStmtAfter (s:stmt) (result: 'st DF.stmtaction) =
     if inspect then
       (match result with
          DF.SDefault -> 
-           L.logStatus (name ^ " after stmt: No change\n")
+           logStatus (name ^ " after stmt: No change\n")
        | DF.SDone -> 
-           L.logStatus (name ^ " after stmt: DONE/STOP\n");
+           logStatus (name ^ " after stmt: DONE/STOP\n");
        | DF.SUse newSt ->
            if stMan#stateSubset newSt prevState then
-             L.logStatus (name ^ " after stmt: No change\n")
+             logStatus (name ^ " after stmt: No change\n")
            else begin
-             L.logStatus (name ^ " after stmt: \n");
+             logStatus (name ^ " after stmt: \n");
              stMan#printState newSt
            end
       )
 
 end
+
+class ['st] inspectingTransF (stMan : ('st, 'sum) stateLattice) analysisName 
+  : ['st] transFunc =
+object (self)
+  inherit ['st] inspectorGadget stMan analysisName as inspector
+  inherit ['st] idTransFunc stMan as super
+    
+  method handleFunc funID cfg =
+    super#handleFunc funID cfg;
+    self#setInspect (Inspect.inspector#mem cfg.svar.vname)
+
+  method handleInstr i (inState:'st) : 'st DF.action =
+    inspector#inspectInstBefore i inState;
+    let result = super#handleInstr i inState in
+    inspector#inspectInstAfter i result;
+    result
+
+  method handleStmt stmt (inState:'st) : 'st DF.stmtaction = 
+    inspector#inspectStmtBefore stmt inState;
+    let result = super#handleStmt stmt inState in
+    inspector#inspectStmtAfter stmt result;
+    result
+    
+end
+
 
 
 (**************** Simple summary manager **************)
@@ -828,7 +873,7 @@ class type ['sum, 'st] summarizer = object
   (** Make the summary, and possibly update the database. 
       Assume implementation only needs to be able query state.
       Return true if the new summary has new information *)
-  method summarize : fKey -> fundec -> (prog_point -> 'st) -> bool
+  method summarize : sumKey -> fundec -> (prog_point -> 'st) -> bool
 
   method scopeIt : fundec -> 'sum -> 'sum
 
@@ -882,7 +927,7 @@ object (self)
 
 
   (** Get the possibly-new output and update the summary *)
-  method summarize (fk : fKey) cfg (getState : prog_point -> 'st) =
+  method summarize sumKey cfg (getState : prog_point -> 'st) =
     let newSummary = self#makeSummary cfg getState in
     let replace fk newSum =
       sums#addReplace fk newSum;
@@ -890,7 +935,7 @@ object (self)
 (*    AU.sums#evictSummaries  *) (* TODO have other summaries evicted elsewhere? *)
     in
     checkupSummary
-      fk
+      sumKey
       cfg
       newSummary
       sums#find

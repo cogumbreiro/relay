@@ -43,19 +43,14 @@
 open Fstructs
 open Cil
 open Alias_types
+open Cildump
+open Logging
 
 module CilPTA = Myptranal
 module Steens = Pta_fi_eq
 module Anders = Pta_fs_dir
 
-module D = Cildump
-module FC = Filecache
-module L = Logging
 module Stats = Mystats
-
-(***** Structs for CIL PTA *****)
-
-let aliasCache = Hashtbl.create 10 (* alias file-info cache *)
 
 
 (***** Structs for loading *****)
@@ -131,70 +126,70 @@ class dummyAnalyzer = object (self)
 
   method identity = "dummy"
 
-  val error_msg = ("Dummy alias analyzer doesn't support this\n")
+  method error_msg = (self#identity ^ " alias analyzer doesn't support this\n")
     
   method deref_funptr fexp =
-    failwith error_msg 
+    failwith self#error_msg 
 
   method points_to e v =
-    failwith error_msg 
+    failwith self#error_msg 
 
   method may_alias e1 e2 =
-    failwith error_msg 
+    failwith self#error_msg 
 
   method deref_exp e =
-    failwith error_msg 
+    failwith self#error_msg 
 
   method deref_exp_abs e =
-    failwith error_msg 
+    failwith self#error_msg 
 
   method deref_lval_abs lv =
-    failwith error_msg
+    failwith self#error_msg
 
   method getNodeLval lv =
-    failwith error_msg
+    failwith self#error_msg
 
   method getNodeExp e =
-    failwith error_msg
+    failwith self#error_msg
 
   method represents abs =
-    failwith error_msg
+    failwith self#error_msg
 
   method may_alias_abs abs1 abs2 =
-    failwith error_msg
+    failwith self#error_msg
 
   method location_alias_abs abs1 abs2 =
-    failwith error_msg
+    failwith self#error_msg
 
   method points_to_abs ptr targ =
-    failwith error_msg
+    failwith self#error_msg
 
   method deref_abs abs =
-    failwith error_msg
+    failwith self#error_msg
 
   method compare abs1 abs2 =
-    failwith error_msg
+    failwith self#error_msg
 
   method hash abs =
-    failwith error_msg
+    failwith self#error_msg
 
   method string_of abs =
-    failwith error_msg
+    failwith self#error_msg
 
   method pts_size abs =
-    failwith error_msg
+    failwith self#error_msg
 
   method label_size abs =
-    failwith error_msg
+    failwith self#error_msg
 
   method reachableFrom abs srcs =
-    failwith error_msg
+    failwith self#error_msg
 
   method reachableFromG abs =
-    failwith error_msg
+    failwith self#error_msg
 
   method writeState () =
-    failwith error_msg
+    failwith self#error_msg
 
 end
 
@@ -211,32 +206,27 @@ class cilAnalyzer = object
   method deref_funptr fexp =
     (* Should also match ftypes, since the PTA merges fields *)
     let ftype = Cil.typeOf fexp in
-    let ftype_str = D.string_of_ftype ftype in    
+    let ftype_str = string_of_ftype ftype in    
     let fdecs = 
-      try
-        CilPTA.resolve_funptr fexp
+      try CilPTA.resolve_funptr fexp
       with 
         Not_found
-      | CilPTA.UnknownLocation ->
-          []
+      | CilPTA.UnknownLocation -> []
     in
     List.fold_left 
       (fun curList fdec ->
          let ft = fdec.svar.vtype in
-         let fts = D.string_of_ftype ft in
-         if (fts = ftype_str) then
-           fdec.svar.vid :: curList
-         else
-           curList
+         let fts = string_of_ftype ft in
+         if (fts = ftype_str) 
+         then fdec.svar.vid :: curList
+         else curList
       ) [] fdecs
 
   method deref_exp e =
-    try
-      CilPTA.resolve_exp e
+    try CilPTA.resolve_exp e
     with 
       Not_found
-    | CilPTA.UnknownLocation ->
-        []
+    | CilPTA.UnknownLocation -> []
 
   method points_to e v =
     try
@@ -251,8 +241,7 @@ class cilAnalyzer = object
         raise UnknownLoc
                
   method may_alias e1 e2 =
-    try
-      CilPTA.may_alias e1 e2
+    try CilPTA.may_alias e1 e2
     with 
       Not_found 
     | CilPTA.UnknownLocation ->
@@ -261,7 +250,7 @@ class cilAnalyzer = object
   (* TODO: figure out how to get an abstract rep for CIL nodes *)
 
   method writeState () =
-    L.logStatus "writeState: Not needed for CIL PTA"
+    logStatus "writeState: Not needed for CIL PTA"
 
 end
 
@@ -277,10 +266,10 @@ let makeSteensNode s =
   SteensNode s
 
 class steensAnalyzer = object (self)
-  inherit aliasAnalyzer
+  inherit dummyAnalyzer
 
   initializer
-    L.logStatus "Initializing Steensgaard AA info";
+    logStatus "Initializing Steensgaard AA info";
     Steens.analyzeAll !rootPath false
 
   method identity = Steens.aaName
@@ -292,7 +281,7 @@ class steensAnalyzer = object (self)
     try
       Steens.deref_exp e
     with Not_found ->
-      L.logError "0 targets from deref_exp";
+      logError "0 targets from deref_exp";
       []
 
   method may_alias e1 e2 =
@@ -376,7 +365,7 @@ class steensAnalyzer = object (self)
     Steens.Abs.reachableFromG n 
 
   method writeState () =
-    L.logStatus "writeState: Not needed for Steens PTA"
+    logStatus "writeState: Not needed for Steens PTA"
     
 end
 
@@ -391,10 +380,10 @@ let makeAndersNode x =
   AndersNode x
 
 class andersAnalyzer = object (self)
-  inherit aliasAnalyzer
+  inherit dummyAnalyzer
 
   initializer
-    L.logStatus "Initializing Andersen's AA info";
+    logStatus "Initializing Andersen's AA info";
     Anders.analyzeAll !rootPath false
 
   method identity = Anders.aaName
@@ -406,7 +395,7 @@ class andersAnalyzer = object (self)
     try
       Anders.deref_exp e
     with Not_found ->
-      L.logError "0 targets from deref_exp";
+      logError "0 targets from deref_exp";
       []
 
   method may_alias e1 e2 =
@@ -496,6 +485,65 @@ class andersAnalyzer = object (self)
     
 end
 
+(***** Optimistic No-Alias Analysis *****)
+
+class noAliasAnalyzer = object (self)
+  inherit dummyAnalyzer
+
+  initializer
+    logStatus "Initializing NoAlias AA info"
+
+  method identity = "noalias"
+  method deref_funptr fexp = []
+  method deref_exp e = []
+  method may_alias e1 e2 = false
+  method points_to e v = false
+  method deref_exp_abs e = []
+  method deref_lval_abs lv = []
+
+end
+
+(***** OIC Callgraph *****)
+
+class oicFPAnalysis = object (self)
+  inherit andersAnalyzer as super
+    
+  initializer
+    logStatus "Initializing OIC FP info"
+    
+  (* Set this so it knows which callgraph file to read *)
+  method identity = "oic"
+
+end
+
+
+(***** DSA Callgraph *****)
+
+class dsaFPAnalysis = object (self)
+  inherit andersAnalyzer as super
+    
+  initializer
+    logStatus "Initializing DSA FP info"
+    
+  (* Set this so it knows which callgraph file to read *)
+  method identity = "llvm_dsa"
+
+end
+
+(***** AndersFS Callgraph *****)
+
+class andersFSFPAnalysis = object (self)
+  inherit andersAnalyzer as super
+    
+  initializer
+    logStatus "Initializing AndersFS FP info"
+    
+  (* Set this so it knows which callgraph file to read *)
+  method identity = "llvm_anders"
+
+end
+
+
 (***** Finalizer ******)
   
 let toFinalize = ref []
@@ -504,7 +552,7 @@ let finalize pta =
   pta#writeState ()
 
 let addFinalizer pta =
-  toFinalize := Stdutil.addOnce !toFinalize pta
+  toFinalize := List_utils.addOnce !toFinalize pta
 
 let finalizeAll () =
   List.iter finalize !toFinalize
@@ -516,11 +564,14 @@ let finalizeAll () =
 
 let dummyAA = new dummyAnalyzer
 
-let cilAA = ref dummyAA (* lazily create *)
-
-let steensAA = ref dummyAA (* lazily create *)
-
-let andersAA = ref dummyAA (* lazily create *)
+(* lazily create these (to avoid required pre-processing when unnecessary) *)
+let cilAA = ref dummyAA 
+let steensAA = ref dummyAA
+let andersAA = ref dummyAA
+let noAliasAA = ref dummyAA
+let oicFPAA = ref dummyAA 
+let dsaAA = ref dummyAA 
+let andersFSFPAA = ref dummyAA 
 
 let getCilAA () =
   if (!cilAA == dummyAA) then begin
@@ -543,22 +594,36 @@ let getAndersAA () =
   end;
   !andersAA
 
-(* Hmm, could have done the above more easily w/ macros, or
-   a language where identifiers are first class *)
+let getNoAliasAA () =
+  if (!noAliasAA == dummyAA) then 
+    noAliasAA := new noAliasAnalyzer;
+  !noAliasAA
 
+let getOICFPAA () =
+  if (!oicFPAA == dummyAA) then 
+    oicFPAA := new oicFPAnalysis;
+  !oicFPAA
+
+let getDSAFPAA () =
+  if (!dsaAA == dummyAA) then 
+    dsaAA := new dsaFPAnalysis;
+  !dsaAA
+
+let getAndersFSFPAA () =
+  if (!andersFSFPAA == dummyAA) then 
+    andersFSFPAA := new andersFSFPAnalysis;
+  !andersFSFPAA
+    
+
+(* Hmm, could have done the above more easily w/ macros, or
+   a language where class types are first class *)
 
 
 (***** the particular analyzer to use for each query *****)
 
-(* TODO: allow separate analyses for different phases, not just query-types *)
-
-
 let fpAA = ref dummyAA
-
 let expAA = ref dummyAA
-
 let lvalAA = ref dummyAA
-
 let mayAA = ref dummyAA
 
 
@@ -567,18 +632,23 @@ let mayAA = ref dummyAA
  * Initializing / Updating CIL PTA info
  ****************************************************)
 
+let aliasCache = Hashtbl.create 10 (* alias file-info cache *)
+
 let setCurrentFile (f:Cil.file) : unit =
   (* TODO: cache PTA state?? *)
   if !cilAA != dummyAA then (* Only do this if it's using the cilAA *)
-    if (not (Hashtbl.mem aliasCache f.fileName)) then
-      begin
-        CilPTA.reset_globals ();
-        CilPTA.analyze_file f;
-        CilPTA.compute_results false;
-        Hashtbl.clear aliasCache;
-        Hashtbl.add aliasCache f.fileName true;
-      end
+    if (not (Hashtbl.mem aliasCache f.fileName)) then begin
+      CilPTA.reset_globals ();
+      CilPTA.analyze_file f;
+      CilPTA.compute_results false;
+      Hashtbl.clear aliasCache;
+      Hashtbl.add aliasCache f.fileName true;
+    end
+    else ()
+  else ()
 
+let newFuncListener fkey f : unit =
+  setCurrentFile f
 
 
 (***********************************************************)
@@ -600,6 +670,10 @@ let assignAnalysis aspect analysis =
       "cil" -> getCilAA ()
     | "fi_ci_eq" -> getFiCiEqAA ()
     | "anders" -> getAndersAA ()
+    | "noalias" -> getNoAliasAA ()
+    | "oic" -> getOICFPAA ()
+    | "dsa" -> getDSAFPAA ()
+    | "andersfs" -> getAndersFSFPAA ()
     | _ ->
         failwith ("bad AA value " ^ analysis ^ " -- defaulting to Cil\n")
   in
@@ -613,6 +687,7 @@ let assignAnalysis aspect analysis =
       
 
 let initSettings settings rootPath = begin
+  Cilinfos.addGetFuncListener newFuncListener;
   setRoot rootPath;
   let aSettings = Config.getGroup settings "ALIAS_ANALYSIS" in
   Config.iter 
@@ -621,6 +696,9 @@ let initSettings settings rootPath = begin
     ) aSettings;
 end
 
+let setFilterFunSig what =
+  Steens.setFilter what;
+  Anders.setFilter what
 
 
 (***********************************************************)
@@ -641,8 +719,9 @@ let deref_funptr fpExp : (fKey list) =
 let deref_exp e = 
   !expAA#deref_exp e
 
-(* Given an expression that refers to the address of a function,
-   get a list of possible functions. *)
+(** Given an expression that refers to the address of a function,
+    get a list of possible functions. 
+    E.g., for the first parameter in the call: thread_create(&foo, ...)  *)
 let rec funsFromAddr addrExp : fKey list =
   match addrExp with
     Lval(l) -> (* assume it's a function pointer *)
@@ -655,7 +734,8 @@ let rec funsFromAddr addrExp : fKey list =
   | _ -> failwith "funsFromAddr doesn't understand given fptr"
 
 
-(** Given a function call expression, find the targets of the call *)
+(** Given a function call expression, find the targets of the call. 
+    E.g., for a function pointer call *callExp(...); *)
 let rec funsForCall callExp : fKey list =
   match callExp with
     Lval(Var(finfo), NoOffset) ->
@@ -668,7 +748,6 @@ let rec funsForCall callExp : fKey list =
   | StartOf (Var(va), NoOffset) ->
       [va.vid]
   | _ -> failwith "funsForCall doesn't understand given fptr"
-
 
 
 module Abs =
@@ -727,11 +806,10 @@ struct
     !lvalAA#label_size abs
 
   let reachableFrom abs srcs =
-    Stat.time "reachableFrom"
-      (!lvalAA#reachableFrom abs) srcs
+    Stat.time "reachableFrom" (!lvalAA#reachableFrom abs) srcs
 
   let reachableFromG abs =
-    Stat.time "reachableFromG" !lvalAA#reachableFromG abs
+    !lvalAA#reachableFromG abs
 
 end
 

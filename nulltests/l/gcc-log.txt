@@ -1,1 +1,1 @@
-duppy -c l.c -o ./l.o -lpthread
+duppy -c test.c -o ./test.o -lpthread

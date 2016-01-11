@@ -1,6 +1,6 @@
 
 (*
-  Copyright (c) 2006-2007, Regents of the University of California
+  Copyright (c) 2007-2008, Regents of the University of California
 
   Authors: Ravi Chugh
   
@@ -42,22 +42,17 @@
 
 open Cil
 open Relative_df
-open Fstructs
 open Sym_types
+open Logging
 
-module L = Logging
 module LP = Lockset_partitioner
 module Par = Pseudo_access
 module AU = All_unlocks
-module BS = Backed_summary
 module DF = Dataflow
-module Sh = Shared
 module PPHash = Ciltools.PPHash
-module IH = Inthash
 module Intra = IntraDataflow
-module CLv = Cil_lvals
-module LSHash = LP.LSHash
-module LvalHash = Lvals.LvalHash
+module LSHash = Par.LSHash
+module LvalHash = Par.LvalHash
 
 
 let inspect = ref false
@@ -172,25 +167,19 @@ module RS = struct
     let f = RNS.S.fold 
       (fun lv _ acc ->
          acc ^ (Lv.string_of_lvscope lv) ^ " ") in
-    "N+ = {"
-    ^ f (RNS.getPlus rns) " "
-    ^ "} N- = {"
-    ^ f (RNS.getMinus rns) " "
-    ^ "}"
-    ^ " (" ^ string_of_int (RNS.S.cardinal (RNS.getPlus rns))
-    ^ "," ^ string_of_int (RNS.S.cardinal (RNS.getMinus rns))
-    ^ ")"
+    Printf.sprintf "N+ = {%s} N- ={%s} (%d,%d)"
+      (f (RNS.getPlus rns) " ")
+      (f (RNS.getMinus rns) " ")
+      (RNS.S.cardinal (RNS.getPlus rns))
+      (RNS.S.cardinal (RNS.getMinus rns))
       
   let string_of_rns_noscope rns =
     let f =
       RNS.S.fold
         (fun lv _ acc ->
            acc ^ Lvals.string_of_lval lv ^ " ") in
-    "N+ = {"
-      ^ f (RNS.getPlus rns) " "
-      ^ "} N- = {"
-      ^ f (RNS.getMinus rns) " "
-      ^ "}"
+    Printf.sprintf "N+ = {%s} N- ={%s}"
+      (f (RNS.getPlus rns) " ") (f (RNS.getMinus rns) " ")
 
   class c = object (self)
 
@@ -217,6 +206,8 @@ module RS = struct
           Some (RNS.unique result)
 
     method initialState = Some (RNS.empty)
+    method setInitialState (st:st) : unit = 
+      failwith "RNS lattice initialState shouldn't change"
 
     method isBottom (a: st) =
       match a with
@@ -225,21 +216,15 @@ module RS = struct
 
     method printState a = 
       match a with
-        None -> Printf.printf "RNS: NONE\n"
-      | Some data -> Printf.printf "%s\n" (string_of_rns data) 
+        None -> logStatus "RNS: NONE\n"
+      | Some data -> logStatus (string_of_rns data) 
           
 
-    method printSummary (fkey:fKey) =
-      let summ = sums#find fkey in
-      Printf.printf "RNS SUMMARY: ";
+    method printSummary key =
+      let summ = sums#find key in
+      logStatus "RNS SUMMARY: ";
       self#printState summ
 
-(*
-    val mutable sumtyp = sums#sumTyp
-
-    method setSumTyp t =
-      sumtyp <- t
-*)
     val mutable thesums = sums
     method setTheSums s = thesums <- s
 
@@ -293,10 +278,6 @@ let countAddrGlob = ref 0
 let countCondNotNull = ref 0
 let countCondLval = ref 0
 let countAssignNotNull = ref 0
-
-let inc c =
-  c := !c + 1
-
 
 module NullTransfer = struct
 
@@ -356,7 +337,7 @@ module NullTransfer = struct
             let _, mayPt = SPTA.derefALvalAt pp alv in
             alv :: mayPt
         | _ ->
-            L.logError ~prior:1
+            logError ~prior:1
               "wrapDoMinus: unknown lv structure";
             [] in
 
@@ -389,7 +370,7 @@ module NullTransfer = struct
           match exp with
           | AddrOf (Var v, _) ->
               if v.vglob then
-               (inc countAddrGlob;
+               (incr countAddrGlob;
                 APlus)
               else
                 AMinus
@@ -398,7 +379,7 @@ module NullTransfer = struct
               if RNS.S.mem
                  alv
                  (stMan#getPlus (stMan#projRel inState)) then
-               (inc countAssignNotNull;
+               (incr countAssignNotNull;
                 APlus)
               else 
                 AMinus
@@ -421,7 +402,7 @@ module NullTransfer = struct
               APlus, emptyCrumbs
             (* try always adding to N+ 
               if v.vglob then
-               (inc countAddrGlob;
+               (incr countAddrGlob;
                 APlus, emptyCrumbs)
               else
                 AMinus, emptyCrumbs
@@ -431,7 +412,7 @@ module NullTransfer = struct
               let alv = Lvals.abs_of_lval rhs in
               if RNS.S.mem alv (stMan#getPlus (stMan#projRel inState))
                 then
-                 (inc countAssignNotNull;
+                 (incr countAssignNotNull;
                   APlus, emptyCrumbs)
               else if RNS.S.mem alv (stMan#getMinus (stMan#projRel inState))
                 then
@@ -477,13 +458,13 @@ module NullTransfer = struct
                      CastE (_, CastE (_, Const (CInt64 (0L, _, _)))),
                      CastE (_, (Lval ((_, _) as lval))),
                      _) ->
-               (inc countCondNotNull;
+               (incr countCondNotNull;
                 Dataflow.GUse (self#wrapDoPlus inState lval))
 
             (* NOTE removed clause equal to null check *)
 
             | Lval ((_, _) as lval) ->
-               (inc countCondLval;
+               (incr countCondLval;
                 Dataflow.GUse (self#wrapDoPlus inState lval))
 
             (* handle !'s in succession *)
@@ -518,11 +499,9 @@ module NullTransfer = struct
 
     (* override default behavior *)
     (* TODO test if this actually has any effect *)
-    method handleCallRet lv callexp actuals loc inState =
-      let funs = Alias.funsForCall callexp in
-      let computeEffectOfFun f = 
-      begin
-        let ss = Symsummary.sum#find f in
+    method handleCallRet lv targs callexp actuals loc inState =
+      let computeEffectOfFun funID = begin
+        let ss = Symsummary.sum#find funID in
         match ss with
           Vbot -> AMinus, emptyCrumbs
 
@@ -533,7 +512,7 @@ module NullTransfer = struct
               (lh, off) :: [] ->
                 self#getEffectOfAssign2 (Cil.mkAddrOf (lh, off)) inState
             | _ ->
-               (L.logError
+               (logError
                   "intraDataflow: handleCallRet: aLval yields multiple Lvals";
                 ADefault, emptyCrumbs)
           end
@@ -555,7 +534,7 @@ module NullTransfer = struct
                    rhs_lv :: [] ->
                      lvals := rhs_lv :: !lvals
                  | _ ->
-                   L.logError "intraDataflow: handleCallRet:
+                   logError "intraDataflow: handleCallRet:
                      aLval yields multiple Lvals"
                ) !alvals;
             (* compute effect of the union of these may Lvals *)
@@ -578,21 +557,19 @@ module NullTransfer = struct
 
       end (* end computeEffectOfFun *) in
 
-      if funs = [] then
+      if targs = [] then
         inState
       else
         let overallEffect =
           List.fold_left
             (fun a b -> combine2 a (computeEffectOfFun b))
-            (APlus, emptyCrumbs) funs in
+            (APlus, emptyCrumbs) targs in
 
         match overallEffect with
           ADefault, _ ->
             inState
 
         | APlus, _ ->
-            L.logStatus ("ravi: handlecallret! " ^
-              Lvals.string_of_lval (Lvals.abs_of_lval lv));
             self#wrapDoPlus inState lv
 
         | AMinus, crumbs ->
@@ -606,22 +583,22 @@ module NullTransfer = struct
     object(self)
     inherit ['state, 'relSt, 'part, 'info] basicTransferOps stMan
 
-    val mutable fkey = -1
+    val mutable fkey = Callg.dummyFID
     val mutable par = LSHash.create 0
     val mutable pp2int = PPHash.create 0
-    val mutable int2ls = IH.create 0
+    val mutable int2ls = Inthash.create 0
 
-    method loadPseudoAccessInfo fk =
+    method loadPseudoAccessInfo (fk:Callg.funID) =
       fkey <- fk;
       (* get summaries *)
-      let p2i, i2l = LP.sums#find fk in
-      let parfromdisk, _, _ = Par.sums#find fk in
+      let p2i, i2l = LP.sums#find fkey in
+      let parfromdisk, _, _ = Par.sums#find fkey in
       (* copy summaries into tables *)
       par <- LSHash.copy parfromdisk;
       pp2int <- PPHash.copy p2i;
-      int2ls <- IH.copy i2l;
-      LP.sums#evictOne fk;
-      Par.sums#evictOne fk
+      int2ls <- Inthash.copy i2l;
+      LP.sums#evictOne fkey;
+      Par.sums#evictOne fkey
 
 
     method getCurrentLockset =
@@ -630,34 +607,34 @@ module NullTransfer = struct
         LP.getLocksetAtPP pp (pp2int, int2ls)
       with
         LP.LsAtPP ->
-          (L.logError ~prior:1 ("getCurrentLockset failed");
-           Racesummary.emptyLS)
+          logError ~prior:1 ("getCurrentLockset failed");
+          Racesummary.emptyLS
 
 
     method checkPseudoAccessIsSafe lv ls =
-      (try let _, paBindings = LP.LSHash.find par ls in
-      (try let pakh, targetStatus = Lvals.LvalHash.find paBindings lv in
-
-         PaFound (pakh, (Par.areTargetsSafe targetStatus))
-
-      with Not_found ->
-        L.logError ~prior:1
-          ("checkPseudoAccessIsSafe( " ^ Lvals.string_of_lval lv
-          ^ " ) fkey " ^ string_of_int fkey
-          ^ " - pakeyhead, targetStatus not found");
-        PaNotFound (Lvals.mergeLv lv))
-
-      with Not_found ->
-        (*L.logError ~prior:1*)
-        L.logStatus
-          ("checkPseudoAccessIsSafe( " ^ Lvals.string_of_lval lv
-          ^ " ) fkey " ^ string_of_int fkey
-          ^ " - reprloc, paBindings not found for lockset:");
-        Racesummary.printLockset ls;
-        PaNotFound (Lvals.mergeLv lv))
-
-
-
+      (try let _, paBindings = LSHash.find par ls in
+       (try let pakh, targetStatus = LvalHash.find paBindings lv in
+        
+        PaFound (pakh, (Par.areTargetsSafe targetStatus))
+          
+        with Not_found ->
+          logError ~prior:1
+            ("checkPseudoAccessIsSafe( " ^ Lvals.string_of_lval lv
+             ^ " ) fkey " ^ Callg.fid_to_string fkey
+             ^ " - pakeyhead, targetStatus not found");
+          PaNotFound (Lvals.mergeLv lv))
+         
+       with Not_found ->
+         (*logError ~prior:1*)
+         logStatus
+           ("checkPseudoAccessIsSafe( " ^ Lvals.string_of_lval lv
+            ^ " ) fkey " ^ Callg.fid_to_string fkey
+            ^ " - reprloc, paBindings not found for lockset:");
+         Racesummary.printLockset ls;
+         PaNotFound (Lvals.mergeLv lv))
+        
+        
+        
     (* check all dataflow facts for races.
        TODO a more efficient way would be to only do this when the
        current lockset has changed. *)
@@ -673,15 +650,15 @@ module NullTransfer = struct
 
            match self#checkPseudoAccessIsSafe lv ls with
              PaFound (_, true) ->
-               L.logStatus ("racyPseudo false " ^ Lv.string_of_lval lv);
+               logStatus ("racyPseudo false " ^ Lv.string_of_lval lv);
                ()
            | PaFound (pakh, false) as crumb ->
-               L.logStatus ("racyPseudo true " ^ Lv.string_of_lval lv);
+               logStatus ("racyPseudo true " ^ Lv.string_of_lval lv);
                newstate := self#wrapDoMinusNormalized
                              ~crumbs:(BreadCrumbs.singleton crumb)
                              !newstate lv
            | PaNotFound _ as crumb ->
-               L.logStatus ("racyPseudo ?? " ^ Lv.string_of_lval lv);
+               logStatus ("racyPseudo ?? " ^ Lv.string_of_lval lv);
                (* TODO carry along actual PaNotFound crumb *)
                let crumb = PaNotFoundPlaceHolder in
                newstate := self#wrapDoMinusA
@@ -699,7 +676,8 @@ module NullTransfer = struct
           self#adjustAllPropagatedFacts inState self#getCurrentLockset
 
       | Call (_, _, _, _) ->
-          let weakerls = AU.getWeakerLS self#getCurrentLockset i in
+          let weakerls = AU.getWeakerLS self#curCG 
+            self#curFunID self#getCurrentLockset i in
           self#adjustAllPropagatedFacts inState weakerls
     in
 
@@ -707,6 +685,7 @@ module NullTransfer = struct
       DF.Default
     else
       DF.Done newState
+
 
   method handleGuard g inState =
     let ls = self#getCurrentLockset in
@@ -732,8 +711,8 @@ module NullTransfer = struct
     method setSetRnsAtPP foo =
       setRnsAtPP <- foo
 
-    method loadPseudoAccessInfo (fk:fKey) : unit =
-      adjTrans#loadPseudoAccessInfo fk
+    method loadPseudoAccessInfo (funID:Callg.funID) : unit =
+      adjTrans#loadPseudoAccessInfo funID
 
     method handleInstr i inState =
       let pp = getCurrentPP () in
@@ -790,9 +769,8 @@ module NullTransfer = struct
 
 
   (* pessimistic adjust *)
-  class ['state, 'relSt, 'part, 'info] pessimisticAdjTransFunc
-                                         stMan =
-    object(self)
+  class ['state, 'relSt, 'part, 'info] pessimisticAdjTransFunc stMan =
+  object(self)
     inherit ['state, 'relSt, 'part, 'info] basicTransferOps stMan
 
     method adjustAllPropagatedFacts inState =
@@ -804,16 +782,16 @@ module NullTransfer = struct
       let newstate = ref inState in
       RNS.S.iter
         (fun lv _ ->
-           match Sh.escapeableAbs lv with
+           match Shared.escapeableAbs lv with
              true ->
                (* only using this crumb to stop the null-warning-prop *)
                let crumb = PaNotFoundPlaceHolder in
                newstate := self#wrapDoMinusNormalized
                  ~crumbs:(BreadCrumbs.singleton crumb)
                  !newstate lv;
-               L.logStatus ("escapeableAbs true " ^ Lv.string_of_lval lv);
+               logStatus ("escapeableAbs true " ^ Lv.string_of_lval lv);
            | false ->
-               L.logStatus ("escapeableAbs false " ^ Lv.string_of_lval lv);
+               logStatus ("escapeableAbs false " ^ Lv.string_of_lval lv);
         ) (stMan#getPlus (stMan#projRel inState));
       !newstate
 
@@ -832,7 +810,7 @@ module NullTransfer = struct
       DF.GUse newState
 
   (* placeholder to typecheck... *)
-  method loadPseudoAccessInfo (fk:fKey) = ()
+  method loadPseudoAccessInfo (fid:Callg.funID) = ()
 
   end (* end pessimisticAdjTransFunc class *)
 

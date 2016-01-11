@@ -72,16 +72,16 @@ module OrderedInt =
 
 module OrderedFKeys = OrderedInt
 
-(* Map from integers to --> ? *)
+(* Map from integers to --> 'a *)
 module IntMap = Map.Make(OrderedInt)
   
 (* Set of integers *)
-module IntSet = Set.Make(OrderedInt)
+module IntSet = Sparsebitv
 
-module FMap = IntMap
+(* faze this out to force users to use the correct funID for cgs?? *)
+module FKMap = IntMap
 
-module FSet = IntSet
-
+module FKSet = IntSet
 
 (*** Name + type string data structures *)
 

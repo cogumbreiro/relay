@@ -63,9 +63,8 @@ and ctyp_base =
 
 and ccomp = ckey
 
-
 type vinfo = vinfo_base HC.hash_consed    (* Information from a varinfo *)
-and vinfo_base =  
+and vinfo_base = 
     (* original program variables *)
     PGlobal of vid * ctyp
   | PLocal  of vid * ctyp
@@ -106,8 +105,14 @@ type funInfo =  {
 let compareType a b = 
   Pervasives.compare a b (* Ciltools.compare_type a.HC.node b.HC.node *)
 
+let rec unrollPType t =
+  match t.HC.node with
+    PNamed (_, t) -> unrollPType t
+  | _ -> t
+
 let isVoid t =
-  match t.HC.node with PVoid -> true | _ -> false
+  match (unrollPType t).HC.node with PVoid -> true | _ -> false
+
 
 let rec compatibleTypes t1 t2 =
   match t1.HC.node, t2.HC.node with
@@ -167,6 +172,23 @@ let rec compatibleTypesNoUnroll t1 t2 =
   | PNamed (_, t), _ -> false
   | _, PNamed (_, t) -> false
   | _ -> false
+
+
+let rec compatibleFunSig callType targType =
+  match callType.HC.node, targType.HC.node with
+    PNamed (_, t1), _ -> compatibleFunSig t1 targType
+  | _, PNamed (_, t2) -> compatibleFunSig callType t2
+  | PFun (r1, a1, va1), PFun (r2, a2, va2) ->
+      (va1 = va2) && 
+        (match a1, a2 with 
+           None, _ | _, None -> true
+         | Some l1, Some l2 -> List.length l1 = List.length l2) &&
+        if isVoid r2 then
+          if isVoid r1 then true
+          else (* "return ignored" *) true
+        else not (isVoid r1)
+  | _, _ -> 
+      compatibleTypes callType targType
 
 
 let compareVarBase a b =
@@ -491,9 +513,9 @@ let rec cil_type_to_ptype typ =
   | TArray (t, len, _) -> hcType (PArray (cil_type_to_ptype t))
   | TFun (retType, args, varargP, _) -> 
       hcType (PFun (cil_type_to_ptype retType,
-                      (match args with None -> 
-                         None 
-                       | Some l -> Some (List.map cil_args_to_pargs l)),
+                    (match args with None -> 
+                       None 
+                     | Some l -> Some (List.map cil_args_to_pargs l)),
                     varargP))
   | TNamed (tinfo, _) -> 
       hcType (PNamed (tinfo.tname, cil_type_to_ptype tinfo.ttype))
@@ -513,7 +535,9 @@ let rec ptype_to_cil_type ptyp =
       let ci = getCinfo k in
       TComp (ci, []) (* Lose attribs *)
   | PEnum n -> 
-      TEnum ({ ename = n; eitems = []; eattr = []; ereferenced = true; }, [])
+      TEnum ({ ename = n; eitems = []; 
+               eattr = []; ereferenced = true; ekind = IInt; 
+             }, [])
   | PBuiltin_va_list -> TBuiltin_va_list []
   | PPtr t1 -> TPtr (ptype_to_cil_type t1, [])
   | PFun (ret, args, var) ->
@@ -647,10 +671,10 @@ end
 module LvalH = Hashtbl.Make (HashableLv)
 
 let addOnceAssign =
-  Stdutil.addOnceP (fun a1 a2 -> compareAssign a1 a2 == 0)
+  List_utils.addOnceP (fun a1 a2 -> compareAssign a1 a2 == 0)
     
 let addOnceCall = 
-  Stdutil.addOnceP (fun c1 c2 -> compareCall c1 c2 == 0)
+  List_utils.addOnceP (fun c1 c2 -> compareCall c1 c2 == 0)
 
 (************* Re-hashing (in case objs were serialized *)
 
@@ -737,6 +761,27 @@ let baseVars (lvs: ptaLv list) : vinfo list =
 let baseVarsRv (rvs: ptaRv list) : vinfo list =
   List.map (fun rv -> baseVarRv rv) rvs
 
+(*
+exception TypeMismatch
+
+let rec ptype_of_lval_basetype lv baseType =
+  let host, off = lv in
+  match host.HC.node with
+    PVar _ -> baseType
+  | PDeref rv -> type_after_deref rv baseType
+
+and type_after_deref rv baseType =
+  match rv.HC.node, baseType with
+    PLv l, PPtr t -> ptype_of_lval_basetype l t
+  | PCast (t, r), _ -> ptype_of_rval_basetype r t
+  | PAddrOf l, _ -> 
+      
+let ptype_of_lval lv =
+  let vi = baseVar lv in
+  let baseType = vi.HC.node.vtyp in
+  ptype_of_lval_basetype baseType
+*)
+
 (** True if the rval is an addrOf *)
 let rec isAddrOf rv =
   match rv.HC.node with
@@ -792,6 +837,22 @@ let isPointerVar vinfo =
   | _ -> false
 
 
+let isPoly curType =
+  match curType.HC.node with
+    PPtr t ->
+      (match (unrollPType t).HC.node with
+         PVoid -> true
+       | PInt -> true
+       | _ -> false
+      )
+  | _ -> false      
+
+let isFunctionType t = 
+  match (unrollPType t).HC.node with
+    PFun _ -> true
+  | _ -> false
+
+
 let callUsesFP ({cexp = ce;}, _, _) =
   List.exists isFPCall ce
 
@@ -800,6 +861,7 @@ let rec getLval rv =
     PLv l -> l
   | PCast (_, r) -> getLval r
   | PAddrOf _ -> raise Not_found
+
 
 
 (*************** Computing types on simple lvals ****)
@@ -827,7 +889,7 @@ let rec typeOfPtLv (lv:ptaLv) : Cil.typ =
              raise TypeOfError
         )
   in
-  Stdutil.typeOffsetUnsafe baseType off.HC.node
+  List_utils.typeOffsetUnsafe baseType off.HC.node
 
 and typeOfPtRv = function
     PAddrOf baseLv ->
@@ -949,12 +1011,18 @@ let printAssignment (assign: ptaAssign) =
 
 
 let printFunTypes funTable =
-  print_string "PTA printing string-representation of function types\n";
+  print_string "PTA printing function types and formals\n";
+  print_string "=======================================\n";
   Hashtbl.iter 
     (fun fid finfo ->
        let fname = name_of_id fid in
-       print_string (fname ^ " : " ^ (string_of_type finfo.funType) ^ "\n")
-    ) funTable
+       print_string (fname ^ " : " ^ (string_of_type finfo.funType) ^ "\n");
+       print_string ("  args: [" ^ 
+         List.fold_left (fun cur vi -> cur  
+                           ^ string_of_vinfo vi ^ ", ") 
+         "" finfo.funFormals ^ "]\n")
+    ) funTable;
+  print_string "\n"
 
 
 (******************* Convert back to CIL ******************)

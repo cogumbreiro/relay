@@ -65,7 +65,7 @@ let oneret (f: Cil.fundec) : unit =
     match !retVar with
       Some rv -> rv
     | None -> begin
-        let rv = makeLocalVar f "__retres" retTyp in (* don't collide *)
+        let rv = makeTempVar f ~name:"__retres" retTyp in (* don't collide *)
         retVar := Some rv;
         rv
     end
@@ -98,6 +98,10 @@ let oneret (f: Cil.fundec) : unit =
 
     | [] -> []
 
+    | [{skind=Return (Some (Lval(Var _,NoOffset)), _)} as s]
+         when mainbody && not !haveGoto
+           -> [s]
+
     | ({skind=Return (retval, l)} as s) :: rests -> 
         currentLoc := l;
 (*
@@ -108,9 +112,9 @@ let oneret (f: Cil.fundec) : unit =
                   d_loc l);
 *)
         if hasRet && retval = None then 
-          E.s (error "Found return without value in function %s\n" fname);
+          E.s (error "Found return without value in function %s" fname);
         if not hasRet && retval <> None then 
-          E.s (error "Found return in subroutine %s\n" fname);
+          E.s (error "Found return in subroutine %s" fname);
         (* Keep this statement because it might have labels. But change it to 
          * an instruction that sets the return value (if any). *)
         s.skind <- begin

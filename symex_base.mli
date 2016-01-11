@@ -19,6 +19,10 @@ module type SYMEX_NULL = sig
 
   val mayBeNull : Lvals.aExp list -> nullStat
 
+  val filterNulls : Lvals.aExp list -> Lvals.aExp list
+
+  val filterNullsLvals : Lvals.aLval list -> Lvals.aLval list
+
 end
 
 module type SYMEX_NULL_GEN_INPUT = sig
@@ -46,11 +50,11 @@ module type SYMEX = sig
 
     val sum : sumdb
 
-    val printSummary : sumdb -> fKey -> unit
+    val printSummary : sumdb -> Summary_keys.sumKey -> unit
 
   end
 
-  val init : Config.settings -> simpleCallG -> Modsummaryi.modSum -> unit
+  val init : Config.settings -> callG -> Modsummaryi.modSum -> unit
 
   val printExitState : unit -> unit
 
@@ -70,9 +74,8 @@ module type SYMEX = sig
 
   val lvalsOfExps : Lvals.aExp list -> Lvals.aLval list
 
-  class symexAnalysis : Analysis_dep.analysis
+  class symexAnalysis : IntraDataflow.analysis
 
   module NULL: SYMEX_NULL
 
 end
-  

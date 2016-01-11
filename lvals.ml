@@ -56,16 +56,9 @@ open Fstructs
 open Cil
 open Pretty
 open Scope
-
-module L = Logging
-module A = Alias
-module E = Errormsg
-module CLv = Cil_lvals
-module Du = Cildump
+open Logging
 
 module Stat = Mystats
-
-
 
 
 (************************************************************
@@ -73,8 +66,11 @@ module Stat = Mystats
  ************************************************************)
 
 type ptaNode = Alias_types.ptaNode
+
+type lval_varid = int
+
 type vinfo = 
-    OrigVar of int
+    OrigVar of lval_varid
   | CreatedVar of varinfo
 
 type aLval = aHost * offset
@@ -152,7 +148,7 @@ let rec lvals_of_abs alv =
       let exps = exp_of_abs e in
       List.map (fun e' -> Mem e', off) exps
   | AbsHost h, off ->
-      let lvals = A.Abs.represents h in
+      let lvals = Alias.Abs.represents h in
       List.map (fun (h, o) -> h, Cil.addOffset off o) lvals
 
 and exp_of_abs ae =
@@ -239,7 +235,7 @@ let rec node_of_absLval lv =
   match lv with 
     CVar vid, off -> 
       let vi = var_of_abs vid in
-      A.Abs.getNodeLval (Var vi, off)
+      Alias.Abs.getNodeLval (Var vi, off)
 
   | AbsHost pNode, NoOffset ->
       pNode
@@ -251,46 +247,42 @@ let rec node_of_absLval lv =
   | CMem exp, off ->
       let node = node_of_absExp exp in
       (* delay the deref? no.. need to return a pts to node *)
-      A.Abs.deref node
+      Alias.Abs.deref node
 
 and node_of_absExp e =
     match e with
       CLval lv
-    | CStartOf lv -> node_of_absLval lv
+    | CStartOf lv -> node_of_absLval lv (* StartOf?! *)
     | CAddrOf lv -> 
-        raise A.UnknownLoc (* ... *)
+        raise Alias.UnknownLoc (* ... *)
 
     | CBinOp (_, e1, _, _) -> node_of_absExp e1 (* should get a list *)
     | CUnOp (_, e1, _) 
     | CCastE (_, e1) -> node_of_absExp e1
 
-    | CConst _ 
-    | CSizeOfE _
-    | CSizeOf _
-    | CSizeOfStr _ 
-    | CAlignOfE _
-    | CAlignOf _ ->
-        raise A.UnknownLoc
+    | CConst _ | CSizeOfE _ | CSizeOf _ | CSizeOfStr _ 
+    | CAlignOfE _ | CAlignOf _ ->
+        raise Alias.UnknownLoc
 
 let deref_absExp e =
   try 
     let n = node_of_absExp e in
-    [A.Abs.deref n]
-  with A.UnknownLoc ->
+    [Alias.Abs.deref n]
+  with Alias.UnknownLoc ->
     (* Maybe the exp was an addrOf to begin w/, so a deref cancels it out *)
     (let rec derefAddrOf e =
        match e with
          CAddrOf lv 
        | CStartOf lv -> [node_of_absLval lv]
        | CCastE (t, e') -> derefAddrOf e'
-       | _ -> raise A.UnknownLoc
+       | _ -> raise Alias.UnknownLoc
      in
      derefAddrOf e)
 
 
 let deref_absLval lv =
   let n = node_of_absLval lv in
-  [A.Abs.deref n]
+  [Alias.Abs.deref n]
 
 
 (********* Constructors ***********)
@@ -330,45 +322,12 @@ let mkAddrOf ((b, off) as lval) =
 let hostOfVar (vi: varinfo) =
   CVar (abs_of_var vi)
 
-(** Use our own VID range (all negative numbers instead) so as
-    not to clash with VIDs that have already been assigned! *)
-let nextGlobalVID = ref (-1)
-
-(** Return the next fresh VID. Assume CIL doesn't use negative ints for ids *)
-let newVID () = 
-  let t = !nextGlobalVID in
-  decr nextGlobalVID;
-  t
-
-(** Make variable infos w/ this, not Cil.makeVarinfo, so as not to
-    clash with VIDs that have already been assigned *)
-let mkVarinfo global name typ =
-  (* Besides the VID counter, the rest of the code should
-     be a clone of the Cil code =/ *)
-  (* Strip const from type for locals *)
-  let vi = 
-    { vname = name;
-      vid   = newVID ();
-      vglob = global;
-      vtype = if global then typ else typeRemoveAttributes ["const"] typ;
-      vdecl = locUnknown;
-      vinline = false;
-      vattr = [];
-      vstorage = NoStorage;
-      vaddrof = false;
-      vreferenced = false;    (* sm *)
-    } in
-  if global then setScope SGlobal vi;
-  (* Assume non-globals set the scope themselves *)
-  vi
-
-
 
 (************ Dummy values ***************)
 
-let dummyVar = mkVarinfo true "DIM$UM" (TVoid [])
+let dummyVar = Cil_lvals.mkVarinfo true "DIM$UM" (TVoid [])
 
-let dummyLval  = (hostOfVar dummyVar, NoOffset)
+let dummyLval = (hostOfVar dummyVar, NoOffset)
     
 
 (************ "New" search functions ************)
@@ -376,21 +335,17 @@ let dummyLval  = (hostOfVar dummyVar, NoOffset)
 let rec findBaseVarinfoExp exp : Cil.varinfo =
   match exp with
     (* Simple variable reference *)
-    CLval(lv) 
-  | CAddrOf (lv) 
-  | CStartOf (lv) ->
+    CLval(lv) | CAddrOf (lv) | CStartOf (lv) ->
       findBaseVarinfoLval lv
   | CBinOp(PlusPI,lhs,_,_) 
   | CBinOp(MinusPI,lhs,_,_)
   | CBinOp(IndexPI,lhs,_,_) ->
       findBaseVarinfoExp lhs
 
-  | CSizeOfE e
-  | CAlignOfE e
-  | CCastE (_, e) -> findBaseVarinfoExp e
+  | CSizeOfE e | CAlignOfE e | CCastE (_, e) -> findBaseVarinfoExp e
  
   (* Other cases shouldn't occur (non lvalues) *)
-  | _ -> raise CLv.BaseVINotFound
+  | _ -> raise Cil_lvals.BaseVINotFound
 
       
 and findBaseVarinfoLval lval : Cil.varinfo =
@@ -399,7 +354,7 @@ and findBaseVarinfoLval lval : Cil.varinfo =
   | (CMem(ptrExp),_) ->
       findBaseVarinfoExp ptrExp
   | (AbsHost _, _) ->
-      raise CLv.BaseVINotFound
+      raise Cil_lvals.BaseVINotFound
 
 let rec isAbsLval lval =
   match lval with
@@ -411,9 +366,7 @@ let rec isAbsLval lval =
 
 and isAbsLocExp exp =
   match exp with
-    CLval lv
-  | CAddrOf lv
-  | CStartOf lv -> 
+    CLval lv | CAddrOf lv | CStartOf lv -> 
       isAbsLval lv
   | CCastE (_, e) -> 
       isAbsLocExp e
@@ -421,33 +374,22 @@ and isAbsLocExp exp =
       isAbsLocExp lhs
   | CUnOp(_,e,_) -> 
       isAbsLocExp e
-  | CConst _
-  | CSizeOfE _
-  | CSizeOfStr _
-  | CSizeOf _
-  | CAlignOfE _
+  | CConst _ | CSizeOfE _ | CSizeOfStr _ | CSizeOf _ | CAlignOfE _ 
   | CAlignOf _ -> None
 
 
 let rec countOpsWithCount (curExp) (curCount) = 
   match curExp with
-    CLval l  
-  | CAddrOf l
-  | CStartOf l->
+    CLval l  | CAddrOf l | CStartOf l->
       countOpsInLval l curCount
   | CBinOp(_, ce1, ce2, _) ->
       let ops = countOpsWithCount ce1 (curCount + 1) in
       countOpsWithCount ce2 ops
   | CUnOp(_, ce, _) ->
       countOpsWithCount ce (curCount + 1)
-  | CSizeOfE e
-  | CAlignOfE e
-  | CCastE (_, e) -> 
+  | CSizeOfE e | CAlignOfE e | CCastE (_, e) -> 
       countOpsWithCount e curCount
-  | CConst _ 
-  | CSizeOf _
-  | CSizeOfStr _
-  | CAlignOf _ -> curCount
+  | CConst _  | CSizeOf _ | CSizeOfStr _ | CAlignOf _ -> curCount
 
 and countOpsInLval lv curCount =
   (* Ignore array index expressions *)
@@ -506,8 +448,8 @@ class absPrinterClass = object (self)
   method private getLastNamedArgument (s: string) : exp =
     match List.rev currentFormals with 
       f :: _ -> Lval (var f)
-    | [] -> 
-        E.s (warn "Can't find the last named arg when printing call to %s\n" s)
+    | [] -> Errormsg.s 
+        (warn "Can't find the last named arg when printing call to %s\n" s)
 
   (*** L-VALUES ***)
   method pALval () (lv:aLval) =  (* lval (base is 1st field)  *)
@@ -520,7 +462,7 @@ class absPrinterClass = object (self)
         self#pOffset
           (text "(*" ++ self#pExpPrec derefStarLevel () e ++ text ")") o
     | AbsHost h, o -> 
-        self#pOffset (text (A.Abs.string_of h)) o
+        self#pOffset (text (Alias.Abs.string_of h)) o
 
 
   method private pLvalPrec (contextprec: int) () lv = 
@@ -574,12 +516,12 @@ class absPrinterClass = object (self)
     let thisLevel = getParenthLevel e in
     let needParens =
       if thisLevel >= contextprec then
-	true
+	    true
       else if contextprec == bitwiseLevel then
         (* quiet down some GCC warnings *)
-	thisLevel == additiveLevel || thisLevel == comparativeLevel
+	    thisLevel == additiveLevel || thisLevel == comparativeLevel
       else
-	false
+	    false
     in
     if needParens then
       chr '(' ++ self#pAExp () e ++ chr ')'
@@ -611,8 +553,8 @@ let string_of_exp e =
 let string_of_lval_decl lv =
   try
     let baseVar = findBaseVarinfoLval lv in
-    (string_of_lval lv) ^ " @ " ^ (Du.string_of_loc baseVar.Cil.vdecl)
-  with CLv.BaseVINotFound ->
+    (string_of_lval lv) ^ " @ " ^ (Cildump.string_of_loc baseVar.Cil.vdecl)
+  with Cil_lvals.BaseVINotFound ->
     string_of_lval lv
 
 (*************** Print to XML *****************)
@@ -623,7 +565,7 @@ class lvalXMLPrinter = object (self)
     text "<lval printed=\"" ++ absPrinter#pALval () lv ++ text "\" " ++
       (match lv with
          AbsHost h, o -> 
-           text ("size=\"" ^ (string_of_int (A.Abs.pts_size h)) ^ "\">")
+           text ("size=\"" ^ (string_of_int (Alias.Abs.pts_size h)) ^ "\">")
        | _ ->
            let size = 
              (match blob with
@@ -635,13 +577,13 @@ class lvalXMLPrinter = object (self)
                      "\" vid=\"" ^ (string_of_int baseVar.vid) ^ "\">") 
              ++ line ++
                self#pLoc () (baseVar.vdecl, None)
-           with CLv.BaseVINotFound ->
+           with Cil_lvals.BaseVINotFound ->
              text ">" in
            size ++ vinfo
       ) ++ text "</lval>" ++ line
 
   method pLoc () (loc, parent) =
-    if CLv.locIsUnknown loc then
+    if Cil_lvals.locIsUnknown loc then
       nil
     else
       indent 1 
@@ -650,7 +592,8 @@ class lvalXMLPrinter = object (self)
               text (string_of_int loc.line) ++ text "\" ") ++
            (match parent with
               None -> nil 
-            | Some (k) -> text ("parent=\"" ^ (string_of_fkey k) ^ "\"")) ++ 
+            | Some (k) -> text ("parent=\"" ^ 
+                                  (Callg.fid_to_string k) ^ "\"")) ++ 
            text "></pp>" ++ line)
 
 end
@@ -678,7 +621,7 @@ and compare_host h1 h2 =
       compare_exp e1 e2
 
   | AbsHost a1, AbsHost a2 ->
-      A.Abs.compare a1 a2
+      Alias.Abs.compare a1 a2
 
   | _ -> 
       compare h1 h2
@@ -761,7 +704,7 @@ and compare_host_attr h1 h2 =
       compare_exp_attr e1 e2
 
   | AbsHost a1, AbsHost a2 ->
-      A.Abs.compare a1 a2
+      Alias.Abs.compare a1 a2
 
   | _ -> 
       compare h1 h2
@@ -837,7 +780,7 @@ and hash_host h =
   | CMem e ->
       hash_exp e
   | AbsHost a ->
-      A.Abs.hash a
+      Alias.Abs.hash a
  
 and hash_exp x =
   match x with
@@ -893,7 +836,7 @@ and hash_host_attr h =
   | CMem e ->
       hash_exp_attr e
   | AbsHost a ->
-      A.Abs.hash a
+      Alias.Abs.hash a
 
 and hash_exp_attr x =
   match x with
@@ -993,13 +936,13 @@ let goldenLvals = LvHash.create 173
     decl information. Ignore attribute lists, etc. *)
 let rec distillLval = function
     CVar(vi) as b, off ->
-      b, CLv.distillOff off
+      b, Cil_lvals.distillOff off
 
   | CMem(exp), off ->
-      CMem (distillExp exp), CLv.distillOff off
+      CMem (distillExp exp), Cil_lvals.distillOff off
 
   | AbsHost h as b, off ->
-      b, CLv.distillOff off
+      b, Cil_lvals.distillOff off
 
 and distillExp e =
   match e with 
@@ -1013,8 +956,8 @@ and distillExp e =
       CStartOf (mergeLv l)
 
   | CConst (CEnum (ce, name, ei)) ->
-      CLv.distillEnuminfo ei;
-      CConst (CEnum (CLv.distillExp ce, name, ei))
+      Cil_lvals.distillEnuminfo ei;
+      CConst (CEnum (Cil_lvals.distillExp ce, name, ei))
 
   | CSizeOfE (e) ->
       CSizeOfE (distillExp e)
@@ -1027,18 +970,18 @@ and distillExp e =
       e
 
   | CSizeOf (t) ->
-      CSizeOf (CLv.mergeType t)
+      CSizeOf (Cil_lvals.mergeType t)
   | CAlignOf (t) -> 
-      CAlignOf (CLv.mergeType t)
+      CAlignOf (Cil_lvals.mergeType t)
 
   | CCastE (t, e) ->
-      CCastE (CLv.mergeType t, distillExp e)
+      CCastE (Cil_lvals.mergeType t, distillExp e)
 
   | CUnOp(op, e, t) ->
-      CUnOp(op, distillExp e, CLv.mergeType t)
+      CUnOp(op, distillExp e, Cil_lvals.mergeType t)
 
   | CBinOp(op, e1, e2, t) ->
-      CBinOp(op, distillExp e1, distillExp e2, CLv.mergeType t)
+      CBinOp(op, distillExp e1, distillExp e2, Cil_lvals.mergeType t)
 
 
 and mergeLv lv = 
@@ -1053,7 +996,7 @@ and mergeLv lv =
 let printHashStats () =
   let hashStats = Stdutil.string_of_hashstats LvHash.stats goldenLvals 
     "Golden lvals" in
-  L.logStatus hashStats
+  logStatus hashStats
 
 (************ "New" type functions **************)
 
@@ -1063,10 +1006,10 @@ let rec typeOfUnsafe e : typ =
     CLval lv -> typeOfLvalUnsafe lv
   | CAddrOf (lv) -> TPtr (typeOfLvalUnsafe lv, [])
   | CStartOf (lv) ->
-      (match CLv.unrollTypeNoAttrs (typeOfLvalUnsafe lv) with
+      (match Cil_lvals.unrollTypeNoAttrs (typeOfLvalUnsafe lv) with
          TArray (t,_, _) -> TPtr(t, [])
        | _ -> 
-           E.s (E.bug "typeOfUnsafe: StartOf on a non-array")
+           Errormsg.s (Errormsg.bug "typeOfUnsafe: StartOf on a non-array")
       )
 
   | CConst(CInt64 (_, ik, _)) -> TInt(ik, [])
@@ -1089,16 +1032,17 @@ let rec typeOfUnsafe e : typ =
 
 and typeOfLvalUnsafe = function
     CVar vid, off -> 
-      CLv.typeOffsetUnsafe (var_of_abs vid).vtype off
+      Cil_lvals.typeOffsetUnsafe (var_of_abs vid).vtype off
   | CMem addr, off ->
-      (match CLv.unrollTypeNoAttrs (typeOfUnsafe addr) with
-         TPtr (t, _) -> CLv.unrollTypeNoAttrs (CLv.typeOffsetUnsafe t off)
+      (match Cil_lvals.unrollTypeNoAttrs (typeOfUnsafe addr) with
+         TPtr (t, _) -> Cil_lvals.unrollTypeNoAttrs 
+           (Cil_lvals.typeOffsetUnsafe t off)
        | t ->
            (match off with
               NoOffset ->
                TVoid []
             | _ -> 
-                CLv.typeOffsetUnsafe t off 
+                Cil_lvals.typeOffsetUnsafe t off 
           )
       )
   | AbsHost h, off ->
@@ -1106,34 +1050,34 @@ and typeOfLvalUnsafe = function
         
 
 let typeAfterDeref exp =
-  match CLv.unrollTypeNoAttrs (typeOfUnsafe exp) with
+  match Cil_lvals.unrollTypeNoAttrs (typeOfUnsafe exp) with
     TPtr (t,_) ->
-      CLv.unrollTypeNoAttrs t
+      Cil_lvals.unrollTypeNoAttrs t
   | TInt (_,x) -> TVoid x
   | TVoid x -> TVoid x (* Hack to make offset attachment allowed *)
   | _ ->
-      raise CLv.TypeNotFound
+      raise Cil_lvals.TypeNotFound
 
 
 let attachOffset host offset =
   let hdOff, tlOff = Cil.removeOffset offset in
   let hostTyp = typeOfLvalUnsafe (host, hdOff) in
   (* Only check if the "last" offset matches *)
-  let canAttach, counter = CLv.canAttachOffset hostTyp tlOff in
+  let canAttach, counter = Cil_lvals.canAttachOffset hostTyp tlOff in
   if canAttach then (host, offset)
-  else raise (CLv.OffsetMismatch counter)
+  else raise (Cil_lvals.OffsetMismatch counter)
 
 
 let mkMemChecked ptrExp offset =
   try
     let hostTyp = typeAfterDeref ptrExp in
-    let canAttach, counter = CLv.canAttachOffset hostTyp offset in
+    let canAttach, counter = Cil_lvals.canAttachOffset hostTyp offset in
     if canAttach then mkMem ptrExp offset
-    else raise (CLv.OffsetMismatch counter)
+    else raise (Cil_lvals.OffsetMismatch counter)
   with 
-    E.Error 
-  | CLv.TypeNotFound ->
-      raise (CLv.OffsetMismatch None)
+    Errormsg.Error 
+  | Cil_lvals.TypeNotFound ->
+      raise (Cil_lvals.OffsetMismatch None)
 
 
 (*************** "New" Formal -> Actual Substitution ***************)
@@ -1146,7 +1090,7 @@ let rec substActForm (actual:aExp) (lvalWithFormal:aLval) : aLval =
     (CVar(vid), formOff) ->
       (* NO, don't substitute! A straight-up var as a formal is always a
          different memory cell from a straight-up var in the other scope! *)
-      raise CLv.SubstInvalidArg
+      raise Cil_lvals.SubstInvalidArg
 
   | (CMem (CLval (CVar(vid), NoOffset)), outerOff) -> begin
       (* Assume any variable encountered is the formal... To fix this,
@@ -1154,24 +1098,24 @@ let rec substActForm (actual:aExp) (lvalWithFormal:aLval) : aLval =
       try
         mkMemChecked actual outerOff
       with 
-        CLv.OffsetMismatch _
+        Cil_lvals.OffsetMismatch _
       | Errormsg.Error 
       | Failure _ ->
-          raise CLv.SubstInvalidArg
+          raise Cil_lvals.SubstInvalidArg
     end
   | (CMem(ptrExp), outerOff) ->
       (try
          let newExp = substActFormExp actual ptrExp in
          mkMemChecked newExp outerOff
        with 
-         CLv.OffsetMismatch _
+         Cil_lvals.OffsetMismatch _
        | Errormsg.Error 
        | Failure _ ->
-           raise CLv.SubstInvalidArg)
+           raise Cil_lvals.SubstInvalidArg)
 
   | AbsHost h, outerOff ->
-      L.logError "substActForm: tried to subs into abs host\n";
-      raise CLv.SubstInvalidArg
+      logError "substActForm: tried to subs into abs host\n";
+      raise Cil_lvals.SubstInvalidArg
              
         
 and substActFormExp (actual:aExp) (expWithFormal:aExp) : aExp =
@@ -1208,7 +1152,7 @@ and substActFormExp (actual:aExp) (expWithFormal:aExp) : aExp =
   | CSizeOf _
   | CSizeOfStr _
   | CConst _ ->
-      raise CLv.SubstInvalidArg
+      raise Cil_lvals.SubstInvalidArg
 
 
 (*************** "New" Simplifiers ***************)
@@ -1226,7 +1170,7 @@ let rec canonicizeExp exp =
       exp
 
 and canonicizeLval (host, off) =
-  let newOff, _ = CLv.canonicizeOff off in
+  let newOff, _ = Cil_lvals.canonicizeOff off in
   match host with
     CVar _ 
   | AbsHost _ ->
@@ -1245,13 +1189,13 @@ let rec doSimplifyLv (lv:aLval) :
   match lv with
     (* Base case *)
     (CVar _ as host, off) ->
-      let newLv = host, CLv.simplifyOff off in
+      let newLv = host, Cil_lvals.simplifyOff off in
       let curTyp = typeOfLvalUnsafe newLv in
       (newLv, [(curTyp, newLv)], false)
 
   | (AbsHost _ as host, off) ->
       (* Base case *)
-      let newLv = host, CLv.simplifyOff off in
+      let newLv = host, Cil_lvals.simplifyOff off in
       (newLv, [], false)
 
   | (CMem (ptrExp), off) ->
@@ -1268,7 +1212,7 @@ let rec doSimplifyLv (lv:aLval) :
            (simplerLv, seenTypes, true)
        with
          Not_found ->
-           let newOff = CLv.simplifyOff off in
+           let newOff = Cil_lvals.simplifyOff off in
            let newLv = (mkMem simplifiedPtr newOff) in
            (newLv, (curTyp, newLv) :: seenTypes, changed))
 
@@ -1301,6 +1245,8 @@ type imprecision =
   | PtsToSame of int * int   (* Ptr alias -- Size of points to set *)
   | RepsSame of int * int    (* Location alias -- Size of label set *)
   | SameType                 (* no AA info, but same type *)
+      (* TODO: have to return a common concrete target for the Pts-to stuff 
+         (and hopefully that target isn't a function, or something stupid) *)
 
 let string_of_imp imp =
   (match imp with
@@ -1352,33 +1298,33 @@ let compare_imprec i1 i2 =
 
 
 let sameLocations n1 n2 =
-  if A.Abs.location_alias n1 n2 then begin
-    let s1 = A.Abs.label_size n1 in
-    let s2 = A.Abs.label_size n2 in
+  if Alias.Abs.location_alias n1 n2 then begin
+    let s1 = Alias.Abs.label_size n1 in
+    let s2 = Alias.Abs.label_size n2 in
     Some (RepsSame (s1, s2))
   end
   else None
     
 let samePtrs p1 p2 =
-  if A.Abs.may_alias p1 p2 then begin
-    let s1 = A.Abs.pts_size p1 in
-    let s2 = A.Abs.pts_size p2 in
+  if Alias.Abs.may_alias p1 p2 then begin
+    let s1 = Alias.Abs.pts_size p1 in
+    let s2 = Alias.Abs.pts_size p2 in
     Some (PtsToSame (s1, s2))
   end
   else None
 
 let lPointsTo p t =
-  if A.Abs.points_to p t then begin
-    let s1 = A.Abs.pts_size p in
-    let s2 = A.Abs.label_size t in
+  if Alias.Abs.points_to p t then begin
+    let s1 = Alias.Abs.pts_size p in
+    let s2 = Alias.Abs.label_size t in
     Some (PtsToHostL (s1, s2)) 
   end
   else None
 
 let rPointsTo t p =
-  if A.Abs.points_to p t then begin
-    let s1 = A.Abs.label_size t in
-    let s2 = A.Abs.pts_size p in
+  if Alias.Abs.points_to p t then begin
+    let s1 = Alias.Abs.label_size t in
+    let s2 = Alias.Abs.pts_size p in
     Some (PtsToHostR (s1, s2)) 
   end
   else None
@@ -1403,11 +1349,11 @@ let rec sameHost h1 h2 =
        sameLocations a1 a2
          
    | AbsHost a, CVar vid ->
-       let vNode = A.Abs.getNodeVar (var_of_abs vid) in
+       let vNode = Alias.Abs.getNodeVar (var_of_abs vid) in
        sameLocations a vNode
 
    | CVar vid, AbsHost a ->
-       let vNode = A.Abs.getNodeVar (var_of_abs vid) in
+       let vNode = Alias.Abs.getNodeVar (var_of_abs vid) in
        sameLocations vNode a
 
    | AbsHost a, CMem ptr ->
@@ -1420,20 +1366,20 @@ let rec sameHost h1 h2 =
          
    | CMem ptr, CVar vid ->
        let ptrNode = node_of_absExp ptr in
-       let vNode = A.Abs.getNodeVar (var_of_abs vid) in
+       let vNode = Alias.Abs.getNodeVar (var_of_abs vid) in
        lPointsTo ptrNode vNode
 
    | CVar vid, CMem ptr ->
        let ptrNode = node_of_absExp ptr in
-       let vNode = A.Abs.getNodeVar (var_of_abs vid) in
+       let vNode = Alias.Abs.getNodeVar (var_of_abs vid) in
        rPointsTo ptrNode vNode
 
    with 
-     A.UnknownLoc ->
-       L.logError "sameHost UnknownLoc\n";
+     Alias.UnknownLoc ->
+       logError "sameHost UnknownLoc\n";
        tryType h1 h2
    | Not_found ->
-       L.logError "sameHost Not_found\n";
+       logError "sameHost Not_found\n";
        tryType h1 h2
   )
 
@@ -1450,9 +1396,9 @@ let rec sameHost h1 h2 =
                (fun found n2 -> 
                   match found with 
                     None -> 
-                      if (A.Abs.compare n1 n2 == 0) then
-                        let s1 = A.Abs.pts_size n1 in
-                        let s2 = A.Abs.pts_size n2 in
+                      if (Alias.Abs.compare n1 n2 == 0) then
+                        let s1 = Alias.Abs.pts_size n1 in
+                        let s2 = Alias.Abs.pts_size n2 in
                         Some (s1, s2)
                       else
                         None
@@ -1463,11 +1409,11 @@ let rec sameHost h1 h2 =
        None -> None
      | Some (a, b) -> Some (PtsToSame (a, b))
    with 
-     A.UnknownLoc ->
-       L.logError "sameHost UnknownLoc\n";
+     Alias.UnknownLoc ->
+       logError "sameHost UnknownLoc\n";
        tryType h1 h2
    | Not_found ->
-       L.logError "sameHost Not_found\n";
+       logError "sameHost Not_found\n";
        tryType h1 h2         
   )
 *)
@@ -1481,7 +1427,7 @@ and tryType h1 h2 =
     typeBasedCheck t1 t2
   with
     Errormsg.Error
-  | CLv.TypeNotFound ->
+  | Cil_lvals.TypeNotFound ->
       None
         
 and typeBasedCheck typ1 typ2 =
@@ -1496,7 +1442,7 @@ and typeOf = function
   | AbsHost _ -> TVoid []
       
 and nodesOf = function
-    CVar v -> [A.Abs.getNodeVar (var_of_abs v)]
+    CVar v -> [Alias.Abs.getNodeVar (var_of_abs v)]
   | CMem e -> deref_absExp e
   | AbsHost h -> [h]
 
@@ -1593,7 +1539,7 @@ let string_of_lvscope (lv:aLval) : string =
     try
       let vi = findBaseVarinfoLval lv in
       ":" ^ (string_of_int vi.vid)
-    with CLv.BaseVINotFound -> ""
+    with Cil_lvals.BaseVINotFound -> ""
   in
   try
     let scope = getScope lv in
@@ -1604,7 +1550,7 @@ let string_of_lvscope (lv:aLval) : string =
 (************* Misc... ***********)
 
 let makeFormalWithName name index =
-  let baseVar = mkVarinfo false name (TVoid []) in
+  let baseVar = Cil_lvals.mkVarinfo false name (TVoid []) in
   setScope (SFormal index) baseVar;
   (hostOfVar baseVar, NoOffset)
     

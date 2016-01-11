@@ -39,45 +39,18 @@
 (** Worker process for analyzing a program for possible 
     data races (launch these processes along w/ the server) *)
 
-open Readcalls
-open Callg
 open Cil
 open Pretty
-open Fstructs
-open Scc_cg
+open Logging
 open Stdutil
-open Cilfiles
-open Cilinfos
 
-module A = Alias
-
-module CLv = Cil_lvals
-module Lv = Lvals
 module RS = Racesummary
 module Race = Racestate
-module Du = Cildump
+module SPTA = Race.SPTA
 module Th = Threads
 module BS = Backed_summary  
 module Warn = Race_warnings
-module DC = Default_cache
-module L = Logging
 module Dis = Distributed
-module Req = Request
-module Stat = Mystats
-module FS = File_serv
-module I = Inspect
-
-module SPTA = Race.SPTA
-
-module Checkp = Checkpoint
-
-(* TODO:
-
-   * Need to be able to get the correlations between statements
-   for post-thread-creation interaction (and possibly before join)?
-   Currently assume entire thread-creator runs in parallel.
-
-*)
 
 (***************************************************)
 (* Commandline handling                            *)
@@ -96,25 +69,22 @@ let userName = ref ""
 
 let statusFile = ref ""
 
-let setVerboseSums yesno =
-  RS.verboseSum := yesno
-
 (* Command-line argument parsing *)
 
 let argSpecs = 
   [("-cg", Arg.Set_string cgDir, "name of call graph directory");
    ("-su", Arg.Set_string configFile, "name of config/summary bootstrap file");
    ("-i", Arg.String 
-      I.inspector#addInspect, "inspect state of function (given name)");
+      Inspect.inspector#addInspect, "inspect state of function (given name)");
    ("-nw", Arg.Set no_warn, "do not generate warnings");
    ("-r", Arg.Set restart, "causes analyzer to clear state and restart");
    ("-u", Arg.Set_string userName, "username to use");
    ("-l", Arg.Set_string logDir, "log status and errors to given dir");
    ("-st", Arg.Set_string statusFile,
     "file storing work status (current scc/pass/analysis)");
-   ("-vs", Arg.Bool setVerboseSums, 
+   ("-vs", Arg.Set RS.verboseSum, 
     "print verbose function summaries");
-   ("-time", Arg.Set Stat.doTime, "Time operations");
+   ("-time", Arg.Set Mystats.doTime, "Time operations");
    ("-mem", Arg.Set Osize.checkSizes, "Check memory usage");
   ]
 
@@ -124,164 +94,126 @@ let anonArgFun (arg:string) : unit =
 let usageMsg = getUsageString "-cg fname -u username [options]\n"
 
 
-(***************************************************)
-(* Determine what summaries need to be kept        *)
-
-
-(** Get the list functions whose summaries are needed by the end *)
-let getNeededFuncs (cg) = begin
-  (* Find which functions actually fork new threads *)
-  let threadCreatorCallers = Th.findTCCallers cg in
-  
-  (* Find the fork targets (i.e., thread roots) *)
-  let threadRoots = Th.getThreadRoots cg threadCreatorCallers in
-
-  (* Also need the functions called by the threadCreator itself 
-     (so that Symstate pass will work) *)
-  let results = List.fold_left
-    (fun cur (fid, tc) ->
-       try
-         let fnode = FMap.find fid cg in
-         List.fold_left 
-           (fun cur fkey ->
-              FSet.add fkey cur
-           ) cur fnode.callees
-       with Not_found ->
-         L.logError "getNeededFuncs: Can't find thread creator in CG!";
-         cur
-    ) threadRoots threadCreatorCallers in
-
-  (* Finally, need entry-point functions *)
-(*
-  let results = List.fold_left
-    (fun cur (fk, _) -> FSet.add fk cur) results (getRoots cg) in
-
-*)
-  FSet.elements results
-    
-
-
-end
-
 
 (***************************************************)
 (* Run                                             *)
 
+let printKnownFuns cg =
+  logStatusD 
+    (map_to_doc line Callg.FMap.iter
+       (fun k n -> dprintf "%s : %s : %b" n.Callg.name 
+          (Callg.fid_to_string k) n.Callg.hasBody)
+       cg nil)
+
 
 (** Initialize function summaries, and watchlist of special 
     functions (e.g., pthread_create) *)
-let initSettings () : simpleCallG =
-  try
-    Cilinfos.reloadRanges !cgDir;
-    let settings = Config.initSettings !configFile in
-    Req.init settings;
-    Req.setUser !userName;
-    Checkp.init !statusFile;
-    DC.makeLCaches (!cgDir);
-    Th.initSettings settings;
-    A.initSettings settings !cgDir;
-    let cgFile = Dumpcalls.getCallsFile !cgDir in
-    let cg = readCalls cgFile in
-    let () = BS.init settings !cgDir cg in
+let initSettings () : Callg.callG =
+  Cilinfos.reloadRanges !cgDir;
+  let settings = Config.initSettings !configFile in
+  Request.init settings;
+  Request.setUser !userName;
+  Checkpoint.init !statusFile;
+  Default_cache.makeLCaches (!cgDir);
+  Th.initSettings settings;
+  Alias.initSettings settings !cgDir;
+  let cgFile = Dumpcalls.getCallsFile !cgDir in
+  let cg = Callg.readCalls cgFile in
 
-    SPTA.init settings cg (RS.sum :> Modsummaryi.modSum);
-    Dis.init settings !cgDir;
-    Entry_points.initSettings settings;
-    let _ = FS.init settings in (* ignore thread created *)
-    let gen_num = Req.initServer () in
-    if ( !restart ) then begin
-      L.logStatus "trying to clear old summaries / local srcs, etc.";
-      L.flushStatus ();
-      BS.clearState gen_num;
-      Req.clearState gen_num;
-    end;
-    cg
+  (* DEBUG *)
+(*
+  printKnownFuns cg;
+*)
 
-  with e -> Printf.printf "Exc. in initSettings: %s\n"
-    (Printexc.to_string e) ; raise e
+  let () = BS.init settings !cgDir cg in
 
+  SPTA.init settings cg (RS.sum :> Modsummaryi.modSum);
+  Dis.init settings !cgDir;
+  Entry_points.initSettings settings;
+  let _ = File_serv.init settings in (* ignore thread created *)
+  let gen_num = Request.initServer () in
+  if ( !restart ) then begin
+    logStatus "trying to clear old summaries / local srcs, etc.";
+    flushStatus ();
+    BS.clearState gen_num;
+    Request.clearState gen_num;
+  end;
+  cg
 
 
 (** Initiate analysis *)
 let doRaceAnal () : unit =
   let cg = initSettings () in
-  let sccCG = getSCCGraph cg in begin
-
-    (* Figure out which summaries are important -- 
-       (i.e., what summaries cannot be garbage collected) *)
-    let neededFuncs = getNeededFuncs cg in
-
+  let sccCG = Scc_cg.getSCCGraph cg in begin
+    
     (* Then do a bottom-up analysis *)
-    Race.RaceBUTransfer.initStats cg sccCG neededFuncs;
+    Race.RaceBUTransfer.initStats cg sccCG;
 
-    L.logStatus "Starting bottomup analysis";
-    L.logStatus "-----";
-    L.flushStatus ();
+    logStatus "Starting bottomup analysis";
+    logStatus "-----";
+    flushStatus ();
 
     Race.BUDataflow.compute cg sccCG;
 
-    L.logStatus "Bottomup analysis complete";
-    L.logStatus "-----";
-    L.flushStatus ();
+    logStatus "Bottomup analysis complete";
+    logStatus "-----";
+    flushStatus ();
     
     if (not !no_warn) then begin
-      L.logStatus "\n\n\nBeginning Thread Analysis:";
-      L.logStatus "-----";
-      L.flushStatus ();  
+      logStatus "\n\n\nBeginning Thread Analysis:";
+      logStatus "-----";
+      flushStatus ();  
       Warn.flagRacesFromSumms cg !cgDir;
 
       (* Try printing alias example requests *)
-      L.logStatus "\n\nPrinting Alias assumptions used by warnings";
-      L.logStatus "-----";
-      L.flushStatus ();
+      logStatus "\n\nPrinting Alias assumptions used by warnings";
+      logStatus "-----";
+      flushStatus ();
       Warn.printAliasUses ();
     end;
     
-    A.finalizeAll ();
+    Alias.finalizeAll ();
   end
 
 
 let printStatistics () = begin
-  Lv.printHashStats ();
-  CLv.printHashStats ();
+(*
+  Lvals.printHashStats ();
+  Cil_lvals.printHashStats ();
+*)
   Gc_stats.printStatistics ();
+  flushStatus ()
 end
 
 
 (** Entry point *)
-let main () = 
-  try
-    Arg.parse argSpecs anonArgFun usageMsg;
-    
-    (* Didn't know how to require the -cg file, etc., so check manually *)
-    if (!cgDir = "" || !configFile = "" || !userName = "") then
-      begin
-        Arg.usage argSpecs usageMsg;
-        exit 1
-      end
-    else
-      begin
-        if (!logDir <> "") then
-          (L.setStatLog !logDir;
-           L.setErrLog !logDir;
-          )
-        ;
-        Cil.initCIL ();
-        Gc_stats.setGCConfig ();
+let main () =
+  Arg.parse argSpecs anonArgFun usageMsg;
 
-        L.logStatus "Checking for data races";
-        L.logStatus "-----";
-        doRaceAnal ();
-        Stat.print stdout "STATS:\n";
-        printStatistics ();
-        exit 0;
-      end
-  with e ->
-    L.logError ~prior:0 ("Exc. in Race Analysis: " ^
-                           (Printexc.to_string e)) ;
-    Stat.print stdout "STATS:\n";
-    printStatistics ();
-    L.flushStatus ();
-    raise e
+  (* Didn't know how to require the -cg file, etc., so check manually *)
+  if (!cgDir = "" || !configFile = "" || !userName = "") then
+    begin
+      Arg.usage argSpecs usageMsg;
+      exit 1
+    end
+  else
+    begin
+      if (!logDir <> "") then
+        (setStatLog !logDir;
+         setErrLog !logDir;
+        )
+      ;
+      Stdutil.printCmdline ();
+      Pervasives.at_exit printStatistics;
+      Cil.initCIL ();
+      Gc_stats.setGCConfig ();
+
+      logStatus "Checking for data races";
+      logStatus "-----";
+      doRaceAnal ();
+      Mystats.print stdout "STATS:\n";
+      exit 0;
+    end
+
 ;;
 main () ;;

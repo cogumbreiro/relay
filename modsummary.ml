@@ -42,15 +42,10 @@
 open Cil
 open Pretty
 open Fstructs
+open Logging
 
 module A = Alias
-module L = Logging
 module Stat = Mystats
-module BS = Backed_summary
-module Lv = Lvals
-module CLv = Cil_lvals
-module Sh = Shared
-module DF = Dataflow
 module Intra = IntraDataflow
 module SPTA = Symex 
   (* hmm... centralize the choice in some Symex-chooser module? *)
@@ -60,7 +55,7 @@ module SPTA = Symex
   TODO: refactor and separate interface from implementation
  ************************************************************)
 
-module Lvs = Set.Make (Lv.OrderedLval)
+module Lvs = Set.Make (Lvals.OrderedLval)
 
 type state = Lvs.t
 
@@ -71,7 +66,7 @@ type summary = state
 
 (****** Make a Singleton representing \bottom ********)
 
-let bottomLval = Lv.dummyLval
+let bottomLval = Lvals.dummyLval
 
 let bottomSet = Lvs.add bottomLval Lvs.empty
 
@@ -107,7 +102,7 @@ module ModSum = Safer_sum.Make (ModSumType)
 let listMods lvs =
   Lvs.fold 
     (fun lval cur ->
-       let scope = Lv.getScope lval in
+       let scope = Lvals.getScope lval in
        (lval, scope) :: cur
     ) lvs []
 
@@ -128,9 +123,9 @@ class modSummary sumID = object (self)
         
 end
 
-let sums = new modSummary (BS.makeSumType "mods")
+let sums = new modSummary (Backed_summary.makeSumType "mods")
 
-let _ = BS.registerType (sums :> ModSum.data)
+let _ = Backed_summary.registerType (sums :> ModSum.data)
 
 
 (************************************************************
@@ -149,11 +144,11 @@ class modStateLattice : [state, state] Intra.stateLattice  = object (self)
 
   (***** Special values of the state *****)
 
-  method bottom =
-    bottomSet
+  method bottom = bottomSet
     
-  method initialState =
-    Lvs.empty
+  method initialState = Lvs.empty
+  method setInitialState (st:state) = 
+    failwith "Modsummary's initial state should be constant"
 
   method isBottom st =
     isBottom st
@@ -170,18 +165,18 @@ class modStateLattice : [state, state] Intra.stateLattice  = object (self)
  
   method printState st =
     let doc = 
-      L.seq_to_doc 
+      seq_to_doc 
         (text ", ")
         Lvs.iter
-        (fun lv -> text (Lv.string_of_lval lv))
+        (fun lv -> text (Lvals.string_of_lval lv))
         st
         Pretty.nil in
-    L.logStatusD doc;
-    L.logStatus "\n"
+    logStatusD doc;
+    logStatus "\n"
 
   method printSummary fkey =
     let theSum = sums#find fkey in
-    L.logStatus "Mod summary:";
+    logStatus "Mod summary:";
     self#printState theSum
 
 end
@@ -201,9 +196,9 @@ class modTransfer stMan = object (self)
     match lv with
       (* [COPY]  x = newVal *)
       (Var(vi) as host, off) ->
-        if Sh.varShareable vi then
-          let newOff, _ = CLv.canonicizeOff off in
-          self#addWrite (Lv.abs_of_lval (host, newOff)) inSt
+        if Shared.varShareable vi then
+          let newOff, _ = Cil_lvals.canonicizeOff off in
+          self#addWrite (Lvals.abs_of_lval (host, newOff)) inSt
         else
           inSt
             
@@ -215,7 +210,7 @@ class modTransfer stMan = object (self)
         (* Add correlation regardless of must/may point to status *)
         List.fold_left 
           (fun curSt curLv ->
-             match Sh.isShareableAbs self#curFunc curLv with
+             match Shared.isShareableAbs self#curFunc curLv with
                None -> curSt
              | Some(scope) ->
                  self#addWrite curLv curSt
@@ -224,30 +219,29 @@ class modTransfer stMan = object (self)
 
   (** Analyze assignment instructions of the form [lv := exp] *)
   method handleAssign lv exp loc inSt =
-    DF.Done (self#handleAssignLeft lv inSt)
+    Dataflow.Done (self#handleAssignLeft lv inSt)
 
   (** Analyze the return value of a function call [lv := callexp(acts)] *)
-  method handleCallRet lval callexp args loc inSt =
+  method handleCallRet lval targs callexp args loc inSt =
     self#handleAssignLeft lval inSt
 
-  method foldSummaryWrites pp actuals sumLv curWrites =
-    curWrites
+  method foldSummaryWrites actuals sumLv curWrites =
+    (* curWrites *)
+    failwith "TODO"
 
   (** Accumulate the writes from callee *)
-  method findApplySum pp actuals fkey curState =
-    let sumWrites = stMan#sums#find fkey in
-    let apply = self#foldSummaryWrites pp actuals in
+  method findApplySum actuals key curState =
+    let sumWrites = stMan#sums#find key in
+    let apply = self#foldSummaryWrites actuals in
     let applied = Lvs.fold apply sumWrites curState in
     applied
       
   (** Analyze the actual call *)
-  method handleCallExp callexp args loc inSt =
-    let funs = A.funsForCall callexp in
-    let pp = getCurrentPP () in
+  method handleCallExp targs callexp args loc inSt =
     List.fold_left 
-      (fun curState fkey ->
-         self#findApplySum pp args fkey curState 
-      ) inSt funs
+      (fun curState sumKey ->
+         self#findApplySum args sumKey curState 
+      ) inSt targs
 
 
 end
@@ -297,15 +291,15 @@ class modAnalysis = object (self)
     (* TODO: make this work if the flow function is changed *)
     transFunc#setInspect yesno
 
-  method isFinal (fk:fKey) = 
+  method isFinal fk = 
     false
       
-  method compute cfg =
+  method compute funID cfg : unit =
     (* TODO: get rid of input *)
     let input = Lvs.empty in
-    ModIntraProc.initialize cfg input;
-    L.logStatus "doing mods analysis";
-    L.flushStatus ();
+    ModIntraProc.initialize funID cfg input;
+    logStatus "doing mods analysis";
+    flushStatus ();
     Stat.time "mods analysis: " ModIntraProc.compute cfg
 
   method summarize fkey cfg =

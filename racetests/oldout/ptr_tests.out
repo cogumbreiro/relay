@@ -1,10 +1,11 @@
-Sun Aug 10 21:12:34 PDT 2008
-reserved status file: /tmp/temp.Az9oc0
-running analysis on /home/jan/research/relay/racetests/ptr_tests/ciltrees
+Mon Oct 12 14:20:36 PDT 2009
+reserved status file: /tmp/temp.aU3bkm
+running analysis on /home/jan/research/relay-race/racetests/ptr_tests/ciltrees
 Registered summary type: rs
 Registered summary type: ss
 Registered summary type: rss
-Registered summary type: mods
+Args: 
+ ./race_anal.exe -cg /home/jan/research/relay-race/racetests/ptr_tests/ciltrees -r -u jan -st /tmp/temp.aU3bkm
 Checking for data races
 -----
 Loading Cil Varinfo ID ranges for lookup tables
@@ -22,184 +23,57 @@ Finished parsing config group: SYM_EX
 Done reading config file
 myIP: 127.0.0.1
 using /tmp/relay_scratch to store acquired files
-using: /tmp/temp.Az9oc0 to track status
-Initializing Steensgaard AA info
+using: /tmp/temp.aU3bkm to track status
+Initializing Andersen's AA info
 Loading function info
-Using old PTA results
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/racetests/ptr_tests/ciltrees/.pta_temp.anders
 Old PTA results loaded
-Reached end of /home/jan/research/relay/racetests/ptr_tests/ciltrees/calls.cil call graph file
-Num funcs: 99
+Reached end of /home/jan/research/relay-race/racetests/ptr_tests/ciltrees/calls.anders call graph file
+Num funcs: 100
 summary database will use:
-	/home/jan/research/relay/racetests/ptr_tests/ciltrees/relay_sums
-Initializing summary mods
-Checking left-over state in mods
+	/home/jan/research/relay-race/racetests/ptr_tests/ciltrees/relay_sums
 Initializing summary rss
-Checking left-over state in rss
+Checking leftover state: rss
 Initializing summary ss
-Checking left-over state in ss
+Checking leftover state: ss
 Initializing summary rs
-Checking left-over state in rs
+Checking leftover state: rs
 SH: initEscapeable found (0, 0) thread (acts, formals)
 
-Entry points use roots: false
+Entry points use roots: true
 file server will use: 14440
 trying to clear old summaries / local srcs, etc.
-Scc_cg: Pruned 20 funcs w/out bodies for scc DAG
+Scc_cg: Pruned 21 funcs w/out bodies for scc DAG
 Starting bottomup analysis
 -----
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #2
+Starting an SCC (1) #3
 =================================
-Summarizing function: cli_validatesig : uselock.c
+Summarizing function: flush_older_commits : test_comb.c
 -----
 doing symstate
 Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	550	0	0	0	2	
-
-TIMES : FUN:550 : 0.00734710693359
-TIMES : SCC:2 : 0.00735902786255
+TIMES : SCC:3 : 0.0130960941315
+TIMES : FUN:695.f : 0.0130860805511
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 550
+Summary for function: flush_older_commits:695.f
 =======
 
-SUMS (fk, lo, un, wr, re):	550	0	0	0	2	
+SUMS (nm, lo, un, wr, re):	flush_older_commits	0	0	0	9	
 
 SS Sum:
  -> 
-$SSTOP
-SIZES: 550 : 194
+Vval: 0
+SIZES: 695.f : 1302
 >>> PROGRESS 1/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #0
-=================================
-Summarizing function: cli_bm_scanbuff : uselock.c
------
-doing symstate
-Prev ldiffCache hits: 3	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	559	0	0	1	12	
-
-TIMES : SCC:0 : 0.00982093811035
-TIMES : FUN:559 : 0.00980997085571
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 559
-=======
-
-SUMS (fk, lo, un, wr, re):	559	0	0	1	12	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 559 : 2377
->>> PROGRESS 2/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #77
-=================================
-Summarizing function: __db_err : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 2	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	72	0	0	0	0	
-
-TIMES : FUN:72 : 0.0608479976654
-TIMES : SCC:77 : 0.0608580112457
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 72
-=======
-
-SUMS (fk, lo, un, wr, re):	72	0	0	0	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 72 : 34
->>> PROGRESS 3/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #1
-=================================
-Summarizing function: __db_pthread_mutex_destroy : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	130	0	0	0	1	
-
-TIMES : SCC:1 : 0.00122380256653
-TIMES : FUN:130 : 0.00121808052063
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 130
-=======
-
-SUMS (fk, lo, un, wr, re):	130	0	0	0	1	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 130 : 943
->>> PROGRESS 4/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #4
-=================================
-Summarizing function: __db_pthread_mutex_init : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	127	0	0	1	2	
-
-TIMES : SCC:4 : 0.00250101089478
-TIMES : FUN:127 : 0.0024938583374
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 127
-=======
-
-SUMS (fk, lo, un, wr, re):	127	0	0	1	2	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 127 : 38080
->>> PROGRESS 5/77 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -207,2043 +81,28 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #5
 =================================
-Summarizing function: __db_mutex_alloc_int : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 4	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	163	0	0	0	0	
-
-TIMES : SCC:5 : 0.00260806083679
-TIMES : FUN:163 : 0.00259613990784
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 163
-=======
-
-SUMS (fk, lo, un, wr, re):	163	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 163 : 34
->>> PROGRESS 6/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #56
-=================================
-Summarizing function: __db_mutex_free : ptrtest.c
+Summarizing function: mgsl_free_intermediate_txbuffer_memory : test_comb.c
 -----
 doing symstate
 Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	168	0	0	0	0	
-
-TIMES : SCC:56 : 0.000483989715576
-TIMES : FUN:168 : 0.000475168228149
+TIMES : FUN:692.f : 0.000931024551392
+TIMES : SCC:5 : 0.000939846038818
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 168
+Summary for function: mgsl_free_intermediate_txbuffer_memory:692.f
 =======
 
-SUMS (fk, lo, un, wr, re):	168	0	0	0	0	
+SUMS (nm, lo, un, wr, re):	mgsl_free_intermediate_txbuffer_memory	0	0	4	2	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 168 : 34
->>> PROGRESS 7/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #3
-=================================
-Summarizing function: __db_mutex_setup : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	172	0	0	3	5	
-
-TIMES : SCC:3 : 0.00204491615295
-TIMES : FUN:172 : 0.00203919410706
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 172
-=======
-
-SUMS (fk, lo, un, wr, re):	172	0	0	3	5	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 172 : 38239
->>> PROGRESS 8/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #67
-=================================
-Summarizing function: __db_pthread_mutex_unlock : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 4	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	129	0	1	1	2	
-
-TIMES : SCC:67 : 0.00217700004578
-TIMES : FUN:129 : 0.0021710395813
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 129
-=======
-
-SUMS (fk, lo, un, wr, re):	129	0	1	1	2	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 129 : 38010
->>> PROGRESS 9/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #68
-=================================
-Summarizing function: __db_pthread_mutex_lock : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 2	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	128	0	1	5	8	
-
-TIMES : FUN:128 : 0.00345683097839
-TIMES : SCC:68 : 0.00346398353577
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 128
-=======
-
-SUMS (fk, lo, un, wr, re):	128	0	1	5	8	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 128 : 38386
->>> PROGRESS 10/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #10
-=================================
-Summarizing function: __db_s_first : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 6
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	320	0	1	6	12	
-
-TIMES : SCC:10 : 0.00277400016785
-TIMES : FUN:320 : 0.00276613235474
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 320
-=======
-
-SUMS (fk, lo, un, wr, re):	320	0	1	6	12	
-
-SS Sum:
- -> 
-Extptr (0):
-  lval = (*pdbp)
-
-SIZES: 320 : 38727
->>> PROGRESS 11/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #11
-=================================
-Summarizing function: __os_ufree : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 14	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	325	0	0	0	2	
-
-TIMES : SCC:11 : 0.000974893569946
-TIMES : FUN:325 : 0.000968933105469
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 325
-=======
-
-SUMS (fk, lo, un, wr, re):	325	0	0	0	2	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 325 : 39191
->>> PROGRESS 12/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #51
-=================================
-Summarizing function: __memp_mf_sync : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	353	0	0	0	0	
-
-TIMES : FUN:353 : 0.000156879425049
-TIMES : SCC:51 : 0.000164031982422
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 353
-=======
-
-SUMS (fk, lo, un, wr, re):	353	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 353 : 34
->>> PROGRESS 13/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #78
-=================================
-Summarizing function: __db_shalloc_free : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	356	0	0	13	13	
-
-TIMES : SCC:78 : 0.00528287887573
-TIMES : FUN:356 : 0.00527596473694
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 356
-=======
-
-SUMS (fk, lo, un, wr, re):	356	0	0	13	13	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 356 : 2077
->>> PROGRESS 14/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #50
-=================================
-Summarizing function: __memp_mf_discard : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	372	0	2	25	41	
-
-TIMES : SCC:50 : 0.0127420425415
-TIMES : FUN:372 : 0.012729883194
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 372
-=======
-
-SUMS (fk, lo, un, wr, re):	372	0	2	25	41	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 372 : 42699
->>> PROGRESS 15/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #52
-=================================
-Summarizing function: __db_appname : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 125	misses: 6
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	386	0	0	0	0	
-
-TIMES : SCC:52 : 0.000249147415161
-TIMES : FUN:386 : 0.000240087509155
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 386
-=======
-
-SUMS (fk, lo, un, wr, re):	386	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 386 : 34
->>> PROGRESS 16/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #55
-=================================
-Summarizing function: __os_get_errno : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	257	0	0	0	0	
-
-TIMES : FUN:257 : 0.00014591217041
-TIMES : SCC:55 : 0.000151872634888
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 257
-=======
-
-SUMS (fk, lo, un, wr, re):	257	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 257 : 34
->>> PROGRESS 17/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #54
-=================================
-Summarizing function: __os_unlink : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	266	0	0	0	1	
-
-TIMES : SCC:54 : 0.00176286697388
-TIMES : FUN:266 : 0.0017569065094
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 266
-=======
-
-SUMS (fk, lo, un, wr, re):	266	0	0	0	1	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 266 : 38901
->>> PROGRESS 18/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #65
-=================================
-Summarizing function: __os_free : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	272	0	0	0	1	
-
-TIMES : SCC:65 : 0.000527858734131
-TIMES : FUN:272 : 0.000522136688232
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 272
-=======
-
-SUMS (fk, lo, un, wr, re):	272	0	0	0	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 272 : 38901
->>> PROGRESS 19/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #53
-=================================
-Summarizing function: __os_closehandle : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	380	0	0	0	6	
-
-TIMES : FUN:380 : 0.00344491004944
-TIMES : SCC:53 : 0.00345301628113
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 380
-=======
-
-SUMS (fk, lo, un, wr, re):	380	0	0	0	6	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 380 : 39139
->>> PROGRESS 20/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #57
-=================================
-Summarizing function: db_strerror : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 7	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	55	0	0	0	0	
-
-TIMES : SCC:57 : 0.00137996673584
-TIMES : FUN:55 : 0.00137305259705
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 55
-=======
-
-SUMS (fk, lo, un, wr, re):	55	0	0	0	0	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 55 : 34
->>> PROGRESS 21/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #58
-=================================
-Summarizing function: __os_unmapfile : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	336	0	0	0	2	
-
-TIMES : SCC:58 : 0.00153994560242
-TIMES : FUN:336 : 0.00153303146362
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 336
-=======
-
-SUMS (fk, lo, un, wr, re):	336	0	0	0	2	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 336 : 38902
->>> PROGRESS 22/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #59
-=================================
-Summarizing function: __db_panic : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	69	0	0	0	0	
-
-TIMES : FUN:69 : 0.000171899795532
-TIMES : SCC:59 : 0.000179052352905
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 69
-=======
-
-SUMS (fk, lo, un, wr, re):	69	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: -30978
-SIZES: 69 : 34
->>> PROGRESS 23/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #61
-=================================
-Summarizing function: __memp_fns : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	347	0	0	0	2	
-
-TIMES : SCC:61 : 0.000591993331909
-TIMES : FUN:347 : 0.000586032867432
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 347
-=======
-
-SUMS (fk, lo, un, wr, re):	347	0	0	0	2	
-
-SS Sum:
- -> 
-Extptr (4):
-  lval = (*$NULL)(sum)
-  lval = (*((dbmp->reginfo)->addr))
-
-SIZES: 347 : 38193
->>> PROGRESS 24/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #60
-=================================
-Summarizing function: __memp_fn : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	350	0	0	0	3	
-
-TIMES : SCC:60 : 0.00191903114319
-TIMES : FUN:350 : 0.00191307067871
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 350
-=======
-
-SUMS (fk, lo, un, wr, re):	350	0	0	0	3	
-
-SS Sum:
- -> 
-Extptr (4):
-  lval = (*$NULL)(sum)
-  lval = (*((dbmfp->dbenv)->mp_handle))
-
-SIZES: 350 : 37599
->>> PROGRESS 25/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #49
-=================================
-Summarizing function: __memp_fclose : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 2	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	393	0	3	43	83	
-
-TIMES : SCC:49 : 0.0282740592957
-TIMES : FUN:393 : 0.0282609462738
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 393
-=======
-
-SUMS (fk, lo, un, wr, re):	393	0	3	43	83	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 393 : 46916
->>> PROGRESS 26/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #62
-=================================
-Summarizing function: __qam_nameop : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 133	misses: 10
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	410	0	0	0	3	
-
-TIMES : FUN:410 : 0.000361919403076
-TIMES : SCC:62 : 0.000370025634766
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 410
-=======
-
-SUMS (fk, lo, un, wr, re):	410	0	0	0	3	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 410 : 38149
->>> PROGRESS 27/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #48
-=================================
-Summarizing function: __qam_db_close : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	417	0	3	51	113	
-
-TIMES : SCC:48 : 0.0348470211029
-TIMES : FUN:417 : 0.034835100174
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 417
-=======
-
-SUMS (fk, lo, un, wr, re):	417	0	3	51	113	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 417 : 48535
->>> PROGRESS 28/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #63
-=================================
-Summarizing function: __ham_db_close : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 136	misses: 6
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	415	0	0	1	3	
-
-TIMES : SCC:63 : 0.00165486335754
-TIMES : FUN:415 : 0.00164699554443
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 415
-=======
-
-SUMS (fk, lo, un, wr, re):	415	0	0	1	3	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 415 : 38788
->>> PROGRESS 29/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #64
-=================================
-Summarizing function: __bam_db_close : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	276	0	0	1	5	
-
-TIMES : SCC:64 : 0.00207495689392
-TIMES : FUN:276 : 0.00206685066223
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 276
-=======
-
-SUMS (fk, lo, un, wr, re):	276	0	0	1	5	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 276 : 39469
->>> PROGRESS 30/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #72
-=================================
-Summarizing function: __db_not_txn_env : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 4	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	287	0	0	0	0	
-
-TIMES : SCC:72 : 0.00018310546875
-TIMES : FUN:287 : 0.00017786026001
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 287
-=======
-
-SUMS (fk, lo, un, wr, re):	287	0	0	0	0	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 287 : 34
->>> PROGRESS 31/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #66
-=================================
-Summarizing function: __db_check_txn : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	289	0	0	0	8	
-
-TIMES : FUN:289 : 0.0010838508606
-TIMES : SCC:66 : 0.00108909606934
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 289
-=======
-
-SUMS (fk, lo, un, wr, re):	289	0	0	0	8	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 289 : 37993
->>> PROGRESS 32/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #74
-=================================
-Summarizing function: __dbenv_close : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 4	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	428	0	0	1	6	
-
-TIMES : SCC:74 : 0.00054407119751
-TIMES : FUN:428 : 0.000537872314453
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 428
-=======
-
-SUMS (fk, lo, un, wr, re):	428	0	0	1	6	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 428 : 39324
->>> PROGRESS 33/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #47
-=================================
-Summarizing function: __db_close : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	264	0	4	60	138	
-
-TIMES : FUN:264 : 0.0221040248871
-TIMES : SCC:47 : 0.022115945816
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 264
-=======
-
-SUMS (fk, lo, un, wr, re):	264	0	4	60	138	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 264 : 52524
->>> PROGRESS 34/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #12
-=================================
-Summarizing function: __db_s_next : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 208	misses: 7
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	328	0	4	62	140	
-
-TIMES : SCC:12 : 0.0147869586945
-TIMES : FUN:328 : 0.0147738456726
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 328
-=======
-
-SUMS (fk, lo, un, wr, re):	328	0	4	62	140	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 328 : 52724
->>> PROGRESS 35/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #15
-=================================
-Summarizing function: __lock_downgrade : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 211	misses: 6
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	306	0	1	6	19	
-
-TIMES : FUN:306 : 0.00420594215393
-TIMES : SCC:15 : 0.00421595573425
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 306
-=======
-
-SUMS (fk, lo, un, wr, re):	306	0	1	6	19	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 306 : 41030
->>> PROGRESS 36/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #16
-=================================
-Summarizing function: __bam_c_rget : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 16	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	436	0	0	0	0	
-
-TIMES : SCC:16 : 0.00019383430481
-TIMES : FUN:436 : 0.000186920166016
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 436
-=======
-
-SUMS (fk, lo, un, wr, re):	436	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 436 : 34
->>> PROGRESS 37/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #19
-=================================
-Summarizing function: __lock_get : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	298	0	1	6	10	
-
-TIMES : FUN:298 : 0.041876077652
-TIMES : SCC:19 : 0.0418858528137
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 298
-=======
-
-SUMS (fk, lo, un, wr, re):	298	0	1	6	10	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 298 : 38611
->>> PROGRESS 38/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #20
-=================================
-Summarizing function: __db_wrlock_err : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 14	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	296	0	0	0	0	
-
-TIMES : FUN:296 : 0.000190019607544
-TIMES : SCC:20 : 0.000196933746338
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 296
-=======
-
-SUMS (fk, lo, un, wr, re):	296	0	0	0	0	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 296 : 34
->>> PROGRESS 39/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #23
-=================================
-Summarizing function: __lock_put : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	157	0	1	5	11	
-
-TIMES : SCC:23 : 0.00227093696594
-TIMES : FUN:157 : 0.00226521492004
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 157
-=======
-
-SUMS (fk, lo, un, wr, re):	157	0	1	5	11	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 157 : 38599
->>> PROGRESS 40/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #22
-=================================
-Summarizing function: __db_c_close : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 14	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	182	0	2	20	29	
-
-TIMES : FUN:182 : 0.0135729312897
-TIMES : SCC:22 : 0.01358294487
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 182
-=======
-
-SUMS (fk, lo, un, wr, re):	182	0	2	20	29	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 182 : 40511
->>> PROGRESS 41/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #42
-=================================
-Summarizing function: __memp_fget : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 47	misses: 8
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	79	0	0	1	0	
-
-TIMES : SCC:42 : 0.000305891036987
-TIMES : FUN:79 : 0.000298023223877
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 79
-=======
-
-SUMS (fk, lo, un, wr, re):	79	0	0	1	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 79 : 83
->>> PROGRESS 42/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #14
-=================================
-Summarizing function: __db_c_get : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	439	0	3	30	58	
-
-TIMES : SCC:14 : 0.0187151432037
-TIMES : FUN:439 : 0.0187039375305
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 439
-=======
-
-SUMS (fk, lo, un, wr, re):	439	0	3	30	58	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 439 : 120046
->>> PROGRESS 43/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #17
-=================================
-Summarizing function: __db_cursor_int : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 90	misses: 7
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	279	0	0	0	0	
-
-TIMES : SCC:17 : 0.000410079956055
-TIMES : FUN:279 : 0.000401973724365
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 279
-=======
-
-SUMS (fk, lo, un, wr, re):	279	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 279 : 34
->>> PROGRESS 44/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #18
-=================================
-Summarizing function: __db_secondary_corrupt : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	323	0	0	0	1	
-
-TIMES : FUN:323 : 0.000217914581299
-TIMES : SCC:18 : 0.00022292137146
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 323
-=======
-
-SUMS (fk, lo, un, wr, re):	323	0	0	0	1	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 323 : 36953
->>> PROGRESS 45/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #46
-=================================
-Summarizing function: __db_s_done : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	431	0	5	68	148	
-
-TIMES : SCC:46 : 0.0163660049438
-TIMES : FUN:431 : 0.0163550376892
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 431
-=======
-
-SUMS (fk, lo, un, wr, re):	431	0	5	68	148	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 431 : 90390
->>> PROGRESS 46/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (3) #8
-=================================
-Summarizing function: __db_c_del : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 211	misses: 6
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	470	0	1	7	26	
-
-Summarizing function: __db_c_del_secondary : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 40	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	471	0	3	27	57	
-
-Summarizing function: __db_c_del_primary : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 252	misses: 15
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	480	0	5	78	178	
-
-Summarizing function: __db_c_del : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 696	misses: 31
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	470	0	5	78	182	
-
-Summarizing function: __db_c_del_primary : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 376	misses: 10
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	480	0	5	78	178	
-
-Summarizing function: __db_c_del_secondary : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 920	misses: 30
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	471	0	4	72	172	
-
-Summarizing function: __db_c_del : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 475	misses: 19
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	470	0	5	78	182	
-
-TIMES : SCC:8 : 0.209713935852
-TIMES : FUN:480 : 0.099280834198
-TIMES : FUN:470 : 0.0460119247437
-TIMES : FUN:471 : 0.0643451213837
-=================================
-Finished an SCC (3)
-=================================
-Summary for function: 470
-=======
-
-SUMS (fk, lo, un, wr, re):	470	0	5	78	182	
-
-SS Sum:
- -> 
-$SSTOP
-Summary for function: 471
-=======
-
-SUMS (fk, lo, un, wr, re):	471	0	4	72	172	
-
-SS Sum:
- -> 
-$SSTOP
-Summary for function: 480
-=======
-
-SUMS (fk, lo, un, wr, re):	480	0	5	78	178	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 470 : 284663
-SIZES: 471 : 245758
-SIZES: 480 : 284194
->>> PROGRESS 47/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #24
-=================================
-Summarizing function: __db_cursor : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 533	misses: 13
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	202	0	0	1	0	
-
-TIMES : SCC:24 : 0.000363826751709
-TIMES : FUN:202 : 0.000355005264282
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 202
-=======
-
-SUMS (fk, lo, un, wr, re):	202	0	0	1	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 202 : 85
->>> PROGRESS 48/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #25
-=================================
-Summarizing function: __dbreg_id_to_db : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	190	0	0	1	0	
-
-TIMES : FUN:190 : 0.000257015228271
-TIMES : SCC:25 : 0.000262022018433
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 190
-=======
-
-SUMS (fk, lo, un, wr, re):	190	0	0	1	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 190 : 85
->>> PROGRESS 49/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #26
-=================================
-Summarizing function: __db_pg_alloc_read : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	227	0	0	1	0	
-
-TIMES : FUN:227 : 0.00115203857422
-TIMES : SCC:26 : 0.00116014480591
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 227
-=======
-
-SUMS (fk, lo, un, wr, re):	227	0	0	1	0	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 227 : 85
->>> PROGRESS 50/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #28
-=================================
-Summarizing function: __db_pgerr : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 8	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	84	0	0	0	1	
-
-TIMES : SCC:28 : 0.000784873962402
-TIMES : FUN:84 : 0.000779867172241
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 84
-=======
-
-SUMS (fk, lo, un, wr, re):	84	0	0	0	1	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 84 : 36960
->>> PROGRESS 51/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #29
-=================================
-Summarizing function: log_compare : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	89	0	0	0	4	
-
-TIMES : FUN:89 : 0.000316858291626
-TIMES : SCC:29 : 0.000322103500366
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 89
-=======
-
-SUMS (fk, lo, un, wr, re):	89	0	0	0	4	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 89 : 295
->>> PROGRESS 52/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #44
-=================================
-Summarizing function: __db_txnlist_pgnoadd : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	209	0	0	3	0	
-
-TIMES : FUN:209 : 0.000402212142944
-TIMES : SCC:44 : 0.000406980514526
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 209
-=======
-
-SUMS (fk, lo, un, wr, re):	209	0	0	3	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 209 : 1709
->>> PROGRESS 53/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #45
-=================================
-Summarizing function: __dbreg_id_to_fname : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	197	0	0	1	0	
-
-TIMES : SCC:45 : 0.000240087509155
-TIMES : FUN:197 : 0.000235080718994
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 197
-=======
-
-SUMS (fk, lo, un, wr, re):	197	0	0	1	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 197 : 85
->>> PROGRESS 54/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #43
-=================================
-Summarizing function: __db_add_limbo : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	218	0	0	3	3	
-
-TIMES : SCC:43 : 0.00155210494995
-TIMES : FUN:218 : 0.00154590606689
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 218
-=======
-
-SUMS (fk, lo, un, wr, re):	218	0	0	3	3	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 218 : 38933
->>> PROGRESS 55/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #70
-=================================
-Summarizing function: __memp_fput : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 4	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	75	0	0	0	0	
-
-TIMES : SCC:70 : 0.000167846679688
-TIMES : FUN:75 : 0.000162124633789
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 75
-=======
-
-SUMS (fk, lo, un, wr, re):	75	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 75 : 34
->>> PROGRESS 56/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #21
-=================================
-Summarizing function: __db_pg_alloc_recover : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	235	0	2	33	58	
-
-TIMES : FUN:235 : 0.00952196121216
-TIMES : SCC:21 : 0.00952887535095
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 235
-=======
-
-SUMS (fk, lo, un, wr, re):	235	0	2	33	58	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 235 : 44904
->>> PROGRESS 57/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #30
-=================================
-Summarizing function: __ua_memcpy : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 99	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	95	0	0	0	0	
-
-TIMES : SCC:30 : 0.000631809234619
-TIMES : FUN:95 : 0.000624895095825
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 95
-=======
-
-SUMS (fk, lo, un, wr, re):	95	0	0	0	0	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 95 : 34
->>> PROGRESS 58/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #27
-=================================
-Summarizing function: __db_pg_free_recover_int : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	100	0	0	11	22	
-
-TIMES : SCC:27 : 0.00510597229004
-TIMES : FUN:100 : 0.00509691238403
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 100
-=======
-
-SUMS (fk, lo, un, wr, re):	100	0	0	11	22	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 100 : 39347
->>> PROGRESS 59/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #32
-=================================
-Summarizing function: updateHash : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 40	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	45	0	0	1	0	
-
-TIMES : FUN:45 : 0.000458002090454
-TIMES : SCC:32 : 0.000465869903564
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 45
-=======
-
-SUMS (fk, lo, un, wr, re):	45	0	0	1	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 45 : 204
->>> PROGRESS 60/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #31
-=================================
-Summarizing function: updateHashVoid : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	47	0	0	1	1	
-
-Summarizing function: updateHashVoid : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	47	0	0	1	1	
-
-TIMES : SCC:31 : 0.000744104385376
-TIMES : FUN:47 : 0.00073504447937
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 47
-=======
-
-SUMS (fk, lo, un, wr, re):	47	0	0	1	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 47 : 230
->>> PROGRESS 61/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #34
-=================================
-Summarizing function: assignHash : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 3	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	49	0	0	2	0	
-
-TIMES : SCC:34 : 0.00120401382446
-TIMES : FUN:49 : 0.00119805335999
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 49
-=======
-
-SUMS (fk, lo, un, wr, re):	49	0	0	2	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 49 : 161
->>> PROGRESS 62/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #33
-=================================
-Summarizing function: assignFstHash : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	51	0	0	1	0	
-
-TIMES : SCC:33 : 0.000505924224854
-TIMES : FUN:51 : 0.000500202178955
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 51
-=======
-
-SUMS (fk, lo, un, wr, re):	51	0	0	1	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 51 : 206
->>> PROGRESS 63/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #35
-=================================
-Summarizing function: DecodeAudio : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 2	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	26	0	0	14	14	
-
-TIMES : SCC:35 : 0.00356006622314
-TIMES : FUN:26 : 0.00355386734009
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 26
-=======
-
-SUMS (fk, lo, un, wr, re):	26	0	0	14	14	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 26 : 1829
->>> PROGRESS 64/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #36
-=================================
-Summarizing function: CalcCRC32 : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 9	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	18	0	0	0	1	
-
-TIMES : SCC:36 : 0.000348091125488
-TIMES : FUN:18 : 0.000341892242432
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 18
-=======
-
-SUMS (fk, lo, un, wr, re):	18	0	0	0	1	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 18 : 91
->>> PROGRESS 65/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #37
-=================================
-Summarizing function: InitCRC : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	14	0	0	2	1	
-
-TIMES : FUN:14 : 0.000401020050049
-TIMES : SCC:37 : 0.000405073165894
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 14
-=======
-
-SUMS (fk, lo, un, wr, re):	14	0	0	2	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 14 : 142
->>> PROGRESS 66/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #69
-=================================
-Summarizing function: flush_older_commits : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	502	0	0	0	9	
-
-TIMES : FUN:502 : 0.000930070877075
-TIMES : SCC:69 : 0.000934839248657
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 502
-=======
-
-SUMS (fk, lo, un, wr, re):	502	0	0	0	9	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 502 : 1330
->>> PROGRESS 67/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #75
-=================================
-Summarizing function: mgsl_free_intermediate_txbuffer_memory : ptrtest.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	499	0	0	4	2	
-
-TIMES : SCC:75 : 0.000957012176514
-TIMES : FUN:499 : 0.000947952270508
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 499
-=======
-
-SUMS (fk, lo, un, wr, re):	499	0	0	4	2	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 499 : 2072
->>> PROGRESS 68/77 SCCs DONE!
+SIZES: 692.f : 2071
+>>> PROGRESS 2/77 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -2251,207 +110,28 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #7
 =================================
-Summarizing function: ptrMain : ptrtest.c
+Summarizing function: assignHash : test_comb.c
 -----
 doing symstate
 Prev ldiffCache hits: 0	misses: 1
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	517	0	3	99	191	
-
-TIMES : SCC:7 : 0.092031955719
-TIMES : FUN:517 : 0.0920209884644
+TIMES : SCC:7 : 0.000437021255493
+TIMES : FUN:192.f : 0.000427007675171
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 517
+Summary for function: assignHash:192.f
 =======
 
-SUMS (fk, lo, un, wr, re):	517	0	3	99	191	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 517 : 173422
->>> PROGRESS 69/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #71
-=================================
-Summarizing function: _spin_unlock : lock.c
------
-doing symstate
-TIMES : FUN:3 : 0.000720024108887
-TIMES : SCC:71 : 0.000726938247681
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 3
-=======
-
-SUMS (fk, lo, un, wr, re):	3	0	1	0	0	
+SUMS (nm, lo, un, wr, re):	assignHash	0	0	2	0	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 3 : 136
->>> PROGRESS 70/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #76
-=================================
-Summarizing function: _spin_lock : lock.c
------
-doing symstate
-TIMES : SCC:76 : 0.000108003616333
-TIMES : FUN:1 : 0.000102043151855
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 1
-=======
-
-SUMS (fk, lo, un, wr, re):	1	1	0	0	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 1 : 136
->>> PROGRESS 71/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #40
-=================================
-Summarizing function: miniMunge2 : uselock.c
------
-doing symstate
-Prev ldiffCache hits: 484	misses: 12
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	531	0	1	1	1	
-
-TIMES : FUN:531 : 0.00272607803345
-TIMES : SCC:40 : 0.00273203849792
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 531
-=======
-
-SUMS (fk, lo, un, wr, re):	531	0	1	1	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 531 : 108
->>> PROGRESS 72/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #39
-=================================
-Summarizing function: miniMunge : uselock.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	536	0	1	1	1	
-
-TIMES : SCC:39 : 0.000473976135254
-TIMES : FUN:536 : 0.000467777252197
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 536
-=======
-
-SUMS (fk, lo, un, wr, re):	536	0	1	1	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 536 : 108
->>> PROGRESS 73/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #38
-=================================
-Summarizing function: accList : uselock.c
------
-doing symstate
-Prev ldiffCache hits: 2	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	539	0	2	2	6	
-
-TIMES : SCC:38 : 0.000910997390747
-TIMES : FUN:539 : 0.000905990600586
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 539
-=======
-
-SUMS (fk, lo, un, wr, re):	539	0	2	2	6	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 539 : 421
->>> PROGRESS 74/77 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #41
-=================================
-Summarizing function: makeList : uselock.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 3
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	546	0	0	3	0	
-
-TIMES : SCC:41 : 0.000385999679565
-TIMES : FUN:546 : 0.000378847122192
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 546
-=======
-
-SUMS (fk, lo, un, wr, re):	546	0	0	3	0	
-
-SS Sum:
- -> 
-Extptr (15):
-  lval = _a156_37484_uselock_1
-  lval = (*$NULL)(sum)
-
-SIZES: 546 : 282
->>> PROGRESS 75/77 SCCs DONE!
+SIZES: 192.f : 175
+>>> PROGRESS 3/77 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -2459,30 +139,1667 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #6
 =================================
-Summarizing function: main : uselock.c
+Summarizing function: assignFstHash : test_comb.c
 -----
 doing symstate
 Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	577	0	4	104	200	
-
-TIMES : FUN:577 : 0.0112431049347
-TIMES : SCC:6 : 0.0112521648407
+TIMES : FUN:194.f : 0.000671148300171
+TIMES : SCC:6 : 0.000679016113281
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 577
+Summary for function: assignFstHash:194.f
 =======
 
-SUMS (fk, lo, un, wr, re):	577	0	4	104	200	
+SUMS (nm, lo, un, wr, re):	assignFstHash	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 194.f : 225
+>>> PROGRESS 4/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #13
+=================================
+Summarizing function: updateHash : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:13 : 0.000356912612915
+TIMES : FUN:188.f : 0.000347852706909
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: updateHash:188.f
+=======
+
+SUMS (nm, lo, un, wr, re):	updateHash	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 188.f : 200
+>>> PROGRESS 5/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #8
+=================================
+Summarizing function: updateHashVoid : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+Summarizing function: updateHashVoid : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:8 : 0.000822067260742
+TIMES : FUN:190.f : 0.000808238983154
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: updateHashVoid:190.f
+=======
+
+SUMS (nm, lo, un, wr, re):	updateHashVoid	0	0	1	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 190.f : 243
+>>> PROGRESS 6/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #10
+=================================
+Summarizing function: __db_cursor : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:356.f : 0.000348091125488
+TIMES : SCC:10 : 0.000357151031494
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_cursor:356.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_cursor	0	0	1	0	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 577 : 174063
->>> PROGRESS 76/77 SCCs DONE!
+SIZES: 356.f : 90
+>>> PROGRESS 7/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #11
+=================================
+Summarizing function: __dbreg_id_to_db : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:344.f : 0.000365018844604
+TIMES : SCC:11 : 0.00037407875061
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __dbreg_id_to_db:344.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__dbreg_id_to_db	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 344.f : 90
+>>> PROGRESS 8/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #18
+=================================
+Summarizing function: __memp_fput : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:18 : 0.000200986862183
+TIMES : FUN:218.f : 0.000191926956177
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __memp_fput:218.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__memp_fput	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 218.f : 34
+>>> PROGRESS 9/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #21
+=================================
+Summarizing function: __db_pg_alloc_read : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:21 : 0.00208592414856
+TIMES : FUN:386.f : 0.00207805633545
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_pg_alloc_read:386.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_pg_alloc_read	0	0	1	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 386.f : 192
+>>> PROGRESS 10/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #27
+=================================
+Summarizing function: log_compare : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 10	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:27 : 0.000521898269653
+TIMES : FUN:232.f : 0.000514030456543
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: log_compare:232.f
+=======
+
+SUMS (nm, lo, un, wr, re):	log_compare	0	0	0	4	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 232.f : 303
+>>> PROGRESS 11/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #29
+=================================
+Summarizing function: __db_txnlist_pgnoadd : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:363.f : 0.000565052032471
+TIMES : SCC:29 : 0.000574111938477
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_txnlist_pgnoadd:363.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_txnlist_pgnoadd	0	0	3	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 363.f : 1713
+>>> PROGRESS 12/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #30
+=================================
+Summarizing function: __dbreg_id_to_fname : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:30 : 0.000365018844604
+TIMES : FUN:351.f : 0.000356197357178
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __dbreg_id_to_fname:351.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__dbreg_id_to_fname	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 351.f : 90
+>>> PROGRESS 13/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #28
+=================================
+Summarizing function: __db_add_limbo : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:373.f : 0.00223684310913
+TIMES : SCC:28 : 0.00224590301514
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_add_limbo:373.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_add_limbo	0	0	4	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 373.f : 38700
+>>> PROGRESS 14/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #57
+=================================
+Summarizing function: __db_panic : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 7	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:212.f : 0.000210046768188
+TIMES : SCC:57 : 0.000218868255615
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_panic:212.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_panic	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: -30978
+SIZES: 212.f : 34
+>>> PROGRESS 15/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #78
+=================================
+Summarizing function: __db_err : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:78 : 0.00019097328186
+TIMES : FUN:215.f : 0.000181913375854
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_err:215.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_err	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 215.f : 34
+>>> PROGRESS 16/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #35
+=================================
+Summarizing function: __db_pgerr : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:227.f : 0.000892877578735
+TIMES : SCC:35 : 0.000901937484741
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_pgerr:227.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_pgerr	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 227.f : 36646
+>>> PROGRESS 17/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #71
+=================================
+Summarizing function: __memp_fget : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:71 : 0.00039005279541
+TIMES : FUN:222.f : 0.000377893447876
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __memp_fget:222.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__memp_fget	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 222.f : 90
+>>> PROGRESS 18/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #76
+=================================
+Summarizing function: __db_pthread_mutex_unlock : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:279.f : 0.00258898735046
+TIMES : SCC:76 : 0.00259900093079
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_pthread_mutex_unlock:279.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_pthread_mutex_unlock	0	1	1	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 279.f : 36712
+>>> PROGRESS 19/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #77
+=================================
+Summarizing function: __db_pthread_mutex_lock : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : FUN:278.f : 0.0041069984436
+TIMES : SCC:77 : 0.00411701202393
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_pthread_mutex_lock:278.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_pthread_mutex_lock	0	1	5	8	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 278.f : 37093
+>>> PROGRESS 20/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #75
+=================================
+Summarizing function: __lock_put : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 6
+
+doing lockset
+doing guarded access
+TIMES : FUN:311.f : 0.00787687301636
+TIMES : SCC:75 : 0.007887840271
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __lock_put:311.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__lock_put	0	1	5	11	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 311.f : 37956
+>>> PROGRESS 21/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #74
+=================================
+Summarizing function: __db_c_close : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 14	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : SCC:74 : 0.00930404663086
+TIMES : FUN:336.f : 0.00928997993469
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_c_close:336.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_c_close	0	2	18	29	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 336.f : 39761
+>>> PROGRESS 22/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #9
+=================================
+Summarizing function: __db_pg_alloc_recover : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 47	misses: 8
+
+doing lockset
+doing guarded access
+TIMES : SCC:9 : 0.0155439376831
+TIMES : FUN:402.f : 0.0155339241028
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_pg_alloc_recover:402.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_pg_alloc_recover	0	2	38	65	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 402.f : 45279
+>>> PROGRESS 23/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #25
+=================================
+Summarizing function: __ua_memcpy : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 104	misses: 5
+
+doing lockset
+doing guarded access
+TIMES : FUN:238.f : 0.000648975372314
+TIMES : SCC:25 : 0.00065803527832
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __ua_memcpy:238.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__ua_memcpy	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 238.f : 34
+>>> PROGRESS 24/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #17
+=================================
+Summarizing function: __db_pg_free_recover_int : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:17 : 0.00677013397217
+TIMES : FUN:248.f : 0.00676107406616
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_pg_free_recover_int:248.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_pg_free_recover_int	0	0	14	27	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 248.f : 39431
+>>> PROGRESS 25/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #23
+=================================
+Summarizing function: DecodeAudio : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 44	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:23 : 0.00927901268005
+TIMES : FUN:169.f : 0.00926899909973
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: DecodeAudio:169.f
+=======
+
+SUMS (nm, lo, un, wr, re):	DecodeAudio	0	0	14	14	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 169.f : 2077
+>>> PROGRESS 26/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #26
+=================================
+Summarizing function: CalcCRC32 : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 9	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:161.f : 0.000365972518921
+TIMES : SCC:26 : 0.000375032424927
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: CalcCRC32:161.f
+=======
+
+SUMS (nm, lo, un, wr, re):	CalcCRC32	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 161.f : 103
+>>> PROGRESS 27/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #33
+=================================
+Summarizing function: InitCRC : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:157.f : 0.000497102737427
+TIMES : SCC:33 : 0.000505924224854
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: InitCRC:157.f
+=======
+
+SUMS (nm, lo, un, wr, re):	InitCRC	0	0	2	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 157.f : 166
+>>> PROGRESS 28/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #42
+=================================
+Summarizing function: __dbenv_close : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:42 : 0.000771999359131
+TIMES : FUN:599.f : 0.000761985778809
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __dbenv_close:599.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__dbenv_close	0	0	1	6	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 599.f : 38616
+>>> PROGRESS 29/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #44
+=================================
+Summarizing function: __qam_nameop : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:44 : 0.000364065170288
+TIMES : FUN:581.f : 0.00035285949707
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __qam_nameop:581.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__qam_nameop	0	0	0	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 581.f : 37182
+>>> PROGRESS 30/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #46
+=================================
+Summarizing function: __db_appname : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:46 : 0.000214099884033
+TIMES : FUN:554.f : 0.000204086303711
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_appname:554.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_appname	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 554.f : 34
+>>> PROGRESS 31/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #55
+=================================
+Summarizing function: __os_get_errno : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:425.f : 0.000169038772583
+TIMES : SCC:55 : 0.000178098678589
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __os_get_errno:425.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__os_get_errno	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 425.f : 34
+>>> PROGRESS 32/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #54
+=================================
+Summarizing function: __os_unlink : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:54 : 0.00166702270508
+TIMES : FUN:434.f : 0.00165796279907
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __os_unlink:434.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__os_unlink	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 434.f : 37705
+>>> PROGRESS 33/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #63
+=================================
+Summarizing function: __os_free : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:63 : 0.000542879104614
+TIMES : FUN:440.f : 0.000533819198608
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __os_free:440.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__os_free	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 440.f : 37705
+>>> PROGRESS 34/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #47
+=================================
+Summarizing function: __os_closehandle : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:47 : 0.00349283218384
+TIMES : FUN:548.f : 0.00348401069641
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __os_closehandle:548.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__os_closehandle	0	0	0	6	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 548.f : 37951
+>>> PROGRESS 35/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #49
+=================================
+Summarizing function: __db_shalloc_free : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 7	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:49 : 0.00428509712219
+TIMES : FUN:524.f : 0.00427317619324
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_shalloc_free:524.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_shalloc_free	0	0	9	9	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 524.f : 1600
+>>> PROGRESS 36/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #50
+=================================
+Summarizing function: __memp_mf_sync : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:521.f : 0.000207901000977
+TIMES : SCC:50 : 0.000216007232666
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __memp_mf_sync:521.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__memp_mf_sync	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 521.f : 34
+>>> PROGRESS 37/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #48
+=================================
+Summarizing function: __memp_mf_discard : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:540.f : 0.0410189628601
+TIMES : SCC:48 : 0.0410289764404
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __memp_mf_discard:540.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__memp_mf_discard	0	2	21	37	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 540.f : 113917
+>>> PROGRESS 38/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #52
+=================================
+Summarizing function: __memp_fns : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 93	misses: 6
+
+doing lockset
+doing guarded access
+TIMES : SCC:52 : 0.000509977340698
+TIMES : FUN:515.f : 0.000500917434692
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __memp_fns:515.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__memp_fns	0	0	0	2	
+
+SS Sum:
+ -> 
+Extptr (4):
+  lval = (*$NULL)(sum)
+  lval = (*((dbmp->reginfo)->addr))
+
+SIZES: 515.f : 36823
+>>> PROGRESS 39/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #51
+=================================
+Summarizing function: __memp_fn : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:518.f : 0.0017409324646
+TIMES : SCC:51 : 0.00175094604492
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __memp_fn:518.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__memp_fn	0	0	0	3	
+
+SS Sum:
+ -> 
+Extptr (4):
+  lval = (*$NULL)(sum)
+  lval = (*((dbmfp->dbenv)->mp_handle))
+
+SIZES: 518.f : 36236
+>>> PROGRESS 40/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #53
+=================================
+Summarizing function: __os_unmapfile : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:53 : 0.00141716003418
+TIMES : FUN:504.f : 0.00140786170959
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __os_unmapfile:504.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__os_unmapfile	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 504.f : 37507
+>>> PROGRESS 41/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #56
+=================================
+Summarizing function: __db_mutex_free : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:56 : 0.000532865524292
+TIMES : FUN:322.f : 0.00052285194397
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_mutex_free:322.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_mutex_free	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 322.f : 34
+>>> PROGRESS 42/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #58
+=================================
+Summarizing function: db_strerror : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : FUN:198.f : 0.00127696990967
+TIMES : SCC:58 : 0.00128602981567
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: db_strerror:198.f
+=======
+
+SUMS (nm, lo, un, wr, re):	db_strerror	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 198.f : 34
+>>> PROGRESS 43/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #45
+=================================
+Summarizing function: __memp_fclose : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:45 : 0.0256259441376
+TIMES : FUN:562.f : 0.0256130695343
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __memp_fclose:562.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__memp_fclose	0	3	38	76	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 562.f : 119235
+>>> PROGRESS 44/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #43
+=================================
+Summarizing function: __qam_db_close : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 127	misses: 10
+
+doing lockset
+doing guarded access
+TIMES : SCC:43 : 0.0315670967102
+TIMES : FUN:588.f : 0.0315551757812
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __qam_db_close:588.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__qam_db_close	0	3	43	95	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 588.f : 157688
+>>> PROGRESS 45/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #59
+=================================
+Summarizing function: __ham_db_close : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 124	misses: 6
+
+doing lockset
+doing guarded access
+TIMES : FUN:586.f : 0.00102281570435
+TIMES : SCC:59 : 0.00103306770325
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __ham_db_close:586.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__ham_db_close	0	0	1	3	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 586.f : 73731
+>>> PROGRESS 46/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #61
+=================================
+Summarizing function: __db_not_txn_env : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : FUN:455.f : 0.000239133834839
+TIMES : SCC:61 : 0.000248908996582
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_not_txn_env:455.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_not_txn_env	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 455.f : 34
+>>> PROGRESS 47/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #60
+=================================
+Summarizing function: __db_check_txn : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:60 : 0.00130891799927
+TIMES : FUN:457.f : 0.00130081176758
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_check_txn:457.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_check_txn	0	0	0	8	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 457.f : 36673
+>>> PROGRESS 48/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #62
+=================================
+Summarizing function: __bam_db_close : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : FUN:444.f : 0.00144910812378
+TIMES : SCC:62 : 0.00145816802979
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __bam_db_close:444.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__bam_db_close	0	0	1	5	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 444.f : 74356
+>>> PROGRESS 49/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #41
+=================================
+Summarizing function: __db_close : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:41 : 0.0233089923859
+TIMES : FUN:432.f : 0.0232980251312
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_close:432.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_close	0	4	52	120	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 432.f : 197785
+>>> PROGRESS 50/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #39
+=================================
+Summarizing function: __db_s_done : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 182	misses: 7
+
+doing lockset
+doing guarded access
+TIMES : SCC:39 : 0.0188550949097
+TIMES : FUN:602.f : 0.0188438892365
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_s_done:602.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_s_done	0	5	60	130	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 602.f : 198732
+>>> PROGRESS 51/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #40
+=================================
+Summarizing function: __db_s_next : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 185	misses: 6
+
+doing lockset
+doing guarded access
+TIMES : FUN:496.f : 0.0137450695038
+TIMES : SCC:40 : 0.0137569904327
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_s_next:496.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_s_next	0	4	51	115	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 496.f : 197880
+>>> PROGRESS 52/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #64
+=================================
+Summarizing function: __os_ufree : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 185	misses: 6
+
+doing lockset
+doing guarded access
+TIMES : SCC:64 : 0.000612020492554
+TIMES : FUN:493.f : 0.000603914260864
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __os_ufree:493.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__os_ufree	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 493.f : 73534
+>>> PROGRESS 53/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #65
+=================================
+Summarizing function: __db_s_first : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : FUN:488.f : 0.00269198417664
+TIMES : SCC:65 : 0.00270104408264
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_s_first:488.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_s_first	0	1	6	12	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*pdbp)
+
+SIZES: 488.f : 73318
+>>> PROGRESS 54/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #67
+=================================
+Summarizing function: __bam_c_rget : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 14	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : SCC:67 : 0.000224113464355
+TIMES : FUN:607.f : 0.000213861465454
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __bam_c_rget:607.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__bam_c_rget	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 607.f : 34
+>>> PROGRESS 55/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #68
+=================================
+Summarizing function: __lock_downgrade : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:68 : 0.00384783744812
+TIMES : FUN:474.f : 0.0038378238678
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __lock_downgrade:474.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__lock_downgrade	0	1	6	19	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 474.f : 76261
+>>> PROGRESS 56/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #69
+=================================
+Summarizing function: __lock_get : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 16	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : FUN:466.f : 0.00818014144897
+TIMES : SCC:69 : 0.00819110870361
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __lock_get:466.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__lock_get	0	1	6	10	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 466.f : 73831
+>>> PROGRESS 57/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #70
+=================================
+Summarizing function: __db_wrlock_err : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 14	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : SCC:70 : 0.000233888626099
+TIMES : FUN:464.f : 0.000225067138672
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_wrlock_err:464.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_wrlock_err	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 464.f : 34
+>>> PROGRESS 58/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #66
+=================================
+Summarizing function: __db_c_get : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:66 : 0.0236101150513
+TIMES : FUN:611.f : 0.0235991477966
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_c_get:611.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_c_get	0	3	28	57	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 611.f : 153189
+>>> PROGRESS 59/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #72
+=================================
+Summarizing function: __db_secondary_corrupt : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 93	misses: 8
+
+doing lockset
+doing guarded access
+TIMES : FUN:491.f : 0.000288009643555
+TIMES : SCC:72 : 0.000298023223877
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_secondary_corrupt:491.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_secondary_corrupt	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 491.f : 35840
+>>> PROGRESS 60/77 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -2490,23 +1807,586 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #73
 =================================
-Summarizing function: _spin_trylock : lock.c
+Summarizing function: __db_cursor_int : test_comb.c
 -----
 doing symstate
-TIMES : SCC:73 : 0.000303983688354
-TIMES : FUN:2 : 0.000295877456665
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:447.f : 0.000211954116821
+TIMES : SCC:73 : 0.000223159790039
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 2
+Summary for function: __db_cursor_int:447.f
 =======
 
-SUMS (fk, lo, un, wr, re):	2	1	0	0	0	
+SUMS (nm, lo, un, wr, re):	__db_cursor_int	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 447.f : 34
+>>> PROGRESS 61/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (3) #36
+=================================
+Summarizing function: __db_c_del : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del_secondary : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 40	misses: 4
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del_primary : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 252	misses: 16
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 639	misses: 32
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del_primary : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 481	misses: 12
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del_secondary : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 970	misses: 34
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 582	misses: 23
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del_primary : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 791	misses: 13
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del_secondary : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 999	misses: 33
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 611	misses: 22
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del_primary : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 809	misses: 13
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del_secondary : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1002	misses: 30
+
+doing lockset
+doing guarded access
+Summarizing function: __db_c_del : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 614	misses: 19
+
+doing lockset
+doing guarded access
+TIMES : FUN:652.f : 0.125713825226
+TIMES : FUN:671.f : 0.16831612587
+TIMES : SCC:36 : 0.450136899948
+TIMES : FUN:648.f : 0.155889749527
+=================================
+Finished an SCC (3)
+=================================
+Summary for function: __db_c_del_primary:671.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_c_del_primary	0	9	122	272	
 
 SS Sum:
  -> 
 $SSTOP
-SIZES: 2 : 136
+Summary for function: __db_c_del_secondary:652.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_c_del_secondary	0	8	116	266	
+
+SS Sum:
+ -> 
+$SSTOP
+Summary for function: __db_c_del:648.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_c_del	0	9	122	276	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 671.f : 508297
+SIZES: 652.f : 507712
+SIZES: 648.f : 586320
+>>> PROGRESS 62/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: ptrMain : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 810	misses: 12
+
+doing lockset
+doing guarded access
+TIMES : FUN:711.f : 0.0423300266266
+TIMES : SCC:1 : 0.0423429012299
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: ptrMain:711.f
+=======
+
+SUMS (nm, lo, un, wr, re):	ptrMain	0	7	154	291	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 711.f : 557764
+>>> PROGRESS 63/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #16
+=================================
+Summarizing function: makeList : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 641	misses: 12
+
+doing lockset
+doing guarded access
+TIMES : SCC:16 : 0.000700950622559
+TIMES : FUN:751.f : 0.000691890716553
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: makeList:751.f
+=======
+
+SUMS (nm, lo, un, wr, re):	makeList	0	0	3	0	
+
+SS Sum:
+ -> 
+Extptr (14):
+  lval = _a5098_138547_test_comb_1
+  lval = (*$NULL)(sum)
+
+SIZES: 751.f : 284
+>>> PROGRESS 64/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #31
+=================================
+Summarizing function: _spin_unlock : test_comb.c
+-----
+doing symstate
+TIMES : SCC:31 : 0.000442981719971
+TIMES : FUN:727.f : 0.000435829162598
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: _spin_unlock:727.f
+=======
+
+SUMS (nm, lo, un, wr, re):	_spin_unlock	0	1	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 727.f : 148
+>>> PROGRESS 65/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #34
+=================================
+Summarizing function: _spin_lock : test_comb.c
+-----
+doing symstate
+TIMES : SCC:34 : 0.000213861465454
+TIMES : FUN:725.f : 0.000205993652344
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: _spin_lock:725.f
+=======
+
+SUMS (nm, lo, un, wr, re):	_spin_lock	1	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 725.f : 148
+>>> PROGRESS 66/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #24
+=================================
+Summarizing function: miniMunge2 : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:24 : 0.00115013122559
+TIMES : FUN:736.f : 0.00113987922668
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: miniMunge2:736.f
+=======
+
+SUMS (nm, lo, un, wr, re):	miniMunge2	0	1	2	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 736.f : 204
+>>> PROGRESS 67/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #22
+=================================
+Summarizing function: miniMunge : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 3
+
+doing lockset
+doing guarded access
+TIMES : FUN:741.f : 0.000684976577759
+TIMES : SCC:22 : 0.000695943832397
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: miniMunge:741.f
+=======
+
+SUMS (nm, lo, un, wr, re):	miniMunge	0	1	2	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 741.f : 204
+>>> PROGRESS 68/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #19
+=================================
+Summarizing function: accList : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 6
+
+doing lockset
+doing guarded access
+TIMES : FUN:744.f : 0.00117993354797
+TIMES : SCC:19 : 0.00118708610535
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: accList:744.f
+=======
+
+SUMS (nm, lo, un, wr, re):	accList	0	2	3	7	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 744.f : 496
+>>> PROGRESS 69/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: main : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 3
+
+doing lockset
+doing guarded access
+TIMES : FUN:784.f : 0.0252289772034
+TIMES : SCC:0 : 0.0252389907837
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: main:784.f
+=======
+
+SUMS (nm, lo, un, wr, re):	main	0	9	159	298	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 784.f : 558341
+>>> PROGRESS 70/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: __db_pthread_mutex_destroy : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 464	misses: 8
+
+doing lockset
+doing guarded access
+TIMES : SCC:2 : 0.00129890441895
+TIMES : FUN:280.f : 0.00129008293152
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_pthread_mutex_destroy:280.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_pthread_mutex_destroy	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 280.f : 870
+>>> PROGRESS 71/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #12
+=================================
+Summarizing function: cli_validatesig : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:12 : 0.000679969787598
+TIMES : FUN:757.f : 0.000669002532959
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: cli_validatesig:757.f
+=======
+
+SUMS (nm, lo, un, wr, re):	cli_validatesig	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 757.f : 196
+>>> PROGRESS 72/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #4
+=================================
+Summarizing function: cli_bm_scanbuff : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : FUN:766.f : 0.010057926178
+TIMES : SCC:4 : 0.0100660324097
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: cli_bm_scanbuff:766.f
+=======
+
+SUMS (nm, lo, un, wr, re):	cli_bm_scanbuff	0	0	1	12	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 766.f : 2438
+>>> PROGRESS 73/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #15
+=================================
+Summarizing function: __db_pthread_mutex_init : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:15 : 0.00300884246826
+TIMES : FUN:277.f : 0.00299978256226
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_pthread_mutex_init:277.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_pthread_mutex_init	0	0	1	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 277.f : 35998
+>>> PROGRESS 74/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #20
+=================================
+Summarizing function: __db_mutex_alloc_int : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 8	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:20 : 0.000416040420532
+TIMES : FUN:317.f : 0.000406980514526
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_mutex_alloc_int:317.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_mutex_alloc_int	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 317.f : 34
+>>> PROGRESS 75/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #14
+=================================
+Summarizing function: __db_mutex_setup : test_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:326.f : 0.00412082672119
+TIMES : SCC:14 : 0.00412893295288
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __db_mutex_setup:326.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__db_mutex_setup	0	0	3	5	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 326.f : 36163
+>>> PROGRESS 76/77 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #32
+=================================
+Summarizing function: _spin_trylock : test_comb.c
+-----
+doing symstate
+TIMES : FUN:726.f : 0.000285148620605
+TIMES : SCC:32 : 0.000293970108032
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: _spin_trylock:726.f
+=======
+
+SUMS (nm, lo, un, wr, re):	_spin_trylock	1	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 726.f : 148
 >>> PROGRESS 77/77 SCCs DONE!
 
 =================================
@@ -2520,6 +2400,10 @@ Beginning Thread Analysis:
 -----
 Expected # thread-creation site pairs: 0
 completed all thread pairs
+Sorting races
+
+Printing races
+
 
 
 $$$$$$
@@ -2528,22 +2412,18 @@ Total Warnings: 0
 
 Printing Alias assumptions used by warnings
 -----
-writeState: Not needed for CIL PTA
-writeState: Not needed for Steens PTA
-Golden lvals hash stats (len, ents, sum/min/median/max bucket)
-	898	408	1803	0	3	6	
-Golden lvals hash stats (len, ents, sum/min/median/max bucket)
-	173	0	0	0	0	0	
-Golden types hash stats (len, ents, sum/min/median/max bucket)
-	173	175	357	0	3	6	
-Golden compInfos hash stats (len, ents, sum/min/median/max bucket)
-	173	0	0	0	0	0	
-Elapsed time (secs): 0.836051
-Top heap size (words): 1956864
-Current heap size (words): 1442816
-Lifetime allocated bytes: 116597524.
-Collections -- minor: 58 major: 13 compactions: 2
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/racetests/ptr_tests/ciltrees/.pta_temp.anders
+
+Elapsed time (secs): 1.044064
+Top heap size (MB): 10
+Current heap size (MB): 10
+Lifetime allocated bytes (MB): 129
+Collections -- minor: 68 major: 12 compactions: 2
+Bytes per word: 4
+Exhausted tries: 1
 return value is 0
 ran 1 times
-cleared status file: /tmp/temp.Az9oc0
-Sun Aug 10 21:12:35 PDT 2008
+cleared status file: /tmp/temp.aU3bkm
+Mon Oct 12 14:20:37 PDT 2009

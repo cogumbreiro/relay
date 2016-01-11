@@ -2,7 +2,7 @@
 
 # "intercept" calls to GNU libtool
 # log its dry-run commands (which should reference gcc) 
-# and run/convert its calls to gcc into calls of mycc.pl
+# and run/convert its calls to gcc into my own tool (duppy)
 
 # 1
 # log what make does

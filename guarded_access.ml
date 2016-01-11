@@ -341,7 +341,7 @@ let iterCorrs = CMap.iter
 let iterGuardedAccs foo corr =
   let pseudoAtts = match corr.corrPseudo with
       None -> PAS.empty | Some s -> s in
-  foo corr.corrAccess corr.corrLocks pseudoAtts
+  foo corr.corrAccess corr.corrLocks corr.corrLEmpty pseudoAtts
 
 
 let set_of_accesses corr =

@@ -43,22 +43,18 @@
     @see messages.ml for some of the messages exchanged
 *)
 
+open Logging
 open Messages
 open Unix
 open Fstructs
 open Scc_cg
 open Scp
-open Stdutil
 open Warn_reports
+open Summary_keys
+open Backed_summary
 
-module L = Logging
-module Dis = Distributed
 module Stat = Mystats
-module BS = Backed_summary
 module FS = File_serv
-module Conf = Config
-
-module RP = Race_reports
 
 (**************** settings **********************)
 
@@ -85,7 +81,7 @@ let setServerPort port =
 let setMyIP () = 
   let host = gethostbyname (gethostname ()) in
   let addr = host.h_addr_list.(0) in
-  L.logStatus ("myIP: " ^ (string_of_inet_addr addr));
+  logStatus ("myIP: " ^ (string_of_inet_addr addr));
   myAddr := ADDR_INET (addr, 0)
     
 
@@ -93,11 +89,11 @@ let readFromFile filename =
   let doRead fd =
     try input_line fd;
     with e -> 
-      L.logError ("Request: can't read ip/port from file: " ^
+      logError ("Request: can't read ip/port from file: " ^
                     (Printexc.to_string e)); 
       raise e
   in
-  open_in_for filename doRead
+  Stdutil.open_in_for filename doRead
 
 
 let localDir = ref ""
@@ -108,8 +104,8 @@ let localDir = ref ""
 let init settings : unit =
   let _ = Unix.umask 0o000 in
   setMyIP ();
-  let reqSettings = Conf.getGroup settings "REQUEST" in
-  Conf.iter 
+  let reqSettings = Config.getGroup settings "REQUEST" in
+  Config.iter 
     (fun fieldName v ->
        match fieldName with
          "SERVER_IP" -> setServerIP (Strutil.strip v)
@@ -120,10 +116,10 @@ let init settings : unit =
        | "LOCAL_SRCS" -> 
            (localDir := Strutil.strip v;
             Filetools.ensurePath !localDir;
-            L.logStatus ("using " ^ !localDir ^ 
+            logStatus ("using " ^ !localDir ^ 
                            " to store acquired files"))
        | _ -> 
-           L.logError ("corrupt val in Request config " ^ v);
+           logError ("corrupt val in Request config " ^ v);
     ) reqSettings
 
 
@@ -144,8 +140,8 @@ let setUser n =
 
 
 (** get wildcard summary filename (making assumptions on naming scheme) *)
-let makeSummPath path fkey =
-  Filename.concat path ((string_of_fkey fkey) ^ ".*")
+let makeSummPath path sumKey =
+  Filename.concat path ((string_of_sumKey sumKey) ^ ".*")
     (* watch out... may need to add an escape like ".\\*" *)
 
 
@@ -161,20 +157,20 @@ let sendMessage msg =
       let reply = readMessage sock_in in
       reply
     with e ->
-      L.logError ("Request doSend failed: " ^ (Printexc.to_string e));
+      logError ("Request doSend failed: " ^ (Printexc.to_string e));
       raise e
   and faultHandler eMsg =
-    L.logError ("Request fault handler with " ^ eMsg);
+    logError ("Request fault handler with " ^ eMsg);
     let reply = ref MFail in
     (Timeout.retry 
        (fun () -> 
-          L.logError ("Request retrying");
-          reply := open_conn_for !servAddr doSend)
-       (fun () -> L.logError ("Request giving up")) (* allow scp to try? *)
+          logError ("Request retrying");
+          reply := Stdutil.open_conn_for !servAddr doSend)
+       (fun () -> logError ("Request giving up")) (* allow scp to try? *)
        num_retries retry_wait);
     !reply
   in
-  try open_conn_for !servAddr doSend
+  try Stdutil.open_conn_for !servAddr doSend
   with 
     Unix_error (e, _, _) -> 
       faultHandler (Unix.error_message e)
@@ -196,10 +192,10 @@ let initServer () : int =
     match sendMessage MInit with
       MInitReply i -> i
     | _ -> 
-        L.logError ("initServer: failed, shutting down");
+        logError ("initServer: failed, shutting down");
         quit 1
   with Unix_error (e, _, _) ->
-    L.logError ("initServer: failed - " ^ (error_message e));
+    logError ("initServer: failed - " ^ (error_message e));
     quit 1
       
 (** Ask server for the next SCC available for analysis *)
@@ -207,7 +203,7 @@ let getSCCWork () =
   try
     sendMessage MReqSCCWork
   with Unix_error (em, _, _) as e ->
-    L.logError ("getSCCWork: failed - " ^ (error_message em));
+    logError ("getSCCWork: failed - " ^ (error_message em));
     raise e
 
 (** Inform server that the [scc] is now complete, and summaries
@@ -218,64 +214,67 @@ let sccDone scc summPaths =
                          (scc, !userName, !myAddr, summPaths)) with
       MSuccess -> ()
     | _ ->
-        L.logError ("sccDone: failed");
+        logError ("sccDone: failed");
   with Unix_error (em, _, _) as e->
-    L.logError ("sccDone: failed - " ^ (error_message em));
+    logError ("sccDone: failed - " ^ (error_message em));
     raise e
 
 
+let attachTypes keysTable sumTypes =
+  let newTable = Hashtbl.create 13 in
+  Hashtbl.iter 
+    (fun (srcUser, srcAddr) (keyPaths : (sumKey * string) list) ->
+       let fullPaths = 
+         List.fold_left 
+           (fun cur (key, path) ->
+              List.fold_left 
+                (fun cur sumTyp ->
+                   ((getBasename key sumTyp), path) :: cur
+                ) cur sumTypes
+           ) [] keyPaths in
+       Hashtbl.add newTable (srcUser, srcAddr) fullPaths
+    ) keysTable;
+  newTable
+
+(* Hack for now... TODO: carry the sumType also *)
+let projectKey keysTypes = 
+  List.fold_left (fun cur (key, _) -> List_utils.addOnce cur key) 
+    [] keysTypes
+
+let projectTypes keysTypes =
+  List.fold_left (fun cur (_, sumTyp) -> List_utils.addOnce cur sumTyp) 
+    [] keysTypes
+  
 (** Ask the server where summaries for the requested functions 
     and analyses ([reqs]) can be found. 
     TODO: modify server_socket.ml and distributed.ml to correlate the 
     location of the summary w/ fKey + sumType also *)
-let askServerForPeers reqs =
-  (* Hack for now... TODO: carry the sumType also *)
-  let projectKey keysAndTypes = 
-    List.fold_left (fun cur (fKey, _) -> Stdutil.addOnce cur fKey) [] reqs
-  in
-  let projectTypes keysAndTypes =
-    List.fold_left (fun cur (_, sumTyp) -> Stdutil.addOnce cur sumTyp) [] reqs
-  in
-  let attachTypes keysTable sumTypes =
-    let newTable = Hashtbl.create 13 in
-    Hashtbl.iter 
-      (fun (srcUser, srcAddr) (keyPaths : (fKey * string) list) ->
-         let fullPaths = 
-           List.fold_left 
-             (fun cur (key, path) ->
-                List.fold_left 
-                  (fun cur sumTyp ->
-                     ((BS.getBasename key sumTyp), path) :: cur
-                  ) cur sumTypes
-             ) [] keyPaths in
-         Hashtbl.add newTable (srcUser, srcAddr) fullPaths
-      ) keysTable;
-    newTable
-  in
-  let reqs = projectKey reqs in
-  match sendMessage (MReqSum reqs) with
+let askServerForPeers (reqs : (sumKey * sumType) list) =
+  let actualReqs = projectKey reqs in
+  let types = projectTypes reqs in
+  match sendMessage (MReqSum actualReqs) with
     MReplySum table -> 
-      attachTypes table (projectTypes reqs)
+      attachTypes table types
   | _ ->
-      L.logError ("askServerForPeers: failed (unexpected reply)");
+      logError ("askServerForPeers: failed (unexpected reply)");
       raise SummariesNotFound
 
 
 (** Download the requested summaries. *)
-let requestSumm (reqs : (fKey * BS.sumType) list) : 
-                   (fKey * BS.sumType * BS.dbToken) list =
+let requestSumm (reqs : (sumKey * sumType) list) : 
+                   (sumKey * sumType * dbToken) list =
 
   (* Track the locations of successfully downloaded function summaries *)
-  let (succeeded : (fKey * BS.sumType * BS.dbToken) list ref) = ref [] in
+  let (succeeded : (sumKey * sumType * dbToken) list ref) = ref [] in
   let addToSucceeded tok fname =
-    let k = BS.key_of_name fname in
-    let sumT = BS.stype_of_name fname in
+    let k = key_of_name fname in
+    let sumT = stype_of_name fname in
     (* TODO: get the type of summary from the fname as well, or think
-     of how to pass the original fkey + sumtype *)
+       of how to pass the original fkey + sumtype *)
     succeeded := (* may be fed same key multiple times for diff summs *)
-        if (List.exists (fun (k', t', _) -> k = k' && sumT = t') !succeeded) 
-        then !succeeded
-        else (k, sumT, tok) :: !succeeded
+      if (List.exists (fun (k', t', _) -> k = k' && sumT = t') !succeeded) 
+      then !succeeded
+      else (k, sumT, tok) :: !succeeded
   in
 
   (* Copy from one peer identified as ([srcUser], [srcAddr]) all
@@ -283,14 +282,13 @@ let requestSumm (reqs : (fKey * BS.sumType) list) :
    (as tracked by [keyPaths]) *)
   let doPeer (srcUser, srcAddr) (srcs : (string * string) list) =
     (* just pick a random destination path to download all summs *)
-    let dest, tok = BS.anyDBPath () in
+    let dest, tok = anyDBPath () in
     let dest = if (Filename.is_relative dest) 
     then Filename.concat cwd dest
     else dest in
       
     (* Try to use file server to acquire summaries *)
-    let doneFS = Stat.time "scp" 
-      (FS.requestFiles srcAddr srcs) dest in
+    let doneFS = Stat.time "scp" (FS.requestFiles srcAddr srcs) dest in
     
     (* If any are left, use scp *)
     let notDone = List.filter 
@@ -299,7 +297,7 @@ let requestSumm (reqs : (fKey * BS.sumType) list) :
       ) srcs in
     let doneSCP = 
       if (notDone != []) then
-        (L.logError "requestSumm: resorting to scp";
+        (logError "requestSumm: resorting to scp";
          Stat.time "scp" 
            (fun dest ->
               match batchScp (srcUser, srcAddr) notDone dest with
@@ -307,7 +305,7 @@ let requestSumm (reqs : (fKey * BS.sumType) list) :
                   (* on normal exit: assume all succeeded *)
                   List.map (fun (n, _) -> n) notDone
               | (_, comm) ->
-                  L.logError ("requestSumm scp failed: " ^ comm);
+                  logError ("requestSumm scp failed: " ^ comm);
                   []
            ) dest
         )
@@ -328,16 +326,16 @@ let requestSumm (reqs : (fKey * BS.sumType) list) :
     let lenR = List.length reqs in
     let lenS = List.length !succeeded in
     if (lenR <> lenS) then (
-      L.logError ("requestSumm: Asked for " ^ (string_of_int lenR) ^ 
+      logError ("requestSumm: Asked for " ^ (string_of_int lenR) ^ 
                     " sums, got " ^ (string_of_int lenS) ^ "\n");
       List.iter 
-        (fun (reqFkey, reqStyp) ->
+        (fun (reqKey, reqStyp) ->
            (* TODO: check the reqStyp also *)
-           if (not (List.exists (fun (fk, st, tok) -> reqFkey = fk) 
+           if (not (List.exists (fun (fk, st, tok) -> reqKey = fk) 
                       !succeeded)) 
            then 
-             L.logError ("Missing: " ^ (string_of_fkey reqFkey) ^ " " 
-                         ^ BS.string_of_sumType reqStyp)) reqs;
+             logError ("Missing: " ^ (string_of_sumKey reqKey) ^ " " 
+                         ^ string_of_sumType reqStyp)) reqs;
       raise SummariesNotFound
     );
     
@@ -349,7 +347,7 @@ let requestSumm (reqs : (fKey * BS.sumType) list) :
   let t = 
     try askServerForPeers reqs
     with Unix_error (e, _, _) ->
-      L.logError ("requestSumm: server error - " ^ (error_message e));
+      logError ("requestSumm: server error - " ^ (error_message e));
       raise SummariesNotFound
   in
   getFromPeers t
@@ -363,10 +361,10 @@ let requestData fname destPath =
   try
     (match sendMessage (MReqData (fname, destPath)) with
        MSuccess -> ()
-     | _ -> L.logError ("requestData: failed");
+     | _ -> logError ("requestData: failed");
     )
   with Unix_error (em, _, _) as e ->
-    L.logError ("requestData: failed - " ^ (error_message em));
+    logError ("requestData: failed - " ^ (error_message em));
     raise e
       
 (** Request to begin the warning generation phase, indicating that
@@ -376,10 +374,10 @@ let reqWarnBarrier num =
   try
     (match sendMessage (MWarnBarrier num) with
        MSuccess -> ()
-     | _ -> L.logError ("reqWarnBarrier: failed");
+     | _ -> logError ("reqWarnBarrier: failed");
     )
   with Unix_error (em, _, _) as e ->
-    L.logError ("reqWarnBarrier: failed - " ^ (error_message em));
+    logError ("reqWarnBarrier: failed - " ^ (error_message em));
     raise e
       
 (** Request from this worker that warnings be checked for the
@@ -388,7 +386,7 @@ let lockWarn (k1:root) (k2:root) =
   try
     sendMessage (MLockWarn (k1, k2))
   with Unix_error (e, _, _) ->
-    L.logError ("lockWarn: failed - " ^ (error_message e));
+    logError ("lockWarn: failed - " ^ (error_message e));
     MFail
 
 (** Inform server that this worker has checked the given root pair *)
@@ -396,9 +394,9 @@ let unlockWarn fk1 fk2 =
   try
     match sendMessage (MUnlockWarn (fk1, fk2)) with
       MSuccess -> ()
-    | _ -> L.logError ("unlockWarn: failed");
+    | _ -> logError ("unlockWarn: failed");
   with Unix_error (em, _, _) as e ->
-    L.logError ("unlockWarn: failed - " ^ (error_message em));
+    logError ("unlockWarn: failed - " ^ (error_message em));
     raise e
 
 (** Send server all the data-race warnings found by this worker *)
@@ -406,9 +404,9 @@ let notifyRace warnData =
   try
     match sendMessage (MNotiRace warnData) with
       MSuccess -> ()
-    | _ -> L.logError ("notifyRace: failed");
+    | _ -> logError ("notifyRace: failed");
   with Unix_error (em, _, _) as e ->
-    L.logError ("notifyRace: failed - " ^ (error_message em));
+    logError ("notifyRace: failed - " ^ (error_message em));
     raise e
 
 (***** Clear out the local scratch directory *******)
@@ -419,9 +417,7 @@ let clearState gen_num =
   let gen_file = Filename.concat !localDir "gen_num.txt" in
   let clearFunc = 
     (fun () ->
-       Filetools.walkDirSimple 
-         (fun file ->
-            Sys.remove file) !localDir
+       Filetools.walkDirSimple (fun file -> Sys.remove file) !localDir
     ) in
-  clearDirGen gen_num gen_file clearFunc
+  Stdutil.clearDirGen gen_num gen_file clearFunc
     

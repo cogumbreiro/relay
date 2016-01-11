@@ -48,9 +48,7 @@
 
 open Gc_stats
 open Stdutil
-
-module E = Errormsg
-module L = Logging
+open Logging
 
 let debug = false
 
@@ -85,6 +83,10 @@ let anonArgFun (arg:string) : unit =
   ()
     
 let usageMsg = getUsageString "[-i fname | -cg cgDir] -o fname [opts]\n"
+
+
+let useInFile () = !in_file <> ""
+let useCGDir () = !cgDir <> "" 
 
 (***************************************************
    Custom pretty printer that doesn't print 
@@ -125,17 +127,18 @@ let getFile (fname:string) : Cil.file =
     if(!inBinary) then
       Cil.loadBinaryFile fname
     else
-      Frontc.parse fname ();
+      let p = Frontc.parse fname in
+      p ();
   with Frontc.ParseError s ->
-    (L.logStatus ("Exception in getFile: " ^ fname ^ " : " ^ s));
+    (logStatus ("Exception in getFile: " ^ fname ^ " : " ^ s));
     raise (Frontc.ParseError s)
 
 
 (** Wrapper for merging a list of files for the output *)
 let doMerge (files : Cil.file list) : Cil.file =
   let result = Mergecil.merge files !out_file in
-  if !E.hadErrors then
-    E.warn "There were errors during merging\n"
+  if !Errormsg.hadErrors then
+    Errormsg.warn "There were errors during merging\n"
   ;
   result
       
@@ -181,8 +184,8 @@ let iterInputs () =
       let nextResult = iterChunks curFileList (getFile fname) in
       loop nextResult
     with End_of_file ->
-      L.logStatus "Reached end of input file";
-      L.logStatus ("Num sources: " ^ 
+      logStatus "Reached end of input file";
+      logStatus ("Num sources: " ^ 
                      (string_of_int (List.length curFileList)));
       flush stdout;
       curFileList
@@ -200,8 +203,8 @@ let iterInputs () =
     !curResults
   in
   let lastChunk = 
-    if (!in_file <> "") then sourcesFromFile ()
-    else if (!cgDir <> "") then sourcesFromDir ()
+    if (useInFile ()) then sourcesFromFile ()
+    else if (useCGDir ()) then sourcesFromDir ()
     else failwith "No inputs!"
   in
   finalizeChunk lastChunk
@@ -219,17 +222,15 @@ let mergeSources () =
 
 
 (** boolean XOR *)
-let xor b1 b2 : bool =
+let bxor b1 b2 : bool =
   (not b1 && b2) || (b1 && not b2)
 
 
 (** Return true if the settings are fine *)
 let validateSettings () : bool=
   (* Didn't know how to require files, so check manually *)
-  let useInFile = !in_file <> "" in
-  let useCGDir = !cgDir <> "" in
   let hasOut = !out_file <> "" in
-  (xor useInFile useCGDir) && hasOut
+  (bxor (useInFile ()) (useCGDir ())) && hasOut
 
 
 let main () = 
@@ -244,16 +245,16 @@ let main () =
     else
       begin
         Cil.initCIL ();
-        L.logStatus ("Merging sources to: " ^ !out_file);
-        L.logStatus "-----";
+        logStatus ("Merging sources to: " ^ !out_file);
+        logStatus "-----";
         mergeSources ();
         printStatistics ();
         exit 0;
       end
   with e -> 
-    L.logError ("Exc. in Merge Sources: " ^ (Printexc.to_string e)); 
+    logError ("Exc. in Merge Sources: " ^ (Printexc.to_string e)); 
     printStatistics ();
-    L.flushStatus ();
+    flushStatus ();
     raise e
 ;;
 main () ;;

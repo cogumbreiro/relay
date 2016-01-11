@@ -39,8 +39,7 @@
     (only wrt to the current function or the function summary examined!) *)
 
 open Cil
-module CLv = Cil_lvals
-module L = Logging
+open Logging
 
 (***************************************************
  * Tracking scope
@@ -59,7 +58,7 @@ type scope =
  * is done to accomodate expressions
  *********************************************************)
 
-let scopeString = "#s"
+let scopeString = "scope_kind"
 
 (* Use an index > 0 to indicate a formal variable of that index. 
    Use special nums < 0 for other scopes *)
@@ -108,13 +107,13 @@ let decideScopeVar curFunc vi : scope =
     if (Cil.isFunctionType vi.vtype) then SFunc
     else SGlobal
   end
-  else match CLv.getIndex curFunc.sformals vi with
+  else match Ciltools.getIndex curFunc.sformals vi with
     Some (i) -> SFormal i
   | None -> STBD
 
 
 let badScopeDebug vi =
-  L.logError ("BadScope: " ^ vi.vname ^ ":" ^ string_of_int vi.vid ^ 
+  logError ("BadScope: " ^ vi.vname ^ ":" ^ string_of_int vi.vid ^ 
                 "   loc: " ^ (Cildump.string_of_loc !currentLoc)) 
     
 (** Decipher the scope annotation that is attached to the var.
@@ -122,10 +121,11 @@ let badScopeDebug vi =
     which do not have varinfos in the first place. *)
 let decipherScope vi : scope =
   try 
-    let Cil.Attr (_, attArgs) = 
+    let att = 
       List.find 
         (fun (Cil.Attr (attName, attArgs)) ->
            attName = scopeString) vi.vattr in
+    let Cil.Attr (_, attArgs) = att in
     match attArgs with
       [Cil.AInt i] ->
         if i == globalNum then SGlobal
@@ -133,11 +133,23 @@ let decipherScope vi : scope =
         else if i == localNum then STBD
         else if (i >= 0) then SFormal i
         else failwith ("unexpected scope attr: " ^ (string_of_int i))
-    | _ ->
-        L.logError "attArgs not a [Cil.AInt]";
+    | [Cil.AStr s] ->
+        if s == string_of_int globalNum then SGlobal
+        else if s == string_of_int funcNum then SFunc
+        else if s == string_of_int localNum then STBD
+        else 
+          let i = int_of_string s in
+          if (i >= 0) then SFormal i
+          else failwith ("unexpected scope attr: " ^ (string_of_int i))  
+    | h :: t ->
+        logErrorF "attArgs not a [Cil.AInt] %s in %s\n" 
+          (Pretty.sprint 80 (d_attrparam () h))
+          (Pretty.sprint 80 (d_attr () att));
 (*        badScopeDebug vi; *)
         raise BadScope
-(*        STBD *)
+    | [] ->
+        logErrorF "not atts\n";
+        raise BadScope
   with Not_found ->
 (*    badScopeDebug vi; *)
     raise BadScope
@@ -155,7 +167,7 @@ let readScope ret vi =
    and get the actual formal. We only make up a similar formal *)
 let warnScope vi decided =
   badScopeDebug vi;
-  L.logError ("Decided: " ^ string_of_scope decided)
+  logError ("Decided: " ^ string_of_scope decided)
   
 let paranoidReadScope curFun ret vi =
   let read = decipherScope vi in
@@ -177,40 +189,63 @@ class scopeVisitor = object (self)
   val mutable curFunc = Cil.dummyFunDec
 
   method vfunc finfo =
-    L.logStatusF "Scoping function: %s\n" finfo.svar.vname;
-    L.flushStatus ();
+    logStatusF "Scoping function: %s\n" finfo.svar.vname;
+    flushStatus ();
     curFunc <- finfo;
     DoChildren
+
+
+  method private tryOverrideScope vi oldScope newScope =
+    match oldScope with
+      STBD ->
+        logStatusF "Overriding scopes %s:%d:%s - %s vs %s\n"
+          vi.vname vi.vid (Cildump.string_of_loc vi.vdecl)
+          (string_of_scope oldScope) (string_of_scope newScope);
+        setScope newScope vi
+    | _ ->
+        logErrorF "Unclear how to override scopes %s:%d:%s - %s vs %s\n"
+          vi.vname vi.vid (Cildump.string_of_loc vi.vdecl)
+          (string_of_scope oldScope) (string_of_scope newScope);
+        
 
   method handleVI (vi:varinfo) =
     try
       let oldScope = decipherScope vi in
       let newScope = decideScopeVar curFunc vi in
-      assert (oldScope = newScope)  
+      if (oldScope <> newScope) then begin
+        (* Hmm, it's possible that it visits the variables before
+           visiting the function! *)
+        self#tryOverrideScope vi oldScope newScope
+      end
     with BadScope ->
       let newScope = decideScopeVar curFunc vi in
       setScope newScope vi
     
   method vvdec (vi:varinfo) =
-    self#handleVI vi;
-    DoChildren
-
-  method vvrbl (vi:varinfo) =
+(*    logStatusF "vvdec variable: %s:%d:%s\n" vi.vname vi.vid 
+      (Cildump.string_of_loc vi.vdecl);
+*)
     self#handleVI vi;
     DoChildren
 
 end
 
 let doAnnotateScope (root : string) =
-  L.logStatus "Annotating scopes once and for all.\n";
-  L.flushStatus ();
+  logStatusF "Annotating scopes for all files in %s.\n" root;
+  flushStatus ();
   let vis = new scopeVisitor in
   Filetools.walkDir 
     (fun ast file ->
-       visitCilFileSameGlobals (vis :> cilVisitor) ast;
-       (* Write back the result! *)
-       Cil.saveBinaryFile ast file;
+       try
+         logStatusF "Annotating scope for file %s\n" file;
+         visitCilFileSameGlobals (vis :> cilVisitor) ast;
+         (* Write back the result! *)
+         Cil.saveBinaryFile ast file;
+       with e ->
+         logErrorF "Exception while annotating scopes %s\n"
+           (Printexc.to_string e);
+         failwith "Exception while annotating"
     ) root;
-  L.logStatus "Scope annotations complete!\n";
-  L.flushStatus ()
+  logStatus "Scope annotations complete!\n";
+  flushStatus ()
 

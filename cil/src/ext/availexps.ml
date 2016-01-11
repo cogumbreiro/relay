@@ -5,6 +5,7 @@
 
 open Cil
 open Pretty
+open Expcompare
 
 module E = Errormsg
 module DF = Dataflow
@@ -14,6 +15,33 @@ module U = Util
 module S = Stats
 
 let debug = ref false
+let doTime = ref false
+
+
+let time s f a = 
+  if !doTime then
+    S.time s f a
+  else f a
+
+(*
+ * When ignore_inst returns true, then
+ * the instruction in question has no
+ * effects on the abstract state.
+ * When ignore_call returns true, then
+ * the instruction only has side-effects
+ * from the assignment if there is one.
+ *)
+let ignore_inst = ref (fun i -> false)
+let ignore_call = ref (fun i -> false)
+
+let registerIgnoreInst (f : instr -> bool) : unit =
+  let f' = !ignore_inst in
+  ignore_inst := (fun i -> (f i) || (f' i))
+
+let registerIgnoreCall (f : instr -> bool) : unit =
+  let f' = !ignore_call in
+  ignore_call := (fun i -> (f i) || (f' i))
+
 
 (* exp IH.t -> exp IH.t -> bool *)
 let eh_equals eh1 eh2 =
@@ -22,7 +50,7 @@ let eh_equals eh1 eh2 =
   else IH.fold (fun vid e b ->
     if not b then b else
     try let e2 = IH.find eh2 vid in
-    if not(Util.equals e e2)
+    if not(compareExpStripCasts e e2)
     then false
     else true
     with Not_found -> false)
@@ -40,10 +68,10 @@ let eh_combine eh1 eh2 =
   let eh' = IH.copy eh1 in (* eh' gets all of eh1 *)
   IH.iter (fun vid e1 ->
     try let e2l = IH.find_all eh2 vid in
-    if not(List.exists (fun e2 -> Util.equals e1 e2) e2l)
+    if not(List.exists (fun e2 -> compareExpStripCasts e1 e2) e2l)
     (* remove things from eh' that eh2 doesn't have *)
     then let e1l = IH.find_all eh' vid in
-    let e1l' = List.filter (fun e -> not(Util.equals e e1)) e1l in
+    let e1l' = List.filter (fun e -> not(compareExpStripCasts e e1)) e1l in
     IH.remove_all eh' vid;
     List.iter (fun e -> IH.add eh' vid e) e1l'
     with Not_found ->
@@ -52,34 +80,38 @@ let eh_combine eh1 eh2 =
 			  eh_pretty eh');
   eh'
 
-(* On a memory write, kill expressions containing memory writes
- * or variables whose address has been taken. *)
-let exp_ok = ref false
-class memReadOrAddrOfFinderClass = object(self)
+
+(* On a memory write, kill expressions containing memory reads
+   variables whose address has been taken, and globals. *)
+class memReadOrAddrOfFinderClass br = object(self)
   inherit nopCilVisitor
 
   method vexpr e = match e with
-    Lval(Mem _, _) -> 
-      exp_ok := true;
+  | Lval(Mem _, _) -> begin
+      br := true;
+      SkipChildren
+  end
+  | AddrOf(Var vi, NoOffset) ->
+      (* Writing to memory won't change the address of something *)
       SkipChildren
   | _ -> DoChildren
 
   method vvrbl vi =
-    if vi.vaddrof then
-      (exp_ok := true;
+    if vi.vaddrof || vi.vglob then
+      (br := true;
        SkipChildren)
     else DoChildren
 
 end
 
-let memReadOrAddrOfFinder = new memReadOrAddrOfFinderClass
-
 (* exp -> bool *)
 let exp_has_mem_read e =
-  exp_ok := false;
-  ignore(visitCilExpr memReadOrAddrOfFinder e);
-  !exp_ok
+  let br = ref false in
+  let vis = new memReadOrAddrOfFinderClass br in
+  ignore(visitCilExpr vis e);
+  !br
 
+   
 let eh_kill_mem eh =
   IH.iter (fun vid e ->
     if exp_has_mem_read e
@@ -87,28 +119,66 @@ let eh_kill_mem eh =
     eh
 
 (* need to kill exps containing a particular vi sometimes *)
-let has_vi = ref false
-class viFinderClass vi = object(self)
+class viFinderClass vi br = object(self)
   inherit nopCilVisitor
       
   method vvrbl vi' = 
     if vi.vid = vi'.vid
-    then (has_vi := true; SkipChildren)
+    then (br := true; SkipChildren)
     else DoChildren
 
 end
 
-let exp_has_vi e vi =
-  let vis = new viFinderClass vi in
-  has_vi := false;
+let exp_has_vi vi e =
+  let br = ref false in
+  let vis = new viFinderClass vi br in
   ignore(visitCilExpr vis e);
-  !has_vi
+  !br
 
 let eh_kill_vi eh vi =
   IH.iter (fun vid e ->
-    if exp_has_vi e vi
+    if exp_has_vi vi e
     then IH.remove eh vid)
     eh
+
+(* need to kill exps containing a particular lval sometimes *)
+class lvalFinderClass lv br = object(self)
+  inherit nopCilVisitor
+
+  method vlval l =
+    if compareLval l lv
+    then (br := true; SkipChildren)
+    else DoChildren
+
+end
+
+let exp_has_lval lv e =
+  let br = ref false in
+  let vis = new lvalFinderClass lv br in
+  ignore(visitCilExpr vis e);
+  !br
+
+let eh_kill_lval eh lv =
+  IH.iter (fun vid e ->
+    if exp_has_lval lv e
+    then IH.remove eh vid)
+    eh
+
+
+class volatileFinderClass br = object(self)
+  inherit nopCilVisitor
+
+  method vexpr e =
+    if (hasAttribute "volatile" (typeAttrs (typeOf e))) 
+    then (br := true; SkipChildren)
+    else DoChildren
+end
+
+let exp_is_volatile e : bool =
+  let br = ref false in
+  let vis = new volatileFinderClass br in
+  ignore(visitCilExpr vis e);
+  !br
 
 let varHash = IH.create 32
 
@@ -130,45 +200,52 @@ let eh_kill_addrof_or_global eh =
     end
     with Not_found -> ()) eh
 
-let eh_handle_inst i eh = match i with
-  (* if a pointer write, kill things with read in them.
-     also kill mappings from vars that have had their address taken,
-     and globals.
-     otherwise kill things with lv in them and add e *)
-  Set(lv,e,_) -> (match lv with
-    (Mem _, _) -> 
-      (eh_kill_mem eh; 
+let eh_handle_inst i eh = 
+  if (!ignore_inst) i then eh else
+  match i with
+    (* if a pointer write, kill things with read in them.
+       also kill mappings from vars that have had their address taken,
+       and globals.
+       otherwise kill things with lv in them and add e *)
+    Set(lv,e,_) -> (match lv with
+      (Mem _, _) -> 
+	(eh_kill_mem eh; 
+	 eh_kill_addrof_or_global eh;
+	 eh)
+    | (Var vi, NoOffset) when not (exp_is_volatile e) -> 
+	(match e with
+	  Lval(Var vi', NoOffset) -> (* ignore x = x *)
+	    if vi'.vid = vi.vid then eh else
+	    (IH.replace eh vi.vid e;
+	     eh_kill_vi eh vi;
+	     eh)
+	| _ ->
+	    (IH.replace eh vi.vid e;
+	     eh_kill_vi eh vi;
+	     eh))
+    | (Var vi, _ ) -> begin
+	(* must remove mapping for vi *)
+	IH.remove eh vi.vid;
+	eh_kill_lval eh lv;
+	eh
+    end)
+  | Call(Some(Var vi,NoOffset),_,_,_) ->
+      (IH.remove eh vi.vid;
+       eh_kill_vi eh vi;
+       if not((!ignore_call) i) then begin
+	 eh_kill_mem eh;
+	 eh_kill_addrof_or_global eh
+       end;
+       eh)
+  | Call(_,_,_,_) ->
+      (eh_kill_mem eh;
        eh_kill_addrof_or_global eh;
        eh)
-  | (Var vi, NoOffset) -> 
-      (match e with
-	Lval(Var vi', NoOffset) -> (* ignore x = x *)
-	  if vi'.vid = vi.vid then eh else
-	  (IH.replace eh vi.vid e;
-	   eh_kill_vi eh vi;
-	   eh)
-      | _ ->
-	  (IH.replace eh vi.vid e;
-	   eh_kill_vi eh vi;
-	   eh))
-  | _ -> eh) (* do nothing for now. *)
-| Call(Some(Var vi,NoOffset),_,_,_) ->
-    (IH.remove eh vi.vid;
-     eh_kill_vi eh vi;
-     eh_kill_mem eh;
-     eh_kill_addrof_or_global eh;
-     eh)
-| Call(_,_,_,_) ->
-    (eh_kill_mem eh;
-     eh_kill_addrof_or_global eh;
-     eh)
-| Asm(_,_,_,_,_,_) ->
-    let _,d = UD.computeUseDefInstr i in
-    (UD.VS.iter (fun vi ->
-      eh_kill_vi eh vi) d;
-     eh)
-
-let allExpHash = IH.create 128
+  | Asm(_,_,_,_,_,_) ->
+      let _,d = UD.computeUseDefInstr i in
+      (UD.VS.iter (fun vi ->
+	eh_kill_vi eh vi) d;
+       eh)
 
 module AvailableExps =
   struct
@@ -186,12 +263,11 @@ module AvailableExps =
 
     let pretty = eh_pretty
 
-    let computeFirstPredecessor stm eh = 
-      eh_combine (IH.copy allExpHash) eh
+    let computeFirstPredecessor stm eh = eh
 
     let combinePredecessors (stm:stmt) ~(old:t) (eh:t) =
-      if S.time "eh_equals" (eh_equals old) eh then None else
-      Some(S.time "eh_combine" (eh_combine old) eh)
+      if time "eh_equals" (eh_equals old) eh then None else
+      Some(time "eh_combine" (eh_combine old) eh)
 
     let doInstr i eh = 
       let action = eh_handle_inst i in
@@ -210,16 +286,8 @@ module AE = DF.ForwardsDataFlow(AvailableExps)
 (* make an exp IH.t with everything in it,
  * also, fill in varHash while we're here.
  *)
-class expCollectorClass = object(self)
+class varHashMakerClass = object(self)
   inherit nopCilVisitor
-
-  method vinst i = match i with
-    Set((Var vi,NoOffset),e,_) ->
-      let e2l = IH.find_all allExpHash vi.vid in
-      if not(List.exists (fun e2 -> Util.equals e e2) e2l)
-      then IH.add allExpHash vi.vid e;
-      DoChildren
-  | _ -> DoChildren
 
   method vvrbl vi =
     (if not(IH.mem varHash vi.vid)
@@ -231,51 +299,24 @@ class expCollectorClass = object(self)
 
 end
 
-let expCollector = new expCollectorClass
+let varHashMaker = new varHashMakerClass
 
-let make_all_exps fd =
-  IH.clear allExpHash;
+let make_var_hash fd =
   IH.clear varHash;
-  ignore(visitCilFunction expCollector fd)
-
-
-
-(* set all statement data to allExpHash, make
- * a list of statements 
- *)
-let all_stmts = ref []
-class allExpSetterClass = object(self)
-  inherit nopCilVisitor
-
-  method vstmt s =
-    all_stmts := s :: (!all_stmts);
-    IH.add AvailableExps.stmtStartData s.sid (IH.copy allExpHash);
-    DoChildren
-
-end
-
-let allExpSetter = new allExpSetterClass
-
-let set_all_exps fd =
-  IH.clear AvailableExps.stmtStartData;
-  ignore(visitCilFunction allExpSetter fd)
+  ignore(visitCilFunction varHashMaker fd)
 
 (*
  * Computes AEs for function fd.
  *
  *
  *)
-(*let iAEsHtbl = Hashtbl.create 128*)
 let computeAEs fd =
   try let slst = fd.sbody.bstmts in
   let first_stm = List.hd slst in
-  S.time "make_all_exps" make_all_exps fd;
-  all_stmts := [];
-  (*S.time "set_all_exps" set_all_exps fd;*)
-  (*Hashtbl.clear iAEsHtbl;*)
-  (*IH.clear (IH.find AvailableExps.stmtStartData first_stm.sid);*)
+  time "make_var_hash" make_var_hash fd;
+  IH.clear AvailableExps.stmtStartData;
   IH.add AvailableExps.stmtStartData first_stm.sid (IH.create 4);
-  S.time "compute" AE.compute [first_stm](*(List.rev !all_stmts)*)
+  time "compute" AE.compute [first_stm]
   with Failure "hd" -> if !debug then ignore(E.log "fn w/ no stmts?\n")
   | Not_found -> if !debug then ignore(E.log "no data for first_stm?\n")
 
@@ -287,29 +328,19 @@ let getAEs sid =
 
 (* get the AE data for an instruction list *)
 let instrAEs il sid eh out =
-  (*if Hashtbl.mem iAEsHtbl (sid,out)
-  then Hashtbl.find iAEsHtbl (sid,out) 
-  else*) 
-    let proc_one hil i =
-      match hil with
-	[] -> let eh' = IH.copy eh in
+  let proc_one hil i =
+    match hil with
+      [] -> let eh' = IH.copy eh in
+      let eh'' = eh_handle_inst i eh' in
+       eh''::hil
+    | eh'::ehrst as l ->
+	let eh' = IH.copy eh' in
 	let eh'' = eh_handle_inst i eh' in
-	(*if !debug then ignore(E.log "instrAEs: proc_one []: for %a\n data is %a\n"
-	   d_instr i eh_pretty eh'');*)
-	eh''::hil
-      | eh'::ehrst as l ->
-	  let eh' = IH.copy eh' in
-	  let eh'' = eh_handle_inst i eh' in
-	  (*if !debug then ignore(E.log "instrAEs: proc_one: for %a\n data is %a\n"
-	     d_instr i eh_pretty eh'');*)
-	  eh''::l
-    in
-    let folded = List.fold_left proc_one [eh] il in
-    (*let foldedout = List.tl (List.rev folded) in*)
-    let foldednotout = List.rev (List.tl folded) in
-    (*Hashtbl.add iAEsHtbl (sid,true) foldedout;
-    Hashtbl.add iAEsHtbl (sid,false) foldednotout;*)
-    (*if out then foldedout else*) foldednotout
+	eh''::l
+  in
+  let folded = List.fold_left proc_one [eh] il in
+  let foldednotout = List.rev (List.tl folded) in
+  foldednotout
 
 class aeVisitorClass = object(self)
   inherit nopCilVisitor
@@ -331,7 +362,7 @@ class aeVisitorClass = object(self)
 	match stm.skind with
 	  Instr il ->
 	    if !debug then ignore(E.log "aeVist: visit il\n");
-	    ae_dat_lst <- S.time "instrAEs" (instrAEs il stm.sid eh) false;
+	    ae_dat_lst <- time "instrAEs" (instrAEs il stm.sid eh) false;
 	    DoChildren
 	| _ ->
 	    if !debug then ignore(E.log "aeVisit: visit non-il\n");

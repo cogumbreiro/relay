@@ -9,10 +9,39 @@ import re
 cillyroot = os.environ['CILLYROOT']
 cilly_bin = os.path.join(cillyroot,'cilly') 
 
+#figure out where the sources of the program are rooted
+progroot = os.path.realpath (os.environ['CURROOT'])
+if progroot[-1] != '/':
+    progroot = progroot + '/'
+
+def addFromRootPath (filename):
+    """ If the given filename is supposed to be rooted in the source 
+    directory add as a prefix, the directories between the 
+    progroot and the current directory of the file.
+
+    Examples (given progroot is /f1/f2):
+
+       /f1/f2/f3/foo.c --> f3/foo.c
+       foo.c --> f3/foo.c
+       /tmp/x.c --> /tmp/x.c
+
+    """
+    absPath = os.path.realpath(filename)
+    if (os.path.commonprefix ([progroot, absPath]) != progroot):
+        print >> sys.stderr, "addFromRootPath: file not in progroot (%s, %s)" \
+            % (progroot, absPath)
+        return filename
+    else:
+        truncated = absPath[len(progroot):]
+        #print >> sys.stderr, "addFromRootPath changed: %s to %s" % \
+        #    (filename, truncated)
+        return truncated
+
 
 #set CUR_CIL_FILE env variable to tell the cilly routine which file
 #is currently being processed
 matched = False
+curFile = "-"
 
 #assume file separator char is '/'
 valid_path_chars = "[_a-zA-Z0-9/.-]*?" #path not required?
@@ -25,7 +54,7 @@ reg = re.compile(valid_prefix + "\.cil\.c|" +
                  valid_prefix + "\.cpp|" +
                  valid_prefix + "\.C|" +
                  valid_prefix + "\.cc|" +
-                 valid_prefix +"\.c")
+                 valid_prefix + "\.c")
 
 for a in sys.argv[1:]:
     mat = reg.search(a)
@@ -45,6 +74,6 @@ else :
 
 
 
-cillyargs = ['cilly', '--keepstatic', '--merge', '--keepmerged'] + sys.argv[1:]
+cillyargs = ['cilly', '--merge', '--keepmerged'] + sys.argv[1:]
 
 os.execv(cilly_bin, cillyargs)

@@ -1,10 +1,11 @@
-Sun Aug 10 21:12:38 PDT 2008
-reserved status file: /tmp/temp.y2MGrS
-running analysis on /home/jan/research/relay/racetests/thread_tests/ciltrees
+Mon Oct 12 14:20:38 PDT 2009
+reserved status file: /tmp/temp.Et3xOJ
+running analysis on /home/jan/research/relay-race/racetests/thread_tests/ciltrees
 Registered summary type: rs
 Registered summary type: ss
 Registered summary type: rss
-Registered summary type: mods
+Args: 
+ ./race_anal.exe -cg /home/jan/research/relay-race/racetests/thread_tests/ciltrees -r -u jan -st /tmp/temp.Et3xOJ
 Checking for data races
 -----
 Loading Cil Varinfo ID ranges for lookup tables
@@ -22,333 +23,34 @@ Finished parsing config group: SYM_EX
 Done reading config file
 myIP: 127.0.0.1
 using /tmp/relay_scratch to store acquired files
-using: /tmp/temp.y2MGrS to track status
-Initializing Steensgaard AA info
+using: /tmp/temp.Et3xOJ to track status
+Initializing Andersen's AA info
 Loading function info
-Using old PTA results
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/racetests/thread_tests/ciltrees/.pta_temp.anders
 Old PTA results loaded
-Reached end of /home/jan/research/relay/racetests/thread_tests/ciltrees/calls.cil call graph file
-Num funcs: 36
+Reached end of /home/jan/research/relay-race/racetests/thread_tests/ciltrees/calls.anders call graph file
+Num funcs: 33
 summary database will use:
-	/home/jan/research/relay/racetests/thread_tests/ciltrees/relay_sums
-Initializing summary mods
-Checking left-over state in mods
+	/home/jan/research/relay-race/racetests/thread_tests/ciltrees/relay_sums
 Initializing summary rss
-Checking left-over state in rss
+Checking leftover state: rss
 Initializing summary ss
-Checking left-over state in ss
+Checking leftover state: ss
 Initializing summary rs
-Checking left-over state in rs
-SH: initEscapeable found (9, 13) thread (acts, formals)
+Checking leftover state: rs
+SH: initEscapeable found (13, 14) thread (acts, formals)
 
-Entry points use roots: false
+Entry points use roots: true
 file server will use: 14440
 trying to clear old summaries / local srcs, etc.
-Scc_cg: Pruned 3 funcs w/out bodies for scc DAG
+Scc_cg: Pruned 5 funcs w/out bodies for scc DAG
 Starting bottomup analysis
 -----
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #28
-=================================
-Summarizing function: _spin_unlock : test_dir/lock.c
------
-doing symstate
-TIMES : FUN:3 : 0.000372886657715
-TIMES : SCC:28 : 0.000380992889404
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 3
-=======
-
-SUMS (fk, lo, un, wr, re):	3	0	1	0	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 3 : 136
->>> PROGRESS 1/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #29
-=================================
-Summarizing function: _spin_lock : test_dir/lock.c
------
-doing symstate
-TIMES : SCC:29 : 0.000147819519043
-TIMES : FUN:1 : 0.000139951705933
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 1
-=======
-
-SUMS (fk, lo, un, wr, re):	1	1	0	0	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 1 : 136
->>> PROGRESS 2/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
 Starting an SCC (1) #0
-=================================
-Summarizing function: lockWithGoto : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	16	0	1	1	2	
-
-TIMES : FUN:16 : 0.00463914871216
-TIMES : SCC:0 : 0.00464606285095
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 16
-=======
-
-SUMS (fk, lo, un, wr, re):	16	0	1	1	2	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 16 : 308
->>> PROGRESS 3/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #1
-=================================
-Summarizing function: globMunge : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	33	0	0	1	1	
-
-TIMES : SCC:1 : 0.00021505355835
-TIMES : FUN:33 : 0.000209093093872
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 33
-=======
-
-SUMS (fk, lo, un, wr, re):	33	0	0	1	1	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 33 : 195
->>> PROGRESS 4/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #26
-=================================
-Summarizing function: unlockedOnEntry : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	95	0	1	1	1	
-
-TIMES : SCC:26 : 0.00203585624695
-TIMES : FUN:95 : 0.00202918052673
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 95
-=======
-
-SUMS (fk, lo, un, wr, re):	95	0	1	1	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 95 : 267
->>> PROGRESS 5/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #25
-=================================
-Summarizing function: lockedOnEntry : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	98	0	0	3	3	
-
-TIMES : SCC:25 : 0.000954866409302
-TIMES : FUN:98 : 0.00095009803772
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 98
-=======
-
-SUMS (fk, lo, un, wr, re):	98	0	0	3	3	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 98 : 314
->>> PROGRESS 6/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #2
-=================================
-Summarizing function: safeThread : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	101	0	1	3	3	
-
-TIMES : SCC:2 : 0.00104212760925
-TIMES : FUN:101 : 0.00103688240051
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 101
-=======
-
-SUMS (fk, lo, un, wr, re):	101	0	1	3	3	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 101 : 321
->>> PROGRESS 7/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #3
-=================================
-Summarizing function: modAL2 : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 5	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	117	0	1	1	1	
-
-TIMES : SCC:3 : 0.000663042068481
-TIMES : FUN:117 : 0.00065803527832
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 117
-=======
-
-SUMS (fk, lo, un, wr, re):	117	0	1	1	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 117 : 111
->>> PROGRESS 8/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #4
-=================================
-Summarizing function: makeAlias : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	31	0	0	1	0	
-
-TIMES : SCC:4 : 0.00373601913452
-TIMES : FUN:31 : 0.00372910499573
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 31
-=======
-
-SUMS (fk, lo, un, wr, re):	31	0	0	1	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 31 : 85
->>> PROGRESS 9/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #5
-=================================
-Summarizing function: reachedByFP : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	133	0	0	0	0	
-
-TIMES : SCC:5 : 0.00149893760681
-TIMES : FUN:133 : 0.00149202346802
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 133
-=======
-
-SUMS (fk, lo, un, wr, re):	133	0	0	0	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 133 : 34
->>> PROGRESS 10/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #6
 =================================
 Summarizing function: mungeMax : test_dir/threads.c
 -----
@@ -357,398 +59,50 @@ Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	13	0	1	1	2	
-
-TIMES : FUN:13 : 0.00476813316345
-TIMES : SCC:6 : 0.00477385520935
+TIMES : SCC:0 : 0.000617980957031
+TIMES : FUN:492.f : 0.000610828399658
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 13
+Summary for function: mungeMax:492.f
 =======
 
-SUMS (fk, lo, un, wr, re):	13	0	1	1	2	
+SUMS (nm, lo, un, wr, re):	mungeMax	0	1	1	2	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 13 : 308
->>> PROGRESS 11/33 SCCs DONE!
+SIZES: 492.f : 317
+>>> PROGRESS 1/28 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #15
+Starting an SCC (1) #19
 =================================
-Summarizing function: getPtr : test_dir/threads2.c
+Summarizing function: unlockedOnEntry : test_dir/threads2.c
 -----
 doing symstate
 Prev ldiffCache hits: 1	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	109	0	0	1	0	
-
-TIMES : SCC:15 : 0.00169205665588
-TIMES : FUN:109 : 0.00168609619141
+TIMES : FUN:588.f : 0.000890016555786
+TIMES : SCC:19 : 0.000899076461792
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 109
+Summary for function: unlockedOnEntry:588.f
 =======
 
-SUMS (fk, lo, un, wr, re):	109	0	0	1	0	
+SUMS (nm, lo, un, wr, re):	unlockedOnEntry	0	1	1	1	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 109 : 92
->>> PROGRESS 12/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #7
-=================================
-Summarizing function: modAL : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	113	0	1	2	1	
-
-TIMES : SCC:7 : 0.0012788772583
-TIMES : FUN:113 : 0.00127291679382
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 113
-=======
-
-SUMS (fk, lo, un, wr, re):	113	0	1	2	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 113 : 157
->>> PROGRESS 13/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #30
-=================================
-Summarizing function: make : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	120	0	0	1	0	
-
-TIMES : SCC:30 : 0.000229835510254
-TIMES : FUN:120 : 0.000226020812988
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 120
-=======
-
-SUMS (fk, lo, un, wr, re):	120	0	0	1	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 120 : 92
->>> PROGRESS 14/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #8
-=================================
-Summarizing function: modU : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	128	0	0	1	0	
-
-TIMES : FUN:128 : 0.000459909439087
-TIMES : SCC:8 : 0.000463962554932
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 128
-=======
-
-SUMS (fk, lo, un, wr, re):	128	0	0	1	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 128 : 89
->>> PROGRESS 15/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #9
-=================================
-Summarizing function: accDListWithPtrA : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	59	0	0	0	1	
-
-TIMES : SCC:9 : 0.00339794158936
-TIMES : FUN:59 : 0.00339078903198
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 59
-=======
-
-SUMS (fk, lo, un, wr, re):	59	0	0	0	1	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 59 : 395
->>> PROGRESS 16/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #11
-=================================
-Summarizing function: t2_main : test_dir/threads2.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	9	0	0	0	0	
-
-TIMES : FUN:9 : 0.00387501716614
-TIMES : SCC:11 : 0.00388216972351
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 9
-=======
-
-SUMS (fk, lo, un, wr, re):	9	0	0	0	0	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 9 : 34
->>> PROGRESS 17/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #12
-=================================
-Summarizing function: makeObjList : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 8	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	46	0	0	4	0	
-
-TIMES : SCC:12 : 0.0028669834137
-TIMES : FUN:46 : 0.00285983085632
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 46
-=======
-
-SUMS (fk, lo, un, wr, re):	46	0	0	4	0	
-
-SS Sum:
- -> 
-Extptr (15):
-  lval = _a177_60315_threads_1
-  lval = (*$NULL)(sum)
-
-SIZES: 46 : 350
->>> PROGRESS 18/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #13
-=================================
-Summarizing function: makeRunRacey : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 0
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	28	0	0	0	0	
-
-TIMES : SCC:13 : 0.000421047210693
-TIMES : FUN:28 : 0.000415086746216
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 28
-=======
-
-SUMS (fk, lo, un, wr, re):	28	0	0	0	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 28 : 34
->>> PROGRESS 19/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #14
-=================================
-Summarizing function: makeRunThreads : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	25	0	0	0	0	
-
-TIMES : SCC:14 : 0.000349998474121
-TIMES : FUN:25 : 0.000344038009644
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 25
-=======
-
-SUMS (fk, lo, un, wr, re):	25	0	0	0	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 25 : 34
->>> PROGRESS 20/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #16
-=================================
-Summarizing function: loopWithGoto : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	40	0	1	1	3	
-
-TIMES : SCC:16 : 0.000925064086914
-TIMES : FUN:40 : 0.000917911529541
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 40
-=======
-
-SUMS (fk, lo, un, wr, re):	40	0	1	1	3	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 40 : 418
->>> PROGRESS 21/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #10
-=================================
-Summarizing function: main : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	75	0	1	13	4	
-
-TIMES : FUN:75 : 0.00231885910034
-TIMES : SCC:10 : 0.0023250579834
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 75
-=======
-
-SUMS (fk, lo, un, wr, re):	75	0	1	13	4	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 75 : 887
->>> PROGRESS 22/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #17
-=================================
-Summarizing function: raceyMunge : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 31	misses: 5
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	22	0	0	1	1	
-
-TIMES : SCC:17 : 0.000245094299316
-TIMES : FUN:22 : 0.000239849090576
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 22
-=======
-
-SUMS (fk, lo, un, wr, re):	22	0	0	1	1	
-
-SS Sum:
- -> 
-Vval: 0
-SIZES: 22 : 199
->>> PROGRESS 23/33 SCCs DONE!
+SIZES: 588.f : 268
+>>> PROGRESS 2/28 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -756,67 +110,123 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #18
 =================================
-Summarizing function: branch : test_dir/threads2.c
+Summarizing function: lockedOnEntry : test_dir/threads2.c
 -----
 doing symstate
-Prev ldiffCache hits: 0	misses: 0
+Prev ldiffCache hits: 0	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	124	0	0	6	2	
-
-TIMES : FUN:124 : 0.00181794166565
-TIMES : SCC:18 : 0.00182294845581
+TIMES : SCC:18 : 0.00125789642334
+TIMES : FUN:591.f : 0.00125002861023
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 124
+Summary for function: lockedOnEntry:591.f
 =======
 
-SUMS (fk, lo, un, wr, re):	124	0	0	6	2	
+SUMS (nm, lo, un, wr, re):	lockedOnEntry	0	0	3	3	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 124 : 443
->>> PROGRESS 24/33 SCCs DONE!
+SIZES: 591.f : 319
+>>> PROGRESS 3/28 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #23
+Starting an SCC (1) #1
+=================================
+Summarizing function: safeThread : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : FUN:594.f : 0.00108790397644
+TIMES : SCC:1 : 0.00109505653381
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: safeThread:594.f
+=======
+
+SUMS (nm, lo, un, wr, re):	safeThread	0	1	3	3	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 594.f : 326
+>>> PROGRESS 4/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: modAL2 : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 5	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : SCC:2 : 0.000849008560181
+TIMES : FUN:611.f : 0.000839948654175
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: modAL2:611.f
+=======
+
+SUMS (nm, lo, un, wr, re):	modAL2	0	1	1	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 611.f : 108
+>>> PROGRESS 5/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #5
 =================================
 Summarizing function: getLock : test_dir/threads.c
 -----
 doing symstate
-Prev ldiffCache hits: 0	misses: 0
+Prev ldiffCache hits: 0	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	53	0	0	0	1	
-
-TIMES : SCC:23 : 0.00432395935059
-TIMES : FUN:53 : 0.00431704521179
+TIMES : SCC:5 : 0.00033712387085
+TIMES : FUN:538.f : 0.00032901763916
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 53
+Summary for function: getLock:538.f
 =======
 
-SUMS (fk, lo, un, wr, re):	53	0	0	0	1	
+SUMS (nm, lo, un, wr, re):	getLock	0	0	0	1	
 
 SS Sum:
  -> 
-$SSTOP
-SIZES: 53 : 199
->>> PROGRESS 25/33 SCCs DONE!
+Extptr (1):
+  lval = (*(o->l))
+
+SIZES: 538.f : 202
+>>> PROGRESS 6/28 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #31
+Starting an SCC (1) #8
 =================================
 Summarizing function: getObj : test_dir/threads.c
 -----
@@ -825,91 +235,203 @@ Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	51	0	0	0	1	
-
-TIMES : SCC:31 : 0.000196933746338
-TIMES : FUN:51 : 0.000190019607544
+TIMES : SCC:8 : 0.000336170196533
+TIMES : FUN:536.f : 0.000328063964844
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 51
+Summary for function: getObj:536.f
 =======
 
-SUMS (fk, lo, un, wr, re):	51	0	0	0	1	
+SUMS (nm, lo, un, wr, re):	getObj	0	0	0	1	
 
 SS Sum:
  -> 
-$SSTOP
-SIZES: 51 : 254
->>> PROGRESS 26/33 SCCs DONE!
+Extptr (1):
+  lval = (*(node->obj))
+
+SIZES: 536.f : 264
+>>> PROGRESS 7/28 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #19
+Starting an SCC (1) #3
 =================================
-Summarizing function: raceyGetterUse : test_dir/threads.c
+Summarizing function: racyGetterUse : test_dir/threads.c
 -----
 doing symstate
 Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	55	0	1	1	3	
-
-TIMES : SCC:19 : 0.00142502784729
-TIMES : FUN:55 : 0.00142002105713
+TIMES : SCC:3 : 0.00185799598694
+TIMES : FUN:540.f : 0.00185108184814
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 55
+Summary for function: racyGetterUse:540.f
 =======
 
-SUMS (fk, lo, un, wr, re):	55	0	1	1	3	
+SUMS (nm, lo, un, wr, re):	racyGetterUse	0	1	1	3	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 55 : 375
->>> PROGRESS 27/33 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #27
-=================================
-Summarizing function: loop : test_dir/threads.c
------
-doing symstate
-Prev ldiffCache hits: 2	misses: 4
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	35	0	1	1	3	
-
-TIMES : SCC:27 : 0.000744819641113
-TIMES : FUN:35 : 0.000739097595215
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 35
-=======
-
-SUMS (fk, lo, un, wr, re):	35	0	1	1	3	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 35 : 370
->>> PROGRESS 28/33 SCCs DONE!
+SIZES: 540.f : 628
+>>> PROGRESS 8/28 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
 Starting an SCC (1) #20
+=================================
+Summarizing function: make : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : SCC:20 : 0.000424861907959
+TIMES : FUN:614.f : 0.000416994094849
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: make:614.f
+=======
+
+SUMS (nm, lo, un, wr, re):	make	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 614.f : 88
+>>> PROGRESS 9/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #4
+=================================
+Summarizing function: modU : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:4 : 0.00100183486938
+TIMES : FUN:625.f : 0.000996112823486
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: modU:625.f
+=======
+
+SUMS (nm, lo, un, wr, re):	modU	0	0	3	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 625.f : 180
+>>> PROGRESS 10/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #11
+=================================
+Summarizing function: getPtr : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:602.f : 0.00040602684021
+TIMES : SCC:11 : 0.000414133071899
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: getPtr:602.f
+=======
+
+SUMS (nm, lo, un, wr, re):	getPtr	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 602.f : 88
+>>> PROGRESS 11/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #6
+=================================
+Summarizing function: modAL : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:606.f : 0.00125622749329
+TIMES : SCC:6 : 0.0012629032135
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: modAL:606.f
+=======
+
+SUMS (nm, lo, un, wr, re):	modAL	0	1	2	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 606.f : 160
+>>> PROGRESS 12/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #10
+=================================
+Summarizing function: loop : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : FUN:517.f : 0.00131106376648
+TIMES : SCC:10 : 0.00131893157959
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: loop:517.f
+=======
+
+SUMS (nm, lo, un, wr, re):	loop	0	1	1	3	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 517.f : 387
+>>> PROGRESS 13/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #7
 =================================
 Summarizing function: loopAndRecurse : test_dir/threads.c
 -----
@@ -918,8 +440,6 @@ Prev ldiffCache hits: 1	misses: 3
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	37	0	0	1	3	
-
 Summarizing function: loopAndRecurse : test_dir/threads.c
 -----
 doing symstate
@@ -927,8 +447,6 @@ Prev ldiffCache hits: 3	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	37	0	1	1	4	
-
 Summarizing function: loopAndRecurse : test_dir/threads.c
 -----
 doing symstate
@@ -936,48 +454,231 @@ Prev ldiffCache hits: 6	misses: 6
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	37	0	1	1	4	
+Summarizing function: loopAndRecurse : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 10	misses: 6
 
-TIMES : SCC:20 : 0.00112795829773
-TIMES : FUN:37 : 0.00111508369446
+doing lockset
+doing guarded access
+TIMES : SCC:7 : 0.00905585289001
+TIMES : FUN:519.f : 0.00901675224304
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 37
+Summary for function: loopAndRecurse:519.f
 =======
 
-SUMS (fk, lo, un, wr, re):	37	0	1	1	4	
+SUMS (nm, lo, un, wr, re):	loopAndRecurse	0	2	2	6	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 37 : 434
->>> PROGRESS 29/33 SCCs DONE!
+SIZES: 519.f : 559
+>>> PROGRESS 14/28 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #21
+Starting an SCC (1) #9
 =================================
-Summarizing function: _spin_trylock : test_dir/lock.c
+Summarizing function: racyMunge : test_dir/threads.c
 -----
 doing symstate
-TIMES : SCC:21 : 0.000201940536499
-TIMES : FUN:2 : 0.000196933746338
+Prev ldiffCache hits: 11	misses: 5
+
+doing lockset
+doing guarded access
+TIMES : SCC:9 : 0.000332117080688
+TIMES : FUN:501.f : 0.000323057174683
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 2
+Summary for function: racyMunge:501.f
 =======
 
-SUMS (fk, lo, un, wr, re):	2	1	0	0	0	
+SUMS (nm, lo, un, wr, re):	racyMunge	0	0	1	1	
 
 SS Sum:
  -> 
-$SSTOP
-SIZES: 2 : 136
->>> PROGRESS 30/33 SCCs DONE!
+Vval: 0
+SIZES: 501.f : 202
+>>> PROGRESS 15/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #12
+=================================
+Summarizing function: branch : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:12 : 0.000723123550415
+TIMES : FUN:618.f : 0.000715017318726
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: branch:618.f
+=======
+
+SUMS (nm, lo, un, wr, re):	branch	0	0	6	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 618.f : 445
+>>> PROGRESS 16/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #13
+=================================
+Summarizing function: munge : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:498.f : 0.000908136367798
+TIMES : SCC:13 : 0.000916957855225
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: munge:498.f
+=======
+
+SUMS (nm, lo, un, wr, re):	munge	0	1	1	2	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 498.f : 290
+>>> PROGRESS 17/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #14
+=================================
+Summarizing function: globMunge : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:14 : 0.000272035598755
+TIMES : FUN:515.f : 0.000265121459961
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: globMunge:515.f
+=======
+
+SUMS (nm, lo, un, wr, re):	globMunge	0	0	1	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 515.f : 198
+>>> PROGRESS 18/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #15
+=================================
+Summarizing function: makeAlias : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:513.f : 0.00028920173645
+TIMES : SCC:15 : 0.000295877456665
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: makeAlias:513.f
+=======
+
+SUMS (nm, lo, un, wr, re):	makeAlias	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 513.f : 83
+>>> PROGRESS 19/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #16
+=================================
+Summarizing function: lockWithGoto : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:16 : 0.00098705291748
+TIMES : FUN:495.f : 0.000978946685791
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: lockWithGoto:495.f
+=======
+
+SUMS (nm, lo, un, wr, re):	lockWithGoto	0	1	1	2	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 495.f : 317
+>>> PROGRESS 20/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #17
+=================================
+Summarizing function: unsafeThread : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:597.f : 0.000600099563599
+TIMES : SCC:17 : 0.000607013702393
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: unsafeThread:597.f
+=======
+
+SUMS (nm, lo, un, wr, re):	unsafeThread	0	0	3	3	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 597.f : 319
+>>> PROGRESS 21/28 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -985,30 +686,60 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #22
 =================================
-Summarizing function: munge : test_dir/threads.c
+Summarizing function: makeObjList : test_dir/threads.c
 -----
 doing symstate
-Prev ldiffCache hits: 8	misses: 5
+Prev ldiffCache hits: 5	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	19	0	1	1	2	
-
-TIMES : SCC:22 : 0.00429797172546
-TIMES : FUN:19 : 0.00429105758667
+TIMES : FUN:528.f : 0.00069785118103
+TIMES : SCC:22 : 0.00070595741272
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 19
+Summary for function: makeObjList:528.f
 =======
 
-SUMS (fk, lo, un, wr, re):	19	0	1	1	2	
+SUMS (nm, lo, un, wr, re):	makeObjList	0	0	4	0	
+
+SS Sum:
+ -> 
+Extptr (17):
+  lval = _a177_60167_threads_1
+  lval = (*$NULL)(sum)
+
+SIZES: 528.f : 358
+>>> PROGRESS 22/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #23
+=================================
+Summarizing function: loopWithGoto : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:23 : 0.00220584869385
+TIMES : FUN:522.f : 0.00219583511353
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: loopWithGoto:522.f
+=======
+
+SUMS (nm, lo, un, wr, re):	loopWithGoto	0	2	2	6	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 19 : 283
->>> PROGRESS 31/33 SCCs DONE!
+SIZES: 522.f : 598
+>>> PROGRESS 23/28 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -1016,61 +747,144 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #24
 =================================
-Summarizing function: unsafeThread : test_dir/threads2.c
+Summarizing function: makeRunThreads : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:24 : 0.00223803520203
+TIMES : FUN:505.f : 0.00222897529602
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: makeRunThreads:505.f
+=======
+
+SUMS (nm, lo, un, wr, re):	makeRunThreads	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 505.f : 34
+>>> PROGRESS 24/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #25
+=================================
+Summarizing function: t2_main : test_dir/threads2.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:25 : 0.000936985015869
+TIMES : FUN:155.f : 0.000927925109863
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: t2_main:155.f
+=======
+
+SUMS (nm, lo, un, wr, re):	t2_main	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 155.f : 34
+>>> PROGRESS 25/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #26
+=================================
+Summarizing function: makeRunRacy : test_dir/threads.c
+-----
+doing symstate
+Prev ldiffCache hits: 8	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:510.f : 0.000633001327515
+TIMES : SCC:26 : 0.000641107559204
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: makeRunRacy:510.f
+=======
+
+SUMS (nm, lo, un, wr, re):	makeRunRacy	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 510.f : 34
+>>> PROGRESS 26/28 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #21
+=================================
+Summarizing function: main : test_dir/threads.c
 -----
 doing symstate
 Prev ldiffCache hits: 0	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	104	0	0	3	3	
-
-TIMES : SCC:24 : 0.00385093688965
-TIMES : FUN:104 : 0.00384402275085
+TIMES : SCC:21 : 0.00398397445679
+TIMES : FUN:562.f : 0.0039758682251
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 104
+Summary for function: main:562.f
 =======
 
-SUMS (fk, lo, un, wr, re):	104	0	0	3	3	
+SUMS (nm, lo, un, wr, re):	main	0	2	14	7	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 104 : 314
->>> PROGRESS 32/33 SCCs DONE!
+SIZES: 562.f : 1055
+>>> PROGRESS 27/28 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #32
+Starting an SCC (1) #27
 =================================
-Summarizing function: reachedByName : test_dir/threads2.c
+Summarizing function: accDListWithPtrA : test_dir/threads.c
 -----
 doing symstate
-Prev ldiffCache hits: 5	misses: 2
+Prev ldiffCache hits: 36	misses: 5
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	136	0	0	0	0	
-
-TIMES : FUN:136 : 0.000144004821777
-TIMES : SCC:32 : 0.00015115737915
+TIMES : SCC:27 : 0.000444889068604
+TIMES : FUN:544.f : 0.000437021255493
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 136
+Summary for function: accDListWithPtrA:544.f
 =======
 
-SUMS (fk, lo, un, wr, re):	136	0	0	0	0	
+SUMS (nm, lo, un, wr, re):	accDListWithPtrA	0	0	0	1	
 
 SS Sum:
  -> 
-$SSBOT
-SIZES: 136 : 34
->>> PROGRESS 33/33 SCCs DONE!
+Vval: 0
+SIZES: 544.f : 389
+>>> PROGRESS 28/28 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -1081,358 +895,354 @@ Bottomup analysis complete
 
 Beginning Thread Analysis:
 -----
-Expected # thread-creation site pairs: 10
+Expected # thread-creation site pairs: 15
 checking a thread-creation pair
 Prev ldiffCache hits: 0	misses: 0
 
 doing symstate
-Prev ldiffCache hits: 38	misses: 3
+Prev ldiffCache hits: 48	misses: 7
 
 doing symstate
-now checking thread roots: raceyGetterUse, raceyGetterUse
-New race added to race reports
-now checking thread roots: raceyGetterUse, raceyGetterUse
-now checking thread roots: raceyGetterUse, loopWithGoto
-now checking thread roots: raceyGetterUse, loopWithGoto
-now checking thread roots: raceyGetterUse, lockWithGoto
-now checking thread roots: raceyGetterUse, lockWithGoto
-now checking thread roots: raceyGetterUse, loopAndRecurse
-now checking thread roots: raceyGetterUse, loopAndRecurse
-now checking thread roots: raceyGetterUse, globMunge
-now checking thread roots: raceyGetterUse, munge
-now checking thread roots: raceyGetterUse, raceyMunge
-now checking thread roots: raceyGetterUse, raceyMunge
-now checking thread roots: raceyGetterUse, raceyGetterUse
-now checking thread roots: raceyGetterUse, raceyGetterUse
-now checking thread roots: raceyGetterUse, loopWithGoto
-now checking thread roots: raceyGetterUse, loopWithGoto
-now checking thread roots: raceyGetterUse, lockWithGoto
-now checking thread roots: raceyGetterUse, lockWithGoto
-now checking thread roots: raceyGetterUse, loopAndRecurse
-now checking thread roots: raceyGetterUse, loopAndRecurse
-now checking thread roots: raceyGetterUse, globMunge
-now checking thread roots: raceyGetterUse, munge
-now checking thread roots: raceyGetterUse, raceyMunge
-now checking thread roots: raceyGetterUse, raceyMunge
-now checking thread roots: loopWithGoto, raceyGetterUse
-now checking thread roots: loopWithGoto, raceyGetterUse
-now checking thread roots: loopWithGoto, loopWithGoto
+now checking thread roots: racyGetterUse(540.f), racyGetterUse(540.f)
+now checking thread roots: racyGetterUse(540.f), racyGetterUse(540.f)
+now checking thread roots: racyGetterUse(522.f), loopWithGoto(522.f)
 New race added to race reports
 New race added to race reports
-now checking thread roots: loopWithGoto, loopWithGoto
-now checking thread roots: loopWithGoto, lockWithGoto
-now checking thread roots: loopWithGoto, lockWithGoto
-now checking thread roots: loopWithGoto, loopAndRecurse
+now checking thread roots: racyGetterUse(522.f), loopWithGoto(522.f)
+now checking thread roots: racyGetterUse(495.f), lockWithGoto(495.f)
+now checking thread roots: racyGetterUse(495.f), lockWithGoto(495.f)
+now checking thread roots: racyGetterUse(519.f), loopAndRecurse(519.f)
+New race added to race reports
+now checking thread roots: racyGetterUse(519.f), loopAndRecurse(519.f)
+now checking thread roots: racyGetterUse(515.f), globMunge(515.f)
+now checking thread roots: racyGetterUse(498.f), munge(498.f)
+now checking thread roots: racyGetterUse(501.f), racyMunge(501.f)
+now checking thread roots: racyGetterUse(501.f), racyMunge(501.f)
+now checking thread roots: racyGetterUse(540.f), racyGetterUse(540.f)
+now checking thread roots: racyGetterUse(540.f), racyGetterUse(540.f)
+now checking thread roots: racyGetterUse(522.f), loopWithGoto(522.f)
+now checking thread roots: racyGetterUse(522.f), loopWithGoto(522.f)
+now checking thread roots: racyGetterUse(495.f), lockWithGoto(495.f)
+now checking thread roots: racyGetterUse(495.f), lockWithGoto(495.f)
+now checking thread roots: racyGetterUse(519.f), loopAndRecurse(519.f)
+now checking thread roots: racyGetterUse(519.f), loopAndRecurse(519.f)
+now checking thread roots: racyGetterUse(515.f), globMunge(515.f)
+now checking thread roots: racyGetterUse(498.f), munge(498.f)
+now checking thread roots: racyGetterUse(501.f), racyMunge(501.f)
+now checking thread roots: racyGetterUse(501.f), racyMunge(501.f)
+now checking thread roots: loopWithGoto(540.f), racyGetterUse(540.f)
+now checking thread roots: loopWithGoto(540.f), racyGetterUse(540.f)
+now checking thread roots: loopWithGoto(522.f), loopWithGoto(522.f)
+New race added to race reports
+now checking thread roots: loopWithGoto(522.f), loopWithGoto(522.f)
+now checking thread roots: loopWithGoto(495.f), lockWithGoto(495.f)
+now checking thread roots: loopWithGoto(495.f), lockWithGoto(495.f)
+now checking thread roots: loopWithGoto(519.f), loopAndRecurse(519.f)
 New race added to race reports
 New race added to race reports
-now checking thread roots: loopWithGoto, loopAndRecurse
-now checking thread roots: loopWithGoto, globMunge
-now checking thread roots: loopWithGoto, munge
-now checking thread roots: loopWithGoto, raceyMunge
-now checking thread roots: loopWithGoto, raceyMunge
-now checking thread roots: loopWithGoto, raceyGetterUse
-now checking thread roots: loopWithGoto, raceyGetterUse
-now checking thread roots: loopWithGoto, loopWithGoto
-now checking thread roots: loopWithGoto, loopWithGoto
-now checking thread roots: loopWithGoto, lockWithGoto
-now checking thread roots: loopWithGoto, lockWithGoto
-now checking thread roots: loopWithGoto, loopAndRecurse
-now checking thread roots: loopWithGoto, loopAndRecurse
-now checking thread roots: loopWithGoto, globMunge
-now checking thread roots: loopWithGoto, munge
-now checking thread roots: loopWithGoto, raceyMunge
-now checking thread roots: loopWithGoto, raceyMunge
-now checking thread roots: lockWithGoto, raceyGetterUse
-now checking thread roots: lockWithGoto, raceyGetterUse
-now checking thread roots: lockWithGoto, loopWithGoto
-now checking thread roots: lockWithGoto, loopWithGoto
-now checking thread roots: lockWithGoto, lockWithGoto
+now checking thread roots: loopWithGoto(519.f), loopAndRecurse(519.f)
+now checking thread roots: loopWithGoto(515.f), globMunge(515.f)
+now checking thread roots: loopWithGoto(498.f), munge(498.f)
+now checking thread roots: loopWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: loopWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: loopWithGoto(540.f), racyGetterUse(540.f)
+now checking thread roots: loopWithGoto(540.f), racyGetterUse(540.f)
+now checking thread roots: loopWithGoto(522.f), loopWithGoto(522.f)
+now checking thread roots: loopWithGoto(522.f), loopWithGoto(522.f)
+now checking thread roots: loopWithGoto(495.f), lockWithGoto(495.f)
+now checking thread roots: loopWithGoto(495.f), lockWithGoto(495.f)
+now checking thread roots: loopWithGoto(519.f), loopAndRecurse(519.f)
+now checking thread roots: loopWithGoto(519.f), loopAndRecurse(519.f)
+now checking thread roots: loopWithGoto(515.f), globMunge(515.f)
+now checking thread roots: loopWithGoto(498.f), munge(498.f)
+now checking thread roots: loopWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: loopWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: lockWithGoto(540.f), racyGetterUse(540.f)
+now checking thread roots: lockWithGoto(540.f), racyGetterUse(540.f)
+now checking thread roots: lockWithGoto(522.f), loopWithGoto(522.f)
+now checking thread roots: lockWithGoto(522.f), loopWithGoto(522.f)
+now checking thread roots: lockWithGoto(495.f), lockWithGoto(495.f)
+now checking thread roots: lockWithGoto(495.f), lockWithGoto(495.f)
+now checking thread roots: lockWithGoto(519.f), loopAndRecurse(519.f)
+now checking thread roots: lockWithGoto(519.f), loopAndRecurse(519.f)
+now checking thread roots: lockWithGoto(515.f), globMunge(515.f)
+now checking thread roots: lockWithGoto(498.f), munge(498.f)
+now checking thread roots: lockWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: lockWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: lockWithGoto(540.f), racyGetterUse(540.f)
+now checking thread roots: lockWithGoto(540.f), racyGetterUse(540.f)
+now checking thread roots: lockWithGoto(522.f), loopWithGoto(522.f)
+now checking thread roots: lockWithGoto(522.f), loopWithGoto(522.f)
+now checking thread roots: lockWithGoto(495.f), lockWithGoto(495.f)
+now checking thread roots: lockWithGoto(495.f), lockWithGoto(495.f)
+now checking thread roots: lockWithGoto(519.f), loopAndRecurse(519.f)
+now checking thread roots: lockWithGoto(519.f), loopAndRecurse(519.f)
+now checking thread roots: lockWithGoto(515.f), globMunge(515.f)
+now checking thread roots: lockWithGoto(498.f), munge(498.f)
+now checking thread roots: lockWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: lockWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: loopAndRecurse(540.f), racyGetterUse(540.f)
+now checking thread roots: loopAndRecurse(540.f), racyGetterUse(540.f)
+now checking thread roots: loopAndRecurse(522.f), loopWithGoto(522.f)
+now checking thread roots: loopAndRecurse(522.f), loopWithGoto(522.f)
+now checking thread roots: loopAndRecurse(495.f), lockWithGoto(495.f)
+now checking thread roots: loopAndRecurse(495.f), lockWithGoto(495.f)
+now checking thread roots: loopAndRecurse(519.f), loopAndRecurse(519.f)
 New race added to race reports
+now checking thread roots: loopAndRecurse(519.f), loopAndRecurse(519.f)
+now checking thread roots: loopAndRecurse(515.f), globMunge(515.f)
+now checking thread roots: loopAndRecurse(498.f), munge(498.f)
+now checking thread roots: loopAndRecurse(501.f), racyMunge(501.f)
+now checking thread roots: loopAndRecurse(501.f), racyMunge(501.f)
+now checking thread roots: loopAndRecurse(540.f), racyGetterUse(540.f)
+now checking thread roots: loopAndRecurse(540.f), racyGetterUse(540.f)
+now checking thread roots: loopAndRecurse(522.f), loopWithGoto(522.f)
+now checking thread roots: loopAndRecurse(522.f), loopWithGoto(522.f)
+now checking thread roots: loopAndRecurse(495.f), lockWithGoto(495.f)
+now checking thread roots: loopAndRecurse(495.f), lockWithGoto(495.f)
+now checking thread roots: loopAndRecurse(519.f), loopAndRecurse(519.f)
+now checking thread roots: loopAndRecurse(519.f), loopAndRecurse(519.f)
+now checking thread roots: loopAndRecurse(515.f), globMunge(515.f)
+now checking thread roots: loopAndRecurse(498.f), munge(498.f)
+now checking thread roots: loopAndRecurse(501.f), racyMunge(501.f)
+now checking thread roots: loopAndRecurse(501.f), racyMunge(501.f)
+now checking thread roots: globMunge(540.f), racyGetterUse(540.f)
+now checking thread roots: globMunge(540.f), racyGetterUse(540.f)
+now checking thread roots: globMunge(522.f), loopWithGoto(522.f)
+now checking thread roots: globMunge(522.f), loopWithGoto(522.f)
+now checking thread roots: globMunge(495.f), lockWithGoto(495.f)
+now checking thread roots: globMunge(495.f), lockWithGoto(495.f)
+now checking thread roots: globMunge(519.f), loopAndRecurse(519.f)
+now checking thread roots: globMunge(519.f), loopAndRecurse(519.f)
+now checking thread roots: globMunge(515.f), globMunge(515.f)
 New race added to race reports
-now checking thread roots: lockWithGoto, lockWithGoto
-now checking thread roots: lockWithGoto, loopAndRecurse
-now checking thread roots: lockWithGoto, loopAndRecurse
-now checking thread roots: lockWithGoto, globMunge
-now checking thread roots: lockWithGoto, munge
-now checking thread roots: lockWithGoto, raceyMunge
-now checking thread roots: lockWithGoto, raceyMunge
-now checking thread roots: lockWithGoto, raceyGetterUse
-now checking thread roots: lockWithGoto, raceyGetterUse
-now checking thread roots: lockWithGoto, loopWithGoto
-now checking thread roots: lockWithGoto, loopWithGoto
-now checking thread roots: lockWithGoto, lockWithGoto
-now checking thread roots: lockWithGoto, lockWithGoto
-now checking thread roots: lockWithGoto, loopAndRecurse
-now checking thread roots: lockWithGoto, loopAndRecurse
-now checking thread roots: lockWithGoto, globMunge
-now checking thread roots: lockWithGoto, munge
-now checking thread roots: lockWithGoto, raceyMunge
-now checking thread roots: lockWithGoto, raceyMunge
-now checking thread roots: loopAndRecurse, raceyGetterUse
-now checking thread roots: loopAndRecurse, raceyGetterUse
-now checking thread roots: loopAndRecurse, loopWithGoto
-now checking thread roots: loopAndRecurse, loopWithGoto
-now checking thread roots: loopAndRecurse, lockWithGoto
-now checking thread roots: loopAndRecurse, lockWithGoto
-now checking thread roots: loopAndRecurse, loopAndRecurse
-New race added to race reports
-now checking thread roots: loopAndRecurse, loopAndRecurse
-now checking thread roots: loopAndRecurse, globMunge
-now checking thread roots: loopAndRecurse, munge
-now checking thread roots: loopAndRecurse, raceyMunge
-now checking thread roots: loopAndRecurse, raceyMunge
-now checking thread roots: loopAndRecurse, raceyGetterUse
-now checking thread roots: loopAndRecurse, raceyGetterUse
-now checking thread roots: loopAndRecurse, loopWithGoto
-now checking thread roots: loopAndRecurse, loopWithGoto
-now checking thread roots: loopAndRecurse, lockWithGoto
-now checking thread roots: loopAndRecurse, lockWithGoto
-now checking thread roots: loopAndRecurse, loopAndRecurse
-now checking thread roots: loopAndRecurse, loopAndRecurse
-now checking thread roots: loopAndRecurse, globMunge
-now checking thread roots: loopAndRecurse, munge
-now checking thread roots: loopAndRecurse, raceyMunge
-now checking thread roots: loopAndRecurse, raceyMunge
-now checking thread roots: globMunge, raceyGetterUse
-now checking thread roots: globMunge, raceyGetterUse
-now checking thread roots: globMunge, loopWithGoto
-now checking thread roots: globMunge, loopWithGoto
-now checking thread roots: globMunge, lockWithGoto
-now checking thread roots: globMunge, lockWithGoto
-now checking thread roots: globMunge, loopAndRecurse
-now checking thread roots: globMunge, loopAndRecurse
-now checking thread roots: globMunge, globMunge
-New race added to race reports
-now checking thread roots: globMunge, munge
-now checking thread roots: globMunge, raceyMunge
-now checking thread roots: globMunge, raceyMunge
-now checking thread roots: munge, raceyGetterUse
-now checking thread roots: munge, raceyGetterUse
-now checking thread roots: munge, loopWithGoto
-now checking thread roots: munge, loopWithGoto
-now checking thread roots: munge, lockWithGoto
-now checking thread roots: munge, lockWithGoto
-now checking thread roots: munge, loopAndRecurse
-now checking thread roots: munge, loopAndRecurse
-now checking thread roots: munge, globMunge
-now checking thread roots: munge, munge
-New race added to race reports
-now checking thread roots: munge, raceyMunge
-now checking thread roots: munge, raceyMunge
-now checking thread roots: raceyMunge, raceyGetterUse
-now checking thread roots: raceyMunge, raceyGetterUse
-now checking thread roots: raceyMunge, loopWithGoto
-now checking thread roots: raceyMunge, loopWithGoto
-now checking thread roots: raceyMunge, lockWithGoto
-now checking thread roots: raceyMunge, lockWithGoto
-now checking thread roots: raceyMunge, loopAndRecurse
-now checking thread roots: raceyMunge, loopAndRecurse
-now checking thread roots: raceyMunge, globMunge
-now checking thread roots: raceyMunge, munge
-now checking thread roots: raceyMunge, raceyMunge
-New race added to race reports
-now checking thread roots: raceyMunge, raceyMunge
-now checking thread roots: raceyMunge, raceyGetterUse
-now checking thread roots: raceyMunge, raceyGetterUse
-now checking thread roots: raceyMunge, loopWithGoto
-now checking thread roots: raceyMunge, loopWithGoto
-now checking thread roots: raceyMunge, lockWithGoto
-now checking thread roots: raceyMunge, lockWithGoto
-now checking thread roots: raceyMunge, loopAndRecurse
-now checking thread roots: raceyMunge, loopAndRecurse
-now checking thread roots: raceyMunge, globMunge
-now checking thread roots: raceyMunge, munge
-now checking thread roots: raceyMunge, raceyMunge
-now checking thread roots: raceyMunge, raceyMunge
+now checking thread roots: globMunge(498.f), munge(498.f)
+now checking thread roots: globMunge(501.f), racyMunge(501.f)
+now checking thread roots: globMunge(501.f), racyMunge(501.f)
+now checking thread roots: munge(540.f), racyGetterUse(540.f)
+now checking thread roots: munge(540.f), racyGetterUse(540.f)
+now checking thread roots: munge(522.f), loopWithGoto(522.f)
+now checking thread roots: munge(522.f), loopWithGoto(522.f)
+now checking thread roots: munge(495.f), lockWithGoto(495.f)
+now checking thread roots: munge(495.f), lockWithGoto(495.f)
+now checking thread roots: munge(519.f), loopAndRecurse(519.f)
+now checking thread roots: munge(519.f), loopAndRecurse(519.f)
+now checking thread roots: munge(515.f), globMunge(515.f)
+now checking thread roots: munge(498.f), munge(498.f)
+now checking thread roots: munge(501.f), racyMunge(501.f)
+now checking thread roots: munge(501.f), racyMunge(501.f)
+now checking thread roots: racyMunge(540.f), racyGetterUse(540.f)
+now checking thread roots: racyMunge(540.f), racyGetterUse(540.f)
+now checking thread roots: racyMunge(522.f), loopWithGoto(522.f)
+now checking thread roots: racyMunge(522.f), loopWithGoto(522.f)
+now checking thread roots: racyMunge(495.f), lockWithGoto(495.f)
+now checking thread roots: racyMunge(495.f), lockWithGoto(495.f)
+now checking thread roots: racyMunge(519.f), loopAndRecurse(519.f)
+now checking thread roots: racyMunge(519.f), loopAndRecurse(519.f)
+now checking thread roots: racyMunge(515.f), globMunge(515.f)
+now checking thread roots: racyMunge(498.f), munge(498.f)
+now checking thread roots: racyMunge(501.f), racyMunge(501.f)
+now checking thread roots: racyMunge(501.f), racyMunge(501.f)
+now checking thread roots: racyMunge(540.f), racyGetterUse(540.f)
+now checking thread roots: racyMunge(540.f), racyGetterUse(540.f)
+now checking thread roots: racyMunge(522.f), loopWithGoto(522.f)
+now checking thread roots: racyMunge(522.f), loopWithGoto(522.f)
+now checking thread roots: racyMunge(495.f), lockWithGoto(495.f)
+now checking thread roots: racyMunge(495.f), lockWithGoto(495.f)
+now checking thread roots: racyMunge(519.f), loopAndRecurse(519.f)
+now checking thread roots: racyMunge(519.f), loopAndRecurse(519.f)
+now checking thread roots: racyMunge(515.f), globMunge(515.f)
+now checking thread roots: racyMunge(498.f), munge(498.f)
+now checking thread roots: racyMunge(501.f), racyMunge(501.f)
+now checking thread roots: racyMunge(501.f), racyMunge(501.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 38	misses: 3
+Prev ldiffCache hits: 48	misses: 7
 
 doing symstate
-Prev ldiffCache hits: 38	misses: 3
+Prev ldiffCache hits: 48	misses: 7
 
 doing symstate
-now checking thread roots: raceyGetterUse, raceyMunge
-now checking thread roots: raceyGetterUse, raceyMunge
-now checking thread roots: loopWithGoto, raceyMunge
-now checking thread roots: loopWithGoto, raceyMunge
-now checking thread roots: lockWithGoto, raceyMunge
-now checking thread roots: lockWithGoto, raceyMunge
-now checking thread roots: loopAndRecurse, raceyMunge
-now checking thread roots: loopAndRecurse, raceyMunge
-now checking thread roots: globMunge, raceyMunge
-now checking thread roots: munge, raceyMunge
-now checking thread roots: raceyMunge, raceyMunge
-now checking thread roots: raceyMunge, raceyMunge
+now checking thread roots: racyGetterUse(501.f), racyMunge(501.f)
+now checking thread roots: racyGetterUse(501.f), racyMunge(501.f)
+now checking thread roots: loopWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: loopWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: lockWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: lockWithGoto(501.f), racyMunge(501.f)
+now checking thread roots: loopAndRecurse(501.f), racyMunge(501.f)
+now checking thread roots: loopAndRecurse(501.f), racyMunge(501.f)
+now checking thread roots: globMunge(501.f), racyMunge(501.f)
+now checking thread roots: munge(501.f), racyMunge(501.f)
+now checking thread roots: racyMunge(501.f), racyMunge(501.f)
+now checking thread roots: racyMunge(501.f), racyMunge(501.f)
 done with pair, sending notification
 checking a thread-creation pair
 Prev ldiffCache hits: 1	misses: 1
 
 doing symstate
-Prev ldiffCache hits: 38	misses: 3
+Prev ldiffCache hits: 48	misses: 7
 
 doing symstate
-now checking thread roots: raceyGetterUse, mungeMax
-now checking thread roots: raceyGetterUse, munge
-now checking thread roots: raceyGetterUse, mungeMax
-now checking thread roots: raceyGetterUse, munge
-now checking thread roots: loopWithGoto, mungeMax
-now checking thread roots: loopWithGoto, munge
-now checking thread roots: loopWithGoto, mungeMax
-now checking thread roots: loopWithGoto, munge
-now checking thread roots: lockWithGoto, mungeMax
-now checking thread roots: lockWithGoto, munge
-now checking thread roots: lockWithGoto, mungeMax
-now checking thread roots: lockWithGoto, munge
-now checking thread roots: loopAndRecurse, mungeMax
-now checking thread roots: loopAndRecurse, munge
-now checking thread roots: loopAndRecurse, mungeMax
-now checking thread roots: loopAndRecurse, munge
-now checking thread roots: globMunge, mungeMax
-now checking thread roots: globMunge, munge
-now checking thread roots: munge, mungeMax
-now checking thread roots: munge, munge
-now checking thread roots: raceyMunge, mungeMax
-now checking thread roots: raceyMunge, munge
-now checking thread roots: raceyMunge, mungeMax
-now checking thread roots: raceyMunge, munge
+now checking thread roots: racyGetterUse(492.f), mungeMax(492.f)
+now checking thread roots: racyGetterUse(498.f), munge(498.f)
+now checking thread roots: racyGetterUse(492.f), mungeMax(492.f)
+now checking thread roots: racyGetterUse(498.f), munge(498.f)
+now checking thread roots: loopWithGoto(492.f), mungeMax(492.f)
+now checking thread roots: loopWithGoto(498.f), munge(498.f)
+now checking thread roots: loopWithGoto(492.f), mungeMax(492.f)
+now checking thread roots: loopWithGoto(498.f), munge(498.f)
+now checking thread roots: lockWithGoto(492.f), mungeMax(492.f)
+now checking thread roots: lockWithGoto(498.f), munge(498.f)
+now checking thread roots: lockWithGoto(492.f), mungeMax(492.f)
+now checking thread roots: lockWithGoto(498.f), munge(498.f)
+now checking thread roots: loopAndRecurse(492.f), mungeMax(492.f)
+now checking thread roots: loopAndRecurse(498.f), munge(498.f)
+now checking thread roots: loopAndRecurse(492.f), mungeMax(492.f)
+now checking thread roots: loopAndRecurse(498.f), munge(498.f)
+now checking thread roots: globMunge(492.f), mungeMax(492.f)
+now checking thread roots: globMunge(498.f), munge(498.f)
+now checking thread roots: munge(492.f), mungeMax(492.f)
+now checking thread roots: munge(498.f), munge(498.f)
+now checking thread roots: racyMunge(492.f), mungeMax(492.f)
+now checking thread roots: racyMunge(498.f), munge(498.f)
+now checking thread roots: racyMunge(492.f), mungeMax(492.f)
+now checking thread roots: racyMunge(498.f), munge(498.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 4	misses: 2
+Prev ldiffCache hits: 3	misses: 3
 
 doing symstate
-Prev ldiffCache hits: 38	misses: 3
+Prev ldiffCache hits: 48	misses: 7
 
 doing symstate
-now checking thread roots: raceyGetterUse, reachedByName
-now checking thread roots: raceyGetterUse, reachedByFP
-now checking thread roots: raceyGetterUse, modU
-now checking thread roots: raceyGetterUse, modAL2
-now checking thread roots: raceyGetterUse, modAL
-now checking thread roots: raceyGetterUse, branch
-now checking thread roots: raceyGetterUse, unsafeThread
-now checking thread roots: raceyGetterUse, unsafeThread
-now checking thread roots: raceyGetterUse, safeThread
-now checking thread roots: raceyGetterUse, safeThread
-now checking thread roots: raceyGetterUse, reachedByName
-now checking thread roots: raceyGetterUse, reachedByFP
-now checking thread roots: raceyGetterUse, modU
-now checking thread roots: raceyGetterUse, modAL2
-now checking thread roots: raceyGetterUse, modAL
-now checking thread roots: raceyGetterUse, branch
-now checking thread roots: raceyGetterUse, unsafeThread
-now checking thread roots: raceyGetterUse, unsafeThread
-now checking thread roots: raceyGetterUse, safeThread
-now checking thread roots: raceyGetterUse, safeThread
-now checking thread roots: loopWithGoto, reachedByName
-now checking thread roots: loopWithGoto, reachedByFP
-now checking thread roots: loopWithGoto, modU
-now checking thread roots: loopWithGoto, modAL2
-now checking thread roots: loopWithGoto, modAL
-now checking thread roots: loopWithGoto, branch
-now checking thread roots: loopWithGoto, unsafeThread
-now checking thread roots: loopWithGoto, unsafeThread
-now checking thread roots: loopWithGoto, safeThread
-now checking thread roots: loopWithGoto, safeThread
-now checking thread roots: loopWithGoto, reachedByName
-now checking thread roots: loopWithGoto, reachedByFP
-now checking thread roots: loopWithGoto, modU
-now checking thread roots: loopWithGoto, modAL2
-now checking thread roots: loopWithGoto, modAL
-now checking thread roots: loopWithGoto, branch
-now checking thread roots: loopWithGoto, unsafeThread
-now checking thread roots: loopWithGoto, unsafeThread
-now checking thread roots: loopWithGoto, safeThread
-now checking thread roots: loopWithGoto, safeThread
-now checking thread roots: lockWithGoto, reachedByName
-now checking thread roots: lockWithGoto, reachedByFP
-now checking thread roots: lockWithGoto, modU
-now checking thread roots: lockWithGoto, modAL2
-now checking thread roots: lockWithGoto, modAL
-now checking thread roots: lockWithGoto, branch
-now checking thread roots: lockWithGoto, unsafeThread
-now checking thread roots: lockWithGoto, unsafeThread
-now checking thread roots: lockWithGoto, safeThread
-now checking thread roots: lockWithGoto, safeThread
-now checking thread roots: lockWithGoto, reachedByName
-now checking thread roots: lockWithGoto, reachedByFP
-now checking thread roots: lockWithGoto, modU
-now checking thread roots: lockWithGoto, modAL2
-now checking thread roots: lockWithGoto, modAL
-now checking thread roots: lockWithGoto, branch
-now checking thread roots: lockWithGoto, unsafeThread
-now checking thread roots: lockWithGoto, unsafeThread
-now checking thread roots: lockWithGoto, safeThread
-now checking thread roots: lockWithGoto, safeThread
-now checking thread roots: loopAndRecurse, reachedByName
-now checking thread roots: loopAndRecurse, reachedByFP
-now checking thread roots: loopAndRecurse, modU
-now checking thread roots: loopAndRecurse, modAL2
-now checking thread roots: loopAndRecurse, modAL
-now checking thread roots: loopAndRecurse, branch
-now checking thread roots: loopAndRecurse, unsafeThread
-now checking thread roots: loopAndRecurse, unsafeThread
-now checking thread roots: loopAndRecurse, safeThread
-now checking thread roots: loopAndRecurse, safeThread
-now checking thread roots: loopAndRecurse, reachedByName
-now checking thread roots: loopAndRecurse, reachedByFP
-now checking thread roots: loopAndRecurse, modU
-now checking thread roots: loopAndRecurse, modAL2
-now checking thread roots: loopAndRecurse, modAL
-now checking thread roots: loopAndRecurse, branch
-now checking thread roots: loopAndRecurse, unsafeThread
-now checking thread roots: loopAndRecurse, unsafeThread
-now checking thread roots: loopAndRecurse, safeThread
-now checking thread roots: loopAndRecurse, safeThread
-now checking thread roots: globMunge, reachedByName
-now checking thread roots: globMunge, reachedByFP
-now checking thread roots: globMunge, modU
-now checking thread roots: globMunge, modAL2
-now checking thread roots: globMunge, modAL
-now checking thread roots: globMunge, branch
-now checking thread roots: globMunge, unsafeThread
-now checking thread roots: globMunge, unsafeThread
-now checking thread roots: globMunge, safeThread
-now checking thread roots: globMunge, safeThread
-now checking thread roots: munge, reachedByName
-now checking thread roots: munge, reachedByFP
-now checking thread roots: munge, modU
-now checking thread roots: munge, modAL2
-now checking thread roots: munge, modAL
-now checking thread roots: munge, branch
-now checking thread roots: munge, unsafeThread
-now checking thread roots: munge, unsafeThread
-now checking thread roots: munge, safeThread
-now checking thread roots: munge, safeThread
-now checking thread roots: raceyMunge, reachedByName
-now checking thread roots: raceyMunge, reachedByFP
-now checking thread roots: raceyMunge, modU
-now checking thread roots: raceyMunge, modAL2
-now checking thread roots: raceyMunge, modAL
-now checking thread roots: raceyMunge, branch
-now checking thread roots: raceyMunge, unsafeThread
-now checking thread roots: raceyMunge, unsafeThread
-now checking thread roots: raceyMunge, safeThread
-now checking thread roots: raceyMunge, safeThread
-now checking thread roots: raceyMunge, reachedByName
-now checking thread roots: raceyMunge, reachedByFP
-now checking thread roots: raceyMunge, modU
-now checking thread roots: raceyMunge, modAL2
-now checking thread roots: raceyMunge, modAL
-now checking thread roots: raceyMunge, branch
-now checking thread roots: raceyMunge, unsafeThread
-now checking thread roots: raceyMunge, unsafeThread
-now checking thread roots: raceyMunge, safeThread
-now checking thread roots: raceyMunge, safeThread
+now checking thread roots: racyGetterUse(625.f), modU(625.f)
+now checking thread roots: racyGetterUse(611.f), modAL2(611.f)
+now checking thread roots: racyGetterUse(606.f), modAL(606.f)
+now checking thread roots: racyGetterUse(618.f), branch(618.f)
+now checking thread roots: racyGetterUse(597.f), unsafeThread(597.f)
+now checking thread roots: racyGetterUse(597.f), unsafeThread(597.f)
+now checking thread roots: racyGetterUse(594.f), safeThread(594.f)
+now checking thread roots: racyGetterUse(594.f), safeThread(594.f)
+now checking thread roots: racyGetterUse(625.f), modU(625.f)
+now checking thread roots: racyGetterUse(611.f), modAL2(611.f)
+now checking thread roots: racyGetterUse(606.f), modAL(606.f)
+now checking thread roots: racyGetterUse(618.f), branch(618.f)
+now checking thread roots: racyGetterUse(597.f), unsafeThread(597.f)
+now checking thread roots: racyGetterUse(597.f), unsafeThread(597.f)
+now checking thread roots: racyGetterUse(594.f), safeThread(594.f)
+now checking thread roots: racyGetterUse(594.f), safeThread(594.f)
+now checking thread roots: loopWithGoto(625.f), modU(625.f)
+now checking thread roots: loopWithGoto(611.f), modAL2(611.f)
+now checking thread roots: loopWithGoto(606.f), modAL(606.f)
+now checking thread roots: loopWithGoto(618.f), branch(618.f)
+now checking thread roots: loopWithGoto(597.f), unsafeThread(597.f)
+now checking thread roots: loopWithGoto(597.f), unsafeThread(597.f)
+now checking thread roots: loopWithGoto(594.f), safeThread(594.f)
+now checking thread roots: loopWithGoto(594.f), safeThread(594.f)
+now checking thread roots: loopWithGoto(625.f), modU(625.f)
+now checking thread roots: loopWithGoto(611.f), modAL2(611.f)
+now checking thread roots: loopWithGoto(606.f), modAL(606.f)
+now checking thread roots: loopWithGoto(618.f), branch(618.f)
+now checking thread roots: loopWithGoto(597.f), unsafeThread(597.f)
+now checking thread roots: loopWithGoto(597.f), unsafeThread(597.f)
+now checking thread roots: loopWithGoto(594.f), safeThread(594.f)
+now checking thread roots: loopWithGoto(594.f), safeThread(594.f)
+now checking thread roots: lockWithGoto(625.f), modU(625.f)
+now checking thread roots: lockWithGoto(611.f), modAL2(611.f)
+now checking thread roots: lockWithGoto(606.f), modAL(606.f)
+now checking thread roots: lockWithGoto(618.f), branch(618.f)
+now checking thread roots: lockWithGoto(597.f), unsafeThread(597.f)
+now checking thread roots: lockWithGoto(597.f), unsafeThread(597.f)
+now checking thread roots: lockWithGoto(594.f), safeThread(594.f)
+now checking thread roots: lockWithGoto(594.f), safeThread(594.f)
+now checking thread roots: lockWithGoto(625.f), modU(625.f)
+now checking thread roots: lockWithGoto(611.f), modAL2(611.f)
+now checking thread roots: lockWithGoto(606.f), modAL(606.f)
+now checking thread roots: lockWithGoto(618.f), branch(618.f)
+now checking thread roots: lockWithGoto(597.f), unsafeThread(597.f)
+now checking thread roots: lockWithGoto(597.f), unsafeThread(597.f)
+now checking thread roots: lockWithGoto(594.f), safeThread(594.f)
+now checking thread roots: lockWithGoto(594.f), safeThread(594.f)
+now checking thread roots: loopAndRecurse(625.f), modU(625.f)
+now checking thread roots: loopAndRecurse(611.f), modAL2(611.f)
+now checking thread roots: loopAndRecurse(606.f), modAL(606.f)
+now checking thread roots: loopAndRecurse(618.f), branch(618.f)
+now checking thread roots: loopAndRecurse(597.f), unsafeThread(597.f)
+now checking thread roots: loopAndRecurse(597.f), unsafeThread(597.f)
+now checking thread roots: loopAndRecurse(594.f), safeThread(594.f)
+now checking thread roots: loopAndRecurse(594.f), safeThread(594.f)
+now checking thread roots: loopAndRecurse(625.f), modU(625.f)
+now checking thread roots: loopAndRecurse(611.f), modAL2(611.f)
+now checking thread roots: loopAndRecurse(606.f), modAL(606.f)
+now checking thread roots: loopAndRecurse(618.f), branch(618.f)
+now checking thread roots: loopAndRecurse(597.f), unsafeThread(597.f)
+now checking thread roots: loopAndRecurse(597.f), unsafeThread(597.f)
+now checking thread roots: loopAndRecurse(594.f), safeThread(594.f)
+now checking thread roots: loopAndRecurse(594.f), safeThread(594.f)
+now checking thread roots: globMunge(625.f), modU(625.f)
+now checking thread roots: globMunge(611.f), modAL2(611.f)
+now checking thread roots: globMunge(606.f), modAL(606.f)
+now checking thread roots: globMunge(618.f), branch(618.f)
+now checking thread roots: globMunge(597.f), unsafeThread(597.f)
+now checking thread roots: globMunge(597.f), unsafeThread(597.f)
+now checking thread roots: globMunge(594.f), safeThread(594.f)
+now checking thread roots: globMunge(594.f), safeThread(594.f)
+now checking thread roots: munge(625.f), modU(625.f)
+now checking thread roots: munge(611.f), modAL2(611.f)
+now checking thread roots: munge(606.f), modAL(606.f)
+now checking thread roots: munge(618.f), branch(618.f)
+now checking thread roots: munge(597.f), unsafeThread(597.f)
+now checking thread roots: munge(597.f), unsafeThread(597.f)
+now checking thread roots: munge(594.f), safeThread(594.f)
+now checking thread roots: munge(594.f), safeThread(594.f)
+now checking thread roots: racyMunge(625.f), modU(625.f)
+now checking thread roots: racyMunge(611.f), modAL2(611.f)
+now checking thread roots: racyMunge(606.f), modAL(606.f)
+now checking thread roots: racyMunge(618.f), branch(618.f)
+now checking thread roots: racyMunge(597.f), unsafeThread(597.f)
+now checking thread roots: racyMunge(597.f), unsafeThread(597.f)
+now checking thread roots: racyMunge(594.f), safeThread(594.f)
+now checking thread roots: racyMunge(594.f), safeThread(594.f)
+now checking thread roots: racyMunge(625.f), modU(625.f)
+now checking thread roots: racyMunge(611.f), modAL2(611.f)
+now checking thread roots: racyMunge(606.f), modAL(606.f)
+now checking thread roots: racyMunge(618.f), branch(618.f)
+now checking thread roots: racyMunge(597.f), unsafeThread(597.f)
+now checking thread roots: racyMunge(597.f), unsafeThread(597.f)
+now checking thread roots: racyMunge(594.f), safeThread(594.f)
+now checking thread roots: racyMunge(594.f), safeThread(594.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 33	misses: 5
+Prev ldiffCache hits: 36	misses: 5
+
+doing symstate
+now checking thread roots: racyGetterUse(562.f), main(562.f)
+New race added to race reports
+now checking thread roots: racyGetterUse(562.f), main(562.f)
+now checking thread roots: loopWithGoto(562.f), main(562.f)
+New race added to race reports
+New race added to race reports
+now checking thread roots: loopWithGoto(562.f), main(562.f)
+now checking thread roots: lockWithGoto(562.f), main(562.f)
+now checking thread roots: lockWithGoto(562.f), main(562.f)
+now checking thread roots: loopAndRecurse(562.f), main(562.f)
+New race added to race reports
+now checking thread roots: loopAndRecurse(562.f), main(562.f)
+now checking thread roots: globMunge(562.f), main(562.f)
+now checking thread roots: munge(562.f), main(562.f)
+New race added to race reports
+now checking thread roots: racyMunge(562.f), main(562.f)
+now checking thread roots: racyMunge(562.f), main(562.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 48	misses: 7
 
 doing symstate
 Prev ldiffCache hits: 1	misses: 1
 
 doing symstate
-now checking thread roots: raceyMunge, raceyMunge
+now checking thread roots: racyMunge(501.f), racyMunge(501.f)
+New race added to race reports
 done with pair, sending notification
 checking a thread-creation pair
 Prev ldiffCache hits: 1	misses: 1
@@ -1441,909 +1251,702 @@ doing symstate
 Prev ldiffCache hits: 1	misses: 1
 
 doing symstate
-now checking thread roots: raceyMunge, mungeMax
-now checking thread roots: raceyMunge, munge
+now checking thread roots: racyMunge(492.f), mungeMax(492.f)
+now checking thread roots: racyMunge(498.f), munge(498.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 4	misses: 2
+Prev ldiffCache hits: 3	misses: 3
 
 doing symstate
 Prev ldiffCache hits: 1	misses: 1
 
 doing symstate
-now checking thread roots: raceyMunge, reachedByName
-now checking thread roots: raceyMunge, reachedByFP
-now checking thread roots: raceyMunge, modU
-now checking thread roots: raceyMunge, modAL2
-now checking thread roots: raceyMunge, modAL
-now checking thread roots: raceyMunge, branch
-now checking thread roots: raceyMunge, unsafeThread
-now checking thread roots: raceyMunge, unsafeThread
-now checking thread roots: raceyMunge, safeThread
-now checking thread roots: raceyMunge, safeThread
+now checking thread roots: racyMunge(625.f), modU(625.f)
+now checking thread roots: racyMunge(611.f), modAL2(611.f)
+now checking thread roots: racyMunge(606.f), modAL(606.f)
+now checking thread roots: racyMunge(618.f), branch(618.f)
+now checking thread roots: racyMunge(597.f), unsafeThread(597.f)
+now checking thread roots: racyMunge(597.f), unsafeThread(597.f)
+now checking thread roots: racyMunge(594.f), safeThread(594.f)
+now checking thread roots: racyMunge(594.f), safeThread(594.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 33	misses: 5
+Prev ldiffCache hits: 36	misses: 5
 
 doing symstate
-Prev ldiffCache hits: 4	misses: 2
-
-doing symstate
-now checking thread roots: mungeMax, mungeMax
-New race added to race reports
-New race added to race reports
-now checking thread roots: mungeMax, munge
-New race added to race reports
-New race added to race reports
-now checking thread roots: munge, mungeMax
-now checking thread roots: munge, munge
+now checking thread roots: racyMunge(562.f), main(562.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 4	misses: 2
+Prev ldiffCache hits: 1	misses: 1
 
 doing symstate
-Prev ldiffCache hits: 4	misses: 2
+Prev ldiffCache hits: 3	misses: 3
 
 doing symstate
-now checking thread roots: mungeMax, reachedByName
-now checking thread roots: mungeMax, reachedByFP
-now checking thread roots: mungeMax, modU
-now checking thread roots: mungeMax, modAL2
-now checking thread roots: mungeMax, modAL
-now checking thread roots: mungeMax, branch
-now checking thread roots: mungeMax, unsafeThread
-now checking thread roots: mungeMax, unsafeThread
-now checking thread roots: mungeMax, safeThread
-now checking thread roots: mungeMax, safeThread
-now checking thread roots: munge, reachedByName
-now checking thread roots: munge, reachedByFP
-now checking thread roots: munge, modU
-now checking thread roots: munge, modAL2
-now checking thread roots: munge, modAL
-now checking thread roots: munge, branch
-now checking thread roots: munge, unsafeThread
-now checking thread roots: munge, unsafeThread
-now checking thread roots: munge, safeThread
-now checking thread roots: munge, safeThread
+now checking thread roots: mungeMax(492.f), mungeMax(492.f)
+now checking thread roots: mungeMax(498.f), munge(498.f)
+now checking thread roots: munge(492.f), mungeMax(492.f)
+now checking thread roots: munge(498.f), munge(498.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 33	misses: 5
+Prev ldiffCache hits: 3	misses: 3
 
 doing symstate
-Prev ldiffCache hits: 33	misses: 5
+Prev ldiffCache hits: 3	misses: 3
 
 doing symstate
-now checking thread roots: reachedByName, reachedByName
-now checking thread roots: reachedByName, reachedByFP
-now checking thread roots: reachedByName, modU
-now checking thread roots: reachedByName, modAL2
-now checking thread roots: reachedByName, modAL
-now checking thread roots: reachedByName, branch
-now checking thread roots: reachedByName, unsafeThread
-now checking thread roots: reachedByName, unsafeThread
-now checking thread roots: reachedByName, safeThread
-now checking thread roots: reachedByName, safeThread
-now checking thread roots: reachedByFP, reachedByName
-now checking thread roots: reachedByFP, reachedByFP
-now checking thread roots: reachedByFP, modU
-now checking thread roots: reachedByFP, modAL2
-now checking thread roots: reachedByFP, modAL
-now checking thread roots: reachedByFP, branch
-now checking thread roots: reachedByFP, unsafeThread
-now checking thread roots: reachedByFP, unsafeThread
-now checking thread roots: reachedByFP, safeThread
-now checking thread roots: reachedByFP, safeThread
-now checking thread roots: modU, reachedByName
-now checking thread roots: modU, reachedByFP
-now checking thread roots: modU, modU
+now checking thread roots: mungeMax(625.f), modU(625.f)
+now checking thread roots: mungeMax(611.f), modAL2(611.f)
+now checking thread roots: mungeMax(606.f), modAL(606.f)
+now checking thread roots: mungeMax(618.f), branch(618.f)
+now checking thread roots: mungeMax(597.f), unsafeThread(597.f)
+now checking thread roots: mungeMax(597.f), unsafeThread(597.f)
+now checking thread roots: mungeMax(594.f), safeThread(594.f)
+now checking thread roots: mungeMax(594.f), safeThread(594.f)
+now checking thread roots: munge(625.f), modU(625.f)
+now checking thread roots: munge(611.f), modAL2(611.f)
+now checking thread roots: munge(606.f), modAL(606.f)
+now checking thread roots: munge(618.f), branch(618.f)
+now checking thread roots: munge(597.f), unsafeThread(597.f)
+now checking thread roots: munge(597.f), unsafeThread(597.f)
+now checking thread roots: munge(594.f), safeThread(594.f)
+now checking thread roots: munge(594.f), safeThread(594.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 36	misses: 5
+
+doing symstate
+now checking thread roots: mungeMax(562.f), main(562.f)
+now checking thread roots: munge(562.f), main(562.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 3	misses: 3
+
+doing symstate
+Prev ldiffCache hits: 36	misses: 5
+
+doing symstate
+now checking thread roots: modU(625.f), modU(625.f)
 New race added to race reports
-now checking thread roots: modU, modAL2
-now checking thread roots: modU, modAL
-now checking thread roots: modU, branch
-now checking thread roots: modU, unsafeThread
-now checking thread roots: modU, unsafeThread
-now checking thread roots: modU, safeThread
-now checking thread roots: modU, safeThread
-now checking thread roots: modAL2, reachedByName
-now checking thread roots: modAL2, reachedByFP
-now checking thread roots: modAL2, modU
-now checking thread roots: modAL2, modAL2
-now checking thread roots: modAL2, modAL
-now checking thread roots: modAL2, branch
-now checking thread roots: modAL2, unsafeThread
-now checking thread roots: modAL2, unsafeThread
-now checking thread roots: modAL2, safeThread
-now checking thread roots: modAL2, safeThread
-now checking thread roots: modAL, reachedByName
-now checking thread roots: modAL, reachedByFP
-now checking thread roots: modAL, modU
-now checking thread roots: modAL, modAL2
-now checking thread roots: modAL, modAL
-now checking thread roots: modAL, branch
-now checking thread roots: modAL, unsafeThread
-now checking thread roots: modAL, unsafeThread
-now checking thread roots: modAL, safeThread
-now checking thread roots: modAL, safeThread
-now checking thread roots: branch, reachedByName
-now checking thread roots: branch, reachedByFP
-now checking thread roots: branch, modU
-now checking thread roots: branch, modAL2
-now checking thread roots: branch, modAL
-now checking thread roots: branch, branch
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-now checking thread roots: branch, unsafeThread
-now checking thread roots: branch, unsafeThread
-now checking thread roots: branch, safeThread
-now checking thread roots: branch, safeThread
-now checking thread roots: unsafeThread, reachedByName
-now checking thread roots: unsafeThread, reachedByFP
-now checking thread roots: unsafeThread, modU
-now checking thread roots: unsafeThread, modAL2
-now checking thread roots: unsafeThread, modAL
-now checking thread roots: unsafeThread, branch
-now checking thread roots: unsafeThread, unsafeThread
-New race added to race reports
-now checking thread roots: unsafeThread, unsafeThread
-now checking thread roots: unsafeThread, safeThread
-now checking thread roots: unsafeThread, safeThread
-now checking thread roots: unsafeThread, reachedByName
-now checking thread roots: unsafeThread, reachedByFP
-now checking thread roots: unsafeThread, modU
-now checking thread roots: unsafeThread, modAL2
-now checking thread roots: unsafeThread, modAL
-now checking thread roots: unsafeThread, branch
-now checking thread roots: unsafeThread, unsafeThread
-now checking thread roots: unsafeThread, unsafeThread
-now checking thread roots: unsafeThread, safeThread
-now checking thread roots: unsafeThread, safeThread
-now checking thread roots: safeThread, reachedByName
-now checking thread roots: safeThread, reachedByFP
-now checking thread roots: safeThread, modU
-now checking thread roots: safeThread, modAL2
-now checking thread roots: safeThread, modAL
-now checking thread roots: safeThread, branch
-now checking thread roots: safeThread, unsafeThread
-now checking thread roots: safeThread, unsafeThread
-now checking thread roots: safeThread, safeThread
-now checking thread roots: safeThread, safeThread
-now checking thread roots: safeThread, reachedByName
-now checking thread roots: safeThread, reachedByFP
-now checking thread roots: safeThread, modU
-now checking thread roots: safeThread, modAL2
-now checking thread roots: safeThread, modAL
-now checking thread roots: safeThread, branch
-now checking thread roots: safeThread, unsafeThread
-now checking thread roots: safeThread, unsafeThread
-now checking thread roots: safeThread, safeThread
-now checking thread roots: safeThread, safeThread
+now checking thread roots: modU(611.f), modAL2(611.f)
+now checking thread roots: modU(606.f), modAL(606.f)
+now checking thread roots: modU(618.f), branch(618.f)
+now checking thread roots: modU(597.f), unsafeThread(597.f)
+now checking thread roots: modU(597.f), unsafeThread(597.f)
+now checking thread roots: modU(594.f), safeThread(594.f)
+now checking thread roots: modU(594.f), safeThread(594.f)
+now checking thread roots: modAL2(625.f), modU(625.f)
+now checking thread roots: modAL2(611.f), modAL2(611.f)
+now checking thread roots: modAL2(606.f), modAL(606.f)
+now checking thread roots: modAL2(618.f), branch(618.f)
+now checking thread roots: modAL2(597.f), unsafeThread(597.f)
+now checking thread roots: modAL2(597.f), unsafeThread(597.f)
+now checking thread roots: modAL2(594.f), safeThread(594.f)
+now checking thread roots: modAL2(594.f), safeThread(594.f)
+now checking thread roots: modAL(625.f), modU(625.f)
+now checking thread roots: modAL(611.f), modAL2(611.f)
+now checking thread roots: modAL(606.f), modAL(606.f)
+now checking thread roots: modAL(618.f), branch(618.f)
+now checking thread roots: modAL(597.f), unsafeThread(597.f)
+now checking thread roots: modAL(597.f), unsafeThread(597.f)
+now checking thread roots: modAL(594.f), safeThread(594.f)
+now checking thread roots: modAL(594.f), safeThread(594.f)
+now checking thread roots: branch(625.f), modU(625.f)
+now checking thread roots: branch(611.f), modAL2(611.f)
+now checking thread roots: branch(606.f), modAL(606.f)
+now checking thread roots: branch(618.f), branch(618.f)
+now checking thread roots: branch(597.f), unsafeThread(597.f)
+now checking thread roots: branch(597.f), unsafeThread(597.f)
+now checking thread roots: branch(594.f), safeThread(594.f)
+now checking thread roots: branch(594.f), safeThread(594.f)
+now checking thread roots: unsafeThread(625.f), modU(625.f)
+now checking thread roots: unsafeThread(611.f), modAL2(611.f)
+now checking thread roots: unsafeThread(606.f), modAL(606.f)
+now checking thread roots: unsafeThread(618.f), branch(618.f)
+now checking thread roots: unsafeThread(597.f), unsafeThread(597.f)
+now checking thread roots: unsafeThread(597.f), unsafeThread(597.f)
+now checking thread roots: unsafeThread(594.f), safeThread(594.f)
+now checking thread roots: unsafeThread(594.f), safeThread(594.f)
+now checking thread roots: unsafeThread(625.f), modU(625.f)
+now checking thread roots: unsafeThread(611.f), modAL2(611.f)
+now checking thread roots: unsafeThread(606.f), modAL(606.f)
+now checking thread roots: unsafeThread(618.f), branch(618.f)
+now checking thread roots: unsafeThread(597.f), unsafeThread(597.f)
+now checking thread roots: unsafeThread(597.f), unsafeThread(597.f)
+now checking thread roots: unsafeThread(594.f), safeThread(594.f)
+now checking thread roots: unsafeThread(594.f), safeThread(594.f)
+now checking thread roots: safeThread(625.f), modU(625.f)
+now checking thread roots: safeThread(611.f), modAL2(611.f)
+now checking thread roots: safeThread(606.f), modAL(606.f)
+now checking thread roots: safeThread(618.f), branch(618.f)
+now checking thread roots: safeThread(597.f), unsafeThread(597.f)
+now checking thread roots: safeThread(597.f), unsafeThread(597.f)
+now checking thread roots: safeThread(594.f), safeThread(594.f)
+now checking thread roots: safeThread(594.f), safeThread(594.f)
+now checking thread roots: safeThread(625.f), modU(625.f)
+now checking thread roots: safeThread(611.f), modAL2(611.f)
+now checking thread roots: safeThread(606.f), modAL(606.f)
+now checking thread roots: safeThread(618.f), branch(618.f)
+now checking thread roots: safeThread(597.f), unsafeThread(597.f)
+now checking thread roots: safeThread(597.f), unsafeThread(597.f)
+now checking thread roots: safeThread(594.f), safeThread(594.f)
+now checking thread roots: safeThread(594.f), safeThread(594.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 36	misses: 5
+
+doing symstate
+now checking thread roots: modU(562.f), main(562.f)
+now checking thread roots: modAL2(562.f), main(562.f)
+now checking thread roots: modAL(562.f), main(562.f)
+now checking thread roots: branch(562.f), main(562.f)
+now checking thread roots: unsafeThread(562.f), main(562.f)
+now checking thread roots: unsafeThread(562.f), main(562.f)
+now checking thread roots: safeThread(562.f), main(562.f)
+now checking thread roots: safeThread(562.f), main(562.f)
+done with pair, sending notification
+checking a thread-creation pair
+now checking thread roots: main(562.f), main(562.f)
 done with pair, sending notification
 completed all thread pairs
+Sorting races
+
+Printing races
+
 ****
 Possible race between access to:
-_a264_61637_threads_1.x @ test_dir/threads.c:251 and
-_a264_61637_threads_1.x @ test_dir/threads.c:251
-	Cluster ID: 6
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:55] and
-	[test_dir/threads.c:50, test_dir/threads.c:55]
 
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
-(1)
-	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
-(2)
-	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-(3)
-	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-****
-Possible race between access to:
-_a264_61637_threads_1.x @ test_dir/threads.c:251 and
-_a264_61637_threads_1.x @ test_dir/threads.c:251
-	Cluster ID: 5
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:55] and
-	[test_dir/threads.c:55]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-(1)
-	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
-(2)
-	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
-****
-Possible race between access to:
-datlock->x @ test_dir/threads.c:89 and
-datlock->x @ test_dir/threads.c:89
-	Cluster ID: 14
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:69] and
-	[test_dir/threads.c:31, test_dir/threads.c:36]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:93 59057 w/ func: munge
-	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-	Th. 2 spawned: test_dir/threads.c:93 59057 w/ func: munge
-****
-Possible race between access to:
-datlock->x @ test_dir/threads.c:89 and
-datlock->x @ test_dir/threads.c:89
-	Cluster ID: 12
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:31, test_dir/threads.c:36] and
-	[test_dir/threads.c:36]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-****
-Possible race between access to:
-datlock->x @ test_dir/threads.c:89 and
-datlock->x @ test_dir/threads.c:89
+_a177_60167_threads_1.next @ threads.c:171 and
+_a177_60167_threads_1.next @ threads.c:171
 	Cluster ID: 11
 	Escapes? true / true 
 	Accessed at locs:
-	[test_dir/threads.c:36] and
-	[test_dir/threads.c:36]
+	[threads.c:123:(517.f), threads.c:134:(519.f), threads.c:135:(519.f)] and
+	[threads.c:182:(528.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
+L+ = empty;
 LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-
-Different possible paths & LS (first 4):
-
-****
-Possible race between access to:
-datlock->x @ test_dir/threads.c:89 and
-datlock->x @ test_dir/threads.c:89
-	Cluster ID: 13
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:69] and
-	[test_dir/threads.c:36]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:93 59057 w/ func: munge
-	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+L+ = empty;
+	Th. 1 spawned: threads.c:305 62430 w/ func: loopAndRecurse
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
-	Th. 2 spawned: test_dir/threads.c:93 59057 w/ func: munge
+	Th. 1 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 ****
 Possible race between access to:
-datlock->x @ test_dir/threads.c:89 and
-datlock->x @ test_dir/threads.c:89
-	Cluster ID: 9
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:69] and
-	[test_dir/threads.c:69]
 
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:93 59057 w/ func: munge
-	Th. 2 spawned: test_dir/threads.c:93 59057 w/ func: munge
-
-Different possible paths & LS (first 4):
-
-(0)
-	lval 1: _a263_61586_threads_1.x
-	lval 2: _a263_61586_threads_1.x
-	Th. 1 spawned: test_dir/threads.c:294 62381 w/ func: munge
-	Th. 2 spawned: test_dir/threads.c:294 62381 w/ func: munge
-****
-Possible race between access to:
-_a108_59279_threads2_1.b @ test_dir/threads2.c:100 and
-_a108_59279_threads2_1.b @ test_dir/threads2.c:100
-	Cluster ID: 17
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads2.c:111] and
-	[test_dir/threads2.c:111]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-
-Different possible paths & LS (first 4):
-
-****
-Possible race between access to:
-_a156_59781_threads2_1.a @ test_dir/threads2.c:148 and
-_a156_59781_threads2_1.a @ test_dir/threads2.c:148
-	Cluster ID: 21
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads2.c:36] and
-	[test_dir/threads2.c:36]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads2.c:164 59987 w/ func: unsafeThread
-	Th. 2 spawned: test_dir/threads2.c:164 59987 w/ func: unsafeThread
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: test_dir/threads2.c:164 59987 w/ func: unsafeThread
-	Th. 2 spawned: test_dir/threads2.c:165 60053 w/ func: unsafeThread
-(1)
-	Th. 1 spawned: test_dir/threads2.c:165 60053 w/ func: unsafeThread
-	Th. 2 spawned: test_dir/threads2.c:164 59987 w/ func: unsafeThread
-(2)
-	Th. 1 spawned: test_dir/threads2.c:165 60053 w/ func: unsafeThread
-	Th. 2 spawned: test_dir/threads2.c:165 60053 w/ func: unsafeThread
-****
-Possible race between access to:
-_a157_59816_threads2_1.a @ test_dir/threads2.c:148 and
-_a157_59816_threads2_1.a @ test_dir/threads2.c:148
-	Cluster ID: 20
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads2.c:105, test_dir/threads2.c:116] and
-	[test_dir/threads2.c:116]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-****
-Possible race between access to:
-_a157_59816_threads2_1.a @ test_dir/threads2.c:148 and
-_a157_59816_threads2_1.a @ test_dir/threads2.c:148
-	Cluster ID: 16
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads2.c:116] and
-	[test_dir/threads2.c:116]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-
-Different possible paths & LS (first 4):
-
-(0)
-	lval 1: _a108_59279_threads2_1.a
-	lval 2: _a108_59279_threads2_1.a
-	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-****
-Possible race between access to:
-_a157_59816_threads2_1.b @ test_dir/threads2.c:148 and
-_a157_59816_threads2_1.b @ test_dir/threads2.c:148
-	Cluster ID: 19
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads2.c:106] and
-	[test_dir/threads2.c:106]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-
-Different possible paths & LS (first 4):
-
-****
-Possible race between access to:
-_a157_59816_threads2_1.c @ test_dir/threads2.c:148 and
-_a157_59816_threads2_1.c @ test_dir/threads2.c:148
-	Cluster ID: 18
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads2.c:117] and
-	[test_dir/threads2.c:117]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-
-Different possible paths & LS (first 4):
-
-(0)
-	lval 1: _a108_59279_threads2_1.c
-	lval 2: _a108_59279_threads2_1.c
-	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
-****
-Possible race between access to:
-dlracey->x @ test_dir/threads.c:98 and
-dlracey->x @ test_dir/threads.c:98
+_a177_60167_threads_1.next @ threads.c:171 and
+_a177_60167_threads_1.next @ threads.c:171
 	Cluster ID: 10
 	Escapes? true / true 
 	Accessed at locs:
-	[test_dir/threads.c:82] and
-	[test_dir/threads.c:82]
+	[threads.c:152:(522.f)] and
+	[threads.c:182:(528.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:102 59248 w/ func: raceyMunge
-	Th. 2 spawned: test_dir/threads.c:102 59248 w/ func: raceyMunge
+	Th. 1 spawned: threads.c:315 62760 w/ func: loopWithGoto
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
-	lval 1: _a260_61433_threads_1.x
-	lval 2: _a260_61433_threads_1.x
-	Th. 1 spawned: test_dir/threads.c:280 62125 w/ func: raceyMunge
-	Th. 2 spawned: test_dir/threads.c:280 62125 w/ func: raceyMunge
-(1)
-	lval 1: _a262_61535_threads_1.x
-	lval 2: _a262_61535_threads_1.x
-	Th. 1 spawned: test_dir/threads.c:288 62274 w/ func: raceyMunge
-	Th. 2 spawned: test_dir/threads.c:288 62274 w/ func: raceyMunge
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 ****
 Possible race between access to:
-[REP: 46].x and
-[REP: 46].x
-	Cluster ID: 0
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:209] and
-	[test_dir/threads.c:209]
 
-	Confidence: used PTA nodes lblSet(0, 0)
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:322 63091 w/ func: raceyGetterUse
-	Th. 2 spawned: test_dir/threads.c:322 63091 w/ func: raceyGetterUse
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: test_dir/threads.c:322 63091 w/ func: raceyGetterUse
-	Th. 2 spawned: test_dir/threads.c:323 63162 w/ func: raceyGetterUse
-(1)
-	Th. 1 spawned: test_dir/threads.c:323 63162 w/ func: raceyGetterUse
-	Th. 2 spawned: test_dir/threads.c:322 63091 w/ func: raceyGetterUse
-(2)
-	Th. 1 spawned: test_dir/threads.c:323 63162 w/ func: raceyGetterUse
-	Th. 2 spawned: test_dir/threads.c:323 63162 w/ func: raceyGetterUse
-****
-Possible race between access to:
-[REP: 25] and
-[REP: 25]
-	Cluster ID: 15
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads2.c:129] and
-	[test_dir/threads2.c:129]
-
-	Confidence: used PTA nodes lblSet(1, 1)
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads2.c:171 60300 w/ func: modU
-	Th. 2 spawned: test_dir/threads2.c:171 60300 w/ func: modU
-
-Different possible paths & LS (first 4):
-
-****
-Possible race between access to:
-[REP: 42].x and
-[REP: 42].x
+_a177_60167_threads_1.obj @ threads.c:171 and
+_a177_60167_threads_1.obj @ threads.c:171
 	Cluster ID: 8
 	Escapes? true / true 
 	Accessed at locs:
-	[test_dir/threads.c:111] and
-	[test_dir/threads.c:111]
+	[threads.c:192:(536.f)] and
+	[threads.c:181:(528.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: threads.c:322 62930 w/ func: racyGetterUse
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+_a263_61428_threads_1.l @ threads.c:251 and
+_a263_61428_threads_1.l @ threads.c:251
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[threads.c:67:(498.f), threads.c:71:(498.f)] and
+	[threads.c:271:(562.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: threads.c:71
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: threads.c:294 62220 w/ func: munge
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+dlracy->x @ threads.c:98 and
+dlracy->x @ threads.c:98
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[threads.c:82:(501.f)] and
+	[threads.c:82:(501.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: threads.c:102 59102 w/ func: racyMunge
+	Th. 2 spawned: threads.c:102 59102 w/ func: racyMunge
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+REP:[686] and
+REP:[686]
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[threads2.c:129:(625.f)] and
+	[threads2.c:129:(625.f)]
 
 	Confidence: used PTA nodes lblSet(1, 1)
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:295 62452 w/ func: globMunge
-	Th. 2 spawned: test_dir/threads.c:295 62452 w/ func: globMunge
+	Th. 1 spawned: threads2.c:158 60056 w/ func: modU
+	Th. 2 spawned: threads2.c:158 60056 w/ func: modU
 
 Different possible paths & LS (first 4):
 
 ****
 Possible race between access to:
-[REP: 30].x and
-[REP: 30].x
+
+REP:[689].x and
+REP:[689].x
 	Cluster ID: 7
 	Escapes? true / true 
 	Accessed at locs:
-	[test_dir/threads.c:121] and
-	[test_dir/threads.c:121]
+	[threads.c:111:(515.f)] and
+	[threads.c:111:(515.f)]
 
-	Confidence: used PTA nodes lblSet(5, 5)
+	Confidence: used PTA nodes lblSet(1, 1)
 
 LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
+L+ = empty;
 LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
-	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+L+ = empty;
+	Th. 1 spawned: threads.c:295 62291 w/ func: globMunge
+	Th. 2 spawned: threads.c:295 62291 w/ func: globMunge
 
 Different possible paths & LS (first 4):
 
-(0)
-	Th. 1 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
-	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-(1)
-	Th. 1 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
-(2)
-	Th. 1 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
 ****
 Possible race between access to:
-[REP: 30].x and
-[REP: 30].x
-	Cluster ID: 4
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:121] and
-	[test_dir/threads.c:150, test_dir/threads.c:156, test_dir/threads.c:161]
 
-	Confidence: used PTA nodes lblSet(5, 5)
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-
-Different possible paths & LS (first 4):
-
-(0)
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
-(1)
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-(2)
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
-(3)
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-****
-Possible race between access to:
-[REP: 30].x and
-[REP: 30].x
-	Cluster ID: 3
-	Escapes? true / true 
-	Accessed at locs:
-	[test_dir/threads.c:121] and
-	[test_dir/threads.c:161]
-
-	Confidence: used PTA nodes lblSet(5, 5)
-
-LS for 1st access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
-(1)
-	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-(2)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
-(3)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
-****
-Possible race between access to:
-[REP: 30].x and
-[REP: 30].x
+REP:[693].x and
+REP:[697].x
 	Cluster ID: 2
 	Escapes? true / true 
 	Accessed at locs:
-	[test_dir/threads.c:161] and
-	[test_dir/threads.c:150, test_dir/threads.c:156, test_dir/threads.c:161]
+	[threads.c:209:(540.f)] and
+	[threads.c:121:(517.f)]
 
-	Confidence: used PTA nodes lblSet(5, 5)
+	Confidence: used PTA nodes lblSet(3, 3)
 
 LS for 1st access:
-L+ = {[REP: 30]#g} (1)
+L+ = {REP:[694]#g} (1)
 	(rep. lock)
-	made empty at: :-1
 LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+L+ = {REP:[698]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: threads.c:322 62930 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
 
 Different possible paths & LS (first 4):
 
 (0)
-LS for 1st access:
-L+ = empty;
 LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+L+ = empty;
+	made empty at: threads.c:134
+	lval 2: REP:[698].x
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:305 62430 w/ func: loopAndRecurse
 (1)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:305 62430 w/ func: loopAndRecurse
 (2)
-LS for 1st access:
-L+ = empty;
 LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+L+ = empty;
+	made empty at: threads.c:134
+	lval 2: REP:[698].x
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
 (3)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
 ****
 Possible race between access to:
-[REP: 30].x and
-[REP: 30].x
+
+REP:[693].x and
+REP:[700].x
 	Cluster ID: 1
 	Escapes? true / true 
 	Accessed at locs:
-	[test_dir/threads.c:161] and
-	[test_dir/threads.c:161]
+	[threads.c:209:(540.f)] and
+	[threads.c:150:(522.f), threads.c:156:(522.f), threads.c:161:(522.f)]
 
-	Confidence: used PTA nodes lblSet(5, 5)
+	Confidence: used PTA nodes lblSet(3, 3)
 
 LS for 1st access:
-L+ = {[REP: 30]#g} (1)
+L+ = {REP:[694]#g} (1)
 	(rep. lock)
-	made empty at: :-1
 LS for 2nd access:
-L+ = {[REP: 30]#g} (1)
-	(rep. lock)
-	made empty at: :-1
-	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+L+ = empty;
+	made empty at: threads.c:156
+	Th. 1 spawned: threads.c:322 62930 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	lval 2: REP:[701].x
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:315 62760 w/ func: loopWithGoto
 (1)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:315 62760 w/ func: loopWithGoto
 (2)
-	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
-	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	lval 2: REP:[701].x
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+(3)
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+****
+Possible race between access to:
+
+REP:[693].x and
+REP:[700].x
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[threads.c:209:(540.f)] and
+	[threads.c:161:(522.f)]
+
+	Confidence: used PTA nodes lblSet(3, 3)
+
+LS for 1st access:
+L+ = {REP:[694]#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = {REP:[701]#g, REP:[702]#g} (2)
+	(rep. lock)
+	Th. 1 spawned: threads.c:322 62930 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 2: REP:[701].x
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:315 62760 w/ func: loopWithGoto
+(1)
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:315 62760 w/ func: loopWithGoto
+(2)
+	lval 2: REP:[701].x
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+(3)
+	Th. 1 spawned: threads.c:323 63000 w/ func: racyGetterUse
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+****
+Possible race between access to:
+
+REP:[700].x and
+REP:[693].x
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[threads.c:161:(522.f)] and
+	[threads.c:161:(522.f)]
+
+	Confidence: used PTA nodes lblSet(3, 3)
+
+LS for 1st access:
+L+ = {REP:[701]#g, REP:[702]#g} (2)
+	(rep. lock)
+LS for 2nd access:
+L+ = {REP:[694]#g, REP:[695]#g} (2)
+	(rep. lock)
+	Th. 1 spawned: threads.c:315 62760 w/ func: loopWithGoto
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: REP:[701].x
+	lval 2: REP:[694].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	lval 1: REP:[701].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(2)
+	lval 2: REP:[694].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(3)
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+REP:[700].x and
+REP:[697].x
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[threads.c:161:(522.f)] and
+	[threads.c:121:(517.f)]
+
+	Confidence: used PTA nodes lblSet(3, 3)
+
+LS for 1st access:
+L+ = {REP:[701]#g, REP:[702]#g} (2)
+	(rep. lock)
+LS for 2nd access:
+L+ = {REP:[698]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:305 62430 w/ func: loopAndRecurse
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: REP:[701].x
+LS for 2nd access:
+L+ = empty;
+	made empty at: threads.c:134
+	lval 2: REP:[698].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+(1)
+	lval 1: REP:[701].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+(2)
+LS for 2nd access:
+L+ = empty;
+	made empty at: threads.c:134
+	lval 2: REP:[698].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+(3)
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+****
+Possible race between access to:
+
+REP:[700].x and
+REP:[700].x
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[threads.c:161:(522.f)] and
+	[threads.c:150:(522.f), threads.c:156:(522.f), threads.c:161:(522.f)]
+
+	Confidence: used PTA nodes lblSet(3, 3)
+
+LS for 1st access:
+L+ = {REP:[701]#g, REP:[702]#g} (2)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	made empty at: threads.c:156
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:315 62760 w/ func: loopWithGoto
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: REP:[701].x
+	lval 2: REP:[701].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+(1)
+	lval 1: REP:[701].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+(2)
+	lval 2: REP:[701].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+(3)
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:316 62829 w/ func: loopWithGoto
+****
+Possible race between access to:
+
+REP:[698].x and
+REP:[698].x
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[threads.c:121:(517.f)] and
+	[threads.c:121:(517.f)]
+
+	Confidence: used PTA nodes lblSet(3, 3)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: threads.c:134
+LS for 2nd access:
+L+ = empty;
+	made empty at: threads.c:134
+	Th. 1 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+	Th. 2 spawned: threads.c:305 62430 w/ func: loopAndRecurse
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = {REP:[698]#g} (1)
+	(rep. lock)
+	lval 2: REP:[697].x
+	Th. 1 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+	Th. 2 spawned: threads.c:305 62430 w/ func: loopAndRecurse
+(1)
+LS for 1st access:
+L+ = {REP:[698]#g} (1)
+	(rep. lock)
+	lval 1: REP:[697].x
+	Th. 1 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+	Th. 2 spawned: threads.c:305 62430 w/ func: loopAndRecurse
+(2)
+	Th. 1 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+(3)
+LS for 1st access:
+L+ = {REP:[698]#g} (1)
+	(rep. lock)
+	lval 1: REP:[697].x
+	Th. 1 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+****
+Possible race between access to:
+
+REP:[700].x and
+REP:[697].x
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[threads.c:150:(522.f), threads.c:156:(522.f), threads.c:161:(522.f)] and
+	[threads.c:121:(517.f)]
+
+	Confidence: used PTA nodes lblSet(3, 3)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: threads.c:156
+LS for 2nd access:
+L+ = {REP:[698]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:305 62430 w/ func: loopAndRecurse
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: REP:[701].x
+LS for 2nd access:
+L+ = empty;
+	made empty at: threads.c:134
+	lval 2: REP:[698].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+(1)
+	lval 1: REP:[701].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+(2)
+LS for 2nd access:
+L+ = empty;
+	made empty at: threads.c:134
+	lval 2: REP:[698].x
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
+(3)
+	Th. 1 spawned: threads.c:316 62829 w/ func: loopWithGoto
+	Th. 2 spawned: threads.c:306 62501 w/ func: loopAndRecurse
 
 
 $$$$$$
-Total Warnings: 22
+Total Warnings: 15
 
 
 Printing Alias assumptions used by warnings
 -----
-nc	0	[REP: 46].x#g/[REP: 46].x#g	0	0
-nc	15	[REP: 25]#g/[REP: 25]#g	1	1
-nc	8	[REP: 42].x#g/[REP: 42].x#g	1	1
-nc	7	[REP: 30].x#g/[REP: 30].x#g	5	5
-nc	4	[REP: 30].x#g/[REP: 30].x#g	5	5
-nc	3	[REP: 30].x#g/[REP: 30].x#g	5	5
-nc	2	[REP: 30].x#g/[REP: 30].x#g	5	5
-nc	1	[REP: 30].x#g/[REP: 30].x#g	5	5
-writeState: Not needed for CIL PTA
-writeState: Not needed for Steens PTA
-Golden lvals hash stats (len, ents, sum/min/median/max bucket)
-	173	66	423	0	3	9	
-Golden lvals hash stats (len, ents, sum/min/median/max bucket)
-	173	0	0	0	0	0	
-Golden types hash stats (len, ents, sum/min/median/max bucket)
-	173	28	81	0	0	3	
-Golden compInfos hash stats (len, ents, sum/min/median/max bucket)
-	173	0	0	0	0	0	
-Elapsed time (secs): 0.180011
-Top heap size (words): 430080
-Current heap size (words): 430080
-Lifetime allocated bytes: 24652832.
-Collections -- minor: 19 major: 6 compactions: 0
+nc	14	REP:[686]#g/REP:[686]#g	1	1
+nc	7	REP:[689].x#g/REP:[689].x#g	1	1
+nc	2	REP:[693].x#g/REP:[697].x#g	3	3
+nc	1	REP:[693].x#g/REP:[700].x#g	3	3
+nc	0	REP:[693].x#g/REP:[700].x#g	3	3
+nc	9	REP:[700].x#g/REP:[693].x#g	3	3
+nc	4	REP:[700].x#g/REP:[697].x#g	3	3
+nc	3	REP:[700].x#g/REP:[700].x#g	3	3
+nc	6	REP:[698].x#g/REP:[698].x#g	3	3
+nc	5	REP:[700].x#g/REP:[697].x#g	3	3
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/racetests/thread_tests/ciltrees/.pta_temp.anders
+
+Elapsed time (secs): 0.212013
+Top heap size (MB): 2
+Current heap size (MB): 2
+Lifetime allocated bytes (MB): 20
+Collections -- minor: 18 major: 5 compactions: 0
+Bytes per word: 4
+Exhausted tries: 1
 return value is 0
 ran 1 times
-cleared status file: /tmp/temp.y2MGrS
-Sun Aug 10 21:12:38 PDT 2008
+cleared status file: /tmp/temp.Et3xOJ
+Mon Oct 12 14:20:39 PDT 2009

@@ -1,5 +1,6 @@
 
 open Cil
+open Callg
 open Fstructs
 open Lockset
 open Access_info
@@ -12,7 +13,7 @@ type origLvId = int
 
 type targetLvId = int
 
-type pseudoAttrib = fKey * origLvId * targetLvId
+type pseudoAttrib = funID * origLvId * targetLvId
 
 module PAS = Set.Make
   (struct
@@ -50,13 +51,13 @@ module type GUARDED_ACCESS = sig
   (* Add / Update things *)
     
   val addCorr : ?pseudo:PAS.t option -> lv -> fullLS -> location -> 
-    fKey -> straintMap  -> straintMap
+    funID -> straintMap  -> straintMap
     
   val updateAcc : correlation -> (fullLS -> fullLS) -> correlation
     
   val updateCorr : lv -> correlation -> straintMap -> straintMap
     
-  val addPseudo : lv -> fullLS ->  location ->  fKey -> pseudoAttrib -> straintMap-> straintMap
+  val addPseudo : lv -> fullLS ->  location ->  funID -> pseudoAttrib -> straintMap-> straintMap
 
   (* Scope pruning *)
 
@@ -68,7 +69,8 @@ module type GUARDED_ACCESS = sig
     
   val iterCorrs :  (lv -> correlation -> unit) -> straintMap -> unit
   
-  val iterGuardedAccs : (accessInfo -> fullLS -> PAS.t -> unit) -> correlation -> unit
+  val iterGuardedAccs : 
+    (accessInfo -> fullLS -> location -> PAS.t -> unit) -> correlation -> unit
     
   val hasPseudo : correlation -> bool
 

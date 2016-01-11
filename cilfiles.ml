@@ -46,8 +46,6 @@ open Cil
 open Filetools
 open Intrange
 
-module IH = Inthash
-
 (*********** ID -> varinfo / compinfo indices *****)
 
 (** File extensions for storing indexes of varinfos / compinfos *)
@@ -55,9 +53,9 @@ let vinfoExt = ".vi"
 
 let cinfoExt = ".ci"
 
-type viMap = varinfo IH.t
+type viMap = varinfo Inthash.t
 
-type ciMap = compinfo IH.t
+type ciMap = compinfo Inthash.t
 
 (** Write the mapping to a file w/ an extension like [vinfoExt] *)
 let doWrites index origFile newExt =

@@ -40,11 +40,11 @@
 open Cil
 open Filetools
 open Intrange
+open Fstructs
+open Logging 
 
-module IH = Inthash
 module FC = Filecache
 module DC = Default_cache
-module L = Logging
 
 (********** Cil varinfos ***********)
 
@@ -76,7 +76,7 @@ let cilIDsSet = ref false
     CIL IDs out of that range *)
 let initCilIDs () =
   if not !cilIDsSet then begin
-    L.logStatus "Setting Cil Varinfo ID ranges";
+    logStatus "Setting Cil Varinfo ID ranges";
     if not !rangesLoaded then 
       failwith "Need to load VID ranges first!"
     ;
@@ -105,7 +105,7 @@ let initCache cache ranges minSize =
   if (maxRange <= minSize) then ()
   else begin
     let newSize = maxRange * 2 in
-    L.logStatusF "Resizing VID/CKEY cache to: %d\n" newSize;
+    logStatusF "Resizing VID/CKEY cache to: %d\n" newSize;
     IDC.resize cache newSize
   end
   
@@ -128,7 +128,7 @@ let getInfo id cache distiller ranges fnameCache =
       let filename = RangeMap.find { r_lower = id;
                                      r_upper = id; } !ranges in
       let index = !fnameCache#getFile filename in
-      let info = IH.find index id in
+      let info = Inthash.find index id in
       distiller info;
       IDC.add cache id info;
       info
@@ -143,9 +143,6 @@ let getVarinfo (id:int) : varinfo =
 let getCinfo (id:int) : compinfo =
   getInfo id ckeyToCinfo Cil_lvals.distillCompinfo ckeyToFile DC.ciFCache
   
-let getFundec fid =
-  failwith "Fundecs not indexed..."
-
 (** look for a global w/ the given name *)
 let varinfo_of_name (n:string) : varinfo option =
   RangeMap.fold 
@@ -154,7 +151,7 @@ let varinfo_of_name (n:string) : varinfo option =
          Some _ -> result
        | None -> 
            try let index = !DC.viFCache#getFile fname in
-           IH.fold 
+           Inthash.fold 
              (fun _ vi result ->
                 match result with 
                   Some _ -> result
@@ -169,7 +166,7 @@ let varinfo_of_name (n:string) : varinfo option =
 
 (** Load the mapping between VID/Compinfo key ranges and source file *)
 let reloadRanges fname = begin
-  L.logStatus "Loading Cil Varinfo ID ranges for lookup tables";
+  logStatus "Loading Cil Varinfo ID ranges for lookup tables";
   let ids, cks = Id_fixer.loadRanges fname in
   vidToFile := ids;
   ckeyToFile := cks;
@@ -183,6 +180,14 @@ end
 
 (********** Cil.File / fundec ops **********)
 
+module CFGC = Cache.Make
+  (struct
+     type t = fKey
+     let equal a b = a = b
+     let hash a = Hashtbl.hash a
+   end)
+
+let cfgCache = CFGC.create 64
 
 (** Get a fundec given the id and file *)
 let getFundec fkey file : Cil.fundec option =
@@ -208,7 +213,44 @@ let getCFG fkey file : Cil.fundec option =
        Cil.computeCFGInfo f false;
       *)
       Some f
-  | None ->
-      None
+  | None -> None
 
 
+let getFuncListeners = ref []
+
+let addGetFuncListener (lis : fKey -> Cil.file -> unit) = 
+  getFuncListeners := List_utils.addOnce !getFuncListeners lis
+
+
+(** Get the AST + CFG for the given function that is defined in [deffile] *)
+let getFunc fKey deffile : fundec option =
+  try 
+    let ast = !DC.astFCache#getFile deffile in
+    List.iter (fun lis -> lis fKey ast) !getFuncListeners;
+    try CFGC.find cfgCache fKey
+    with Not_found ->
+      let oldLoc = !currentLoc in
+      let cfg = getCFG fKey ast in (* may modify currentLoc *)
+      currentLoc := oldLoc;
+      CFGC.add cfgCache fKey cfg;
+      cfg
+  with FC.File_not_found fname ->
+    logError ("getFunc/CFG: can't find " ^ fname);
+    None
+  
+
+let iterInfos (foo: 'a -> unit) ranges distiller fnameCache =
+  RangeMap.iter 
+    (fun { r_lower = l; r_upper = r } file ->
+       let index = !fnameCache#getFile file in
+       for id = l to r do  
+         try 
+           let info = Inthash.find index id in
+           distiller info;
+           foo info
+         with Not_found -> () (* may catch Not_founds from foo too... *)
+       done
+    ) !ranges
+
+let iterCompinfos (foo: compinfo -> unit) =
+  iterInfos foo ckeyToFile Cil_lvals.distillCompinfo DC.ciFCache

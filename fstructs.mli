@@ -16,15 +16,15 @@ val compareFKey : fKey -> fKey -> int
 
 val dummyFKey : fKey
 
-module FMap : Map.S with type key = fKey
+module FKMap : Map.S with type key = fKey
 
-module FSet : Set.S with type elt = fKey
+module FKSet : Sparsebitv.S
 
 module OrderedFKeys : Map.OrderedType with type t = fKey
 
 module IntMap : Map.S with type key = int
   
-module IntSet : Set.S with type elt = int
+module IntSet : Sparsebitv.S
 
 
 (*** Name + type string data structures *)

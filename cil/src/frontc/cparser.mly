@@ -42,6 +42,7 @@
 */
 %{
 open Cabs
+open Cabshelper
 module E = Errormsg
 
 let parse_error msg : unit =       (* sm: c++-mode highlight hack: -> ' <- *)
@@ -60,15 +61,10 @@ let getComments () =
       r
 *)
 
-let currentLoc () = 
-  let l, f, c = E.getPosition () in
-  { lineno   = l; 
-    filename = f; 
-    byteno   = c;}
-
 let cabslu = {lineno = -10; 
 	      filename = "cabs loc unknown"; 
-	      byteno = -10;}
+	      byteno = -10;
+              ident = 0;}
 
 (* cabsloc -> cabsloc *)
 (*
@@ -246,6 +242,7 @@ let transformOffsetOf (speclist, dtype) member =
 %}
 
 %token <string * Cabs.cabsloc> IDENT
+%token <string * Cabs.cabsloc> QUALIFIER
 %token <int64 list * Cabs.cabsloc> CST_CHAR
 %token <int64 list * Cabs.cabsloc> CST_WCHAR
 %token <string * Cabs.cabsloc> CST_INT
@@ -258,7 +255,7 @@ let transformOffsetOf (speclist, dtype) member =
 %token <int64 list * Cabs.cabsloc> CST_WSTRING
 
 %token EOF
-%token<Cabs.cabsloc> CHAR INT DOUBLE FLOAT VOID INT64 INT32
+%token<Cabs.cabsloc> CHAR INT BOOL DOUBLE FLOAT VOID INT64 INT32
 %token<Cabs.cabsloc> ENUM STRUCT TYPEDEF UNION
 %token<Cabs.cabsloc> SIGNED UNSIGNED LONG SHORT
 %token<Cabs.cabsloc> VOLATILE EXTERN STATIC CONST RESTRICT AUTO REGISTER
@@ -470,7 +467,7 @@ primary_expression:                     /*(* 6.5.1. *)*/
 |        	constant
 		        {CONSTANT (fst $1), snd $1}
 |		paren_comma_expression  
-		        {smooth_expression (fst $1), snd $1}
+		        {PAREN (smooth_expression (fst $1)), snd $1}
 |		LPAREN block RPAREN
 		        { GNU_BODY (fst3 $2), $1 }
 
@@ -496,7 +493,7 @@ postfix_expression:                     /*(* 6.5.2 *)*/
                           CALL (VARIABLE "__builtin_types_compatible_p", 
                                 [TYPE_SIZEOF(b1,d1); TYPE_SIZEOF(b2,d2)]), $1 }
 |               BUILTIN_OFFSETOF LPAREN type_name COMMA offsetof_member_designator RPAREN
-                        { transformOffsetOf $3 (fst $5), $1 }
+                        { transformOffsetOf $3 $5, $1 }
 |		postfix_expression DOT id_or_typename
 		        {MEMBEROF (fst $1, $3), snd $1}
 |		postfix_expression ARROW id_or_typename   
@@ -511,12 +508,12 @@ postfix_expression:                     /*(* 6.5.2 *)*/
 ;
 
 offsetof_member_designator:	/* GCC extension for __builtin_offsetof */
-|		IDENT
-		        { VARIABLE (fst $1), snd $1 }
+|		id_or_typename
+		        { VARIABLE ($1) }
 |		offsetof_member_designator DOT IDENT
-			{ MEMBEROF (fst $1, fst $3), snd $1 }
+			{ MEMBEROF ($1, fst $3) }
 |		offsetof_member_designator bracket_comma_expression
-			{ INDEX (fst $1, smooth_expression $2), snd $1 }
+			{ INDEX ($1, smooth_expression $2) }
 ;
 
 unary_expression:   /*(* 6.5.3 *)*/
@@ -736,9 +733,9 @@ wstring_list:
 
 one_string: 
     CST_STRING				{$1}
-|   FUNCTION__                          {(Cabs.explodeStringToInts 
+|   FUNCTION__                          {(Cabshelper.explodeStringToInts 
 					    !currentFunctionName), $1}
-|   PRETTY_FUNCTION__                   {(Cabs.explodeStringToInts 
+|   PRETTY_FUNCTION__                   {(Cabshelper.explodeStringToInts 
 					    !currentFunctionName), $1}
 ;    
 
@@ -880,8 +877,12 @@ statement:
 |   FOR LPAREN for_clause opt_expression
 	        SEMICOLON opt_expression RPAREN statement
 	                         {FOR ($3, $4, $6, $8, (*handleLoc*) $1)}
-|   IDENT COLON statement
-		                 {LABEL (fst $1, $3, (*handleLoc*) (snd $1))}
+|   IDENT COLON attribute_nocv_list statement
+		                 {(* The only attribute that should appear here
+                                     is "unused". For now, we drop this on the
+                                     floor, since unused labels are usually
+                                     removed anyways by Rmtmps. *)
+                                  LABEL (fst $1, $4, (snd $1))}
 |   CASE expression COLON statement
 	                         {CASE (fst $2, $4, (*handleLoc*) $1)}
 |   CASE expression ELLIPSIS expression COLON statement
@@ -972,6 +973,7 @@ decl_spec_list_opt_no_named:
 type_spec:   /* ISO 6.7.2 */
     VOID            { Tvoid, $1}
 |   CHAR            { Tchar, $1 }
+|   BOOL            { Tbool, $1 }
 |   SHORT           { Tshort, $1 }
 |   INT             { Tint, $1 }
 |   LONG            { Tlong, $1 }
@@ -1042,7 +1044,10 @@ field_decl_list: /* (* ISO 6.7.2 *) */
 ;
 field_decl: /* (* ISO 6.7.2. Except that we allow unnamed fields. *) */
 |   declarator                      { ($1, None) }
-|   declarator COLON expression     { ($1, Some (fst $3)) }    
+|   declarator COLON expression attributes
+                                    { let (n,decl,al,loc) = $1 in
+                                      let al' = al @ $4 in
+                                     ((n,decl,al',loc), Some (fst $3)) }    
 |              COLON expression     { (missingFieldDecl, Some (fst $2)) }
 ;
 
@@ -1059,8 +1064,8 @@ enumerator:
 
 declarator:  /* (* ISO 6.7.5. Plus Microsoft declarators.*) */
    pointer_opt direct_decl attributes_with_asm
-                                         { let (n, decl) = $2 in
-                                           (n, applyPointer (fst $1) decl, $3, (*(*handleLoc*)*)(snd $1)) }
+                               { let (n, decl) = $2 in
+                                (n, applyPointer (fst $1) decl, $3, (snd $1)) }
 ;
 
 
@@ -1296,7 +1301,7 @@ attributes_with_asm:
 
 /* things like __attribute__, but no const/volatile */
 attribute_nocv:
-    ATTRIBUTE LPAREN paren_attr_list_ne RPAREN	
+    ATTRIBUTE LPAREN paren_attr_list RPAREN	
                                         { ("__attribute__", $3), $1 }
 /*(*
 |   ATTRIBUTE_USED                      { ("__attribute__", 
@@ -1306,6 +1311,12 @@ attribute_nocv:
 |   MSATTR                              { (fst $1, []), snd $1 }
                                         /* ISO 6.7.3 */
 |   THREAD                              { ("__thread",[]), $1 }
+|   QUALIFIER                     {("__attribute__",[VARIABLE(fst $1)]),snd $1}
+;
+
+attribute_nocv_list:
+    /* empty */				{ []}
+|   attribute_nocv attribute_nocv_list  { fst $1 :: $2 }
 ;
 
 /* __attribute__ plus const/volatile */
@@ -1320,7 +1331,7 @@ attribute:
  *  to support them appearing between the 'struct' keyword and the type name. 
  * Actually, a declspec can appear there as well (on MSVC) *)  */
 just_attribute:
-    ATTRIBUTE LPAREN paren_attr_list_ne RPAREN
+    ATTRIBUTE LPAREN paren_attr_list RPAREN
                                         { ("__attribute__", $3) }
 |   DECLSPEC paren_attr_list_ne         { ("__declspec", $2) }
 ;
@@ -1354,9 +1365,13 @@ primary_attr:
                                             * attribute lists, is translated 
                                             * to aconst *)*/
 |   CONST                                { VARIABLE "aconst" }
+
 |   IDENT COLON CST_INT                  { VARIABLE (fst $1 ^ ":" ^ fst $3) }
 
+/*(* The following rule conflicts with the ? : attributes. We give it a very 
+   * low priority *)*/
 |   CST_INT COLON CST_INT                { VARIABLE (fst $1 ^ ":" ^ fst $3) } 
+
 |   DEFAULT COLON CST_INT                { VARIABLE ("default:" ^ fst $3) }
                           
                                             /*(** GCC allows this as an 
@@ -1369,11 +1384,12 @@ postfix_attr:
     primary_attr                         { $1 }
                                          /* (* use a VARIABLE "" so that the 
                                              * parentheses are printed *) */
-|   IDENT LPAREN  RPAREN                 { CALL(VARIABLE (fst $1), [VARIABLE ""]) }
-|   IDENT paren_attr_list_ne             { CALL(VARIABLE (fst $1), $2) }
+|   IDENT LPAREN  RPAREN             { CALL(VARIABLE (fst $1), [VARIABLE ""]) }
+|   IDENT paren_attr_list_ne         { CALL(VARIABLE (fst $1), $2) }
 
 |   postfix_attr ARROW id_or_typename    {MEMBEROFPTR ($1, $3)} 
 |   postfix_attr DOT id_or_typename      {MEMBEROF ($1, $3)}  
+|   postfix_attr LBRACKET attr RBRACKET  {INDEX ($1, $3) }
 ;
 
 /*(* Since in attributes we use both IDENT and NAMED_TYPE as indentifiers, 
@@ -1460,8 +1476,14 @@ logical_or_attr:
 |   logical_or_attr PIPE_PIPE logical_and_attr {BINARY(OR ,$1 , $3)}
 ;
 
+conditional_attr: 
+    logical_or_attr                        { $1 }
+/* This is in conflict for now */
+|   logical_or_attr QUEST conditional_attr COLON conditional_attr 
+                                          { QUESTION($1, $3, $5) }
 
-attr: logical_or_attr                    { $1 }
+
+attr: conditional_attr                    { $1 }
 ;
 
 attr_list_ne:
@@ -1469,8 +1491,16 @@ attr_list_ne:
 |  attr COMMA attr_list_ne               { $1 :: $3 }
 |  error COMMA attr_list_ne              { $3 }
 ;
+attr_list:
+  /* empty */                            { [] }
+| attr_list_ne                           { $1 }
+;
 paren_attr_list_ne: 
    LPAREN attr_list_ne RPAREN            { $2 }
+|  LPAREN error RPAREN                   { [] }
+;
+paren_attr_list: 
+   LPAREN attr_list RPAREN               { $2 }
 |  LPAREN error RPAREN                   { [] }
 ;
 /*** GCC ASM instructions ***/
@@ -1498,14 +1528,19 @@ asmoperandsne:
 |    asmoperandsne COMMA asmoperand     { $3 :: $1 }
 ;
 asmoperand:
-     string_constant LPAREN expression RPAREN    { (fst $1, fst $3) }
-|    string_constant LPAREN error RPAREN         { (fst $1, NOTHING ) } 
+     asmopname string_constant LPAREN expression RPAREN    { ($1, fst $2, fst $4) }
+|    asmopname string_constant LPAREN error RPAREN         { ($1, fst $2, NOTHING ) } 
 ; 
 asminputs: 
   /* empty */                { ([], []) }
 | COLON asmoperands asmclobber
                         { ($2, $3) }
 ;
+asmopname:
+    /* empty */                         { None }
+|   LBRACKET IDENT RBRACKET             { Some (fst $2) }
+;
+
 asmclobber:
     /* empty */                         { [] }
 | COLON asmcloberlst_ne                 { $2 }

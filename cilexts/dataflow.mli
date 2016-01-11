@@ -23,6 +23,7 @@ type 't guardaction =
   | GUse of 't    (** Use this data for the branch *)
   | GUnreachable  (** The branch will never be taken. *)
 
+val ifSuccs : stmt -> stmt * stmt
 
 (******************************************************************
  **********

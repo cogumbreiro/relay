@@ -40,29 +40,26 @@
     is separate / use the warn_reports functor *)
 
 open Cil
+open Cildump
+open Logging
 open Fstructs
-open Stdutil
 open Warn_reports
-
 
 module LS = Lockset
 module Accs = Access_info
-module Du = Cildump
-module L = Logging
 
 module A = Alias
 module Lv = Lvals
 module CLv = Cil_lvals
-module D = Cildump
 
 let maxWarningsPerLoc = 5
 
-let maxDiffString = (string_of_int (maxWarningsPerLoc -1))
+let maxDiffString = (string_of_int (maxWarningsPerLoc - 1))
 
 (*************** types, etc. ********)
 
 (** Where a thread was created, and which function was run *)
-type threadRootLoc = Cil.location * string * fKey
+type threadRootLoc = location * string * Callg.funID
 
 (** One access that is part of a race, and how it was reached *)
 type raceInfo = {
@@ -70,7 +67,7 @@ type raceInfo = {
   lval : Lv.aLval;
   imprec : Lv.imprecision;
   locks : LS.fullLS;
-  emptied : Cil.location;
+  emptied : location;
   threadRoot : threadRootLoc;
   threadEsc : bool;
 }
@@ -88,16 +85,16 @@ let newClusterId () =
 (** Races that are similar *)
 type raceRep = cluster_id * ((raceInfo * raceInfo) list)
 
+let eqLocation l1 l2 =
+  compareLoc l1 l2 == 0
 
 (** Hashtable that clusters races by access location *)
 module LocHash = Hashtbl.Make(
   struct
-    type t = (Cil.location * Cil.location)
+    type t = (location * location)
     let equal (l1,l2) (l3,l4) = 
-      (Cil.compareLoc l1 l3 == 0 &&
-         Cil.compareLoc l2 l4 == 0)  ||
-        (Cil.compareLoc l1 l4 == 0 && 
-           Cil.compareLoc l2 l3 == 0)
+      (eqLocation l1 l3 && eqLocation l2 l4)  ||
+        (eqLocation l1 l4 && eqLocation l2 l3)
     let hash (a,b) = (Hashtbl.hash a) lxor (Hashtbl.hash b)
   end
 )
@@ -129,26 +126,30 @@ let listsEq eq l1 l2 =
   try List.for_all2 (fun e1 e2 -> eq e1 e2) l1 l2
   with Invalid_argument _ -> false
 
-let locksEq =
-  LS.LS.equal
+let locksEq ls1 ls2 =
+  LS.LS.equal ls1 ls2
 
 let rootsEq (l1, fn1, fk1) (l2, fn2, fk2) =
-  fk1 == fk2 && compareLoc l1 l2 == 0
+  (* Don't care much about which context the root comes from ?
+     TODO: OIC doesn't understand thread creation for now,
+     so they should be equivalent to the "0th" context *)
+  let fkey1 = Callg.fid_to_fkey fk1 in
+  let fkey2 = Callg.fid_to_fkey fk2 in
+  (fkey1 = fkey2) && eqLocation l1 l2
 
 let eqRaceInfo ri1 ri2 =
   ri1.imprec = ri2.imprec &&
   rootsEq ri1.threadRoot ri2.threadRoot &&
   Lv.compare_lval ri1.lval ri2.lval == 0 &&
-  Cil.compareLoc ri1.emptied ri2.emptied == 0 &&
+  eqLocation ri1.emptied ri2.emptied &&
   locksEq ri1.locks ri2.locks &&
   Accs.eqAccesses ri1.access ri2.access &&
-  ri1.threadEsc == ri2.threadEsc 
+  ri1.threadEsc = ri2.threadEsc 
 
 
 let eqOneReport (ri1, ri2) (ri1', ri2') =
-  eqRaceInfo ri1 ri1' &&
-    eqRaceInfo ri2 ri2'
-
+  (eqRaceInfo ri1 ri1' && eqRaceInfo ri2 ri2') ||
+    (eqRaceInfo ri1 ri2' && eqRaceInfo ri2 ri1')
 
 let hashWarnData (ri1, ri2) =
   hashRaceInfo ri1, hashRaceInfo ri2
@@ -207,39 +208,40 @@ let printLocks ls =
     LS.set_to_buf buff locked;
   );
   if LS.hasSummaryLock ls then Buffer.add_string buff "\t(rep. lock)\n";
-  L.logStatusB buff;
+  logStatusB buff;
   Buffer.clear buff
- 
 
 let printThreadRoot (tr, tf, tk) i =
-  L.logStatus ("\tTh. " ^ (string_of_int i) ^ " spawned: " ^ 
-                 (Du.string_of_loc tr) ^ " " ^ (string_of_int tr.byte) ^
-                 " w/ func: " ^ tf)
+  logStatusF "\tTh. %d spawned: %s %d w/ func: %s\n" 
+    i (string_of_loc tr) tr.byte tf
+
+let printEmptiedLS loc = 
+  if eqLocation loc locUnknown then ()
+  else logStatusF "\tmade empty at: %s\n" (string_of_loc loc)
+
 
 (** Print any differences between the first pair or report infos
     [(fri1, fri2)] and subsequent pairs of report infos *)
 let printDiffs (fri1, fri2) (ri1, ri2) =
   let ls1Eq = locksEq fri1.locks ri1.locks in
   if (not ls1Eq) then
-    (L.logStatus ("LS for 1st access:");
+    (logStatus ("LS for 1st access:");
      printLocks ri1.locks);
-  if (Cil.compareLoc fri1.emptied ri1.emptied != 0) then 
-    L.logStatus ("\tmade empty at: " ^ 
-                   (Du.string_of_loc ri1.emptied))
+  if not (eqLocation fri1.emptied ri1.emptied) then 
+    printEmptiedLS ri1.emptied
   ;
   if (Lv.compare_lval fri1.lval ri1.lval != 0) then 
-    L.logStatus ("\tlval 1: " ^ (Lv.string_of_lval ri1.lval))
+    logStatus ("\tlval 1: " ^ (Lv.string_of_lval ri1.lval))
   ;
   let ls2Eq = locksEq fri2.locks ri2.locks in
   if (not ls2Eq) then
-    (L.logStatus ("LS for 2nd access:");
+    (logStatus ("LS for 2nd access:");
      printLocks ri2.locks);
-  if (Cil.compareLoc fri2.emptied ri2.emptied != 0) then 
-    L.logStatus ("\tmade empty at: " ^ 
-                   (Du.string_of_loc ri2.emptied))
+  if not (eqLocation fri2.emptied ri2.emptied) then 
+    printEmptiedLS ri2.emptied
   ;
   if (Lv.compare_lval fri2.lval ri2.lval != 0) then 
-    L.logStatus ("\tlval 2: " ^ (Lv.string_of_lval ri2.lval))
+    logStatus ("\tlval 2: " ^ (Lv.string_of_lval ri2.lval))
   ;
   (* TODO check if different too *)
   printThreadRoot ri1.threadRoot 1;
@@ -247,7 +249,7 @@ let printDiffs (fri1, fri2) (ri1, ri2) =
 
 
 let printImprecision imp = 
-  L.logStatus ("\tConfidence: " ^ (Lv.string_of_imp imp))
+  logStatus ("\tConfidence: " ^ (Lv.string_of_imp imp))
 
 let compare_esc esc1 esc2 =
   match esc1, esc2 with
@@ -278,64 +280,65 @@ let compare_reports ((loc1, loc1'), id1, rp1) ((loc2, loc2'), id2, rp2) =
       if (c <> 0) then c 
       else let c = Lv.compare_lval ri1'.lval ri2'.lval in
       if (c <> 0) then c
-      else let c = Cil.compareLoc loc1 loc2 in
+      else let c = compareLoc loc1 loc2 in
       if (c <> 0) then c
-      else Cil.compareLoc loc1' loc2'
+      else compareLoc loc1' loc2'
   | _ -> 
-      let c = Cil.compareLoc loc1 loc2 in
+      let c = compareLoc loc1 loc2 in
       if (c <> 0) then c
-      else Cil.compareLoc loc1' loc2'
+      else compareLoc loc1' loc2'
 
 
 let sortRaces races =
   let flattened = LocHash.fold 
     (fun locs (id, rp) cur -> (locs, id, rp) :: cur) races [] in
   List.sort compare_reports flattened
-  
+
+let printRaceRep rep id =
+  match rep with
+    (ri1, ri2) as first :: tl ->
+      logStatusF "%s and\n%s\n"
+        (Lv.string_of_lval_decl ri1.lval) (Lv.string_of_lval_decl ri2.lval);
+      logStatusF "\tCluster ID: %d\n" id;
+      logStatusF "\tEscapes? %b / %b \n" ri1.threadEsc ri2.threadEsc;
+      logStatus ("\tAccessed at locs:\n\t" ^ 
+                   (Accs.string_of_accesses ri1.access) ^ " and\n\t" ^
+                   (Accs.string_of_accesses ri2.access) ^ "\n");
+      printImprecision ri1.imprec; (* first is same as second *)
+      logStatus "";
+      logStatus ("LS for 1st access:");
+      printLocks ri1.locks;
+      printEmptiedLS ri1.emptied;
+      logStatus ("LS for 2nd access:");
+      printLocks ri2.locks;
+      printEmptiedLS ri2.emptied;
+      printThreadRoot ri1.threadRoot 1;
+      printThreadRoot ri2.threadRoot 2;
+      logStatus "";
+      logStatus ("Different possible paths & LS (first " 
+                 ^ maxDiffString ^ "):\n");
+      let _ = List.fold_left
+        (fun i next ->
+           logStatus ("(" ^ (string_of_int i) ^ ")");
+           printDiffs first next;
+           i + 1
+        ) 0 tl in
+      ()
+  | [] -> ()
 
 (** Print out possible races... sorted *)
 let printRaces races =
-  
+  logStatus "Sorting races\n";
+  flushStatus ();
   let races = sortRaces races in
-
+  logStatus "Printing races\n";
   let numWarnings = List.fold_left
     (fun wcount ((loc1, loc2), id, rep) ->
-       match rep with
-          (ri1, ri2) as first :: tl ->
-            L.logStatus ("****\nPossible race between access to:\n" ^
-                           (Lv.string_of_lval_decl ri1.lval) ^ " and\n" ^
-                           (Lv.string_of_lval_decl ri2.lval));
-            L.logStatusF "\tCluster ID: %d\n" id;
-            L.logStatusF "\tEscapes? %b / %b \n" ri1.threadEsc ri2.threadEsc;
-            L.logStatus ("\tAccessed at locs:\n\t" ^ 
-                           (Accs.string_of_accesses ri1.access) ^ " and\n\t" ^
-                           (Accs.string_of_accesses ri2.access) ^ "\n");
-            printImprecision ri1.imprec; (* first is same as second *)
-            L.logStatus "";
-            L.logStatus ("LS for 1st access:");
-            printLocks ri1.locks;
-            L.logStatus ("\tmade empty at: " ^ 
-                           (Du.string_of_loc ri1.emptied));
-            L.logStatus ("LS for 2nd access:");
-            printLocks ri2.locks;
-            L.logStatus ("\tmade empty at: " ^ 
-                           (Du.string_of_loc ri2.emptied));
-            printThreadRoot ri1.threadRoot 1;
-            printThreadRoot ri2.threadRoot 2;
-            L.logStatus "";
-            L.logStatus ("Different possible paths & LS (first " 
-                         ^ maxDiffString ^ "):\n");
-            let _ = List.fold_left
-              (fun i next ->
-                 L.logStatus ("(" ^ (string_of_int i) ^ ")");
-                 printDiffs first next;
-                 i + 1
-              ) 0 tl in
-            wcount + 1
-       | _ ->
-           wcount
+       logStatus "****\nPossible race between access to:\n";
+       printRaceRep rep id ;
+       wcount + 1
     ) 0 races in
-  L.logStatus ("\n\n$$$$$$\nTotal Warnings: " ^ 
+  logStatus ("\n\n$$$$$$\nTotal Warnings: " ^ 
                  (string_of_int numWarnings))
 
 
@@ -351,7 +354,7 @@ class racesXMLPrinter = object (self)
 
   method pCallpath emp (tr, tf, tk) (edges: (int * int) list) =
     indent 1 
-      (text ("<cp root=\"" ^ (string_of_int tk) ^ "\">") ++ line ++
+      (text ("<cp root=\"" ^ (Callg.fid_to_string tk) ^ "\">") ++ line ++
          indent 1 (text "<spawned_at>" ++ 
                      self#pLoc () (tr, None) ++ 
                      text "</spawned_at>" ++ line) ++
@@ -392,21 +395,25 @@ class racesXMLPrinter = object (self)
       (self#pCallpath acc.emptied acc.threadRoot []) ++
       text ("</" ^ accTag ^ ">") ++ line
 
+  method pRaceInfo (ri1, ri2) =
+    (text "<race>" ++ line) ++ 
+      (self#pAccess 1 ri1 ++ self#pAccess 2 ri2) ++
+      (text "</race>" ++ line)
+      
+
   method pRaces () races =
     let doc = text "<?xml version=\"1.0\"?>" ++ line ++ text "<run>" ++ line in
     let doc = LocHash.fold
       (fun (loc1, loc2) (id, rep) doc ->
-         doc ++ dprintf "<cluster id=\"%d\">@!" id ++
-           List.fold_left
-           (fun doc (ri1, ri2) ->
-              (doc ++ text "<race>" ++ line) ++
-                (self#pAccess 1 ri1 ++ self#pAccess 2 ri2) ++
-                (text "</race>" ++ line)
-           ) nil rep ++
+         doc ++ dprintf "<cluster id=\"%d\">" id ++ line ++
+           indent 1 (List.fold_left
+                       (fun doc riPair ->
+                          doc ++ self#pRaceInfo riPair
+                       ) nil rep) ++
            text "</cluster>" ++ line
       ) races doc
     in
-    doc ++ text "</run>" ++ line
+    doc ++ text "</run>" ++ line ++ text "</xml>"
 
 end
 
@@ -438,26 +445,26 @@ let printLvalFreq races =
     (fun _ (id, reps) ->
        List.fold_left 
          (fun (uniqLvs) (ri1, ri2) ->
-            let ulv1 = addOnceP 
+            let ulv1 = List_utils.addOnceP 
               (fun lv1 lv2 -> Lv.compare_lval lv1 lv2 == 0) 
               uniqLvs ri1.lval in
-            addOnceP 
+            List_utils.addOnceP 
               (fun lv1 lv2 -> Lv.compare_lval lv1 lv2 == 0) ulv1 ri2.lval
          ) [] reps ) 
     (fun lv -> LVH.find lvFreq lv)
     (fun lv newCount -> LVH.replace lvFreq lv newCount )
     (fun f -> LVH.fold f lvFreq [] ) 
     races in
-  L.logStatus "\n\nLval frequency\n===========================";
+  logStatus "\n\nLval frequency\n===========================";
   List.iter (fun (lv, f) ->
-               L.logStatus ((Lv.string_of_lval lv) ^ " :: " ^
+               logStatus ((Lv.string_of_lval lv) ^ " :: " ^
                               (string_of_int f))) lSorted
 
 
 let string_of_basev lv =
   try
     let v = Lv.findBaseVarinfoLval lv in
-    (v.Cil.vname) ^ " @ " ^ (Du.string_of_loc v.Cil.vdecl)
+    (v.vname) ^ " @ " ^ (string_of_loc v.vdecl)
   with CLv.BaseVINotFound ->
     ""
 
@@ -468,32 +475,32 @@ let printBaseVarFreq races =
     (fun _ (id, reps) ->
        List.fold_left 
          (fun (uniqVars) (ri1, ri2) ->
-              let u1 = addOnceP (=) uniqVars (string_of_basev ri1.lval) in
-              addOnceP (=) u1 (string_of_basev ri2.lval)
+              let u1 = 
+                List_utils.addOnceP (=) uniqVars (string_of_basev ri1.lval) in
+              List_utils.addOnceP (=) u1 (string_of_basev ri2.lval)
          ) [] reps )
     (fun lv -> Hashtbl.find lvFreq lv)
     (fun lv newCount -> Hashtbl.replace lvFreq lv newCount )
     (fun f -> Hashtbl.fold f lvFreq [] ) 
     races in
-  L.logStatus "\n\nBase var frequency\n===========================";
+  logStatus "\n\nBase var frequency\n===========================";
   List.iter (fun (v, f) ->
                if (v <> "") then
-                 L.logStatus (v ^ " :: " ^ (string_of_int f))) lSorted
+                 logStatus (v ^ " :: " ^ (string_of_int f))) lSorted
     
 
 let printAccessLocFreq races =
   let locFreq = Hashtbl.create 107 in
   let lSorted = getFreq
     (fun (l1, l2) _ ->
-       addOnceP 
-         (fun l1 l2 -> Cil.compareLoc l1 l2 == 0) [l1] l2)
+       List_utils.addOnceP eqLocation [l1] l2)
     (fun loc -> Hashtbl.find locFreq loc)
     (fun loc newCount -> Hashtbl.replace locFreq loc newCount)
     (fun f -> Hashtbl.fold f locFreq [])
     races in
-  L.logStatus "\n\nAccess location frequency\n===========================";
+  logStatus "\n\nAccess location frequency\n===========================";
   List.iter (fun (l, f) -> 
-               L.logStatus ((D.string_of_loc l) ^ " :: " ^
+               logStatus ((string_of_loc l) ^ " :: " ^
                               (string_of_int f))) lSorted
 
 
@@ -503,16 +510,16 @@ let printRootFreq races =
     (fun (_, _) (id, rep) ->
        List.fold_left 
          (fun uniqRoots (ri1, ri2) ->
-              let ur1 = addOnceP (=) uniqRoots ri1.threadRoot in
-              addOnceP (=) ur1 ri2.threadRoot
+              let ur1 = List_utils.addOnceP (=) uniqRoots ri1.threadRoot in
+              List_utils.addOnceP (=) ur1 ri2.threadRoot
          ) [] rep)
     (fun root -> Hashtbl.find rootFreq root)
     (fun root newCount -> Hashtbl.replace rootFreq root newCount)
     (fun f -> Hashtbl.fold f rootFreq []) 
     races in
-  L.logStatus "\n\nThread root frequency\n===========================";
+  logStatus "\n\nThread root frequency\n===========================";
   List.iter (fun ((trLoc, trFun, _), f) -> 
-               L.logStatus ((D.string_of_loc trLoc) ^ ", " ^ 
+               logStatus ((string_of_loc trLoc) ^ ", " ^ 
                               trFun ^ " :: " ^
                               (string_of_int f))) rSorted
 
@@ -555,7 +562,7 @@ module AliasAssumptions = struct
 
 
   let pickLval lvs =
-    match Stdutil.pickFromList lvs !randomize with
+    match List_utils.pickFromList lvs !randomize with
       None -> raise NoLvals
     | Some x -> x
 
@@ -590,7 +597,7 @@ module AliasAssumptions = struct
   let printAliasInfo id (ri1, ri2) =
     let worstCasePrint (s1, s2) =
       (* Start w/ nc to indicate that we can't check it *)
-      L.logStatusF "nc\t%d\t%s/%s\t%d\t%d\n"
+      logStatusF "nc\t%d\t%s/%s\t%d\t%d\n"
         id
         (Lv.string_of_lvscope ri1.lval)
         (Lv.string_of_lvscope ri2.lval)
@@ -601,7 +608,7 @@ module AliasAssumptions = struct
       try
         let lv1 = (lvToAliasStr ri1.lval) in
         let lv2 = (lvToAliasStr ri2.lval) in
-        L.logStatusF "wa\t%d\t%s/%s\t%d\t%d\n"
+        logStatusF "wa\t%d\t%s/%s\t%d\t%d\n"
              id lv1 lv2 s1 s2
       with
         NoLvals
@@ -613,7 +620,7 @@ module AliasAssumptions = struct
       try
         let lv1 = (lvToAliasStr (stripDeref ptr)) in
         let lv2 = (lvToAliasStr targ) in
-        L.logStatusF "wp\t%d\t%s/%s\t%d\t%d\n"
+        logStatusF "wp\t%d\t%s/%s\t%d\t%d\n"
              id lv1 lv2 s1 s2
       with
         NoLvals
@@ -653,7 +660,66 @@ end
  Object version of all the races
 ****************************************)
 
-(* TODO: use the warn_reports.ml stuff to do merges, etc.? *)
+module RaceWarnInput = struct
+  
+  type key = Accs.accessInfo * Accs.accessInfo
+  type data = raceInfo * raceInfo
+
+  (* Maybe check the accessInfos completely to make clustering more even
+     across the different analysis parameters? *)
+  let equalKey (a1, b1) (a2, b2) = 
+(*
+    let a1 = Accs.firstLocation a1 in
+    let a2 = Accs.firstLocation a2 in
+    let b1 = Accs.firstLocation b1 in
+    let b2 = Accs.firstLocation b2 in
+    (eqLocation a1 a2 && eqLocation b1 b2)
+    || (eqLocation a1 b2 && eqLocation b1 a2)
+*)
+    (Accs.eqAccesses a1 a2 && Accs.eqAccesses b1 b2)
+    || (Accs.eqAccesses a1 b2 && Accs.eqAccesses b1 a2)
+
+
+  let hashKey (a1, b1) =
+    let a1 = Accs.firstLocation a1 in
+    let b1 = Accs.firstLocation b1 in
+    Hashtbl.hash a1 lxor Hashtbl.hash b1
+
+  let hashConsKey (a1, b1) = 
+    Accs.hcAccesses a1, Accs.hcAccesses b1
+
+  let debugEqualData (ri1, ri1') (ri2, ri2') =
+    let lv1 = Lv.string_of_lval ri1.lval in
+    let lv2 = Lv.string_of_lval ri2.lval in
+    let loc1 = Accs.firstLocation ri1.access in
+    let loc2 = Accs.firstLocation ri2.access in
+    lv1 = "loglist[0].filename" && lv1 = lv2 && 
+        loc1.line = 26664 && loc2.line = 26664
+
+  let equalData d1 d2 =
+    let eq = eqOneReport d1 d2 in
+    if not eq && debugEqualData d1 d2 then begin
+      let ri1, _ = d1 in
+      let ri2, _ = d2 in
+      let lv1 = Lv.string_of_lval ri1.lval in
+      let lv2 = Lv.string_of_lval ri2.lval in
+      logStatusF "GOTCHA (1) %s\n" lv1;
+      logStatusF "GOTCHA (2) %s\n" lv2;
+    end;
+    eq
+
+  let hashConsData d =
+    hashWarnData d    
+
+  let xmlp = new racesXMLPrinter
+
+  let pDataXML d =
+    xmlp#pRaceInfo d
+
+end
+
+
+module RaceWarnOut = Warn_reports.MakeRep(RaceWarnInput)
 
 
 (************************************************************
@@ -685,13 +751,13 @@ class raceReports ?(initial = LocHash.create 137) () = object (self : 'a)
     let writeSelf oc =
       Marshal.to_channel oc curRaces [Marshal.Closures]
     in
-    open_out_bin_for fname writeSelf
+    Stdutil.open_out_bin_for fname writeSelf
 
   method deserialize (fname:string) =
     let doLoad ic =
       Marshal.from_channel ic
     in
-    curRaces <- open_in_bin_for fname doLoad
+    curRaces <- Stdutil.open_in_bin_for fname doLoad
 
 
   method saveToXML (fname:string) = 
@@ -699,43 +765,34 @@ class raceReports ?(initial = LocHash.create 137) () = object (self : 'a)
       let doc = xmlp#pRaces () curRaces in
       fprint oc 80 doc;
     in
-    open_out_for fname doWrite
+    Stdutil.open_out_for fname doWrite
 
 
 
   (** Add a report to the set of curRaces *)
-  method addRace ({ access = access1; }, { access = access2;} as newR) 
+  method addWarning ({ access = access1; }, { access = access2;} as newR) 
     : cluster_id =
 
-    let l1, l2 = Accs.firstLocation access1, Accs.firstLocation access2 in
+    let (l1, l2) = Accs.firstLocation access1, Accs.firstLocation access2 in
     
-    let f (id, oldReport) l1first =
-      if (List.exists (fun oldR -> eqOneReport newR oldR) oldReport) then
-        ()
-      else if (List.length oldReport < maxWarningsPerLoc) then
-        let newR = hashWarnData newR in
-        if l1first then
+    let tryAddRace (id, oldReport) =
+      if (List.length oldReport < maxWarningsPerLoc) then
+        if (List.exists (fun oldR -> eqOneReport newR oldR) oldReport) then ()
+        else 
+          let newR = hashWarnData newR in
           LocHash.replace curRaces (l1, l2) (id, (newR :: oldReport))
-        else
-          LocHash.replace curRaces (l2, l1) (id, (newR :: oldReport)) in
-
+    in
     try
       let (id, oldReport1) = LocHash.find curRaces (l1, l2) in
-      f (id, oldReport1) true;
+      tryAddRace (id, oldReport1);
       id
     with Not_found ->
-      try
-        let (id, oldReport2) = LocHash.find curRaces (l2, l1) in
-        f (id, oldReport2) false;
-        id
-      with Not_found ->
-        L.logStatus "New race added to race reports";
-        L.flushStatus ();
-        let newID = newClusterId () in
-        let newR = hashWarnData newR in
-        LocHash.add curRaces (l1, l2) (newID, [ newR ]);
-        newID
-
+      logStatus "New race added to race reports";
+      flushStatus ();
+      let newID = newClusterId () in
+      let newR = hashWarnData newR in
+      LocHash.add curRaces (l1, l2) (newID, [ newR ]);
+      newID
 
   (** frequency of lval appearance, thread root appearance, etc. *)
   method printStats =

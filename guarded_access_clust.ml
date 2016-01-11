@@ -169,7 +169,7 @@ let addCorr ?(pseudo=None) lv curLocks location fk curMap =
     in
     LMap.add curLocks newAccs oldLSM 
   in
-  CMap.add lv newLSM curMap
+  CMap.add lv newLSM curMap (* not addComb? *)
 
 
 (** Update access info across functions (at a function call). *)
@@ -214,7 +214,8 @@ let enumAccesses (accs : straintMap) =
 let iterCorrs = CMap.iter
 
 let iterGuardedAccs foo corr =
-  LMap.iter (fun ls acc -> foo acc.corrAccesses ls acc.corrPseudo) corr
+  LMap.iter 
+    (fun ls acc -> foo acc.corrAccesses ls locUnknown acc.corrPseudo) corr
 
 let hasPseudo corr =
   LMap.exists (fun _ acc -> not (PAS.is_empty acc.corrPseudo)) corr

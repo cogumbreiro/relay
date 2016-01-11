@@ -42,40 +42,37 @@
 open Cil
 open Fstructs
 open Scc_cg
+open Summary_keys
 open Warn_reports
 
 module RP = Race_reports
 
-
 (***** Message types ******)
 
 type root = 
-    MEntry of fKey
-  | MThread of fKey
+    MEntry of Callg.funID
+  | MThread of Callg.funID
               
 type warnKey = root * root
     
 type userName = string
     
 type path = string
-    
+
+(* TODO: make work w/ context-sens. callgraph *)    
 
 (** Message clients send to the server -- 
     "Noti" messages represent clients notifying the server of an event
     "Req"  messages represent a client requesting service 
            from the server 
     "Lock" messages are a special client lock request *)
-(*
-type 'a message =
-*)
 type message =
     MInit
   | MInitReply of int
 
   | MReqSCCWork 
   | MSCCReady of scc 
-  | MNotiSCCDone of scc * userName * Unix.sockaddr * (fKey * path) list  
-
+  | MNotiSCCDone of scc * userName * Unix.sockaddr * (sumKey * path) list
 
   | MLockWarn of warnKey
   | MUnlockWarn of warnKey
@@ -85,8 +82,8 @@ type message =
 
   | MWarnBarrier of int
  
-  | MReqSum of fKey list
-  | MReplySum of (userName * Unix.sockaddr, (fKey * path) list) Hashtbl.t 
+  | MReqSum of sumKey list
+  | MReplySum of (userName * Unix.sockaddr, (sumKey * path) list) Hashtbl.t 
 
   (* Different warning tag for different kinds of warning reports *)
   | MNotiRace of RP.raceTable

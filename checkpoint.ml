@@ -93,21 +93,15 @@ let clearCheck (key:string) : unit =
 
 (** Check if there is any left-over values for the given key *)
 let getPrevCheck (key:string) : string option =
-  if shouldDo () then
-    try
-      let tab = getOldTable () in
-      let v = Hashtbl.find tab key in
-      Some v
-    with
-      Sys_error _ 
-    | End_of_file
-    | Not_found
-    | Failure _ ->
-        L.logError "Checkpoint: No left-over status file";
-        None
-  else 
+  if shouldDo () then try
+    let tab = getOldTable () in
+    let v = Hashtbl.find tab key in
+    Some v
+  with Sys_error _  | End_of_file | Not_found | Failure _ ->
+    L.logError "Checkpoint: No left-over status file";
     None
-
+  else None
+    
 
   
 (************************************************************

@@ -35,7 +35,8 @@
  *
  *)
 
-(* maincil *)
+
+(* main.ml *)
 (* this module is the program entry point for the 'cilly' program, *)
 (* which reads a C program file, parses it, translates it to the CIL *)
 (* intermediate language, and then renders that back into C *)
@@ -96,6 +97,7 @@ let features : C.featureDescr list =
     Logwrites.feature;
     Heapify.feature1;
     Heapify.feature2;
+    Heapify_separate.feature;
     Oneret.feature;
     makeCFGFeature; (* ww: make CFG *must* come before Partial *) 
     Partial.feature;
@@ -103,6 +105,7 @@ let features : C.featureDescr list =
     Sfi.feature;
     Dataslicing.feature;
     Logcalls.feature;
+    Logcalls2.feature;
     Ptranal.feature;
     Myptranal.feature;
     Trans_alloc.feature;
@@ -116,7 +119,11 @@ let rec processOneFile (cil: C.file) =
 
     if !Cilutil.doCheck then begin
       ignore (E.log "First CIL check\n");
-      ignore (CK.checkFile [] cil);
+      if not (CK.checkFile [] cil) && !Cilutil.strictChecking then begin
+        E.bug ("CIL's internal data structures are inconsistent "
+               ^^"(see the warnings above).  This may be a bug "
+               ^^"in CIL.\n")
+      end
     end;
 
     (* Scan all the features configured from the Makefile and, if they are 
@@ -133,7 +140,11 @@ let rec processOneFile (cil: C.file) =
           (* See if we need to do some checking *)
           if !Cilutil.doCheck && fdesc.C.fd_post_check then begin
             ignore (E.log "CIL check after %s\n" fdesc.C.fd_name);
-            ignore (CK.checkFile [] cil);
+            if not (CK.checkFile [] cil) && !Cilutil.strictChecking then begin
+              E.error ("Feature \"%s\" left CIL's internal data "
+                       ^^"structures in an inconsistent state. "
+                       ^^"(See the warnings above)") fdesc.C.fd_name
+            end
           end
         end)
       features;
@@ -150,7 +161,7 @@ let rec processOneFile (cil: C.file) =
   end
         
 (***** MAIN *****)  
-let rec theMain () =
+let theMain () =
   let usageMsg = "Usage: cilly [options] source-files" in
   (* Processign of output file arguments *)
   let openFile (what: string) (takeit: outfile -> unit) (fl: string) = 
@@ -191,17 +202,17 @@ let rec theMain () =
       [blankLine]
   in
   let featureArgs = 
-    ("", Arg.Unit (fun () -> ()), "\n\t\tCIL Features") :: featureArgs 
+    ("", Arg.Unit (fun () -> ()), " \n\t\tCIL Features") :: featureArgs 
   in
     
   let argDescr = Ciloptions.options @ 
         [ 
           "--out", Arg.String (openFile "output" 
                                  (fun oc -> outChannel := Some oc)),
-              "the name of the output CIL file.  The cilly script sets this for you.";
+              " the name of the output CIL file.\n\t\t\t\tThe cilly script sets this for you.";
           "--mergedout", Arg.String (openFile "merged output"
                                        (fun oc -> mergedChannel := Some oc)),
-              "specify the name of the merged file";
+              " specify the name of the merged file";
         ]
         @ F.args @ featureArgs in
   begin
@@ -210,7 +221,7 @@ let rec theMain () =
     Stats.reset (Stats.has_performance_counters ());
 
     (* parse the command-line arguments *)
-    Arg.parse argDescr Ciloptions.recordFile usageMsg;
+    Arg.parse (Arg.align argDescr) Ciloptions.recordFile usageMsg;
     Cil.initCIL ();
 
     Ciloptions.fileNames := List.rev !Ciloptions.fileNames;
@@ -226,13 +237,13 @@ let rec theMain () =
       let one =
         match files with
           [one] -> one
-        | [] -> E.s (E.error "No arguments for CIL\n")
+        | [] -> E.s (E.error "No arguments for CIL")
         | _ ->
             let merged =
               Stats.time "merge" (Mergecil.merge files)
                 (if !outName = "" then "stdout" else !outName) in
             if !E.hadErrors then
-              E.s (E.error "There were errors during merging\n");
+              E.s (E.error "There were errors during merging");
             (* See if we must save the merged file *)
             (match !mergedChannel with
               None -> ()

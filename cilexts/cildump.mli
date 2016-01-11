@@ -26,3 +26,6 @@ val string_of_stmt : stmt -> string
 val string_of_instr : instr -> string
 
 val string_of_type : typ -> string
+
+val string_of_offset : offset -> string
+

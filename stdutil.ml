@@ -38,11 +38,7 @@
 (** Basic utilities to augment the Ocaml standard library *)
 
 open Cil
-
-module D = Cildump
-module E = Errormsg
-module L = Logging
-module Stat = Mystats
+open Logging
 
 (***************************************************
  * Augment the standard library
@@ -50,7 +46,7 @@ module Stat = Mystats
 
 (** Enhance the exit() function to print stats first *)
 let quit exit_code =
-  Stat.print Pervasives.stdout "STATS:\n";
+  Mystats.print Pervasives.stdout "STATS:\n";
   Gc_stats.printStatistics ();
   exit exit_code
 
@@ -60,6 +56,10 @@ let quit exit_code =
 let getUsageString tail = 
   "Usage: " ^ (Filename.basename Sys.executable_name) ^ " " ^ tail
 
+(** Print the list of arguments that this binary was run with *)
+let printCmdline () =
+  logStatus "Args: ";
+  logStatus (Array.fold_left (fun cur s -> cur ^ " " ^ s) "" Sys.argv)
 
 (** remove all files in a directory that statisfy the filter (non-recursive) *)
 let clearDir dir filter =
@@ -67,11 +67,9 @@ let clearDir dir filter =
   Array.iter 
     (fun fname ->
        if (filter fname) then
-         try
-           Sys.remove (Filename.concat dir fname)
-         with
-           Sys_error e ->
-             L.logError ("couldn't clear dir: " ^ e)) files
+         try Sys.remove (Filename.concat dir fname)
+         with Sys_error e -> logError ("couldn't clear dir: " ^ e)
+    ) files
 
 
 (** conditionally clear out a directory, given a generation number,
@@ -82,153 +80,21 @@ let clearDirGen genNum genFile clearFunc =
     if (Sys.file_exists genFile) then
       let oldNum = Gen_num.getNum genFile in
       genNum <> oldNum
-    else
-      true
+    else true
   in
   if (clearP) then
     (clearFunc ();
-     Gen_num.setNum genNum genFile
-    ) 
-  else
-    L.logStatus "not clearing persistent state, same generation num"
-      
-(*************************** List utils ****************************)
-  
-(** add given [item] if it is not already in the given [lst] *)
-let addOnce (lst: 'a list) (item: 'a) =
-  if (not (List.mem item lst)) then
-    item :: lst
-  else 
-    lst
-
-(** add given [item] if it is not already in the given [lst]. Test for
-    equality of items with the given [eq] func *)
-let addOnceP eq lst item =
-  if (List.exists (fun other -> eq item other) lst) then lst
-  else item :: lst
+     Gen_num.setNum genNum genFile ) 
+  else logStatus "not clearing persistent state, same generation num"
 
 
+(******************** Utils for collections ************************)
 
-(** Take the union of two lists, slowly *)
-let union l1 l2 =
-  List.fold_left addOnce l1 l2
-
+let countMapEntry (_) (_) curCount = curCount + 1
 
 (** Return the size of a map [m], based on the given [fold] function *)
 let mapSize (m) (fold) : int =
-  let count (_) (_) curCount =
-      curCount + 1
-  in
-  fold count m 0
-
-
-(** Return the index of the first element that satisfies pred *)
-let indexOf pred list = 
-  let rec indexHelp curIndex = function
-      [] -> raise Not_found
-    | x :: l -> if pred x then curIndex else indexHelp (curIndex + 1) l
-  in
-  indexHelp 0 list
-
-(** Remove n elements from the head of the list *)
-let rec listSliceHead curL n =
-  if n == 0 then curL
-  else match curL with
-    [] -> raise (Invalid_argument "out of bounds")
-  | _ :: t -> 
-      listSliceHead t (n - 1)
-
-(** Keep n elements from the list, truncating the rest from the tail.
-    The returned list is reverse *)
-let rec listSliceTailRev curL rest n =
-  if n == 0 then curL
-  else match rest with
-    [] -> raise (Invalid_argument "out of bounds")
-  | h :: t ->
-      listSliceTailRev (h :: curL) t (n - 1)
-        
-(** Get a slice of a list given the bounds. Bounds are 0-based and
-    does includes all up to [last - 1]. No fancy negative-indexing.
-    @raise Invalid_argument if out of bounds *)
-let listSlice lis first last =
-  let len = (last - first) in
-  if (len < 0) then raise (Invalid_argument "out of bounds")
-  else
-    let truncH = listSliceHead lis first in
-    let truncL = listSliceTailRev [] truncH len in
-    List.rev truncL
-
-let pickFromList ls randomize =
-  if randomize then begin
-    let len = List.length ls in
-    if len == 0 then None
-    else
-      let picked = Random.int len in
-      Some (List.nth ls picked)
-  end else
-    (* Pick first *)
-    match ls with
-      [] -> None
-    | x :: _ -> Some x
-
-let removeNth ls n =
-  let rec loop curLs curN curHead =
-    match ls with
-      [] -> failwith "removeNth"
-    | x :: t ->
-        if curN == 0 then x, t, curHead
-        else
-          loop t (n - 1) (x :: curHead)
-  in
-  let ele, finalTail, revHead = loop ls n [] in
-  (ele, List.rev_append revHead finalTail)
-
-let stealFromList ls randomize =
-  if randomize then begin
-    let len = List.length ls in
-    if len == 0 then (None, ls)
-    else
-      let picked = Random.int len in
-      let x, newLS = removeNth ls picked in
-      (Some x, newLS)
-  end else
-    (* Pick first *)
-    match ls with
-      [] -> None, ls
-    | x :: t -> (Some x, t)
-
-let pickK n k =
-  if n <= 0 || k > n then 
-    raise (Invalid_argument "pickK")
-  ;
-  let rec loop chosen left =
-    if left = 0 then chosen
-    else
-      let next = Random.int n in
-      if List.mem next chosen then loop chosen left
-      else loop (next :: chosen) (left - 1)
-  in
-  loop [] k
-
-
-(** Iterate through ordered pairs of [l1] and [l2] *)
-let listIterOrderedPairs foo l1 l2 =
-  List.iter (fun x1 -> List.iter (fun x2 -> foo x1 x2) l2) l1
-
-(** Iterate unordered pair combinations within given list [ls] *)
-let listIterPairs foo ls =
-  let rec iter l1 l2 l2start  =
-    match l1, l2, l2start with
-      [], _, _
-    | _, _, []  -> ()
-    | _ :: t1 , [], _ :: t2 ->
-        iter t1 t2 t2
-    | h1 :: _, h2 :: t2, _ ->
-        foo h1 h2;
-        iter l1 t2 l2start
-  in
-  iter ls ls ls
-
+  fold countMapEntry m 0
 
 let seqToString iter seq doElem sep =
   let firstElem = ref true in
@@ -241,6 +107,8 @@ let seqToString iter seq doElem sep =
        ) seq;
   Buffer.contents buff
 
+let mapToList fold m =
+  fold (fun k v cur -> (k, v) :: cur) m []
 
 (***************************************************
  * File / resource functions
@@ -256,7 +124,7 @@ let get_extension name =
 
 
 let finaliseResource closeFunc = fun res ->
-  L.logError "finaliseResource was called?!";
+  logError "finaliseResource was called?!";
   closeFunc res
 
 (** Open the resource (identified by [resourceName]), using 
@@ -330,7 +198,7 @@ let fileToTable ?(sep=":") (fname:string) : (string, string) Hashtbl.t =
       let line = input_line ic in
       match Str.split splitter line with
         [k; v] -> Hashtbl.add result k v
-      | _ -> L.logError ("fileToTable: corrupt entry - " ^ line)
+      | _ -> logError ("fileToTable: corrupt entry - " ^ line)
     done; with End_of_file ->
       ()
   in
@@ -346,3 +214,11 @@ let string_of_hashstats statsFun hashtbl caption : string =
   let tlen, entries, sum_buck_lens, min_buck, med_buck, max_buck =
     statsFun hashtbl in
   Printf.sprintf "%s hash stats (len, ents, sum/min/median/max bucket)\n\t%d\t%d\t%d\t%d\t%d\t%d\t" caption tlen entries sum_buck_lens min_buck med_buck max_buck
+
+
+(************************************************************)
+
+let negF foo = 
+  function x -> not (foo x)
+  
+  

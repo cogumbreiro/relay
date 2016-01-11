@@ -15,7 +15,9 @@
 
 (* Sets over ordered types *)
 
-(** Extended by Jan to have a faster "is the intersection empty?" query *)
+(** Extended by Jan to have a faster "is the intersection empty?" query
+    as well as other common ops. Needed access to internal representation,
+    so a simple module "include" wouldn't work...  *)
 
 module type OrderedType =
   sig
@@ -29,6 +31,8 @@ module type S =
     type t
     val empty: t
     val is_empty: t -> bool
+    val is_singleton : t -> bool
+    val is_singletonX : elt -> t -> bool
     val inter_isEmpty: t -> t -> bool
     val mem: elt -> t -> bool
     val add: elt -> t -> t
@@ -52,6 +56,8 @@ module type S =
     val max_elt: t -> elt
     val choose: t -> elt
     val split: elt -> t -> t * bool * t
+
+    val mapUnchanged: (elt -> elt) -> t -> t
   end
 
 module Make(Ord: OrderedType) =
@@ -193,6 +199,14 @@ module Make(Ord: OrderedType) =
     let empty = Empty
 
     let is_empty = function Empty -> true | _ -> false
+
+    let is_singleton = function 
+        Node (Empty, y, Empty, _) -> true
+      | _ -> false
+          
+    let is_singletonX x = function 
+        Node (Empty, y, Empty, _) -> Ord.compare x y == 0
+      | _ -> false
 
     let rec mem x = function
         Empty -> false
@@ -342,5 +356,13 @@ module Make(Ord: OrderedType) =
       elements_aux [] s
 
     let choose = min_elt
+
+    (* Map operation that must not change the comparable characteristics *)
+    let rec mapUnchanged foo s =
+      match s with
+        Empty -> s
+      | Node(l, v, r, x) ->
+          Node(mapUnchanged foo l, foo v, mapUnchanged foo r, x)
+
 
   end

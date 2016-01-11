@@ -40,25 +40,23 @@
     for a bounded number of times. Other safety features also added. *)
 
 open Stdutil
-open Fstructs
+open Logging
+open Summary_keys
+open Backed_summary
 
-module BS = Backed_summary
-module Req = Request
-module L = Logging
 
-module Make (I:BS.Summarizeable) = struct
+module Make (I:Summarizeable) = struct
   
-  module Basic = BS.Make(I)
+  module Base = Backed_summary.Make(I)
 
   type sum = I.t
 
-
-  class data sumID : [sum] BS.base = object(self)
-    inherit Basic.data sumID as super
+  class data sumID : [sum] base = object(self)
+    inherit Base.data sumID as super
 
     val checkSep = ","
 
-    val checkPointK = "deserial " ^ (BS.string_of_sumType sumID)
+    val checkPointK = "deserial " ^ (string_of_sumType sumID)
 
     val numRetries = 6
       
@@ -67,18 +65,17 @@ module Make (I:BS.Summarizeable) = struct
     (** Check if the checkpoint is clear. If not, remove the summary.
         Assumes the summary can be re-obtained *)
     method cleanup () =
-      L.logStatus ("Checking left-over state in " ^ 
-                     (BS.string_of_sumType sumID));
-      L.flushStatus ();
+      logStatus ("Checking leftover state: " ^ (string_of_sumType sumID));
+      flushStatus ();
       match Checkpoint.getPrevCheck checkPointK with
         Some (info) ->
           let splitter = Str.regexp checkSep in
           (match Str.split splitter info with
              [keyStr; tokStr] -> 
-               let fkey, token = 
-                 (fkey_of_string keyStr, BS.token_of_string tokStr) in
+               let key, token = (sumKey_of_string keyStr, 
+                                 token_of_string tokStr) in
                self#err ("Recovering from deserialization. Nuking: " ^ keyStr);
-               BS.removeSummary fkey sumID token;
+               removeSummary key sumID token;
                Checkpoint.clearCheck checkPointK;
            | _ ->
                self#err "Corrupt checkpoint info";
@@ -89,39 +86,38 @@ module Make (I:BS.Summarizeable) = struct
 
     (** Extended version of deserialize, which will retry when files
         are corrupt, etc. *)
-    method private deserialize fkey token : sum * BS.dbToken =
-      let doDeserial fkey token =
+    method private deserialize key token : sum * dbToken =
+      let doDeserial key token =
         (* Hmm... checkpoints on retry too? 
            Also, what if the token is not the same the next time around? *)
-        let checkpointInfo = (string_of_fkey fkey) ^ checkSep ^ 
-          (BS.string_of_token token) in
+        let checkpointInfo = (string_of_sumKey key) ^ checkSep ^ 
+          (string_of_token token) in
         Checkpoint.addCheck checkPointK checkpointInfo;
-        let result = (super#deserialize fkey token) in
+        let result = (super#deserialize key token) in
         Checkpoint.clearCheck checkPointK;
         result
-      in try 
-        doDeserial fkey token
-      with 
-        Out_of_memory ->
-          (* The file is not corrupt *)
-          let result = ref (I.initVal, token) in
-          (* Serialize other summaries, and free some memory *)
-          Timeout.retry 
-            (fun () ->
-               BS.flushAll ();
-               (* super#serializeAndFlush; *)
-               Gc.full_major ();
-               result := doDeserial fkey token;
-            )
-            (fun () ->
-               L.logError ~prior:0 "deserialization giving up";
-               Checkpoint.clearCheck checkPointK; (* Don't nuke on reboot *)
-               quit 1;
-               (* maybe re-raise exception, but we don't have the latest exc. *)
-            ) numRetries retryTime;
-          !result
+      in try doDeserial key token
+      with Out_of_memory ->
+        (* The file is not corrupt *)
+        let result = ref (I.initVal, token) in
+        (* Serialize other summaries, and free some memory *)
+        Timeout.retry 
+          (fun () ->
+             Backed_summary.flushAll ();
+             (* super#serializeAndFlush; *)
+             Gc.full_major ();
+             result := doDeserial key token;
+          )
+          (fun () ->
+             logError ~prior:0 "deserialization giving up";
+             Checkpoint.clearCheck checkPointK; (* Don't nuke on reboot *)
+             quit 1;
+             (* maybe re-raise exception, but we don't have the latest exc. *)
+          ) numRetries retryTime;
+        !result
+
       | Stack_overflow as e ->
-          (* The file is not corrupt... can't do anything =( *)
+          (* The file is not corrupt... but can't do anything =( *)
           raise e
             
       (* TODO: Check for other non-file-corruption exceptions *)
@@ -132,24 +128,21 @@ module Make (I:BS.Summarizeable) = struct
           let result = ref (I.initVal, token) in
           let redo = 
             (fun () ->
-               let keyToks = Req.requestSumm [(fkey, self#sumTyp)] in
+               let keyToks = Request.requestSumm [(key, self#sumTyp)] in
                match keyToks with
-                 [(k, _, tok)] when k = fkey ->
-                   result := doDeserial k tok
-               | _ ->
-                   L.logError ~prior:0 
-                     "deserialization retry couldn't get sums";
-                   raise e
-            )
+                 [(k, _, tok)] when k = key -> result := doDeserial k tok
+               | _ -> logError ~prior:0  
+                   "deserialization retry couldn't get sums";
+                   raise e )
           in
-          Timeout.retry 
-            redo 
+          Timeout.retry redo 
             (fun () -> 
-               L.logError ~prior:0 "deserialization giving up";
+               logError ~prior:0 "deserialization giving up";
                Checkpoint.clearCheck checkPointK; (* Don't nuke on reboot *)
                quit 1; (* fail fast *)
             ) numRetries retryTime;
-          !result       
-  end (* End class: base *)
+          !result
+
+  end (* End class: data *)
 
 end 

@@ -50,6 +50,8 @@ let string_of_instr (i:instr) : string =
 let string_of_type (t:typ) : string =
   sprint buffsize (d_type () t)
 
+let string_of_offset (off:offset) : string =
+  sprint buffsize (d_offset Pretty.nil () off)        
 
 (***************************************)
 (* Function types and call expressions *)

@@ -1,10 +1,6 @@
 (** Query different alias analyses at different phases *)
 
-open Readcalls
 open Fstructs
-open Filecache
-open Cilfiles
-
 open Alias_types
 
 (***********************************************************)
@@ -13,6 +9,8 @@ open Alias_types
 val initSettings : Config.settings -> string -> unit
 
 val setCurrentFile : Cil.file -> unit
+
+val setFilterFunSig : bool -> unit
 
 (***********************************************************)
 (* Finish up                                               *)

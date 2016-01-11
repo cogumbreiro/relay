@@ -1,10 +1,11 @@
-Sun Aug 10 21:12:40 PDT 2008
-reserved status file: /tmp/temp.DUib0w
-running analysis on /home/jan/research/relay/racetests/knot/ciltrees
+Mon Oct 12 14:20:40 PDT 2009
+reserved status file: /tmp/temp.khrXBp
+running analysis on /home/jan/research/relay-race/racetests/knot/ciltrees
 Registered summary type: rs
 Registered summary type: ss
 Registered summary type: rss
-Registered summary type: mods
+Args: 
+ ./race_anal.exe -cg /home/jan/research/relay-race/racetests/knot/ciltrees -r -u jan -st /tmp/temp.khrXBp
 Checking for data races
 -----
 Loading Cil Varinfo ID ranges for lookup tables
@@ -22,35 +23,742 @@ Finished parsing config group: SYM_EX
 Done reading config file
 myIP: 127.0.0.1
 using /tmp/relay_scratch to store acquired files
-using: /tmp/temp.DUib0w to track status
-Initializing Steensgaard AA info
+using: /tmp/temp.khrXBp to track status
+Initializing Andersen's AA info
 Loading function info
-Using old PTA results
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/racetests/knot/ciltrees/.pta_temp.anders
 Old PTA results loaded
-Reached end of /home/jan/research/relay/racetests/knot/ciltrees/calls.cil call graph file
-Num funcs: 75
+Reached end of /home/jan/research/relay-race/racetests/knot/ciltrees/calls.anders call graph file
+Num funcs: 121
 summary database will use:
-	/home/jan/research/relay/racetests/knot/ciltrees/relay_sums
-Initializing summary mods
-Checking left-over state in mods
+	/home/jan/research/relay-race/racetests/knot/ciltrees/relay_sums
 Initializing summary rss
-Checking left-over state in rss
+Checking leftover state: rss
 Initializing summary ss
-Checking left-over state in ss
+Checking leftover state: ss
 Initializing summary rs
-Checking left-over state in rs
-SH: initEscapeable found (3, 3) thread (acts, formals)
+Checking leftover state: rs
+SH: initEscapeable found (2, 3) thread (acts, formals)
 
-Entry points use roots: false
+Entry points use roots: true
 file server will use: 14440
 trying to clear old summaries / local srcs, etc.
-Scc_cg: Pruned 46 funcs w/out bodies for scc DAG
+Scc_cg: Pruned 32 funcs w/out bodies for scc DAG
 Starting bottomup analysis
 -----
 getting next SCC from server
 Acquiring needed summaries
 =================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: __builtin_fabsl : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:0 : 0.00114893913269
+TIMES : FUN:83.f : 0.00113916397095
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __builtin_fabsl:83.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__builtin_fabsl	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 83.f : 34
+>>> PROGRESS 1/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
 Starting an SCC (1) #1
+=================================
+Summarizing function: strerror : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:579.f : 0.000179052352905
+TIMES : SCC:1 : 0.000186920166016
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: strerror:579.f
+=======
+
+SUMS (nm, lo, un, wr, re):	strerror	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: "foo"
+SIZES: 579.f : 34
+>>> PROGRESS 2/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: __builtin_strchr : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:9.f : 0.000314950942993
+TIMES : SCC:2 : 0.000323057174683
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __builtin_strchr:9.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__builtin_strchr	0	0	0	1	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*s___0)
+
+SIZES: 9.f : 80
+>>> PROGRESS 3/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #3
+=================================
+Summarizing function: pwrite : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:3 : 0.000312805175781
+TIMES : FUN:505.f : 0.000304937362671
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: pwrite:505.f
+=======
+
+SUMS (nm, lo, un, wr, re):	pwrite	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 505.f : 82
+>>> PROGRESS 4/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #4
+=================================
+Summarizing function: pthread_sigmask : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:4 : 0.000694036483765
+TIMES : FUN:573.f : 0.000686168670654
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: pthread_sigmask:573.f
+=======
+
+SUMS (nm, lo, un, wr, re):	pthread_sigmask	0	0	2	2	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 573.f : 163
+>>> PROGRESS 5/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #5
+=================================
+Summarizing function: __builtin_strpbrk : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : FUN:4.f : 0.000333070755005
+TIMES : SCC:5 : 0.000340938568115
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __builtin_strpbrk:4.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__builtin_strpbrk	0	0	0	2	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*s1)
+
+SIZES: 4.f : 116
+>>> PROGRESS 6/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #6
+=================================
+Summarizing function: pread : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:500.f : 0.000324010848999
+TIMES : SCC:6 : 0.000332117080688
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: pread:500.f
+=======
+
+SUMS (nm, lo, un, wr, re):	pread	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 500.f : 82
+>>> PROGRESS 7/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #7
+=================================
+Summarizing function: pthread_self : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:7 : 0.000173091888428
+TIMES : FUN:499.f : 0.000164985656738
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: pthread_self:499.f
+=======
+
+SUMS (nm, lo, un, wr, re):	pthread_self	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0UL
+SIZES: 499.f : 34
+>>> PROGRESS 8/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #8
+=================================
+Summarizing function: pthread_join : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:8 : 0.000349998474121
+TIMES : FUN:569.f : 0.000342845916748
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: pthread_join:569.f
+=======
+
+SUMS (nm, lo, un, wr, re):	pthread_join	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 569.f : 82
+>>> PROGRESS 9/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #9
+=================================
+Summarizing function: __builtin_strncat : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:9 : 0.000324964523315
+TIMES : FUN:141.f : 0.00031590461731
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __builtin_strncat:141.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__builtin_strncat	0	0	1	1	
+
+SS Sum:
+ -> 
+Extptr (1):
+  lval = (*dest)
+
+SIZES: 141.f : 111
+>>> PROGRESS 10/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #10
+=================================
+Summarizing function: pthread_setcanceltype : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:10 : 0.000327825546265
+TIMES : FUN:496.f : 0.000319957733154
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: pthread_setcanceltype:496.f
+=======
+
+SUMS (nm, lo, un, wr, re):	pthread_setcanceltype	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 496.f : 82
+>>> PROGRESS 11/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #11
+=================================
+Summarizing function: time : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:494.f : 0.000240087509155
+TIMES : SCC:11 : 0.000248193740845
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: time:494.f
+=======
+
+SUMS (nm, lo, un, wr, re):	time	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 494.f : 78
+>>> PROGRESS 12/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #12
+=================================
+Summarizing function: fflush : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:12 : 0.00016188621521
+TIMES : FUN:565.f : 0.0001540184021
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: fflush:565.f
+=======
+
+SUMS (nm, lo, un, wr, re):	fflush	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 565.f : 34
+>>> PROGRESS 13/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #13
+=================================
+Summarizing function: ftw : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:13 : 0.000226974487305
+TIMES : FUN:636.f : 0.000219106674194
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: ftw:636.f
+=======
+
+SUMS (nm, lo, un, wr, re):	ftw	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 636.f : 34
+>>> PROGRESS 14/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #14
+=================================
+Summarizing function: putchar : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:14 : 0.000164031982422
+TIMES : FUN:563.f : 0.000156164169312
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: putchar:563.f
+=======
+
+SUMS (nm, lo, un, wr, re):	putchar	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 563.f : 34
+>>> PROGRESS 15/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #15
+=================================
+Summarizing function: isdigit : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:634.f : 0.000146865844727
+TIMES : SCC:15 : 0.0001540184021
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: isdigit:634.f
+=======
+
+SUMS (nm, lo, un, wr, re):	isdigit	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 634.f : 34
+>>> PROGRESS 16/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #16
+=================================
+Summarizing function: memset : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:16 : 0.000303030014038
+TIMES : FUN:559.f : 0.000296115875244
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: memset:559.f
+=======
+
+SUMS (nm, lo, un, wr, re):	memset	0	0	1	0	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*s___0)
+
+SIZES: 559.f : 82
+>>> PROGRESS 17/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #17
+=================================
+Summarizing function: __builtin_strcat : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:17 : 0.000317096710205
+TIMES : FUN:626.f : 0.000310897827148
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __builtin_strcat:626.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__builtin_strcat	0	0	1	1	
+
+SS Sum:
+ -> 
+Extptr (1):
+  lval = (*dest)
+
+SIZES: 626.f : 111
+>>> PROGRESS 18/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #18
+=================================
+Summarizing function: dup : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:18 : 0.000164031982422
+TIMES : FUN:479.f : 0.000157117843628
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: dup:479.f
+=======
+
+SUMS (nm, lo, un, wr, re):	dup	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 479.f : 34
+>>> PROGRESS 19/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #19
+=================================
+Summarizing function: strtok : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:19 : 0.000379085540771
+TIMES : FUN:549.f : 0.000371932983398
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: strtok:549.f
+=======
+
+SUMS (nm, lo, un, wr, re):	strtok	0	0	2	1	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*s___0)
+
+SIZES: 549.f : 143
+>>> PROGRESS 20/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #21
+=================================
+Summarizing function: atoi : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:21 : 0.000319957733154
+TIMES : FUN:295.f : 0.000308990478516
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: atoi:295.f
+=======
+
+SUMS (nm, lo, un, wr, re):	atoi	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 295.f : 82
+>>> PROGRESS 21/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #22
+=================================
+Summarizing function: printf : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:294.f : 0.000272989273071
+TIMES : SCC:22 : 0.000280857086182
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: printf:294.f
+=======
+
+SUMS (nm, lo, un, wr, re):	printf	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 294.f : 82
+>>> PROGRESS 22/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #23
+=================================
+Summarizing function: htons : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:23 : 0.000159978866577
+TIMES : FUN:293.f : 0.000153064727783
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: htons:293.f
+=======
+
+SUMS (nm, lo, un, wr, re):	htons	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: (unsigned short)0
+SIZES: 293.f : 34
+>>> PROGRESS 23/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #24
+=================================
+Summarizing function: socket : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:24 : 0.00016713142395
+TIMES : FUN:288.f : 0.000158071517944
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: socket:288.f
+=======
+
+SUMS (nm, lo, un, wr, re):	socket	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 288.f : 34
+>>> PROGRESS 24/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #37
 =================================
 Summarizing function: cache_init : knot_comb.c
 -----
@@ -59,29 +767,27 @@ Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	21	0	0	1	1	
-
-TIMES : SCC:1 : 0.000280141830444
-TIMES : FUN:21 : 0.000272989273071
+TIMES : FUN:172.f : 0.000869989395142
+TIMES : SCC:37 : 0.000878095626831
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 21
+Summary for function: cache_init:172.f
 =======
 
-SUMS (fk, lo, un, wr, re):	21	0	0	1	1	
+SUMS (nm, lo, un, wr, re):	cache_init	0	0	1	1	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 21 : 103
->>> PROGRESS 1/29 SCCs DONE!
+SIZES: 172.f : 111
+>>> PROGRESS 25/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #2
+Starting an SCC (1) #49
 =================================
 Summarizing function: current_usecs : knot_comb.c
 -----
@@ -90,463 +796,50 @@ Prev ldiffCache hits: 0	misses: 2
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	139	0	0	0	1	
-
-TIMES : FUN:139 : 0.00023889541626
-TIMES : SCC:2 : 0.000247001647949
+TIMES : SCC:49 : 0.000272035598755
+TIMES : FUN:301.f : 0.000264167785645
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 139
+Summary for function: current_usecs:301.f
 =======
 
-SUMS (fk, lo, un, wr, re):	139	0	0	0	1	
+SUMS (nm, lo, un, wr, re):	current_usecs	0	0	0	1	
 
 SS Sum:
  -> 
 $SSTOP
-SIZES: 139 : 81
->>> PROGRESS 2/29 SCCs DONE!
+SIZES: 301.f : 84
+>>> PROGRESS 26/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #0
+Starting an SCC (1) #65
 =================================
-Summarizing function: main : knot_comb.c
+Summarizing function: fprintf : lib.c
 -----
 doing symstate
 Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	230	0	0	10	14	
-
-TIMES : FUN:230 : 0.010055065155
-TIMES : SCC:0 : 0.0100650787354
+TIMES : FUN:161.f : 0.000684022903442
+TIMES : SCC:65 : 0.000692129135132
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 230
+Summary for function: fprintf:161.f
 =======
 
-SUMS (fk, lo, un, wr, re):	230	0	0	10	14	
+SUMS (nm, lo, un, wr, re):	fprintf	0	0	1	2	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 230 : 1003
->>> PROGRESS 3/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #24
-=================================
-Summarizing function: allow_file : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 42	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	151	0	0	0	1	
-
-TIMES : SCC:24 : 0.00132489204407
-TIMES : FUN:151 : 0.00131821632385
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 151
-=======
-
-SUMS (fk, lo, un, wr, re):	151	0	0	0	1	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 151 : 213
->>> PROGRESS 4/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #26
-=================================
-Summarizing function: input_get_line : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 1	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	87	0	0	4	3	
-
-TIMES : FUN:87 : 0.00216889381409
-TIMES : SCC:26 : 0.00217509269714
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 87
-=======
-
-SUMS (fk, lo, un, wr, re):	87	0	0	4	3	
-
-SS Sum:
- -> 
-Extptr (12):
-  lval = (*state).buf[0]
-  lval = (*$NULL)(sum)
-
-SIZES: 87 : 580
->>> PROGRESS 5/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #27
-=================================
-Summarizing function: input_init : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 4	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	86	0	0	3	0	
-
-TIMES : SCC:27 : 0.000503063201904
-TIMES : FUN:86 : 0.000497102737427
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 86
-=======
-
-SUMS (fk, lo, un, wr, re):	86	0	0	3	0	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 86 : 254
->>> PROGRESS 6/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #25
-=================================
-Summarizing function: http_parse : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	89	0	0	5	3	
-
-TIMES : FUN:89 : 0.0037670135498
-TIMES : SCC:25 : 0.00377511978149
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 89
-=======
-
-SUMS (fk, lo, un, wr, re):	89	0	0	5	3	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 89 : 674
->>> PROGRESS 7/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #23
-=================================
-Summarizing function: get_request_filename : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 20	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	157	0	0	5	5	
-
-TIMES : SCC:23 : 0.00146889686584
-TIMES : FUN:157 : 0.00146198272705
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 157
-=======
-
-SUMS (fk, lo, un, wr, re):	157	0	0	5	5	
-
-SS Sum:
- -> 
-Extptr (5):
-  lval = (*request).url
-  lval = (*$NULL)(sum)
-
-SIZES: 157 : 889
->>> PROGRESS 8/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #9
-=================================
-Summarizing function: get_request_fd : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 10	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	162	0	0	5	5	
-
-TIMES : SCC:9 : 0.0012378692627
-TIMES : FUN:162 : 0.00123119354248
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 162
-=======
-
-SUMS (fk, lo, un, wr, re):	162	0	0	5	5	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 162 : 889
->>> PROGRESS 9/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #8
-=================================
-Summarizing function: process_client_nocache : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 10	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	167	0	0	6	7	
-
-TIMES : SCC:8 : 0.00252604484558
-TIMES : FUN:167 : 0.00251889228821
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 167
-=======
-
-SUMS (fk, lo, un, wr, re):	167	0	0	6	7	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 167 : 976
->>> PROGRESS 10/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #14
-=================================
-Summarizing function: fstat__extinline : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 14	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	15	0	0	0	0	
-
-TIMES : SCC:14 : 0.00078010559082
-TIMES : FUN:15 : 0.000772953033447
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 15
-=======
-
-SUMS (fk, lo, un, wr, re):	15	0	0	0	0	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 15 : 34
->>> PROGRESS 11/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #13
-=================================
-Summarizing function: cache_new : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 0	misses: 1
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	44	0	0	6	2	
-
-TIMES : SCC:13 : 0.00428915023804
-TIMES : FUN:44 : 0.00428199768066
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 44
-=======
-
-SUMS (fk, lo, un, wr, re):	44	0	0	6	2	
-
-SS Sum:
- -> 
-$SSTOP
-SIZES: 44 : 821
->>> PROGRESS 12/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #17
-=================================
-Summarizing function: cache_add : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 18	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	58	0	0	5	9	
-
-TIMES : SCC:17 : 0.00140309333801
-TIMES : FUN:58 : 0.00139594078064
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 58
-=======
-
-SUMS (fk, lo, un, wr, re):	58	0	0	5	9	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 58 : 955
->>> PROGRESS 13/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #21
-=================================
-Summarizing function: cache_remove : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 11	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	61	0	0	6	11	
-
-TIMES : SCC:21 : 0.00443696975708
-TIMES : FUN:61 : 0.00442910194397
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 61
-=======
-
-SUMS (fk, lo, un, wr, re):	61	0	0	6	11	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 61 : 1218
->>> PROGRESS 14/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #16
-=================================
-Summarizing function: cache_use : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 12	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	71	0	0	5	11	
-
-TIMES : SCC:16 : 0.000930070877075
-TIMES : FUN:71 : 0.000924110412598
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 71
-=======
-
-SUMS (fk, lo, un, wr, re):	71	0	0	5	11	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 71 : 1775
->>> PROGRESS 15/29 SCCs DONE!
-
-=================================
-getting next SCC from server
-Acquiring needed summaries
-=================================
-Starting an SCC (1) #18
-=================================
-Summarizing function: cache_entry_addref : knot_comb.c
------
-doing symstate
-Prev ldiffCache hits: 31	misses: 2
-
-doing lockset
-doing guarded access
-SUMS (fk, lo, un, wr, re):	23	0	1	1	1	
-
-TIMES : FUN:23 : 0.00114393234253
-TIMES : SCC:18 : 0.00115013122559
-=================================
-Finished an SCC (1)
-=================================
-Summary for function: 23
-=======
-
-SUMS (fk, lo, un, wr, re):	23	0	1	1	1	
-
-SS Sum:
- -> 
-$SSBOT
-SIZES: 23 : 604
->>> PROGRESS 16/29 SCCs DONE!
+SIZES: 161.f : 143
+>>> PROGRESS 27/89 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -554,129 +847,614 @@ Acquiring needed summaries
 =================================
 Starting an SCC (1) #20
 =================================
-Summarizing function: cache_entry_release : knot_comb.c
+Summarizing function: main : knot_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 0	misses: 4
+Prev ldiffCache hits: 0	misses: 1
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	24	0	1	1	3	
-
-TIMES : SCC:20 : 0.00209712982178
-TIMES : FUN:24 : 0.00209212303162
+TIMES : SCC:20 : 0.0124001502991
+TIMES : FUN:404.f : 0.0123920440674
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 24
+Summary for function: main:404.f
 =======
 
-SUMS (fk, lo, un, wr, re):	24	0	1	1	3	
+SUMS (nm, lo, un, wr, re):	main	0	0	15	15	
 
 SS Sum:
  -> 
-$SSBOT
-SIZES: 24 : 702
->>> PROGRESS 17/29 SCCs DONE!
+Vval: 0
+SIZES: 404.f : 1617
+>>> PROGRESS 28/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #19
+Starting an SCC (1) #25
+=================================
+Summarizing function: sigemptyset : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 59	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:617.f : 0.000645875930786
+TIMES : SCC:25 : 0.000655889511108
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: sigemptyset:617.f
+=======
+
+SUMS (nm, lo, un, wr, re):	sigemptyset	0	0	1	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 617.f : 107
+>>> PROGRESS 29/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #26
+=================================
+Summarizing function: bzero : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:26 : 0.000653028488159
+TIMES : FUN:545.f : 0.00064492225647
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: bzero:545.f
+=======
+
+SUMS (nm, lo, un, wr, re):	bzero	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 545.f : 82
+>>> PROGRESS 30/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #27
+=================================
+Summarizing function: sigaddset : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:27 : 0.000631809234619
+TIMES : FUN:611.f : 0.000625133514404
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: sigaddset:611.f
+=======
+
+SUMS (nm, lo, un, wr, re):	sigaddset	0	0	1	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 611.f : 107
+>>> PROGRESS 31/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #28
+=================================
+Summarizing function: connect : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : FUN:539.f : 0.000586032867432
+TIMES : SCC:28 : 0.000594139099121
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: connect:539.f
+=======
+
+SUMS (nm, lo, un, wr, re):	connect	0	0	1	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 539.f : 107
+>>> PROGRESS 32/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #58
+=================================
+Summarizing function: cache_remove : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : FUN:220.f : 0.00191712379456
+TIMES : SCC:58 : 0.00192499160767
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: cache_remove:220.f
+=======
+
+SUMS (nm, lo, un, wr, re):	cache_remove	0	0	5	10	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 220.f : 1188
+>>> PROGRESS 33/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #60
+=================================
+Summarizing function: cache_add : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 12	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:60 : 0.00145578384399
+TIMES : FUN:217.f : 0.00144696235657
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: cache_add:217.f
+=======
+
+SUMS (nm, lo, un, wr, re):	cache_add	0	0	5	9	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 217.f : 1002
+>>> PROGRESS 34/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #56
+=================================
+Summarizing function: cache_use : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 11	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:56 : 0.00107502937317
+TIMES : FUN:231.f : 0.00106596946716
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: cache_use:231.f
+=======
+
+SUMS (nm, lo, un, wr, re):	cache_use	0	0	4	10	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 231.f : 1219
+>>> PROGRESS 35/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #82
+=================================
+Summarizing function: free : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 29	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:82 : 0.000292062759399
+TIMES : FUN:158.f : 0.000283002853394
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: free:158.f
+=======
+
+SUMS (nm, lo, un, wr, re):	free	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 158.f : 82
+>>> PROGRESS 36/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #66
+=================================
+Summarizing function: cache_entry_release : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:175.f : 0.00196599960327
+TIMES : SCC:66 : 0.00197386741638
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: cache_entry_release:175.f
+=======
+
+SUMS (nm, lo, un, wr, re):	cache_entry_release	0	1	3	3	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 175.f : 776
+>>> PROGRESS 37/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #57
 =================================
 Summarizing function: cache_evict : knot_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 5	misses: 4
+Prev ldiffCache hits: 8	misses: 4
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	66	0	1	7	12	
-
-TIMES : SCC:19 : 0.0018138885498
-TIMES : FUN:66 : 0.00180697441101
+TIMES : SCC:57 : 0.00147795677185
+TIMES : FUN:225.f : 0.00146985054016
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 66
+Summary for function: cache_evict:225.f
 =======
 
-SUMS (fk, lo, un, wr, re):	66	0	1	7	12	
+SUMS (nm, lo, un, wr, re):	cache_evict	0	1	7	11	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 66 : 1896
->>> PROGRESS 18/29 SCCs DONE!
+SIZES: 225.f : 1389
+>>> PROGRESS 38/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #15
+Starting an SCC (1) #59
 =================================
-Summarizing function: cache_finish_get : knot_comb.c
+Summarizing function: cache_entry_addref : knot_comb.c
 -----
 doing symstate
 Prev ldiffCache hits: 22	misses: 5
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	73	0	2	8	15	
-
-TIMES : SCC:15 : 0.00124597549438
-TIMES : FUN:73 : 0.00124001502991
+TIMES : SCC:59 : 0.0012321472168
+TIMES : FUN:174.f : 0.0012218952179
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 73
+Summary for function: cache_entry_addref:174.f
 =======
 
-SUMS (fk, lo, un, wr, re):	73	0	2	8	15	
+SUMS (nm, lo, un, wr, re):	cache_entry_addref	0	1	1	1	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 73 : 2288
->>> PROGRESS 19/29 SCCs DONE!
+SIZES: 174.f : 610
+>>> PROGRESS 39/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #22
+Starting an SCC (1) #55
 =================================
-Summarizing function: cache_find : knot_comb.c
+Summarizing function: cache_finish_get : knot_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 35	misses: 5
+Prev ldiffCache hits: 0	misses: 4
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	68	0	0	0	1	
-
-TIMES : FUN:68 : 0.000558853149414
-TIMES : SCC:22 : 0.000564098358154
+TIMES : SCC:55 : 0.00153112411499
+TIMES : FUN:233.f : 0.00152206420898
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 68
+Summary for function: cache_finish_get:233.f
 =======
 
-SUMS (fk, lo, un, wr, re):	68	0	0	0	1	
+SUMS (nm, lo, un, wr, re):	cache_finish_get	0	2	8	14	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 233.f : 1806
+>>> PROGRESS 40/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #62
+=================================
+Summarizing function: fstat__extinline : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 32	misses: 5
+
+doing lockset
+doing guarded access
+TIMES : FUN:166.f : 0.000634908676147
+TIMES : SCC:62 : 0.000643968582153
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: fstat__extinline:166.f
+=======
+
+SUMS (nm, lo, un, wr, re):	fstat__extinline	0	0	0	0	
 
 SS Sum:
  -> 
 $SSTOP
-SIZES: 68 : 78
->>> PROGRESS 20/29 SCCs DONE!
+SIZES: 166.f : 34
+>>> PROGRESS 41/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #12
+Starting an SCC (1) #63
+=================================
+Summarizing function: strdup : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:63 : 0.000387907028198
+TIMES : FUN:164.f : 0.000379085540771
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: strdup:164.f
+=======
+
+SUMS (nm, lo, un, wr, re):	strdup	0	0	1	1	
+
+SS Sum:
+ -> 
+Mustptr -> lval = _a180_4071_lib_1
+SIZES: 164.f : 107
+>>> PROGRESS 42/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #64
+=================================
+Summarizing function: snprintf : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:64 : 0.000370979309082
+TIMES : FUN:162.f : 0.000363111495972
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: snprintf:162.f
+=======
+
+SUMS (nm, lo, un, wr, re):	snprintf	0	0	1	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 162.f : 118
+>>> PROGRESS 43/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #75
+=================================
+Summarizing function: read : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:171.f : 0.000282049179077
+TIMES : SCC:75 : 0.000289916992188
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: read:171.f
+=======
+
+SUMS (nm, lo, un, wr, re):	read	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 171.f : 82
+>>> PROGRESS 44/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #79
+=================================
+Summarizing function: close : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:79 : 0.000169992446899
+TIMES : FUN:170.f : 0.000163078308105
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: close:170.f
+=======
+
+SUMS (nm, lo, un, wr, re):	close	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 170.f : 34
+>>> PROGRESS 45/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #85
+=================================
+Summarizing function: open : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:85 : 0.000366926193237
+TIMES : FUN:156.f : 0.000357866287231
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: open:156.f
+=======
+
+SUMS (nm, lo, un, wr, re):	open	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 156.f : 82
+>>> PROGRESS 46/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #61
+=================================
+Summarizing function: cache_new : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:61 : 0.00496411323547
+TIMES : FUN:196.f : 0.00495505332947
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: cache_new:196.f
+=======
+
+SUMS (nm, lo, un, wr, re):	cache_new	0	0	9	6	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 196.f : 1739
+>>> PROGRESS 47/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #86
+=================================
+Summarizing function: cache_find : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 36	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:227.f : 0.000616073608398
+TIMES : SCC:86 : 0.000623941421509
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: cache_find:227.f
+=======
+
+SUMS (nm, lo, un, wr, re):	cache_find	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 227.f : 84
+>>> PROGRESS 48/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #54
 =================================
 Summarizing function: cache_get : knot_comb.c
 -----
@@ -685,122 +1463,441 @@ Prev ldiffCache hits: 0	misses: 1
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	22	0	2	15	16	
-
-TIMES : SCC:12 : 0.00260519981384
-TIMES : FUN:22 : 0.00259804725647
+TIMES : SCC:54 : 0.00304412841797
+TIMES : FUN:173.f : 0.00303602218628
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 22
+Summary for function: cache_get:173.f
 =======
 
-SUMS (fk, lo, un, wr, re):	22	0	2	15	16	
+SUMS (nm, lo, un, wr, re):	cache_get	0	2	18	19	
 
 SS Sum:
  -> 
 $SSTOP
-SIZES: 22 : 3191
->>> PROGRESS 21/29 SCCs DONE!
+SIZES: 173.f : 3182
+>>> PROGRESS 49/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #11
+Starting an SCC (1) #73
 =================================
-Summarizing function: get_request_entry : knot_comb.c
+Summarizing function: strstr : lib.c
 -----
 doing symstate
-Prev ldiffCache hits: 66	misses: 12
+Prev ldiffCache hits: 71	misses: 12
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	178	0	2	20	21	
-
-TIMES : SCC:11 : 0.00173401832581
-TIMES : FUN:178 : 0.00172686576843
+TIMES : FUN:272.f : 0.000364065170288
+TIMES : SCC:73 : 0.000375032424927
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 178
+Summary for function: strstr:272.f
 =======
 
-SUMS (fk, lo, un, wr, re):	178	0	2	20	21	
+SUMS (nm, lo, un, wr, re):	strstr	0	0	0	1	
 
 SS Sum:
  -> 
-$SSTOP
-SIZES: 178 : 4053
->>> PROGRESS 22/29 SCCs DONE!
+Extptr (1):
+  lval = (*haystack)
+
+SIZES: 272.f : 82
+>>> PROGRESS 50/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #10
+Starting an SCC (1) #70
 =================================
-Summarizing function: process_client_cache : knot_comb.c
+Summarizing function: allow_file : knot_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 39	misses: 4
+Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	184	0	2	22	24	
-
-TIMES : SCC:10 : 0.00410795211792
-TIMES : FUN:184 : 0.00410103797913
+TIMES : SCC:70 : 0.00135898590088
+TIMES : FUN:313.f : 0.00135087966919
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 184
+Summary for function: allow_file:313.f
 =======
 
-SUMS (fk, lo, un, wr, re):	184	0	2	22	24	
+SUMS (nm, lo, un, wr, re):	allow_file	0	0	0	1	
 
 SS Sum:
  -> 
 $SSTOP
-SIZES: 184 : 4319
->>> PROGRESS 23/29 SCCs DONE!
+SIZES: 313.f : 208
+>>> PROGRESS 51/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #28
+Starting an SCC (1) #72
 =================================
-Summarizing function: http_init : knot_comb.c
+Summarizing function: input_get_line : knot_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 49	misses: 7
+Prev ldiffCache hits: 2	misses: 1
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	88	0	0	4	0	
-
-TIMES : SCC:28 : 0.000607013702393
-TIMES : FUN:88 : 0.000602006912231
+TIMES : SCC:72 : 0.00273704528809
+TIMES : FUN:247.f : 0.0027289390564
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 88
+Summary for function: input_get_line:247.f
 =======
 
-SUMS (fk, lo, un, wr, re):	88	0	0	4	0	
+SUMS (nm, lo, un, wr, re):	input_get_line	0	0	3	3	
+
+SS Sum:
+ -> 
+Extptr (12):
+  lval = (*state).buf[0]
+  lval = (*$NULL)(sum)
+
+SIZES: 247.f : 593
+>>> PROGRESS 52/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #74
+=================================
+Summarizing function: input_init : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 6	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:74 : 0.000902891159058
+TIMES : FUN:246.f : 0.000894069671631
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: input_init:246.f
+=======
+
+SUMS (nm, lo, un, wr, re):	input_init	0	0	3	0	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 88 : 432
->>> PROGRESS 24/29 SCCs DONE!
+SIZES: 246.f : 259
+>>> PROGRESS 53/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #7
+Starting an SCC (1) #78
+=================================
+Summarizing function: strlen : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+TIMES : SCC:78 : 0.000298976898193
+TIMES : FUN:245.f : 0.000290155410767
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: strlen:245.f
+=======
+
+SUMS (nm, lo, un, wr, re):	strlen	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: 0U
+SIZES: 245.f : 82
+>>> PROGRESS 54/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #71
+=================================
+Summarizing function: http_parse : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:249.f : 0.00490093231201
+TIMES : SCC:71 : 0.0049090385437
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: http_parse:249.f
+=======
+
+SUMS (nm, lo, un, wr, re):	http_parse	0	0	8	7	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 249.f : 1237
+>>> PROGRESS 55/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #69
+=================================
+Summarizing function: get_request_filename : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 21	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:319.f : 0.0016610622406
+TIMES : SCC:69 : 0.00167012214661
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: get_request_filename:319.f
+=======
+
+SUMS (nm, lo, un, wr, re):	get_request_filename	0	0	8	9	
+
+SS Sum:
+ -> 
+Extptr (5):
+  lval = (*request).url
+  lval = (*$NULL)(sum)
+
+SIZES: 319.f : 1455
+>>> PROGRESS 56/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #53
+=================================
+Summarizing function: get_request_entry : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 17	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:53 : 0.00266695022583
+TIMES : FUN:342.f : 0.0026581287384
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: get_request_entry:342.f
+=======
+
+SUMS (nm, lo, un, wr, re):	get_request_entry	0	2	25	28	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 342.f : 5015
+>>> PROGRESS 57/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #76
+=================================
+Summarizing function: write : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 52	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : FUN:296.f : 0.000324964523315
+TIMES : SCC:76 : 0.000334978103638
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: write:296.f
+=======
+
+SUMS (nm, lo, un, wr, re):	write	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 296.f : 82
+>>> PROGRESS 58/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #83
+=================================
+Summarizing function: __errno_location : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:83 : 0.000173807144165
+TIMES : FUN:299.f : 0.000165939331055
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __errno_location:299.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__errno_location	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 299.f : 34
+>>> PROGRESS 59/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #52
+=================================
+Summarizing function: process_client_cache : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:52 : 0.00457286834717
+TIMES : FUN:348.f : 0.00456404685974
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: process_client_cache:348.f
+=======
+
+SUMS (nm, lo, un, wr, re):	process_client_cache	0	2	27	30	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 348.f : 5330
+>>> PROGRESS 60/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #68
+=================================
+Summarizing function: get_request_fd : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 65	misses: 8
+
+doing lockset
+doing guarded access
+TIMES : SCC:68 : 0.00143718719482
+TIMES : FUN:324.f : 0.00142908096313
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: get_request_fd:324.f
+=======
+
+SUMS (nm, lo, un, wr, re):	get_request_fd	0	0	8	11	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 324.f : 1804
+>>> PROGRESS 61/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #67
+=================================
+Summarizing function: process_client_nocache : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 18	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:67 : 0.00345802307129
+TIMES : FUN:330.f : 0.00344896316528
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: process_client_nocache:330.f
+=======
+
+SUMS (nm, lo, un, wr, re):	process_client_nocache	0	0	10	14	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 330.f : 1989
+>>> PROGRESS 62/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #77
+=================================
+Summarizing function: http_init : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 26	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:77 : 0.00044584274292
+TIMES : FUN:248.f : 0.000437021255493
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: http_init:248.f
+=======
+
+SUMS (nm, lo, un, wr, re):	http_init	0	0	4	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 248.f : 438
+>>> PROGRESS 63/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #51
 =================================
 Summarizing function: process_client : knot_comb.c
 -----
@@ -809,147 +1906,746 @@ Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	195	0	2	21	24	
-
-TIMES : SCC:7 : 0.00475907325745
-TIMES : FUN:195 : 0.00475192070007
+TIMES : SCC:51 : 0.00453877449036
+TIMES : FUN:361.f : 0.00452899932861
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 195
+Summary for function: process_client:361.f
 =======
 
-SUMS (fk, lo, un, wr, re):	195	0	2	21	24	
+SUMS (nm, lo, un, wr, re):	process_client	0	2	31	36	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 195 : 3876
->>> PROGRESS 25/29 SCCs DONE!
+SIZES: 361.f : 5798
+>>> PROGRESS 64/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #6
+Starting an SCC (1) #47
 =================================
 Summarizing function: accept_loop : knot_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 62	misses: 8
+Prev ldiffCache hits: 88	misses: 8
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	208	1	0	24	28	
-
-TIMES : SCC:6 : 0.0061149597168
-TIMES : FUN:208 : 0.00610613822937
+TIMES : SCC:47 : 0.00501012802124
+TIMES : FUN:375.f : 0.00500106811523
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 208
+Summary for function: accept_loop:375.f
 =======
 
-SUMS (fk, lo, un, wr, re):	208	1	0	24	28	
+SUMS (nm, lo, un, wr, re):	accept_loop	1	0	36	40	
 
 SS Sum:
  -> 
 $SSBOT
-SIZES: 208 : 4225
->>> PROGRESS 26/29 SCCs DONE!
+SIZES: 375.f : 6217
+>>> PROGRESS 65/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #3
+Starting an SCC (1) #29
 =================================
 Summarizing function: thread_main : knot_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 61	misses: 6
+Prev ldiffCache hits: 83	misses: 6
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	224	1	0	24	30	
-
-TIMES : SCC:3 : 0.00131893157959
-TIMES : FUN:224 : 0.0013120174408
+TIMES : SCC:29 : 0.00512194633484
+TIMES : FUN:394.f : 0.0051109790802
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 224
+Summary for function: thread_main:394.f
 =======
 
-SUMS (fk, lo, un, wr, re):	224	1	0	24	30	
+SUMS (nm, lo, un, wr, re):	thread_main	1	0	37	42	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 224 : 4354
->>> PROGRESS 27/29 SCCs DONE!
+SIZES: 394.f : 6389
+>>> PROGRESS 66/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #4
+Starting an SCC (1) #30
 =================================
-Summarizing function: thread_process_client : knot_comb.c
+Summarizing function: hstrerror : lib.c
 -----
 doing symstate
-Prev ldiffCache hits: 50	misses: 3
+Prev ldiffCache hits: 75	misses: 3
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	205	0	2	22	25	
-
-TIMES : FUN:205 : 0.0010290145874
-TIMES : SCC:4 : 0.00103402137756
+TIMES : SCC:30 : 0.000184774398804
+TIMES : FUN:536.f : 0.000178098678589
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 205
+Summary for function: hstrerror:536.f
 =======
 
-SUMS (fk, lo, un, wr, re):	205	0	2	22	25	
+SUMS (nm, lo, un, wr, re):	hstrerror	0	0	0	0	
 
 SS Sum:
  -> 
-Vval: 0
-SIZES: 205 : 3950
->>> PROGRESS 28/29 SCCs DONE!
+Vval: "foo"
+SIZES: 536.f : 34
+>>> PROGRESS 67/89 SCCs DONE!
 
 =================================
 getting next SCC from server
 Acquiring needed summaries
 =================================
-Starting an SCC (1) #5
+Starting an SCC (1) #31
+=================================
+Summarizing function: fclose : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:31 : 0.000173807144165
+TIMES : FUN:464.f : 0.000165939331055
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: fclose:464.f
+=======
+
+SUMS (nm, lo, un, wr, re):	fclose	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 464.f : 34
+>>> PROGRESS 68/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #32
+=================================
+Summarizing function: inet_addr : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:606.f : 0.000297069549561
+TIMES : SCC:32 : 0.000303983688354
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: inet_addr:606.f
+=======
+
+SUMS (nm, lo, un, wr, re):	inet_addr	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: ss
+SIZES: 606.f : 82
+>>> PROGRESS 69/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #33
 =================================
 Summarizing function: thread_main_autospawn : knot_comb.c
 -----
 doing symstate
-Prev ldiffCache hits: 44	misses: 3
+Prev ldiffCache hits: 0	misses: 0
 
 doing lockset
 doing guarded access
-SUMS (fk, lo, un, wr, re):	221	1	0	24	28	
-
-TIMES : SCC:5 : 0.000895023345947
-TIMES : FUN:221 : 0.000890970230103
+TIMES : FUN:391.f : 0.00182604789734
+TIMES : SCC:33 : 0.00183510780334
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: 221
+Summary for function: thread_main_autospawn:391.f
 =======
 
-SUMS (fk, lo, un, wr, re):	221	1	0	24	28	
+SUMS (nm, lo, un, wr, re):	thread_main_autospawn	1	0	36	40	
 
 SS Sum:
  -> 
 Vval: 0
-SIZES: 221 : 4231
->>> PROGRESS 29/29 SCCs DONE!
+SIZES: 391.f : 6212
+>>> PROGRESS 70/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #34
+=================================
+Summarizing function: fopen64 : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 74	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : SCC:34 : 0.000268936157227
+TIMES : FUN:461.f : 0.000257015228271
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: fopen64:461.f
+=======
+
+SUMS (nm, lo, un, wr, re):	fopen64	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 461.f : 34
+>>> PROGRESS 71/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #35
+=================================
+Summarizing function: send : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:35 : 0.000312089920044
+TIMES : FUN:530.f : 0.000304937362671
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: send:530.f
+=======
+
+SUMS (nm, lo, un, wr, re):	send	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 530.f : 82
+>>> PROGRESS 72/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #36
+=================================
+Summarizing function: fopen : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:458.f : 0.000162124633789
+TIMES : SCC:36 : 0.000169992446899
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: fopen:458.f
+=======
+
+SUMS (nm, lo, un, wr, re):	fopen	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 458.f : 34
+>>> PROGRESS 73/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #38
+=================================
+Summarizing function: sprintf : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:38 : 0.00032901763916
+TIMES : FUN:597.f : 0.000322103500366
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: sprintf:597.f
+=======
+
+SUMS (nm, lo, un, wr, re):	sprintf	0	0	1	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 597.f : 118
+>>> PROGRESS 74/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #39
+=================================
+Summarizing function: recv : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:39 : 0.000385046005249
+TIMES : FUN:525.f : 0.00037693977356
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: recv:525.f
+=======
+
+SUMS (nm, lo, un, wr, re):	recv	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 525.f : 82
+>>> PROGRESS 75/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #40
+=================================
+Summarizing function: fread : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:40 : 0.000327110290527
+TIMES : FUN:453.f : 0.000319957733154
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: fread:453.f
+=======
+
+SUMS (nm, lo, un, wr, re):	fread	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0U
+SIZES: 453.f : 82
+>>> PROGRESS 76/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #41
+=================================
+Summarizing function: __h_errno_location : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:41 : 0.000167846679688
+TIMES : FUN:524.f : 0.000159978866577
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __h_errno_location:524.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__h_errno_location	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 524.f : 34
+>>> PROGRESS 77/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #42
+=================================
+Summarizing function: gethostbyname : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:42 : 0.000294208526611
+TIMES : FUN:521.f : 0.000287055969238
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: gethostbyname:521.f
+=======
+
+SUMS (nm, lo, un, wr, re):	gethostbyname	0	0	0	1	
+
+SS Sum:
+ -> 
+Mustptr -> lval = r
+SIZES: 521.f : 82
+>>> PROGRESS 78/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #43
+=================================
+Summarizing function: getopt : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:43 : 0.000380039215088
+TIMES : FUN:592.f : 0.000373125076294
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: getopt:592.f
+=======
+
+SUMS (nm, lo, un, wr, re):	getopt	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 592.f : 114
+>>> PROGRESS 79/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #44
+=================================
+Summarizing function: pthread_cancel : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:590.f : 0.000159978866577
+TIMES : SCC:44 : 0.000166893005371
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: pthread_cancel:590.f
+=======
+
+SUMS (nm, lo, un, wr, re):	pthread_cancel	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 590.f : 34
+>>> PROGRESS 80/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #45
+=================================
+Summarizing function: fwrite : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:45 : 0.000227212905884
+TIMES : FUN:447.f : 0.000220060348511
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: fwrite:447.f
+=======
+
+SUMS (nm, lo, un, wr, re):	fwrite	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0U
+SIZES: 447.f : 34
+>>> PROGRESS 81/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #46
+=================================
+Summarizing function: inet_ntoa : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:46 : 0.000216960906982
+TIMES : FUN:518.f : 0.000209093093872
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: inet_ntoa:518.f
+=======
+
+SUMS (nm, lo, un, wr, re):	inet_ntoa	0	0	0	0	
+
+SS Sum:
+ -> 
+Mustptr -> lval = b
+SIZES: 518.f : 34
+>>> PROGRESS 82/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #48
+=================================
+Summarizing function: unlink : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:445.f : 0.000159025192261
+TIMES : SCC:48 : 0.000166177749634
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: unlink:445.f
+=======
+
+SUMS (nm, lo, un, wr, re):	unlink	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 445.f : 34
+>>> PROGRESS 83/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #50
+=================================
+Summarizing function: thread_process_client : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:50 : 0.00196695327759
+TIMES : FUN:372.f : 0.0019588470459
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: thread_process_client:372.f
+=======
+
+SUMS (nm, lo, un, wr, re):	thread_process_client	0	2	32	37	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 372.f : 5864
+>>> PROGRESS 84/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #80
+=================================
+Summarizing function: sigwait : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 65	misses: 4
+
+doing lockset
+doing guarded access
+TIMES : FUN:514.f : 0.000418901443481
+TIMES : SCC:80 : 0.000427007675171
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: sigwait:514.f
+=======
+
+SUMS (nm, lo, un, wr, re):	sigwait	0	0	2	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 514.f : 143
+>>> PROGRESS 85/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #81
+=================================
+Summarizing function: vfprintf : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:81 : 0.000353097915649
+TIMES : FUN:585.f : 0.000344038009644
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: vfprintf:585.f
+=======
+
+SUMS (nm, lo, un, wr, re):	vfprintf	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 585.f : 82
+>>> PROGRESS 86/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #84
+=================================
+Summarizing function: __builtin_fabs : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : FUN:85.f : 0.00016713142395
+TIMES : SCC:84 : 0.000174045562744
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: __builtin_fabs:85.f
+=======
+
+SUMS (nm, lo, un, wr, re):	__builtin_fabs	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 85.f : 34
+>>> PROGRESS 87/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #87
+=================================
+Summarizing function: alarm : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:87 : 0.000167846679688
+TIMES : FUN:511.f : 0.000159978866577
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: alarm:511.f
+=======
+
+SUMS (nm, lo, un, wr, re):	alarm	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0U
+SIZES: 511.f : 34
+>>> PROGRESS 88/89 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #88
+=================================
+Summarizing function: lseek : lib.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:88 : 0.000200986862183
+TIMES : FUN:581.f : 0.000194072723389
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: lseek:581.f
+=======
+
+SUMS (nm, lo, un, wr, re):	lseek	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: offset
+SIZES: 581.f : 34
+>>> PROGRESS 89/89 SCCs DONE!
 
 =================================
 getting next SCC from server
@@ -960,15 +2656,15 @@ Bottomup analysis complete
 
 Beginning Thread Analysis:
 -----
-Expected # thread-creation site pairs: 3
+Expected # thread-creation site pairs: 6
 checking a thread-creation pair
-Prev ldiffCache hits: 50	misses: 2
+Prev ldiffCache hits: 0	misses: 0
 
 doing symstate
-Prev ldiffCache hits: 103	misses: 3
+Prev ldiffCache hits: 152	misses: 3
 
 doing symstate
-now checking thread roots: thread_main, thread_main
+now checking thread roots: thread_main(394.f), thread_main(394.f)
 New race added to race reports
 New race added to race reports
 New race added to race reports
@@ -979,103 +2675,339 @@ New race added to race reports
 New race added to race reports
 New race added to race reports
 New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-New race added to race reports
-now checking thread roots: thread_main, thread_main_autospawn
-now checking thread roots: thread_main_autospawn, thread_main
-now checking thread roots: thread_main_autospawn, thread_main_autospawn
+now checking thread roots: thread_main(391.f), thread_main_autospawn(391.f)
+now checking thread roots: thread_main_autospawn(394.f), thread_main(394.f)
+now checking thread roots: thread_main_autospawn(391.f), thread_main_autospawn(391.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 103	misses: 3
+Prev ldiffCache hits: 152	misses: 3
 
 doing symstate
-Prev ldiffCache hits: 103	misses: 3
+Prev ldiffCache hits: 152	misses: 3
 
 doing symstate
-now checking thread roots: thread_main, thread_process_client
+now checking thread roots: thread_main(372.f), thread_process_client(372.f)
 New race added to race reports
-now checking thread roots: thread_main_autospawn, thread_process_client
+now checking thread roots: thread_main_autospawn(372.f), thread_process_client(372.f)
 done with pair, sending notification
 checking a thread-creation pair
-Prev ldiffCache hits: 45	misses: 2
+Prev ldiffCache hits: 66	misses: 3
 
 doing symstate
-Prev ldiffCache hits: 45	misses: 2
-
-doing symstate
-now checking thread roots: thread_process_client, thread_process_client
+now checking thread roots: thread_main(404.f), main(404.f)
 New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+now checking thread roots: thread_main_autospawn(404.f), main(404.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 152	misses: 3
+
+doing symstate
+Prev ldiffCache hits: 66	misses: 3
+
+doing symstate
+now checking thread roots: thread_process_client(372.f), thread_process_client(372.f)
+New race added to race reports
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 66	misses: 3
+
+doing symstate
+now checking thread roots: thread_process_client(404.f), main(404.f)
+New race added to race reports
+done with pair, sending notification
+checking a thread-creation pair
+now checking thread roots: main(404.f), main(404.f)
 done with pair, sending notification
 completed all thread pairs
+Sorting races
+
+Printing races
+
 ****
 Possible race between access to:
+
+g_cache_hits @ knot_comb.c:764 and
+g_cache_hits @ knot_comb.c:764
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:487:(173.f)] and
+	[knot_comb.c:1251:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {g_cache_mutex#g:184} (1)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_cache_hits @ knot_comb.c:764 and
+g_cache_hits @ knot_comb.c:764
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:487:(173.f)] and
+	[knot_comb.c:1252:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {g_cache_mutex#g:184} (1)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_cache_misses @ knot_comb.c:765 and
+g_cache_misses @ knot_comb.c:765
+	Cluster ID: 18
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:490:(173.f)] and
+	[knot_comb.c:1253:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {g_cache_mutex#g:184} (1)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_cache_misses @ knot_comb.c:765 and
+g_cache_misses @ knot_comb.c:765
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:490:(173.f)] and
+	[knot_comb.c:1254:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {g_cache_mutex#g:184} (1)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_hash @ knot_comb.c:263 and
+g_hash @ knot_comb.c:263
+	Cluster ID: 24
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:372:(217.f), knot_comb.c:423:(220.f), knot_comb.c:446:(227.f)] and
+	[knot_comb.c:472:(172.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {g_cache_mutex#g:184} (1)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_spawn_on_demand @ knot_comb.c:756 and
+g_spawn_on_demand @ knot_comb.c:756
+	Cluster ID: 25
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1080:(375.f)] and
+	[knot_comb.c:1184:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
 g_conn_open @ knot_comb.c:760 and
 g_conn_open @ knot_comb.c:760
-	Cluster ID: 6
+	Cluster ID: 0
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:1072] and
-	[knot_comb.c:1072]
+	[knot_comb.c:1072:(375.f)] and
+	[knot_comb.c:1072:(375.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
 	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(1)
 	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(2)
+(1)
 	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 ****
 Possible race between access to:
+
+g_conn_open @ knot_comb.c:760 and
+g_conn_open @ knot_comb.c:760
+	Cluster ID: 19
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1072:(375.f)] and
+	[knot_comb.c:1244:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_open @ knot_comb.c:760 and
+g_conn_open @ knot_comb.c:760
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1072:(375.f)] and
+	[knot_comb.c:1245:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
 g_conn_fail @ knot_comb.c:761 and
 g_conn_fail @ knot_comb.c:761
-	Cluster ID: 7
+	Cluster ID: 1
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:1012, knot_comb.c:1035, knot_comb.c:1092] and
-	[knot_comb.c:1012, knot_comb.c:1035]
+	[knot_comb.c:1012:(361.f), knot_comb.c:1035:(361.f), knot_comb.c:1092:(375.f)] and
+	[knot_comb.c:1012:(361.f), knot_comb.c:1035:(361.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 (1)
 	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 (2)
 	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
@@ -1084,33 +3016,88 @@ Different possible paths & LS (first 4):
 	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 ****
 Possible race between access to:
+
+g_conn_fail @ knot_comb.c:761 and
+g_conn_fail @ knot_comb.c:761
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1012:(361.f), knot_comb.c:1035:(361.f)] and
+	[knot_comb.c:1248:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_fail @ knot_comb.c:761 and
+g_conn_fail @ knot_comb.c:761
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1012:(361.f), knot_comb.c:1035:(361.f)] and
+	[knot_comb.c:1249:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
 g_conn_succeed @ knot_comb.c:762 and
 g_conn_succeed @ knot_comb.c:762
-	Cluster ID: 8
+	Cluster ID: 2
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:1010] and
-	[knot_comb.c:1010]
+	[knot_comb.c:1010:(361.f)] and
+	[knot_comb.c:1010:(361.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 (1)
 	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 (2)
 	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
@@ -1119,22 +3106,77 @@ Different possible paths & LS (first 4):
 	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 ****
 Possible race between access to:
-g_conn_active @ knot_comb.c:763 and
-g_conn_active @ knot_comb.c:763
+
+g_conn_succeed @ knot_comb.c:762 and
+g_conn_succeed @ knot_comb.c:762
 	Cluster ID: 21
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:1045] and
-	[knot_comb.c:1045]
+	[knot_comb.c:1010:(361.f)] and
+	[knot_comb.c:1246:(404.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_succeed @ knot_comb.c:762 and
+g_conn_succeed @ knot_comb.c:762
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1010:(361.f)] and
+	[knot_comb.c:1247:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_active @ knot_comb.c:763 and
+g_conn_active @ knot_comb.c:763
+	Cluster ID: 26
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1045:(372.f)] and
+	[knot_comb.c:1045:(372.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
 	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 
@@ -1142,481 +3184,132 @@ Different possible paths & LS (first 4):
 
 ****
 Possible race between access to:
+
 g_conn_active @ knot_comb.c:763 and
 g_conn_active @ knot_comb.c:763
-	Cluster ID: 20
+	Cluster ID: 27
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:1073, knot_comb.c:1093, knot_comb.c:1099] and
-	[knot_comb.c:1045]
+	[knot_comb.c:1045:(372.f)] and
+	[knot_comb.c:1250:(404.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 ****
 Possible race between access to:
+
 g_conn_active @ knot_comb.c:763 and
 g_conn_active @ knot_comb.c:763
-	Cluster ID: 9
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1073, knot_comb.c:1093, knot_comb.c:1099] and
-	[knot_comb.c:1073, knot_comb.c:1093, knot_comb.c:1099]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-g_bytes_sent @ knot_comb.c:766 and
-g_bytes_sent @ knot_comb.c:766
 	Cluster ID: 10
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:901, knot_comb.c:958, knot_comb.c:1022] and
-	[knot_comb.c:901, knot_comb.c:958, knot_comb.c:1022]
+	[knot_comb.c:1073:(375.f), knot_comb.c:1093:(375.f), knot_comb.c:1099:(375.f)] and
+	[knot_comb.c:1045:(372.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-attr_init_done @ knot_comb.c:1051 and
-attr_init_done @ knot_comb.c:1051
-	Cluster ID: 17
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1087] and
-	[knot_comb.c:1081]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-attr_init_done @ knot_comb.c:1051 and
-attr_init_done @ knot_comb.c:1051
-	Cluster ID: 12
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1087] and
-	[knot_comb.c:1087]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-[REP: 0].refs and
-[REP: 0].refs
-	Cluster ID: 13
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:511, knot_comb.c:525] and
-	[knot_comb.c:511, knot_comb.c:525, knot_comb.c:526]
-
-	Confidence: used PTA nodes lblSet(0, 0)
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-[REP: 11] and
-[REP: 11]
-	Cluster ID: 14
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:605, knot_comb.c:610, knot_comb.c:632] and
-	[knot_comb.c:605, knot_comb.c:610, knot_comb.c:632]
-
-	Confidence: used PTA nodes lblSet(0, 0)
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
 	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 ****
 Possible race between access to:
-[REP: 50] and
-[REP: 50]
-	Cluster ID: 15
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:693] and
-	[knot_comb.c:693]
 
-	Confidence: used PTA nodes lblSet(0, 0)
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-[REP: 50] and
-(*$NULL) @ :-1
-	Cluster ID: 19
-	Escapes? true / false 
-	Accessed at locs:
-	[knot_comb.c:693] and
-	[knot_comb.c:593]
-
-	Confidence: Same type
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-
-Different possible paths & LS (first 4):
-
-(0)
-	lval 1: (*$NULL)
-	lval 2: [REP: 50]
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(2)
-	lval 1: (*$NULL)
-	lval 2: [REP: 50]
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-[REP: 11] and
-(*$NULL) @ :-1
-	Cluster ID: 18
-	Escapes? true / false 
-	Accessed at locs:
-	[knot_comb.c:605, knot_comb.c:610, knot_comb.c:632] and
-	[knot_comb.c:593]
-
-	Confidence: Same type
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-
-Different possible paths & LS (first 4):
-
-(0)
-	lval 1: (*$NULL)
-	lval 2: [REP: 11]
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(2)
-	lval 1: (*$NULL)
-	lval 2: [REP: 11]
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-_a939_27720_knot_comb_1 @ knot_comb.c:922 and
-_a939_27720_knot_comb_1 @ knot_comb.c:922
-	Cluster ID: 11
-	Escapes? false / false 
-	Accessed at locs:
-	[knot_comb.c:945] and
-	[knot_comb.c:945]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-_a319_9679_knot_comb_1.total @ knot_comb.c:268 and
-_a319_9679_knot_comb_1.total @ knot_comb.c:268
-	Cluster ID: 5
-	Escapes? false / false 
-	Accessed at locs:
-	[knot_comb.c:328] and
-	[knot_comb.c:328]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-_a319_9679_knot_comb_1.refs @ knot_comb.c:268 and
-_a319_9679_knot_comb_1.refs @ knot_comb.c:268
-	Cluster ID: 4
-	Escapes? false / false 
-	Accessed at locs:
-	[knot_comb.c:329] and
-	[knot_comb.c:329]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-_a319_9679_knot_comb_1.prev @ knot_comb.c:268 and
-_a319_9679_knot_comb_1.prev @ knot_comb.c:268
+g_conn_active @ knot_comb.c:763 and
+g_conn_active @ knot_comb.c:763
 	Cluster ID: 3
-	Escapes? false / false 
+	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:332] and
-	[knot_comb.c:332]
+	[knot_comb.c:1073:(375.f), knot_comb.c:1093:(375.f), knot_comb.c:1099:(375.f)] and
+	[knot_comb.c:1073:(375.f), knot_comb.c:1093:(375.f), knot_comb.c:1099:(375.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
 	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+
+g_conn_active @ knot_comb.c:763 and
+g_conn_active @ knot_comb.c:763
+	Cluster ID: 22
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1073:(375.f), knot_comb.c:1093:(375.f), knot_comb.c:1099:(375.f)] and
+	[knot_comb.c:1250:(404.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_bytes_sent @ knot_comb.c:766 and
+g_bytes_sent @ knot_comb.c:766
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:901:(330.f), knot_comb.c:958:(348.f), knot_comb.c:1022:(361.f)] and
+	[knot_comb.c:901:(330.f), knot_comb.c:958:(348.f), knot_comb.c:1022:(361.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
 (1)
 	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 (2)
 	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
@@ -1625,129 +3318,212 @@ Different possible paths & LS (first 4):
 	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 ****
 Possible race between access to:
-_a319_9679_knot_comb_1.next @ knot_comb.c:268 and
-_a319_9679_knot_comb_1.next @ knot_comb.c:268
-	Cluster ID: 2
-	Escapes? false / false 
+
+g_bytes_sent @ knot_comb.c:766 and
+g_bytes_sent @ knot_comb.c:766
+	Cluster ID: 23
+	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:331] and
-	[knot_comb.c:331]
+	[knot_comb.c:901:(330.f), knot_comb.c:958:(348.f), knot_comb.c:1022:(361.f)] and
+	[knot_comb.c:1242:(404.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
 	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 (1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
 	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
 ****
 Possible race between access to:
-_a319_9679_knot_comb_1.filename @ knot_comb.c:268 and
-_a319_9679_knot_comb_1.filename @ knot_comb.c:268
-	Cluster ID: 1
-	Escapes? false / false 
-	Accessed at locs:
-	[knot_comb.c:323] and
-	[knot_comb.c:323]
 
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-_a319_9679_knot_comb_1.data @ knot_comb.c:268 and
-_a319_9679_knot_comb_1.data @ knot_comb.c:268
-	Cluster ID: 0
-	Escapes? false / false 
-	Accessed at locs:
-	[knot_comb.c:327] and
-	[knot_comb.c:327]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-	made empty at: :-1
-LS for 2nd access:
-L+ = empty;
-	made empty at: :-1
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-_a319_9679_knot_comb_1.filename @ knot_comb.c:268 and
-_a319_9679_knot_comb_1.filename @ knot_comb.c:268
+g_bytes_sent @ knot_comb.c:766 and
+g_bytes_sent @ knot_comb.c:766
 	Cluster ID: 16
-	Escapes? false / false 
+	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:323] and
-	[knot_comb.c:324]
+	[knot_comb.c:901:(330.f), knot_comb.c:958:(348.f), knot_comb.c:1022:(361.f)] and
+	[knot_comb.c:1243:(404.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: :-1
 LS for 2nd access:
 L+ = empty;
-	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
 	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+attr_init_done @ knot_comb.c:1051 and
+attr_init_done @ knot_comb.c:1051
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1087:(375.f)] and
+	[knot_comb.c:1081:(375.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
 	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+
+attr_init_done @ knot_comb.c:1051 and
+attr_init_done @ knot_comb.c:1051
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1087:(375.f)] and
+	[knot_comb.c:1087:(375.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+
+REP:[641] and
+REP:[641]
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[lib.c:299:(158.f), knot_comb.c:605:(249.f), knot_comb.c:610:(249.f), knot_comb.c:632:(249.f)] and
+	[lib.c:190:(161.f), lib.c:317:(245.f), lib.c:168:(296.f), knot_comb.c:971:(348.f), knot_comb.c:973:(348.f)]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: knot_comb.c:918
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	made empty at: knot_comb.c:918
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+
+REP:[641] and
+REP:[641]
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[lib.c:299:(158.f), knot_comb.c:605:(249.f), knot_comb.c:610:(249.f), knot_comb.c:632:(249.f)] and
+	[lib.c:299:(158.f), knot_comb.c:605:(249.f), knot_comb.c:610:(249.f), knot_comb.c:632:(249.f)]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: knot_comb.c:918
+LS for 2nd access:
+L+ = empty;
+	made empty at: knot_comb.c:918
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+
+REP:[641].refs and
+REP:[641].refs
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:511:(174.f), knot_comb.c:525:(175.f), knot_comb.c:526:(175.f)] and
+	[knot_comb.c:511:(174.f), knot_comb.c:525:(175.f)]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: knot_comb.c:985
+LS for 2nd access:
+L+ = empty;
+	made empty at: knot_comb.c:985
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
 
 Different possible paths & LS (first 4):
 
@@ -1766,30 +3542,26 @@ Different possible paths & LS (first 4):
 
 
 $$$$$$
-Total Warnings: 22
+Total Warnings: 28
 
 
 Printing Alias assumptions used by warnings
 -----
-nc	13	[REP: 0].refs#g/[REP: 0].refs#g	0	0
-nc	14	[REP: 11]#g/[REP: 11]#g	0	0
-nc	15	[REP: 50]#g/[REP: 50]#g	0	0
-writeState: Not needed for CIL PTA
-writeState: Not needed for Steens PTA
-Golden lvals hash stats (len, ents, sum/min/median/max bucket)
-	173	78	516	0	3	6	
-Golden lvals hash stats (len, ents, sum/min/median/max bucket)
-	173	0	0	0	0	0	
-Golden types hash stats (len, ents, sum/min/median/max bucket)
-	173	43	123	0	0	3	
-Golden compInfos hash stats (len, ents, sum/min/median/max bucket)
-	173	0	0	0	0	0	
-Elapsed time (secs): 0.208012
-Top heap size (words): 552960
-Current heap size (words): 552960
-Lifetime allocated bytes: 24146328.
-Collections -- minor: 18 major: 5 compactions: 0
+nc	9	REP:[641]#g/REP:[641]#g	0	0
+nc	6	REP:[641]#g/REP:[641]#g	0	0
+nc	7	REP:[641].refs#g/REP:[641].refs#g	0	0
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/racetests/knot/ciltrees/.pta_temp.anders
+
+Elapsed time (secs): 0.368022
+Top heap size (MB): 2
+Current heap size (MB): 2
+Lifetime allocated bytes (MB): 40
+Collections -- minor: 28 major: 7 compactions: 1
+Bytes per word: 4
+Exhausted tries: 1
 return value is 0
 ran 1 times
-cleared status file: /tmp/temp.DUib0w
-Sun Aug 10 21:12:41 PDT 2008
+cleared status file: /tmp/temp.khrXBp
+Mon Oct 12 14:20:40 PDT 2009

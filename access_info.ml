@@ -1,18 +1,18 @@
 
 (** Common information that can be tracked for all "accesses" *)
 
-open Fstructs
+open Cil
+open Callg
 
-module Du = Cildump
 module L = Logging
 module CLv = Cil_lvals
 
 
 (** Function + source-code location *)
-type funLoc = fKey * Cil.location
+type funLoc = funID * Cil.location
 
 let compareFunLoc (k1, l1) (k2, l2) = 
-  let c = k1 - k2 in 
+  let c = Callg.compareFunID k1 k2 in 
   if c == 0 then Cil.compareLoc l1 l2 else c
 
 (** Set of Function + File + Line number locations *)
@@ -33,8 +33,8 @@ let firstLocation a =
   let _, l = Locs.min_elt a in
   l
 
-let string_loc (fkey, loc) =
-  Du.string_of_loc loc
+let string_loc (fid, loc) =
+  Printf.sprintf "%s:(%s)" (Cildump.string_of_loc loc) (fid_to_string fid)
 
 let string_of_accesses a =
   let outString = Buffer.create 10 in
@@ -43,8 +43,8 @@ let string_of_accesses a =
   Buffer.add_string outString "]";
   Buffer.contents outString
 
-let hcAccLocation (fk, loc) =
-  (fk, CLv.distillLoc loc)
+let hcAccLocation (fid, loc) =
+  (fid, CLv.distillLoc loc)
 
 (** Hash-cons the info related to an access *)
 let hcAccesses a = 

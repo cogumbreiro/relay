@@ -9,7 +9,7 @@ cillyroot = os.environ['CILLYROOT']
 cilly_bin = os.path.join(cillyroot,'cilly') 
 
 #figure out where the sources of the program are rooted
-progroot = os.path.abspath (os.environ['CURROOT'])
+progroot = os.path.realpath (os.environ['CURROOT'])
 if progroot[-1] != '/':
     progroot = progroot + '/'
 
@@ -25,7 +25,7 @@ def addFromRootPath (filename):
        /tmp/x.c --> /tmp/x.c
 
     """
-    absPath = os.path.abspath(filename)
+    absPath = os.path.realpath(filename)
     if (os.path.commonprefix ([progroot, absPath]) != progroot):
         print >> sys.stderr, "addFromRootPath: file not in progroot (%s, %s)" \
             % (progroot, absPath)
@@ -74,8 +74,10 @@ else :
 
 
 # still need ptr analysis to check if fp calls are to malloc
-cillyargs = ['cilly', '--dotrans_alloc', 
+cillyargs = ['cilly', 
+             '--doheapify_sep', '--heapify_locals', 
+             '--dotrans_alloc',
 #             '--verbose', '--tr', 'rmtmps',
-             '--domyptranal', '--dodumpfile'] + sys.argv[1:]
+             '--keepunused', '--domyptranal', '--dodumpfile'] + sys.argv[1:]
 
 os.execv(cilly_bin, cillyargs)

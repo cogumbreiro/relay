@@ -26,6 +26,10 @@ module type SYMEX_NULL = sig
 
   val mayBeNull : Lvals.aExp list -> nullStat
 
+  val filterNulls : Lvals.aExp list -> Lvals.aExp list
+
+  val filterNullsLvals : Lvals.aLval list -> Lvals.aLval list
+
 end
 
 module type SYMEX_NULL_GEN_INPUT = sig
@@ -75,7 +79,9 @@ module SYMEX_NULL_GEN (S : SYMEX_NULL_GEN_INPUT) = struct
     match lv with
       (Lv.CVar v as h), _ -> if S.isNullHost h then Null else NotNull
     | Lv.AbsHost _, _ -> RepNode
-    | Lv.CMem e, _ -> expMayBeNull e (* shouldn't have to recurse though *)
+    | (Lv.CMem e as h), _ -> 
+        if S.isNullHost h then Null
+        else expMayBeNull e (* shouldn't have to recurse though? *)
         
   let expMayBeNullBool exp =
     match expMayBeNull exp with
@@ -93,6 +99,22 @@ module SYMEX_NULL_GEN (S : SYMEX_NULL_GEN_INPUT) = struct
          if compareNullStat cur other < 0 then other
          else cur
       ) NotNull exps
+
+  let notNullExp exp =
+    match expMayBeNull exp with
+      NotNull | RepNode -> true
+    | Null -> false
+
+  let filterNulls exps =
+    List.filter notNullExp exps
+
+  let notNullLval exp =
+    match lvMayBeNull exp with
+      NotNull | RepNode -> true
+    | Null -> false
+
+  let filterNullsLvals lvals =
+    List.filter notNullLval lvals
 
 end
 
@@ -112,11 +134,11 @@ module type SYMEX = sig
 
     val sum : sumdb
 
-    val printSummary : sumdb -> fKey -> unit
+    val printSummary : sumdb -> Summary_keys.sumKey -> unit
 
   end
 
-  val init : Config.settings -> simpleCallG -> Modsummaryi.modSum -> unit
+  val init : Config.settings -> Callg.callG -> Modsummaryi.modSum -> unit
 
   val printExitState : unit -> unit
 
@@ -136,7 +158,7 @@ module type SYMEX = sig
 
   val lvalsOfExps : Lvals.aExp list -> Lvals.aLval list
 
-  class symexAnalysis : Analysis_dep.analysis
+  class symexAnalysis : IntraDataflow.analysis
 
   module NULL : SYMEX_NULL
 

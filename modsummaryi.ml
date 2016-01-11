@@ -35,7 +35,7 @@
   
 *)
 
-open Fstructs
+open Summary_keys
 open Lvals
 
 (** Basic Interface for mod summaries (track what externally visible 
@@ -43,11 +43,11 @@ open Lvals
 
 class type modSum = object 
 
-  method getMods : fKey -> (aLval * Scope.scope ) list
+  method getMods : sumKey -> (aLval * Scope.scope ) list
 
-  method iterMods : fKey -> (aLval * Scope.scope -> unit) -> unit
+  method iterMods : sumKey -> (aLval * Scope.scope -> unit) -> unit
 
-  method foldMods : 'a. fKey -> (aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a
+  method foldMods : 'a.  sumKey -> (aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a
 
 end
 
@@ -63,7 +63,7 @@ class absModSumm : modSum = object
   method iterMods fkey foo =
     failwith init_error_msg
 
-  method foldMods : 'a. fKey -> (aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a =
+  method foldMods : 'a.  sumKey -> (aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a =
     fun fkey foo acc ->
       failwith init_error_msg
 

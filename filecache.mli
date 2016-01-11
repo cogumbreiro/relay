@@ -1,6 +1,5 @@
 
 open Fstructs
-open Cil
 open Cilfiles
 
 
@@ -24,7 +23,7 @@ end
 
 (************** Basic Loaders ****************)
 
-val cilLoader : string -> file
+val cilLoader : string -> Cil.file
 
 val viLoader : string -> viMap
 

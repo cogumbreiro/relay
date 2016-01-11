@@ -30,6 +30,40 @@ type 't guardaction =
   | GUnreachable  (** The branch will never be taken. *)
 
 
+(** Get the two successors of an If statement *)
+let ifSuccs (s:stmt) : stmt * stmt = 
+  let fstStmt blk = match blk.bstmts with
+      [] -> Cil.dummyStmt
+    | fst::_ -> fst
+  in
+  match s.skind with
+    If(e, b1, b2, _) ->
+      let thenSucc = fstStmt b1 in
+      let elseSucc = fstStmt b2 in
+      let oneFallthrough () = 
+        let fallthrough = 
+          List.filter 
+            (fun s' -> thenSucc != s' && elseSucc != s')
+            s.succs
+        in
+        match fallthrough with
+          [] -> E.s (bug "Bad CFG: missing fallthrough for If.")
+        | [s'] -> s'
+        | _ ->  E.s (bug "Bad CFG: multiple fallthrough for If.")
+      in
+      (* If thenSucc or elseSucc is Cil.dummyStmt, it's an empty block.
+         So the successor is the statement after the if *)
+      let stmtOrFallthrough s' =
+        if s' == Cil.dummyStmt then
+          oneFallthrough ()
+        else 
+          s'
+      in
+      (stmtOrFallthrough thenSucc,
+       stmtOrFallthrough elseSucc)
+        
+  | _-> E.s (bug "ifSuccs on a non-If Statement.")
+
 
 
 (******************************************************************
@@ -191,40 +225,6 @@ module ForwardsDataFlow =
                             worklist) then 
             Queue.add s worklist
 
-
-    (** Get the two successors of an If statement *)
-    let ifSuccs (s:stmt) : stmt * stmt = 
-      let fstStmt blk = match blk.bstmts with
-          [] -> Cil.dummyStmt
-        | fst::_ -> fst
-      in
-      match s.skind with
-        If(e, b1, b2, _) ->
-          let thenSucc = fstStmt b1 in
-          let elseSucc = fstStmt b2 in
-          let oneFallthrough () = 
-            let fallthrough = 
-              List.filter 
-                (fun s' -> thenSucc != s' && elseSucc != s')
-                s.succs
-            in
-            match fallthrough with
-              [] -> E.s (bug "Bad CFG: missing fallthrough for If.")
-            | [s'] -> s'
-            | _ ->  E.s (bug "Bad CFG: multiple fallthrough for If.")
-          in
-          (* If thenSucc or elseSucc is Cil.dummyStmt, it's an empty block.
-             So the successor is the statement after the if *)
-          let stmtOrFallthrough s' =
-            if s' == Cil.dummyStmt then
-              oneFallthrough ()
-            else 
-              s'
-          in
-          (stmtOrFallthrough thenSucc,
-           stmtOrFallthrough elseSucc)
-            
-      | _-> E.s (bug "ifSuccs on a non-If Statement.")
 
     (** Process a statement *)
     let processStmt (s: stmt) : unit = 

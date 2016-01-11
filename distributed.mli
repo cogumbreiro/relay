@@ -1,7 +1,6 @@
+
 open Fstructs
-open Backed_summary
-open Readcalls
-open Backed_summary
+open Summary_keys
 open Scc_cg
 
 type sccLock
@@ -26,9 +25,9 @@ val recordSccDone : int -> unit
 
 val isSccDone : int -> bool
 
-val recordFunDone : fKey -> (Unix.sockaddr * string * string) list -> unit
+val recordFunDone : sumKey -> (Unix.sockaddr * string * string) list -> unit
 
-val isFunDone : fKey -> (Unix.sockaddr * string * string) list option
+val isFunDone : sumKey -> (Unix.sockaddr * string * string) list option
 
 (*************** Higher level completion checks *********)
 

@@ -1,5 +1,5 @@
 (*
-  Copyright (c) 2006-2007, Regents of the University of California
+  Copyright (c) 2007-2008, Regents of the University of California
 
   Authors: Jan Voung, Ravi Chugh
   
@@ -41,16 +41,16 @@
     dataflow analysis for state using [Relative_set] *)
 
 open Relative_set
+open Logging
+open Cildump
 
 module Intra = IntraDataflow
 module A = Alias
 module Lv = Lvals
 module Stat = Mystats
-module L = Logging
-module Du = Cildump
 module SPTA = Symstate2
 module LS = Lockset
-
+module BS = Backed_summary
 
 (********** Simple, partially-defined, relative state managers **********)
   
@@ -152,8 +152,8 @@ class ['state, 'relSt, 'part, 'info] relTransFunc
       (* Only update if mustAlias... how to generalize soundness requirement? *)
       if (mustAlias) then (
         (if (List.length subbedLvs > 1) 
-         then L.logError ("RS: summary lock maps to multiple @ " ^ 
-                            (Du.string_of_loc callSite))
+         then logError ("RS: summary lock maps to multiple @ " ^ 
+                            (string_of_loc callSite))
         );
         List.fold_left 
           (fun curState subbedLv ->
@@ -197,31 +197,23 @@ class ['state, 'relSt, 'part, 'info] relTransFunc
       stMan#injRel inState newRel
         
     (** Partially handle function calls by only updating the relative state *)
-    method handleCallExp callexp actuals loc (inState : 'st) =
-      let funs = A.funsForCall callexp in
-      if (funs = []) then
-        (L.logError ("handleCall: funptr resolved to 0 fun(s): " ^
-                                (Du.string_of_exp callexp));
-         inState)    
-      else
-        (* Handle each of the called functions (may be >1 if based
-           on a function pointer) by merging the outputs of each call *)
-        (List.fold_left 
-           (fun curState fkey ->
-              (* Find the output state for this call by assuming 
-                 each funptr call started with inState *)
-              let newState =
-                let sumState = stMan#sums#find fkey in
-                if (stMan#isBottom sumState) then
-                  stMan#bottom
-                else
-                  self#applySum actuals loc sumState inState
-              in (* Summary should not be Not_found *)
+    method handleCallExp funs callexp actuals loc (inState : 'st) =
+      (* Handle each of the called functions (may be >1 if based
+         on a function pointer) by merging the outputs of each call *)
+      (List.fold_left 
+         (fun curState fkey ->
+            (* Find the output state for this call by assuming 
+               each funptr call started with inState *)
+            let newState =
+              let sumState = stMan#sums#find fkey in
+              if (stMan#isBottom sumState) then stMan#bottom
+              else self#applySum actuals loc sumState inState
+            in (* Summary should not be Not_found *)
 
-              (* Finally, merge outcome with the rest of the results *)
-              Stat.time "LS combineStates"
-                (stMan#combineStates curState) newState
-           ) stMan#bottom funs)
+            (* Finally, merge outcome with the rest of the results *)
+            Stat.time "LS combineStates"
+              (stMan#combineStates curState) newState
+         ) stMan#bottom funs)
 
   end
   
@@ -264,12 +256,9 @@ class lockTransfer = object (self)
     let appLock = self#applyLocked pp actuals in
     let appUn   = self#applyUnlocked pp actuals in
     let didLocked = 
-      LS.LS.S.fold appLock
-        (LS.LS.getPlus lockDiff) curLS in
-    let didUnlocked = 
-      LS.LS.unique (LS.LS.S.fold appUn
-                      (LS.LS.getMinus lockDiff) didLocked)
-    in
+      LS.LS.S.fold appLock (LS.LS.getPlus lockDiff) curLS in
+    let didUnlocked = LS.LS.unique
+      (LS.LS.S.fold appUn (LS.LS.getMinus lockDiff) didLocked) in
     didUnlocked
 
 

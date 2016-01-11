@@ -1,0 +1,1 @@
+duppy -Wall -W -DDEBUG=y -g -c -o test.o test.c

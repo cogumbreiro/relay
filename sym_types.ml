@@ -131,11 +131,11 @@ let isConst e =
 let makeNullExp () =
   CConst (CStr "$SSBOT")
 
-let nullVar = Lvals.mkVarinfo true "$NULL" (TVoid [])
+let nullVar = CLv.mkVarinfo true "$NULL" (TVoid [])
 
 let nullAddr =
-  { saHost = Lvals.CMem  
-      (Lvals.mkLval (Lvals.hostOfVar  nullVar) NoOffset);
+  { saHost = Lvals.CMem (Lvals.mkLval 
+                           (Lvals.hostOfVar nullVar) NoOffset);
     saSummary = true; }
 
 let isNullAddr addr =
@@ -143,37 +143,6 @@ let isNullAddr addr =
 
 let isNullHost h =
   Lvals.compare_host nullAddr.saHost h == 0
-  
-(* DEPRECATED 
-let rec scopeValue op (v:symVal) = 
-  match v with
-    Vtop
-  | Vbot ->
-      ()
-
-  | Vval e ->
-      Scope.AL.scopeExp op e
-
-  | Vstruct oMap ->
-      OffsetMap.iter 
-        (fun _ v ->
-           scopeValue op v) oMap
-
-  | Vmustptr ( {saHost = h; } , _ ) ->
-      Scope.AL.scopeHost op h
-        
-  | Vmayptr (_, aoSet) ->
-      AddrOffSet.iter 
-        (fun ( {saHost = h; }, _) ->
-           Scope.AL.scopeHost op h) aoSet
-        
-  | Vextptr (_, aoMap) ->
-      AddrOffSet.iter 
-        (fun ( {saHost = h; }, _) ->
-           Scope.AL.scopeHost op h) aoMap
-*)
-
-
 
 (*********************************************************
  * Test / Debug code

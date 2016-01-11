@@ -62,24 +62,24 @@ void *lockWithGoto(void *obj) {
 
 void *munge (void *mArg) {
 
-  dl *dlo = (dl *) mArg;
+  dl *dl = (dl*) mArg;
 
-  _spin_lock (dlo->l);
+  _spin_lock (dl->l);
   
-  dlo->x = dlo->x + 1;
+  dl->x = dl->x + 1;
 
-  _spin_unlock (dlo->l);
+  _spin_unlock (dl->l);
 
 
   return 0;
 }
 
 
-void *raceyMunge (void *mArg) {
+void *racyMunge (void *mArg) {
 
-  dl *dlo = (dl *) mArg;
+  dl *dl = (dl*) mArg;
 
-  dlo->x = dlo->x + 1;
+  dl->x = dl->x + 1;
 
   return 0;
 }
@@ -95,11 +95,11 @@ void makeRunThreads (dl *datlock) {
 
 }
 
-void makeRunRacey (dl *dlracey) {
+void makeRunRacy (dl *dlracy) {
 
   pthread_t temp_t;
 
-  pthread_create (&temp_t, (void *)0, &raceyMunge, (void*) dlracey);
+  pthread_create (&temp_t, (void *)0, &racyMunge, (void*) dlracy);
 
 }
 
@@ -148,7 +148,7 @@ void *loopWithGoto (void *lis) {
 
   
   while (nod && 
-         (((dl*)nod->obj)->x != 10 )) { // racey read..
+         (((dl*)nod->obj)->x != 10 )) { // racy read..
     nod = nod->next;
   }
   
@@ -196,7 +196,7 @@ spinlock_t *getLock(dl *o) {
   return o->l;
 }
 
-void raceyGetterUse(list *l) {
+void racyGetterUse(list *l) {
 
   dl *curObj;
   spinlock_t *tempLock;
@@ -277,15 +277,15 @@ int main(int argc, char *argv[]) {
 
   /* Make one thread that races, but w/ no-one else, because it 
      Accesses different data! */
-  pthread_create (&temp_t, (void *)0, &raceyMunge, (void*) data_and_lock2);
+  pthread_create (&temp_t, (void *)0, &racyMunge, (void*) data_and_lock2);
 
   /* Try the same, but w/ one level of function call indirection */
-  makeRunRacey (data_and_lock3);
+  makeRunRacy (data_and_lock3);
 
   /* Now, do the same thing as before, but make the data shared
      so that there REALLY IS A RACE! */
   makeRunThreads (data_and_lock4);
-  pthread_create (&temp_t, (void *)0, &raceyMunge, (void*) data_and_lock4);
+  pthread_create (&temp_t, (void *)0, &racyMunge, (void*) data_and_lock4);
 
   /* Now, try causing a RACE by having one thread access a global
      that aliases w/ an arg */
@@ -319,8 +319,8 @@ int main(int argc, char *argv[]) {
   /* test usage of getters */
   list3 = makeObjList (14);
 
-  pthread_create (&temp_t, (void *)0, &raceyGetterUse, (void*) list3);
-  pthread_create (&temp_t, (void *)0, &raceyGetterUse, (void*) list3);
+  pthread_create (&temp_t, (void *)0, &racyGetterUse, (void*) list3);
+  pthread_create (&temp_t, (void *)0, &racyGetterUse, (void*) list3);
   loopWithGoto(list3);
 
 

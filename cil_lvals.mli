@@ -18,21 +18,21 @@ val simplifyOff : Cil.offset -> Cil.offset
 
 val simplifyLval : Cil.lval -> Cil.lval * bool
 
+val omitCast : Cil.exp -> Cil.exp
 
 exception BaseVINotFound
-
-
-val getIndex : Cil.varinfo list -> Cil.varinfo -> int option
 
 val findBaseVarinfoExp : Cil.exp -> Cil.varinfo
 
 val findBaseVarinfoLval : Cil.lval -> Cil.varinfo
 
+val findTopOffsetLvExp : Cil.exp  -> Cil.offset
+
 val countOpsInExp : Cil.exp -> int
 
 val countOpsWithCount : Cil.exp -> int -> int
 
-
+val mkVarinfo : bool -> string -> Cil.typ -> Cil.varinfo
 
 (***************************************************
  * Actual / Formal substitution on ASTs
@@ -55,6 +55,8 @@ exception TypeNotFound
 
 val unrollTypeNoAttrs : Cil.typ -> Cil.typ
 
+val dropTypeAttribs : Cil.typ -> Cil.typ
+
 val typeOfUnsafe : Cil.exp -> Cil.typ 
 
 val typeOfInitUnsafe : Cil.init -> Cil.typ
@@ -63,14 +65,13 @@ val typeOfLvalUnsafe : Cil. lval -> Cil.typ
 
 val typeOffsetUnsafe : Cil.typ -> Cil.offset -> Cil.typ
 
+val typeAfterDerefOfT : Cil.typ -> Cil.typ
+
 val typeAfterDeref : Cil.exp -> Cil.typ
-
-
 
 val typeAfterDerefNoUnroll : Cil.exp -> Cil.typ
 
 val typeOfNoUnroll : Cil.exp -> Cil.typ
-
 
 
 exception OffsetMismatch of (Cil.fieldinfo * Cil.typ) option
@@ -91,9 +92,8 @@ val locIsUnknown : Cil.location -> bool
  *****************************************************)
 
 module HashedLval : Hashtbl.HashedType with type t  = Cil.lval
-
 module HashedExp : Hashtbl.HashedType with type t = Cil.exp
-
+module HashedTyp : Hashtbl.HashedType with type t = Cil.typ
 
 val distillOff : Cil.offset -> Cil.offset
 

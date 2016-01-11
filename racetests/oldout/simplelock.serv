@@ -1,0 +1,90 @@
+Mon Oct 12 14:20:34 PDT 2009
+incrementing generation number
+incrementing value in gen_num.txt
+
+running server on /home/jan/research/relay-race/racetests/simplelock/ciltrees
+Registered summary type: rs
+Server ip is: 127.0.0.1
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: SERVER
+Done reading config file
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+Initializing Andersen's AA info
+Loading function info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/racetests/simplelock/ciltrees/.pta_temp.anders
+Old PTA results loaded
+Entry points use roots: true
+trying to clear logs
+Callgraph, etc.
+-----
+Reached end of /home/jan/research/relay-race/racetests/simplelock/ciltrees/calls.anders call graph file
+Num funcs: 26
+Scc_cg: Pruned 5 funcs w/out bodies for scc DAG
+Starting server
+-----
+>>> PROGRESS 1/18 SCCs DONE!
+
+>>> PROGRESS 2/18 SCCs DONE!
+
+>>> PROGRESS 3/18 SCCs DONE!
+
+>>> PROGRESS 4/18 SCCs DONE!
+
+>>> PROGRESS 5/18 SCCs DONE!
+
+>>> PROGRESS 6/18 SCCs DONE!
+
+>>> PROGRESS 7/18 SCCs DONE!
+
+>>> PROGRESS 8/18 SCCs DONE!
+
+>>> PROGRESS 9/18 SCCs DONE!
+
+>>> PROGRESS 10/18 SCCs DONE!
+
+>>> PROGRESS 11/18 SCCs DONE!
+
+>>> PROGRESS 12/18 SCCs DONE!
+
+>>> PROGRESS 13/18 SCCs DONE!
+
+>>> PROGRESS 14/18 SCCs DONE!
+
+>>> PROGRESS 15/18 SCCs DONE!
+
+>>> PROGRESS 16/18 SCCs DONE!
+
+>>> PROGRESS 17/18 SCCs DONE!
+
+>>> PROGRESS 18/18 SCCs DONE!
+
+Finished all SCCs
+Received warnings from worker. Status: 1/1
+Sorting races
+
+Printing races
+
+
+
+$$$$$$
+Total Warnings: 0
+Elapsed time (secs): 0.024001
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 1
+Collections -- minor: 11 major: 3 compactions: 0
+Bytes per word: 4
+Mon Oct 12 14:20:35 PDT 2009

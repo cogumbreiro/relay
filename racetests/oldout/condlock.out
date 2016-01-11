@@ -1,0 +1,195 @@
+Mon Oct 12 14:20:35 PDT 2009
+reserved status file: /tmp/temp.7lgG7u
+running analysis on /home/jan/research/relay-race/racetests/condlock/ciltrees
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rss
+Args: 
+ ./race_anal.exe -cg /home/jan/research/relay-race/racetests/condlock/ciltrees -r -u jan -st /tmp/temp.7lgG7u
+Checking for data races
+-----
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.0.1
+using /tmp/relay_scratch to store acquired files
+using: /tmp/temp.7lgG7u to track status
+Initializing Andersen's AA info
+Loading function info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/racetests/condlock/ciltrees/.pta_temp.anders
+Old PTA results loaded
+Reached end of /home/jan/research/relay-race/racetests/condlock/ciltrees/calls.anders call graph file
+Num funcs: 7
+summary database will use:
+	/home/jan/research/relay-race/racetests/condlock/ciltrees/relay_sums
+Initializing summary rss
+Checking leftover state: rss
+Initializing summary ss
+Checking leftover state: ss
+Initializing summary rs
+Checking leftover state: rs
+SH: initEscapeable found (1, 1) thread (acts, formals)
+
+Entry points use roots: true
+file server will use: 14440
+trying to clear old summaries / local srcs, etc.
+Scc_cg: Pruned 5 funcs w/out bodies for scc DAG
+Starting bottomup analysis
+-----
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: condDeposit : cond.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+TIMES : SCC:0 : 0.000623941421509
+TIMES : FUN:354.f : 0.000616073608398
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: condDeposit:354.f
+=======
+
+SUMS (nm, lo, un, wr, re):	condDeposit	0	0	1	3	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 354.f : 276
+>>> PROGRESS 1/2 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: main : cond.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+TIMES : FUN:362.f : 0.000797033309937
+TIMES : SCC:1 : 0.00080394744873
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: main:362.f
+=======
+
+SUMS (nm, lo, un, wr, re):	main	0	0	2	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 362.f : 165
+>>> PROGRESS 2/2 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+
+
+
+Beginning Thread Analysis:
+-----
+Expected # thread-creation site pairs: 3
+checking a thread-creation pair
+Prev ldiffCache hits: 1	misses: 2
+
+doing symstate
+Prev ldiffCache hits: 7	misses: 1
+
+doing symstate
+now checking thread roots: condDeposit(354.f), condDeposit(354.f)
+New race added to race reports
+now checking thread roots: condDeposit(354.f), condDeposit(354.f)
+now checking thread roots: condDeposit(354.f), condDeposit(354.f)
+now checking thread roots: condDeposit(354.f), condDeposit(354.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 7	misses: 1
+
+doing symstate
+now checking thread roots: condDeposit(362.f), main(362.f)
+now checking thread roots: condDeposit(362.f), main(362.f)
+done with pair, sending notification
+checking a thread-creation pair
+now checking thread roots: main(362.f), main(362.f)
+done with pair, sending notification
+completed all thread pairs
+Sorting races
+
+Printing races
+
+****
+Possible race between access to:
+
+donor1_blood @ cond.c:7 and
+donor1_blood @ cond.c:7
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[cond.c:29:(354.f), cond.c:32:(354.f), cond.c:37:(354.f)] and
+	[cond.c:29:(354.f), cond.c:32:(354.f), cond.c:37:(354.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: cond.c:44 35231 w/ func: condDeposit
+	Th. 2 spawned: cond.c:44 35231 w/ func: condDeposit
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: cond.c:45 35294 w/ func: condDeposit
+	Th. 2 spawned: cond.c:44 35231 w/ func: condDeposit
+(1)
+	Th. 1 spawned: cond.c:45 35294 w/ func: condDeposit
+	Th. 2 spawned: cond.c:45 35294 w/ func: condDeposit
+
+
+$$$$$$
+Total Warnings: 1
+
+
+Printing Alias assumptions used by warnings
+-----
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/racetests/condlock/ciltrees/.pta_temp.anders
+
+Elapsed time (secs): 0.028001
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 2
+Collections -- minor: 10 major: 2 compactions: 0
+Bytes per word: 4
+Exhausted tries: 1
+return value is 0
+ran 1 times
+cleared status file: /tmp/temp.7lgG7u
+Mon Oct 12 14:20:35 PDT 2009

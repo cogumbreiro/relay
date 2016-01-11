@@ -15,10 +15,6 @@
 # just as good (since this becomes an 'sh' script)
 
 
-# We must put these AC_SUBST very early, and in this order. See below where we
-# define NEWLINE
-AC_SUBST(CIL_FEATURES_DEFINES) 
-AC_SUBST(NEWLINE)
 
 
 # -------------- usual initial stuff -------------
@@ -35,7 +31,7 @@ AC_PREREQ(2.50)
 # Assign here the CIL version numbers
 CIL_VERSION_MAJOR=1
 CIL_VERSION_MINOR=3
-CIL_VERSION_REV=5
+CIL_VERSION_REV=7
 CIL_VERSION=$CIL_VERSION_MAJOR.$CIL_VERSION_MINOR.$CIL_VERSION_REV
 
 
@@ -52,7 +48,6 @@ fi
 AC_PROG_CC
 
 AC_PROG_INSTALL
-
 
 # find system type (using this macro means we must include
 # the files install-sh, config.sub, and config.guess (all from
@@ -127,7 +122,7 @@ ocamlDownloadInstructions="
 reqMaj=3
 reqMin=08
 knownMaj=3
-knownMin=09
+knownMin=11
 AC_MSG_CHECKING(ocaml version is at least $reqMaj.$reqMin)
 if binaryExists ocamlc; then
   # what version?
@@ -216,6 +211,8 @@ AC_MSG_CHECKING([for Perl])
   case "$perlport" in
     cygwin)
         ;;
+    msys)
+        ;;
     MSWin32) # ActivePerl
         ;;
     linux)
@@ -297,6 +294,10 @@ fi
 # 
 # Now setup the performance counters
 #
+# At runtime, we'll try to get the cycle speed from /proc/cpuinfo
+# or FreeBSD sysctl.  This means binaries can be moved to different computers.
+# CYCLES_PER_USEC is only a backup in case these aren't available.
+# (See the subversion history for the old code that read /proc/cpuinfo here.)
 AC_MSG_CHECKING(if performance counters are usable)
 # Create a C file from src/perfcount.c.in
 rm -f ./cycles.exe
@@ -316,26 +317,7 @@ else
 fi
 rm -f ./cycles.exe
 
-# If we are on Linux and we use performance counters try to get
-# the processor speed from /proc/cpuinfo
 if test "$CYCLES_PER_USEC" != "0" ;then
-     case "$target" in
-        # linux
-        *86*linux*)
-             AC_MSG_CHECKING(if /proc/cpuinfo has processor speed)
-             cpuinfo=`cat /proc/cpuinfo 2>/dev/null | grep "cpu MHz"`
-             [procspeed=`echo $cpuinfo | sed 's/^.*[^0-9]\([0-9]\+\.[0-9]\+\).*$/\1/g'`]
-             if test "$procspeed"!="" ;then
-                CYCLES_PER_USEC=$procspeed
-                AC_MSG_RESULT([got $CYCLES_PER_USEC cycles per us])
-             else
-                AC_MSG_RESULT(no)
-             fi   
-             ;;
-        *)      
-             ;;
-      esac
-      # Now set HAS_PERFCOUNT
       HAS_PERFCOUNT=1
 else
       HAS_PERFCOUNT=0
@@ -372,7 +354,7 @@ AC_MSG_RESULT($UNDERSCORE_NAME)
 
 # checks for header files
 AC_HEADER_STDC
-AC_CHECK_HEADERS(stdlib.h strings.h sys/time.h unistd.h wchar.h)
+AC_CHECK_HEADERS(stdlib.h strings.h sys/time.h unistd.h wchar.h stdbool.h)
 
 # checks for typedefs, structures, and compiler characteristics
 AC_C_CONST
@@ -383,19 +365,46 @@ AC_HEADER_TIME
 AC_FUNC_MEMCMP
 AC_CHECK_FUNCS(mkdir select socket __sysv_signal)
 
+# Find out the true definitions of some integer types
+CIL_CHECK_INTEGER_TYPE(size_t, TYPE_SIZE_T)
+CIL_CHECK_INTEGER_TYPE(wchar_t, TYPE_WCHAR_T)
 
 
 # ----------- platform-specific code -------------
 # $target is typically processor-vendor-os
 case "$target" in
-  # linux
-  *86*linux*|*86*freebsd*|*86*openbsd*|*86*darwin*)
+
+  *86*linux*)
     AC_MSG_RESULT(configuring for linux/x86)
 
     ARCHOS=x86_LINUX
     ;;
 
+  *86*openbsd*)
+    AC_MSG_RESULT(configuring for OpenBSD/x86)
+
+    ARCHOS=x86_OPENBSD
+    ;;
+
+  *i386*freebsd*|*amd64*freebsd*)
+
+    if test x"${ARCH}" = x""; then
+       ARCH=`uname -p`
+    fi
+
+    AC_MSG_RESULT(configuring for freebsd/${ARCH})
+
+    ARCHOS=${ARCH}_FREEBSD
+    ;;
+
+
   # Mac OS X
+  *86*darwin*)
+    AC_MSG_RESULT(configuring for darwin/x86)
+
+    ARCHOS=x86_DARWIN
+    ;;
+
   *powerpc*darwin*)
     AC_MSG_RESULT(configuring for powerpc/darwin, which we treat like linux/x86)
 
@@ -411,9 +420,22 @@ case "$target" in
     # override CILHOME; even on cygwin we want forward slashes
     # sm: I folded this into what I hope will be the only
     # case-analysis of machine type
-    CILHOME=`cygpath -wa "$CILHOME"  | sed -e "s/\\\\\/\\//g"`
+    #CILHOME=`cygpath -wa "$CILHOME"  | sed -e "s/\\\\\/\\//g"`
+    # Try to use the Unix paths even on cygwin. The newest versions of make
+    #  do not like colons in file names
+    CILHOME=`cygpath -u "$CILHOME"`
     CC=`which $CC`
     CC=`cygpath -wa "$CC"  | sed -e "s/\\\\\/\\//g"`
+    ;;
+
+  # MinGW
+  *86*mingw32*)
+    AC_MSG_RESULT(configuring for MinGW on win32/x86)
+
+    ARCHOS=x86_WIN32
+    MINGW=yes
+
+    CC=`which $CC`
     ;;
 
   # Solaris
@@ -427,7 +449,8 @@ case "$target" in
     AC_MSG_ERROR([
       Unsupported platform $target -- sorry.
       ./configure supports these platforms:
-         on x86:     Linux, Win32(with Cygwin), freeBSD, openBSD, and Mac OS X
+         on x86:     Linux, Win32(with Cygwin), FreeBSD, OpenBSD, and Mac OS X
+         on amd64:   FreeBSD
          on PowerPC: Mac OS X 
          on SPARC:   Solaris
     ])
@@ -445,24 +468,10 @@ rm -f obj/$ARCHOS/feature_config.ml
 rm -f obj/.depend/feature_config.d
 AC_MSG_RESULT([done])
 
-# We will use substitution variables whose definition contains newlines. The
-# problem is that when config.status runs, it wants to break the series of
-# substitution commands for sed into fragments based on line count. We could
-# be unlucky and have config.status break the series of substitution in the
-# middle of a variable that contains newlines. So, we first create a single
-# variable called NEWLINE whose definition is a carriage return. This means
-# that there will be exactly one opportunity for this error to happen (in the
-# definition of NEWLINE). The occurrence of AC_SUBST for NEWLINE must occur
-# after those of the variables that use it! And we want to put all of these
-# very early on, to make sure that they are not around the place when the file
-# bets broken.
-
-NEWLINE="\\
-"
 
 
 #
-# CIL/CCured features
+# CIL features
 #
 #
    
@@ -470,30 +479,27 @@ NEWLINE="\\
 
 
 # Give a space-separated list of features with the defaults
-features="blockinggraph=no rand=no arithabs=no zrapp=no"
+features="blockinggraph=no zrapp=no llvm=no"
 
 AC_ARG_WITH(blockinggraph,
     AC_HELP_STRING([--with-blockinggraph],
                    [enable the blocking graph feature]))
-AC_ARG_WITH(rand,
-    AC_HELP_STRING([--with-rand],
-                   [enable the randomized value numbering]))
-AC_ARG_WITH(arithabs,
-    AC_HELP_STRING([--with-arithabs],
-                   [enable the arithmetic abstraction]))
 AC_ARG_WITH(zrapp,
     AC_HELP_STRING([--with-zrapp],
                    [enable the zrapp pretty-printer]))
 
-# Smalloc.ml is distributed by {matth,nks}@cs.berkeley.edu as part of Scrash.
-features="$features smalloc=no"
-
-# cqualann.ml is used by Matt Harren.  Please ignore.
-features="$features cqualann=no"
+AC_ARG_WITH(llvm,
+    AC_HELP_STRING([--with-llvm],
+                   [enable the LLVM code generator]))
 
 # Now add any features specified in the command-line
 
 features="$features $EXTRAFEATURES"
+
+rm -f Makefile.features
+echo "# -*- Mode: makefile -*-">Makefile.features
+echo "# This file was generated automatically by ./configure.in">>Makefile.features
+echo "# We will not need this once configure supports multiline variables">>Makefile.features
 
 for f_val in $features
 do
@@ -510,22 +516,20 @@ do
    AC_MSG_RESULT($curval)
    if test $curval = yes ;then
       CIL_FEATURES="$CIL_FEATURES $f"
+      f_up=`echo $f | tr a-z A-Z`
+      echo "export USE_$f_up=yes">>Makefile.features
    fi
 done
-
-## Now produce the CIL_FEATURES_DEFINES
-CIL_FEATURES_DEFINES=""
-# Convert to upper case
-for f in `echo $CIL_FEATURES | tr a-z A-Z`
-do
-   CIL_FEATURES_DEFINES="${CIL_FEATURES_DEFINES}@NEWLINE@export USE_$f=yes"
-done
+echo "TYPE_SIZE_T=\"$TYPE_SIZE_T\"" >>Makefile.features
+echo "TYPE_WCHAR_T=\"$TYPE_WCHAR_T\"" >>Makefile.features
+chmod -w Makefile.features
 
 
 # ----------------- finish up -------------------
 # names of the variables that get substituted in files; for example,
 # write @ARCHOS@ somewhere in a written file to get it substituted
 AC_SUBST(ARCHOS)
+AC_SUBST(MINGW)
 AC_SUBST(CILHOME)
 AC_SUBST(HAS_MSVC)
 AC_SUBST(DEFAULT_COMPILER)
@@ -544,42 +548,20 @@ AC_SUBST(EXTRASRCDIRS)
 
 # finish the configure script and generate various files; ./configure
 # will apply variable substitutions to <filename>.in to generate <filename>;
-# I find it useful to mark generated files as read-only so I don't
-# accidentally edit them (and them lose my changes when ./configure
-# runs again); I had originally done the chmod after AC_OUTPUT, but
-# the problem is then the chmod doesn't run inside ./config.status
 
-# MY_AC_CONFIG_FILES(filename)
-# do AC_CONFIG_FILES(filename, chmod a-w filename)
-define([MY_AC_CONFIG_FILES],
-[{
-  if test -f [$1].in; then
-    AC_CONFIG_FILES([$1], chmod a-w [$1])
-  else
-    true
-    #echo "skipping [$1] because it's not in this distribution"
-  fi
-}])
-define([MY_AC_CONFIG_EXE_FILES],
-[{
-  if test -f [$1].in; then
-    AC_CONFIG_FILES([$1], [chmod a-w,a+x $1])
-  else
-    true
-    #echo "skipping [$1] because it's not in this distribution"
-  fi
-}])
-
-MY_AC_CONFIG_FILES(Makefile)
-MY_AC_CONFIG_FILES(cil.spec)
-MY_AC_CONFIG_FILES(config.mk)
-MY_AC_CONFIG_FILES(test/Makefile)
-MY_AC_CONFIG_EXE_FILES(bin/cilly.bat)
-MY_AC_CONFIG_EXE_FILES(bin/patcher.bat)
-MY_AC_CONFIG_FILES(bin/CilConfig.pm)
-MY_AC_CONFIG_FILES(doc/index.html)
-MY_AC_CONFIG_FILES(doc/header.html)
-MY_AC_CONFIG_FILES(ocamlutil/perfcount.c)
+CIL_CONFIG_FILES(Makefile)
+CIL_CONFIG_FILES(META)
+CIL_CONFIG_FILES(cil.spec)
+CIL_CONFIG_FILES(config.mk)
+CIL_CONFIG_FILES(test/Makefile)
+CIL_CONFIG_EXE_FILES(bin/cilly.bat)
+CIL_CONFIG_EXE_FILES(bin/patcher.bat)
+CIL_CONFIG_FILES(bin/CilConfig.pm)
+CIL_CONFIG_FILES(doc/index.html)
+CIL_CONFIG_FILES(doc/header.html)
+CIL_CONFIG_FILES(ocamlutil/perfcount.c)
+CIL_CONFIG_FILES(test/llvm/Makefile)
+CIL_CONFIG_FILES(src/machdep-ml.c)
 
 AC_OUTPUT()
 
@@ -597,4 +579,3 @@ CIL configuration:
   Extra source directories    EXTRASRCDIRS       $EXTRASRCDIRS
   Cycles per microsecond      CYCLES_PER_USEC    $CYCLES_PER_USEC
 EOF
-

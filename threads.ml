@@ -38,16 +38,15 @@
 
 (** Manages information about thread creation functions 
     (e.g., which argument to pthread_create is the function pointer
-    for the thread root?)
-*)
+    for the thread root?) *)
 
 open Cil
+open Cildump
 open Fstructs
 open Callg
+open Logging
 
-module D = Cildump
 module A = Alias
-module L = Logging
 module DC = Default_cache
 
 (*************************************************
@@ -62,8 +61,8 @@ type threadCreatorAttribs = {
   tcStartFunName : string; (* if fun doesn't start thread, which fun does? *)
   tcStartFunType : string; 
   tcFPIndex : int;         (* index of arg list for function pointer *)
-  tcArgIndex : int;        (* index of arg list for the args of new thread *)
-  thArgIndex : int;        (* index of where arg is sent to spawned func *)
+  tcArgIndex : int;        (* index of arg list for the actuals of new thread *)
+  thArgIndex : int;        (* index of where formals are sent to spawned func *)
 
   (* 
      TODO: allow a list of arguments from different sources for example, 
@@ -71,17 +70,18 @@ type threadCreatorAttribs = {
      (one during pool creation, and another when the thread starts):
      
      // Make a pool that runs [func]
-     a_pool = g_thread_pool_new (func, obj_arg);
+     a_pool = g_thread_pool_new (func, common_arg);
 
      // Run a thread on argument [new_arg]
      g_thread_pool_push (a_pool, new_arg);
 
+     func (new_arg, common_arg) { ... }
   *)
 
 }
-    
-let (threadCreators : (FNTMap.key * threadCreatorAttribs) list ref ) 
-    = ref [] (* global list of known thread creators *)
+ 
+(** global list of known thread creators and their arguments *)
+let (threadCreators : (FNTMap.key * threadCreatorAttribs) list ref ) = ref [] 
 
 
 (*************************************************
@@ -97,13 +97,9 @@ let topSplitter = Str.split_delim (Str.regexp (ws ^ "[$]" ^ ws))
 exception BadLine
 
 let addThreadCreator (funcName, typString) tcData =
-  if (List.exists 
-        (fun (fkey,_) -> 
-           (compareNT fkey (funcName, typString)) == 0
-        ) !threadCreators) then
-    ()
-  else
-    threadCreators := ((funcName, typString), tcData) :: !threadCreators
+  threadCreators := List_utils.addOnceP 
+    (fun (fnt1, _) (fnt2, _) -> compareNT fnt1 fnt2 == 0)
+    !threadCreators ((funcName, typString), tcData) 
 
 let parseArgIndexes options =
   match options with
@@ -169,7 +165,7 @@ let initSettings settings =
               raise BadLine
          )
        with BadLine ->
-         L.logError ~prior:0 
+         logError ~prior:0 
            ("corrupt value in thread config " ^ details ^"\n")
     ) threadSettings
 
@@ -186,35 +182,43 @@ let find ((fname, ftyp):fNT) =
     List.find 
       (fun ((fn, ft), _) ->
          (* just compare function names (not types) for now *)
-         fname = fn
-      )
+         fname = fn)
       !threadCreators in
   entry
 
-type tccs = (fKey * simpleCallN) list
+(** Thread creator callers (functions that call pthread_create, etc.) *)
+type tcc = {
+  tccID : funID;
+  tccName : string;
+  tccDefFile : string;
+}
 
-
-(* Get a list of all the functions that call thread creation functions *)
-let findTCCallers (cg:simpleCallG) : (fKey * simpleCallN) list =
+(** Get a list of all the functions that call thread creation functions *)
+let findTCCallers cg : tcc list =
+  let createsThread callerKey callerNode = 
+    List.exists 
+      (fun calleeKey ->
+         try
+           let calleeNode = FMap.find calleeKey cg in
+           let (cn, ct) = calleeNode.name, calleeNode.typ in
+           List.exists 
+             (fun ((tcn, tct), _) ->
+                (* (Fstructs.compareNT (cn, ct) (tcn, tct)) == 0 *)
+                (* Just compare the names for now... *)
+                cn = tcn
+             ) !threadCreators
+         with Not_found ->
+           false
+      ) (calleeKeys callerNode)
+  in
+  (* Drops context-sensitivity here... which may be bad if the call
+     to thread_create was through a fun pointer *)
   FMap.fold 
     (fun callerKey callerNode res ->
-       if (List.exists 
-             (fun calleeKey ->
-                try
-                  let calleeNode = FMap.find calleeKey cg in
-                  let (cn, ct) = calleeNode.name, calleeNode.typ in
-                  let creates_thread = List.exists 
-                    (fun ((tcn, tct), _) ->
-                       (* (Fstructs.compareNT (cn, ct) (tcn, tct)) == 0 *)
-                       (* Just compare the names for now... *)
-                       cn = tcn
-                    ) !threadCreators
-                  in creates_thread
-                with Not_found ->
-                  false
-             ) callerNode.callees
-          ) 
-       then (callerKey, callerNode) :: res
+       if createsThread callerKey callerNode then
+         { tccID = callerKey;
+           tccName = callerNode.name;
+           tccDefFile = callerNode.defFile; } :: res
        else res
     ) cg []
 
@@ -234,11 +238,8 @@ let makeFakeActuals threadA arg =
 
 (** A generic visitor that searches for function calls to 
     thread creation functions *)
-class virtual threadCreateVisitor cg = object (self)
+class virtual threadCreateVisitor (cg : callG) = object (self)
   inherit Pp_visitor.ppVisitor
-
-  val curCG = cg
-
 
   (** handle given call to a thread creation function *)
   method handleThreadCreate i loc threadA actuals =
@@ -246,18 +247,19 @@ class virtual threadCreateVisitor cg = object (self)
     let funs = A.funsFromAddr f in
     (* What to do if we don't know what the FP leads to? *)
     if (funs = []) then
-      L.logError ("unknown func ptr used as thread root: " 
-                  ^ (D.string_of_exp f))
+      logError ("unknown func ptr used as thread root: " 
+                ^ (string_of_exp f))
     else
       let arg = List.nth actuals threadA.tcArgIndex in
       let args = makeFakeActuals threadA arg in
-      self#handleThreadRoots i loc f funs args
+      let fids = getMatchingIDs cg funs in
+      self#handleThreadRoots i loc f fids args
 
-    
+        
   (* handle thread creation at instruction i and location l, with 
      root function f (may be a list of funs if funptr) and its argument *)
   method virtual handleThreadRoots : Cil.instr -> Cil.location -> 
-    Cil.exp -> fKey list -> Cil.exp list -> unit
+    Cil.exp -> funID list -> Cil.exp list -> unit
 
 
   (* Look for calls to thread creation functions and handle *)
@@ -265,70 +267,81 @@ class virtual threadCreateVisitor cg = object (self)
     self#setInstrPP i;
     (* Look for calls to thread creators (e.g., pthread_create (...)) *)
     let result = match i with
-      (* Direct Call *)
-      Call(ret, Lval(Var(va),NoOffset), actuals, loc) -> begin
-        let (fname, ftyp) = 
-          (va.vname,
-           D.string_of_ftype va.vtype) in
-        try
-          let tcAttribs = find (fname, ftyp) in
-          self#handleThreadCreate i loc tcAttribs actuals;
-          SkipChildren
-        with Not_found ->
-          (* Most function calls aren't actually going to match... *)
-          SkipChildren
-      end
+        (* Direct Call *)
+        Call(ret, Lval(Var(va),NoOffset), actuals, loc) -> begin
+          let (fname, ftyp) = 
+            (va.vname,
+             string_of_ftype va.vtype) in
+          try
+            let tcAttribs = find (fname, ftyp) in
+            self#handleThreadCreate i loc tcAttribs actuals;
+            SkipChildren
+          with Not_found ->
+            (* Most function calls aren't actually going to match... *)
+            SkipChildren
+        end
 
-    (* Indirect Call *)
-    | Call(ret, Lval(Mem(ptrExp), NoOffset), actuals, loc) ->
-        (* Note: Do not conflate state from function pointer calls *)
-        let aliasedFuns = 
-          A.deref_funptr ptrExp in
-        (* What to do if we don't know what the FP leads to? *)
-        if (aliasedFuns = []) then
-          L.logError ("Threads: No FP targets for: " ^ 
-                        (D.string_of_exp ptrExp))
-        else
-          List.iter 
-            (fun fid ->
-               try
-                 let fnode = FMap.find fid curCG in
-                 let fname, ftyp = fnode.name, fnode.typ in
-                 let tcAttribs = find (fname, ftyp) in
-                 self#handleThreadCreate i loc tcAttribs actuals;
-               with Not_found ->
-                 (* Most function calls aren't going to match *)
-                 ()
-            ) aliasedFuns;
-        SkipChildren
-
-    (* Calls based on offsets *)
-    | Call(_) ->
-        L.logError "threadCreateVisitor: can't interp. a Call instr\n";
-        SkipChildren
-    | _ ->
-        SkipChildren
+      (* Indirect Call *)
+      | Call(ret, Lval(Mem(ptrExp), NoOffset), actuals, loc) ->
+          (* Note: Do not conflate state from function pointer calls *)
+          let aliasedFuns = 
+            A.deref_funptr ptrExp in
+          (* What to do if we don't know what the FP leads to? *)
+          if (aliasedFuns = []) then
+            logError ("Threads: No FP targets for: " ^ 
+                        (string_of_exp ptrExp))
+          else begin
+            let aliasedFuns = getMatchingIDs cg aliasedFuns in
+            List.iter 
+              (fun fid ->
+                 try
+                   let fnode = FMap.find fid cg in
+                   let fname, ftyp = fnode.name, fnode.typ in
+                   let tcAttribs = find (fname, ftyp) in
+                   self#handleThreadCreate i loc tcAttribs actuals;
+                 with Not_found ->
+                   (* Most function calls aren't going to match *)
+                   ()
+              ) aliasedFuns
+          end;
+          SkipChildren
+            
+      (* Calls based on offsets *)
+      | Call(_) ->
+          logError "threadCreateVisitor: can't interp. a Call instr\n";
+          SkipChildren
+      | _ ->
+          SkipChildren
     in
     self#bumpInstr 1;
     result
-            
+      
 end
 
-
-
-(** A visitor that finds the names/types of possible thread roots 
+let getFundec fid cg =
+  (* Ugh... really only needed the context insensitive version of
+     the callgraph  *)
+  let fkey = fid_to_fkey fid in
+  try
+    let fNode = FMap.find fid cg in
+    Cilinfos.getFunc fkey fNode.defFile
+  with Not_found ->
+    logError ("threadArgFinder can't find fnode " ^ string_of_fkey fkey);
+    None
+      
+(** A visitor that finds the funIDs of possible thread roots 
     (functions "forked" by thread creators) *)
 class threadRootFinder cg start = object (self)
   inherit threadCreateVisitor cg
 
   val mutable roots = start
-        
+    
   method getFuncs =
     roots
 
   (* handle given call to a thread creation function *)
   method handleThreadRoots i loc f funs args =
-    (* Record function key of each thread root *)
+    (* Record function all funIDs matching given fkeys of each thread root *)
     List.iter (fun fkey -> roots <- FSet.add fkey roots) funs
 
 end
@@ -345,14 +358,10 @@ let collectThreadRoots cg curRoots (cfg:fundec) =
 (** Return the list of thread roots (spawned at thread creation sites) *)
 let getThreadRoots cg tcs =
   List.fold_left
-    (fun cur (fk, tc) ->
-       let ast = !DC.astFCache#getFile tc.defFile in
-       A.setCurrentFile ast;
-       match Cilinfos.getCFG fk ast with
-         Some func ->
-           (collectThreadRoots cg cur func)
-       | None -> 
-           cur
+    (fun cur tcc ->
+       match Cilinfos.getFunc (fid_to_fkey tcc.tccID) tcc.tccDefFile with
+         Some func -> (collectThreadRoots cg cur func)
+       | None -> cur
     ) FSet.empty tcs
 
 
@@ -382,43 +391,26 @@ class threadArgFinder cg (startActs:ES.t) (startForms:VS.t) = object (self)
 
   method getFormals = foundFormals
 
-  method private getFundec fid =
-    try
-      let fNode = FMap.find fid cg in
-      (* Copied from Intra... should find a nice common file for it (not Intra) *)
-      try 
-        let ast = !DC.astFCache#getFile fNode.defFile in
-        A.setCurrentFile ast; (* probably don't need this part *)
-        Cilinfos.getCFG fid ast
-      with Filecache.File_not_found fname ->
-        L.logError ("threadArgFinder can't find file " ^ fname);
-        None
-    with Not_found ->
-      L.logError ("threadArgFinder can't find fnode " ^ string_of_fkey fid);
-      None
-
   method handleThreadRoots i loc f funs actuals =
     foundActuals <- 
       List.fold_left (fun cur arg -> ES.add arg cur) foundActuals actuals;
     foundFormals <- 
       List.fold_left 
       (fun cur fid ->
-         match self#getFundec fid with
+         match getFundec fid cg with
            None -> cur
          | Some fdec -> 
              List.fold_left (fun cur var -> VS.add var cur) cur fdec.sformals
       ) foundFormals funs
 
 end
-
-
+  
+  
 (** @return a list of the arguments that are ever passed to a thread root *)
 let getThreadActuals cg tcs : Cil.exp list  * Cil.varinfo list =
   let actuals, formals = List.fold_left
-    (fun (curActs, curForms) (fk, tc) ->
-       let ast = !DC.astFCache#getFile tc.defFile in
-       A.setCurrentFile ast;
-       match Cilinfos.getCFG fk ast with
+    (fun (curActs, curForms) tcc ->
+       match Cilinfos.getFunc (fid_to_fkey tcc.tccID) tcc.tccDefFile with
          Some func ->
            let vis = new threadArgFinder cg curActs curForms in
            let _ = Cil.visitCilFunction (vis :> cilVisitor) func in
@@ -427,3 +419,4 @@ let getThreadActuals cg tcs : Cil.exp list  * Cil.varinfo list =
            (curActs, curForms)
     ) (ES.empty, VS.empty) tcs in
   (ES.elements actuals, VS.elements formals)
+

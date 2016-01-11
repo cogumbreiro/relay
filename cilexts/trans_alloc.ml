@@ -35,22 +35,98 @@ let nameAllocVar ( { line = ln;
     
 let isAllocVar (n:string) : bool =
   Str.string_match allocNameRegExp n 0
+
+(** Reversing the process. How to find out if an assignment was
+    original a malloc call, given the RHS of the assignment. *)
+let rec findMalloc exp =
+  match exp with
+    AddrOf (Var v, _) 
+  | StartOf (Var v, _) ->  if isAllocVar v.vname then Some (v) else None
+  | AddrOf (Mem _, _)
+  | StartOf (Mem _, _)
+  | Lval _ -> None
+  | CastE (t, e) -> findMalloc e
+  | Const _ | SizeOf _ | SizeOfStr _ | SizeOfE _ 
+  | AlignOf _ | AlignOfE _ | UnOp _ | BinOp _  -> None
+
+let unknownMallocType = 
+  (* turn void types in arrays of uchar (arbitrary, but unlikely size) *)
+  TArray (TInt (IUChar, []), Some (Cil.integer 231), [])
+
  
 (*** Simple wrapper around PTA call ***)
    
+let collectFunsOfType ftype_str curList fdec =
+  let ft = fdec.svar.vtype in
+  let fts = D.string_of_ftype ft in
+  if (fts = ftype_str) then fdec.svar.vname :: curList
+  else curList
+
 let resolveFP (exp:exp) : string list =
   let ftype = typeOf exp in
   let ftype_str = D.string_of_ftype ftype in    
   let fdecs = PTA.resolve_funptr exp in
-  List.fold_left (fun curList fdec ->
-                    let ft = fdec.svar.vtype in
-                    let fts = D.string_of_ftype ft in
-                    if (fts = ftype_str) then
-                      fdec.svar.vname :: curList
-                    else
-                      curList
-                 ) [] fdecs
-    
+  List.fold_left (collectFunsOfType ftype_str) [] fdecs
+
+let warnHasMultipleSizeOf exp =
+  let rec loop cur exp =
+    match exp with
+      SizeOf _ | SizeOfE _ | SizeOfStr _ -> cur + 1
+    | Const _ | Lval _ | AddrOf _ | StartOf _ | AlignOf _ | AlignOfE _ -> cur
+    | CastE (_, e) -> loop cur e
+    | UnOp (_, e, _) -> loop cur e
+    | BinOp (_, e1, e2, _) -> 
+        let c = loop cur e1 in
+        loop c e2
+  in
+  if loop 0 exp > 1 then
+    Printf.fprintf stderr "Alloc: multiple sizeof (%s) @ %s\n"
+      (D.string_of_exp exp) (D.string_of_loc !currentLoc)
+
+let rec typeFromSizeOf cur exp =
+  match cur with 
+    Some x -> cur
+  | None ->
+      try findSizeOf exp
+      with Not_found -> cur
+
+and findSizeOf exp =
+  match exp with
+    SizeOf t -> Some t
+  | SizeOfE e -> Some (typeOf e)
+  | SizeOfStr _ -> Some (!stringLiteralType)
+  | CastE (_, e2) -> findSizeOf e2
+  | BinOp (op, e1, e2, _) ->
+      (try
+         let sz1 = findSizeOf e1 in
+         try 
+           let _ = findSizeOf e2 in
+           warnHasMultipleSizeOf exp;
+           sz1
+         with Not_found ->
+           sz1
+       with Not_found ->
+         findSizeOf e2)
+  | UnOp (op, e1, _) ->
+      findSizeOf e1
+  | AlignOf _ | AlignOfE _ | Const _
+  | Lval _ | AddrOf _ | StartOf _ -> raise Not_found
+
+
+let pickType retType actuals =
+  match List.fold_left typeFromSizeOf None actuals with
+    None -> if (isVoidType retType) then unknownMallocType else retType
+  | Some t ->
+      if Ciltools.compare_type retType t <> 0 then
+        Printf.fprintf stderr "Trans_alloc: %s <> %s\n" 
+          (D.string_of_type retType) (D.string_of_type t);
+      (* Should do something smarter to pick the widest? *)
+      if (isVoidType t) then
+        if (isVoidType retType) then unknownMallocType
+        else retType
+      else t
+
+
 (*** The actual transformation ***)
 
 (** A visitor that converts p = alloc(x), into p = &fresh_global *)
@@ -84,24 +160,16 @@ class allocVisitor = object (self)
     in
     match i with
       Call (Some(retval), callexp, actuals, loc) ->
+(* TODO: translate even if retType is Int and call is to a malloc'er *)
         let retType = typeOfLval retval in begin
         match retType with
-
           TPtr (t, _) ->
             let fnames = resolveCall callexp in
             if (List.exists (* not a forall? watch out on empty lists... *)
                   (fun fn -> Alloc.isAlloc fn) fnames) then
               let moreID = self#checkUsed loc in
               let name = nameAllocVar loc moreID in
-              let finalT = 
-                if (isVoidType t) then
-                  (* turn void types in arrays of uchar (arbitrary size) *)
-                  TArray (TInt (IUChar, []), 
-                          Some (Cil.integer 8), 
-                          [])
-                else
-                  t
-              in
+              let finalT = pickType t actuals in
               let freshAllocVar = Cil.makeGlobalVar name finalT in
               newVars := freshAllocVar :: !newVars;
               ChangeTo 
@@ -112,7 +180,7 @@ class allocVisitor = object (self)
         | _ -> SkipChildren
         end                                                     
     | _ -> 
-        SkipChildren
+        SkipChildren 
 
 
   method vglob (g:global) : global list visitAction =
