@@ -1,6 +1,7 @@
 
 module IH = Inthash
 module E = Errormsg
+module PPH = Ciltools.PPHash
 
 open Cil
 open Pretty
@@ -29,21 +30,7 @@ type 't guardaction =
   | GUnreachable  (** The branch will never be taken. *)
 
 
-(******************************************************************
- **********
- **********         Set up 
- **********
- ********************************************************************)
 
-
-module HashedInstr = struct
-  type t = instr
-  let equal x y =
-    (Ciltools.compare_instr x y) == 0
-  let hash = Ciltools.hash_instr
-end
-  
-module InstrHash = Hashtbl.Make (HashedInstr)
 
 (******************************************************************
  **********
@@ -81,14 +68,15 @@ module type ForwardsTransfer = sig
    * data. Otherwise, compute the combination, and return it. *)
 
   val doInstr: Cil.instr -> t -> t action
-  (** The (forwards) transfer function for an instruction. The 
-   * {!Cil.currentLoc} is set before calling this. The default action is to 
-   * continue with the state unchanged. *)
+  (** The (forwards) transfer function for an instruction. 
+   * {!Cil.currentLoc} and {!Cil.curProgPoint} are set before calling this. 
+   * The default action is to continue with the state unchanged. *)
 
   val doStmt: Cil.stmt -> t -> t stmtaction
-  (** The (forwards) transfer function for a statement. The {!Cil.currentLoc} 
-   * is set before calling this. The default action is to do the instructions
-   * in this statement, if applicable, and continue with the successors. *)
+  (** The (forwards) transfer function for a statement. 
+   * {!Cil.currentLoc} and {!Cil.curProgPoint} are set before calling this. 
+   * The default action is to do the instructions in this statement, 
+   * if applicable, and continue with the successors. *)
 
   val doGuard: Cil.exp -> t -> t guardaction
   (** Generate the successor to an If statement assuming the given expression
@@ -115,23 +103,65 @@ module ForwardsDataFlow =
      * predecessors of a statement before the statement itself. *)
     let worklist: Cil.stmt Queue.t = Queue.create ()
 
-    (** Cache of state before each instruction, used by getStateAtInstr *)
-    let instrStateCache = InstrHash.create 23
+    (** Track data for each program point (by tracking data before each
+        program point). Look up data after program point by finding
+        the next program point (if it's an instruction) *)
+    let ppBeforeState: T.t PPH.t = PPH.create 11
+
+
+    (** Look up the data before a particular program point *)
+    let getDataBefore (pp:prog_point) =
+      try PPH.find ppBeforeState pp
+      with Not_found ->
+        E.bug "FF(%s): no data before prog. point" T.name;
+        raise Not_found
+
+
+    (** Look up the data after a particular program point.
+        Currently only valid for instruction-based pps.
+        What it means to be after a stmt is unclear when
+        considering all the different kinds of stmts 
+        (e.g., what's after a Return stmt?)... *)
+    let getDataAfter (pp:prog_point) =
+      let succPP = { pp with pp_instr = pp.pp_instr + 1; } in
+      try PPH.find ppBeforeState succPP
+      with Not_found ->
+        E.bug "FF(%s): no data after prog. point" T.name;
+        raise Not_found
+
+
+    (** Replace the data available before a particular program point *)
+    let setDataBefore (pp:prog_point) d =
+      PPH.replace ppBeforeState pp d
+      (* Not updating SID based table... *)
+
+
+    (** Replace the data available after a particular program point.
+        Currently only valid for instruction-based pps *)
+    let setDataAfter (pp:prog_point) d =
+      let succPP = { pp with pp_instr = pp.pp_instr + 1; } in
+      PPH.replace ppBeforeState succPP d
+
 
     (** We call this function when we have encountered a statement, with some 
      * state. *)
-    let reachedStatement (s: stmt) (d: T.t) : unit = 
+    let reachedStatement (s: stmt) (d: T.t) : unit =
+      setStmtLocation s;
+
       (** see if we know about it already *)
       E.pushContext (fun _ -> dprintf "Reached statement %d with %a" 
           s.sid T.pretty d);
       let newdata: T.t option = 
         try
-          let old = IH.find T.stmtStartData s.sid in 
-          match T.combinePredecessors s ~old:old d with 
+          let old = IH.find T.stmtStartData s.sid in
+          match T.combinePredecessors s ~old:old d with
             None -> (* We are done here *)
               if !T.debug then 
                 ignore (E.log "FF(%s): reached stmt %d with %a\n  implies the old state %a\n"
                           T.name s.sid T.pretty d T.pretty old);
+              let pp = getCurrentPP () in
+              (* In case we didn't know the state at this pp before *)
+              setDataBefore pp old;
               None
           | Some d' -> begin
               (* We have changed the data *) 
@@ -149,9 +179,12 @@ module ForwardsDataFlow =
       in
       E.popContext ();
       match newdata with 
-        None -> ()
-      | Some d' -> 
+        None ->
+          ()
+      | Some d' ->
           IH.replace T.stmtStartData s.sid d';
+          let pp = getCurrentPP () in
+          setDataBefore pp d';
           if T.filterStmt s && 
             not (Queue.fold (fun exists s' -> exists || s'.sid = s.sid)
                             false
@@ -195,15 +228,20 @@ module ForwardsDataFlow =
 
     (** Process a statement *)
     let processStmt (s: stmt) : unit = 
-      currentLoc := get_stmtLoc s.skind;
+      setStmtLocation s;
       if !T.debug then 
         ignore (E.log "FF(%s).stmt %d at %t\n" T.name s.sid d_thisloc);
 
       (* It must be the case that the block has some data *)
       let init: T.t = 
-         try T.copy (IH.find T.stmtStartData s.sid) 
-         with Not_found -> 
-            E.s (E.bug "FF(%s): processing block without data" T.name)
+        try 
+          let old = T.copy (IH.find T.stmtStartData s.sid) in
+          (* Maybe the data wasn't in ppBeforeState in the first place... *)
+          let pp = getCurrentPP () in
+          setDataBefore pp old;
+          old
+        with Not_found -> 
+          E.s (E.bug "FF(%s): processing block without data" T.name)
       in
 
       (** See what the custom says *)
@@ -216,34 +254,42 @@ module ForwardsDataFlow =
             | SDone -> E.s (bug "SDone")
           in
           (* Do the instructions in order *)
-          let handleInstruction (s: T.t) (i: instr) : T.t = 
-            currentLoc := get_instrLoc i;
-            (* Cache state before every instruction for now *)
-            InstrHash.replace instrStateCache i s;
+          let handleInstruction ((st, index): T.t * int) (i: instr) 
+              : (T.t * int) = 
+            setInstrLocation i index;
+
+            (* Track state before every instruction *)
+            let pp = getCurrentPP () in
+            setDataBefore pp st;
 
             (* Now handle the instruction itself *)
             let s' = 
-              let action = T.doInstr i s in 
+              let action = T.doInstr i st in 
               match action with 
                | Done s' -> s'
-               | Default -> s (* do nothing *)
-               | Post f -> f s
+               | Default -> st (* do nothing *)
+               | Post f -> f st
             in
-            s'
+            
+            (* Track state after every instruction... *)
+            setDataAfter pp s';
+
+            (s', index + 1)
           in
 
           let after: T.t = 
             match s.skind with 
               Instr il -> 
                 (* Handle instructions starting with the first one *)
-                List.fold_left handleInstruction curr il
+                let result, _ = 
+                  List.fold_left handleInstruction (curr, 0) il in
+                result
 
             | Goto _ | Break _ | Continue _ | If _ 
             | TryExcept _ | TryFinally _ 
             | Switch _ | Loop _ | Return _ | Block _ -> curr
           in
-          currentLoc := get_stmtLoc s.skind;
-                
+
           (* Handle If guards *)
           let succsToReach = match s.skind with
               If (e, _, _, _) -> begin
@@ -279,12 +325,10 @@ module ForwardsDataFlow =
       end
 
 
-
-
     (** Compute the data flow. Must have the CFG initialized *)
     let compute (sources: stmt list) = 
       Queue.clear worklist;
-      InstrHash.clear instrStateCache;
+      PPH.clear ppBeforeState;
 
       List.iter (fun s -> Queue.add s worklist) sources;
 
@@ -315,42 +359,8 @@ module ForwardsDataFlow =
       fixedpoint ()
 
 
-    (** recompute the state at a particular instruction within a stmt
-        (which must be a list of instructions) *)
-    let getStateAtInstr (s: stmt) (i: instr) =
-      let init: T.t = 
-        try T.copy (IH.find T.stmtStartData s.sid) 
-        with Not_found -> 
-          E.s (E.bug "FF(%s): processing block without data" T.name)
-      in
-      match s.skind with
-        Instr (il) -> begin
-          try 
-            InstrHash.find instrStateCache i
-          with Not_found ->
-            let (finalSt, _) = List.fold_left 
-              (fun ((curSt, fin) as curVal) curI ->
-                 if (fin) then
-                   curVal
-                 else if (i == curI) then
-                   (curSt, true)
-                 else begin
-                   InstrHash.replace instrStateCache curI curSt;
-                   let newSt = 
-                     match T.doInstr curI curSt with
-                       Done st -> st
-                     | Default -> curSt
-                     | Post f -> f curSt
-                   in
-                   (newSt, false)
-                 end
-              ) (init, false) il in
-            finalSt
-        end
-      | _ -> 
-          (* Other kinds of statements don't need re-computation *)
-          init
-  end            
+  end
+
 
 (******************************************************************
  **********
@@ -431,9 +441,11 @@ module BackwardsDataFlow =
              (* Do the default one. Combine the successors *)
              let res = 
                match s.succs with 
-                 [] -> E.s (E.bug "You must doStmt for the statements with no successors")
+                 [] -> 
+                   E.s (E.bug "You must doStmt for the statements with no successors")
+                     (* JAN: why don't they use funcExitData? *)
                | fst :: rest -> 
-                   List.fold_left (fun acc succ -> 
+                   List.fold_left (fun acc succ ->
                      T.combineSuccessors acc (getStmtStartData succ))
                      (getStmtStartData fst)
                      rest
@@ -518,5 +530,3 @@ module BackwardsDataFlow =
           
   end
 
-
-    

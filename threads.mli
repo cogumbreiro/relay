@@ -2,13 +2,7 @@ open Fstructs
 open Callg
 open Cil
 
-type threadCreatorAttribs = {
-  tcStarts : bool;         (* true if the function starts the thread also *)
-  tcStartFunName : string; (* if fun doesn't start thread, which fun does? *)
-  tcStartFunType : string;
-  tcFPIndex : int;         (* index of arg list for function pointer *)
-  tcArgIndex : int;        (* index of arg list for the args of new thread *)
-}
+type threadCreatorAttribs
 
 val initSettings : Config.settings -> unit
 
@@ -22,13 +16,14 @@ val getThreadRoots : simpleCallG -> tccs -> FSet.t
 
 
 class virtual threadCreateVisitor : simpleCallG -> object 
-  inherit nopCilVisitor
-
-  val mutable curStmt : stmt
+  inherit Pp_visitor.ppVisitor
 
   method handleThreadCreate : instr -> location -> 
     threadCreatorAttribs -> exp list -> unit
 
-  method virtual handleThreadRoots : instr -> location -> exp -> fKey list -> exp -> unit
+  method virtual handleThreadRoots : instr -> location -> exp -> 
+    fKey list -> exp list -> unit
 
 end
+
+val getThreadActuals : simpleCallG -> tccs -> exp list * varinfo list

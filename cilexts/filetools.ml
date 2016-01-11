@@ -51,26 +51,34 @@ let ensurePath (pathname : string) =
       (* Still need to check the last dir *)
       checkMake pathname
 
-
-
-let rec walkDir (apply:Cil.file -> string -> unit) (root:string) = 
-  let filesInRoot = Sys.readdir root in
+(** @return a list of subdirectories and files in the given directory *)
+let getDirsFiles dirname filefilter =
+  let filesInRoot = Sys.readdir dirname in
   
   (* partition array of filenames into list of dirs and reg_files *) 
   let dirs, files =
     Array.fold_left
       (fun (dirs, files) fn ->
-         let fullName = Filename.concat root fn in
+         let fullName = Filename.concat dirname fn in
          let fstat = Unix.stat fullName in
          if (fstat.Unix.st_kind == Unix.S_DIR) then 
            (* it's a directory *)
            (fullName :: dirs, files)
-         else if (Filename.check_suffix fullName ".c") then
+         else if filefilter fullName then
            (dirs, fullName :: files)
          else
            (dirs, files)
       ) ([], []) filesInRoot in
 
+  let files = List.sort Pervasives.compare files in
+  let dirs = List.sort Pervasives.compare dirs in
+  (dirs, files)
+
+
+let rec walkDir (apply:Cil.file -> string -> unit) (root:string) = 
+  let dirs, files = getDirsFiles root 
+    (fun fullName -> (Filename.check_suffix fullName ".c")) in
+  
   (* Handle files in current directory before descending into other dirs *)
   List.iter
     (fun file ->
@@ -92,20 +100,7 @@ let rec walkDir (apply:Cil.file -> string -> unit) (root:string) =
 
 
 let rec walkDirSimple (apply : string -> unit) (root:string) = 
-  let filesInRoot = Sys.readdir root in
-  
-  (* partition array of filenames into list of dirs and reg_files *) 
-  let dirs, files =
-    Array.fold_left
-      (fun (dirs, files) fn ->
-         let fullName = Filename.concat root fn in
-         let fstat = Unix.stat fullName in
-         if (fstat.Unix.st_kind == Unix.S_DIR) then 
-           (* it's a directory *)
-           (fullName :: dirs, files)
-         else 
-           (dirs, fullName :: files)
-      ) ([], []) filesInRoot in
+  let dirs, files = getDirsFiles root (fun _ -> true) in
   
   (* Handle files in current directory before descending into other dirs *)
   List.iter

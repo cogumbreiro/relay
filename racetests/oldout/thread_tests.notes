@@ -1,0 +1,64 @@
+Extra warnings from old thread-test
+
+****
+Possible race between access to:
+	g_dl_p->x : threads.c:14 and
+	_a272_63613_threads.x : threads.c:260
+	Accessed at locs:
+	threads.c:110 and
+	threads.c:68
+	Possible paths & LS (first 3):
+
+(0)
+	LS for 1st access:
+L+ = empty;
+L- = empty;
+	made empty at: :-1
+	LS for 2nd access:
+L+ = {(*(_a272_63613_threads.l))#tbd, } (1)
+L- = empty;
+	made empty at: :-1
+	Th. 1 spawned: threads.c:304 w/ func: globMunge
+	Th. 2 spawned: threads.c:303 w/ func: munge
+
+
+
+****
+Possible race between access to:
+	g_dl_p->x : threads.c:14 and
+	g_dl_p->x : threads.c:14
+	Accessed at locs:
+	threads.c:110 and
+	threads.c:110
+	Possible paths & LS (first 3):
+
+(0)
+	LS for 1st access:
+L+ = empty;
+L- = empty;
+	made empty at: :-1
+	LS for 2nd access:
+L+ = empty;
+L- = empty;
+	made empty at: :-1
+	Th. 1 spawned: threads.c:304 w/ func: globMunge
+	Th. 2 spawned: threads.c:304 w/ func: globMunge
+
+
+These are legit warnings!
+
+  dl *data_and_lock5 = (dl *) malloc (sizeof(dl)); // &_a272_blah...
+
+
+  /* Now, try causing a RACE by having one thread access a global
+     that aliases w/ an arg */
+  // makeAlias (data_and_lock5);
+  g_dl_p = data_and_lock5;
+  pthread_create (&temp_t, (void *)0, &munge, (void*) data_and_lock5);
+  pthread_create (&temp_t, (void *)0, &globMunge, (void*)0);
+
+
+why does the summary for globMunge show 0 reads and 0 writes?
+
+
+

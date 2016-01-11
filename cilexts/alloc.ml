@@ -10,6 +10,18 @@ let allocFNs = ["kmalloc";
                 "vmalloc";
                 "kmem_cache_alloc"; (* assume race-free *)
                 "mempool_alloc";    (* assume race-free *)
+
+                (* Apache *)
+                "apr_palloc";
+                "apr_pcalloc";
+
+                (* OpenSSL *)
+                "CRYPTO_malloc";
+                "CRYPTO_realloc";
+                "CRYPTO_realloc_clean";
+                "CRYPTO_malloc_locked";
+                "CRYPTO_remalloc";
+
                ]
 
 (** Tests if given string is the name of an allocation function

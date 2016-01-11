@@ -24,8 +24,6 @@ class SearchForm(forms.Form):
 
 
 
-
-
 #------------------------------------------------------------
 # Quantifiers, "true", "false", and, or, etc. 
 # for building more complex filtering predicates
@@ -130,13 +128,29 @@ def lval_match_pat1(pat):
 def lval_match_pat2(pat):
     return lambda race: pat.match (str(race.access2.lval.printed)) != None
 
+
+lval_alloc_sql_re = r'.*_a[0-9]+_[0-9]+.*'
+
 lval_alloc_re = re.compile('.*_a\d+_\d+.*')
 
 is_alloc1 = lval_match_pat1(lval_alloc_re)
 is_alloc2 = lval_match_pat2(lval_alloc_re)
 
+def both_alloc():
+    filt = Q(races__access1__lval__printed__regex = lval_alloc_sql_re)
+    filt = filt & Q(races__access2__lval__printed__regex = lval_alloc_sql_re)
+    return filt
+
+def some_alloc():
+    filt = Q(races__access1__lval__printed__regex = lval_alloc_sql_re)
+    filt = filt | Q(races__access2__lval__printed__regex = lval_alloc_sql_re)
+    return filt
+    
+
 def lvals_syntactic(race):
     return str(race.access1.lval.printed) == str(race.access2.lval.printed)
+
+
 
 #---
 
@@ -152,6 +166,12 @@ def fun_match_pat1(pat):
 def fun_match_pat2(pat):
     return lambda race: fun_match(race.access2.occurs_at.parent_function, pat)
 
+def fun_match_filter(pat):
+    filt = Q(races__access1__occurs_at__parent_function__name__regex = pat)
+    filt = filt & \
+        Q(races__access2__occurs_at__parent_function__name__regex = pat)
+    return filt
+
 #---
 
 def tr_match_pat1(pat):
@@ -160,21 +180,48 @@ def tr_match_pat1(pat):
 def tr_match_pat2(pat):
     return lambda race: fun_match(race.access2.accessed_through.root_function, pat)
 
+def tr_match_filter(pat):
+    filt = Q(races__access1__accessed_through__root_function__name__regex = pat)
+    filt = filt & \
+        Q(races__access2__accessed_through__root_function__name__regex = pat)
+    return filt
+    
+
 #---
 
 def uses_blob(n):
     return lambda race : (race.access1.lval.rep_size > n or
                           race.access2.lval.rep_size > n)
 
+
+# Faster, filter requiring both race clusters to only consist of accesses
+# that use blobs of size < n
+def uses_blob_lt_filter(n):
+    filt = Q(races__access1__lval__rep_size__lt = n)
+    filt = filt & Q(races__access2__lval__rep_size__lt = n)
+    return filt
+
+
 #---
 
 def uses_global(race):
     return race.access1.lval.is_global or race.access2.lval.is_global
 
+def uses_global_filter():
+    filt = Q(races__access1__lval__is_global=True)
+    filt = filt & Q(races__access2__lval__is_global=True)
+    return filt
+
 #---
 
 def with_lock(race):
     return race.access1.locks.count() > 0 or race.access2.locks.count() > 0
+
+def with_lock_filter():
+    filt = Q(races__access1__locks__isnull=False)
+    filt = filt | Q(races__access2__locks__isnull=False)
+    return filt
+    
 
 #---
 
@@ -280,7 +327,7 @@ def race_on_at2(rcs, lv1=None, lv2=None, locs=[], d=5):
 """
 from relay.warnings.search import *
 from relay.warnings.models import *
-r = Run.objects.get(id=9)
+r = Run.objects.get(id=66)
 rcs = Race_cluster.objects.filter(run=r)
 
 

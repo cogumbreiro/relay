@@ -1,0 +1,1 @@
+duppy -c k.c -o ./k.o -lpthread

@@ -1,0 +1,202 @@
+Sun Aug 10 21:12:33 PDT 2008
+incrementing generation number
+incrementing value in gen_num.txt
+
+running server on /home/jan/research/relay/racetests/ptr_tests/ciltrees
+Registered summary type: rs
+Server ip is: 127.0.0.1
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: SERVER
+Done reading config file
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Entry points use roots: false
+trying to clear logs
+Callgraph, etc.
+-----
+Reached end of /home/jan/research/relay/racetests/ptr_tests/ciltrees/calls.cil call graph file
+Num funcs: 99
+Scc_cg: Pruned 20 funcs w/out bodies for scc DAG
+Starting server
+-----
+>>> PROGRESS 1/77 SCCs DONE!
+
+>>> PROGRESS 2/77 SCCs DONE!
+
+>>> PROGRESS 3/77 SCCs DONE!
+
+>>> PROGRESS 4/77 SCCs DONE!
+
+>>> PROGRESS 5/77 SCCs DONE!
+
+>>> PROGRESS 6/77 SCCs DONE!
+
+>>> PROGRESS 7/77 SCCs DONE!
+
+>>> PROGRESS 8/77 SCCs DONE!
+
+>>> PROGRESS 9/77 SCCs DONE!
+
+>>> PROGRESS 10/77 SCCs DONE!
+
+>>> PROGRESS 11/77 SCCs DONE!
+
+>>> PROGRESS 12/77 SCCs DONE!
+
+>>> PROGRESS 13/77 SCCs DONE!
+
+>>> PROGRESS 14/77 SCCs DONE!
+
+>>> PROGRESS 15/77 SCCs DONE!
+
+>>> PROGRESS 16/77 SCCs DONE!
+
+>>> PROGRESS 17/77 SCCs DONE!
+
+>>> PROGRESS 18/77 SCCs DONE!
+
+>>> PROGRESS 19/77 SCCs DONE!
+
+>>> PROGRESS 20/77 SCCs DONE!
+
+>>> PROGRESS 21/77 SCCs DONE!
+
+>>> PROGRESS 22/77 SCCs DONE!
+
+>>> PROGRESS 23/77 SCCs DONE!
+
+>>> PROGRESS 24/77 SCCs DONE!
+
+>>> PROGRESS 25/77 SCCs DONE!
+
+>>> PROGRESS 26/77 SCCs DONE!
+
+>>> PROGRESS 27/77 SCCs DONE!
+
+>>> PROGRESS 28/77 SCCs DONE!
+
+>>> PROGRESS 29/77 SCCs DONE!
+
+>>> PROGRESS 30/77 SCCs DONE!
+
+>>> PROGRESS 31/77 SCCs DONE!
+
+>>> PROGRESS 32/77 SCCs DONE!
+
+>>> PROGRESS 33/77 SCCs DONE!
+
+>>> PROGRESS 34/77 SCCs DONE!
+
+>>> PROGRESS 35/77 SCCs DONE!
+
+>>> PROGRESS 36/77 SCCs DONE!
+
+>>> PROGRESS 37/77 SCCs DONE!
+
+>>> PROGRESS 38/77 SCCs DONE!
+
+>>> PROGRESS 39/77 SCCs DONE!
+
+>>> PROGRESS 40/77 SCCs DONE!
+
+>>> PROGRESS 41/77 SCCs DONE!
+
+>>> PROGRESS 42/77 SCCs DONE!
+
+>>> PROGRESS 43/77 SCCs DONE!
+
+>>> PROGRESS 44/77 SCCs DONE!
+
+>>> PROGRESS 45/77 SCCs DONE!
+
+>>> PROGRESS 46/77 SCCs DONE!
+
+>>> PROGRESS 47/77 SCCs DONE!
+
+>>> PROGRESS 48/77 SCCs DONE!
+
+>>> PROGRESS 49/77 SCCs DONE!
+
+>>> PROGRESS 50/77 SCCs DONE!
+
+>>> PROGRESS 51/77 SCCs DONE!
+
+>>> PROGRESS 52/77 SCCs DONE!
+
+>>> PROGRESS 53/77 SCCs DONE!
+
+>>> PROGRESS 54/77 SCCs DONE!
+
+>>> PROGRESS 55/77 SCCs DONE!
+
+>>> PROGRESS 56/77 SCCs DONE!
+
+>>> PROGRESS 57/77 SCCs DONE!
+
+>>> PROGRESS 58/77 SCCs DONE!
+
+>>> PROGRESS 59/77 SCCs DONE!
+
+>>> PROGRESS 60/77 SCCs DONE!
+
+>>> PROGRESS 61/77 SCCs DONE!
+
+>>> PROGRESS 62/77 SCCs DONE!
+
+>>> PROGRESS 63/77 SCCs DONE!
+
+>>> PROGRESS 64/77 SCCs DONE!
+
+>>> PROGRESS 65/77 SCCs DONE!
+
+>>> PROGRESS 66/77 SCCs DONE!
+
+>>> PROGRESS 67/77 SCCs DONE!
+
+>>> PROGRESS 68/77 SCCs DONE!
+
+>>> PROGRESS 69/77 SCCs DONE!
+
+>>> PROGRESS 70/77 SCCs DONE!
+
+>>> PROGRESS 71/77 SCCs DONE!
+
+>>> PROGRESS 72/77 SCCs DONE!
+
+>>> PROGRESS 73/77 SCCs DONE!
+
+>>> PROGRESS 74/77 SCCs DONE!
+
+>>> PROGRESS 75/77 SCCs DONE!
+
+>>> PROGRESS 76/77 SCCs DONE!
+
+>>> PROGRESS 77/77 SCCs DONE!
+
+Finished all SCCs
+Received warnings from worker. Status: 1/1
+
+
+$$$$$$
+Total Warnings: 0
+Elapsed time (secs): 0.040001
+Top heap size (words): 122880
+Current heap size (words): 122880
+Lifetime allocated bytes: 1630188.
+Collections -- minor: 19 major: 2 compactions: 0
+Sun Aug 10 21:12:35 PDT 2008

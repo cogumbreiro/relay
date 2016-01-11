@@ -69,7 +69,7 @@ module L = Logging
 let ws = "[ \r\n\t]*"
 
 (* Tolerable section names *)
-let secNames = "\([_a-zA-Z]+\)"
+let secNames = "\\([_a-zA-Z]+\\)"
 
 let groupStart = Str.regexp (ws ^ secNames ^ ws ^ "[{]" ^ ws)
 

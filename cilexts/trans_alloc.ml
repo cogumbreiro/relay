@@ -9,20 +9,30 @@ module PTA = Myptranal
    valid for variable names *)
 let varnameRegExp = Str.regexp "[_a-zA-Z][_a-zA-Z0-9]*"
 
-let allocNameRegExp = Str.regexp "_a[0-9]+_[0-9]*_[_a-zA-Z][_a-zA-Z0-9]*"
+let allocNameRegExp = Str.regexp "_a[0-9]+_[0-9]*_[_a-zA-Z][_a-zA-Z0-9]*_[0-9]*"
 
+let nameLine ln =
+  string_of_int ln
+
+let nameByte b =
+  if (b > 0) 
+  then (string_of_int b)
+  else ""
+    
+let nameFile f =
+  let baseF = Filename.basename f in
+  (if (Str.string_match varnameRegExp baseF 0) then
+     Str.matched_string baseF
+   else "alloc")
+    
 let nameAllocVar ( { line = ln;
                      file = f;
-                     byte = b; } :location) =
-  let baseF = Filename.basename f in
-  "_a" ^ (string_of_int ln) ^ "_" ^ 
-    (if (b > 0) 
-     then (string_of_int b)
-     else "") ^ "_" ^
-    (if (Str.string_match varnameRegExp baseF 0) then
-       Str.matched_string baseF
-     else "alloc")
-
+                     byte = b; } :location) (moreID : int) =
+  "_a" ^ nameLine ln ^ "_" ^ 
+    nameByte b ^ "_" ^
+    nameFile f ^ "_" ^ 
+    (string_of_int moreID)
+    
 let isAllocVar (n:string) : bool =
   Str.string_match allocNameRegExp n 0
  
@@ -44,10 +54,18 @@ let resolveFP (exp:exp) : string list =
 (*** The actual transformation ***)
 
 (** A visitor that converts p = alloc(x), into p = &fresh_global *)
-class allocVisitor = object
+class allocVisitor = object (self)
   inherit nopCilVisitor 
         
   val newVars = ref []
+
+  val alreadyUsedLocs = Hashtbl.create 11
+
+  method checkUsed loc =
+    let oldID = try Hashtbl.find alreadyUsedLocs loc with Not_found -> 0 in
+    let newID = oldID + 1 in
+    Hashtbl.replace alreadyUsedLocs loc newID;
+    newID
 
   method vinst (i:instr) : instr list visitAction = 
     let rec resolveCall (exp:exp) : string list = 
@@ -71,9 +89,10 @@ class allocVisitor = object
 
           TPtr (t, _) ->
             let fnames = resolveCall callexp in
-            if (List.exists (* not a forall? *)
+            if (List.exists (* not a forall? watch out on empty lists... *)
                   (fun fn -> Alloc.isAlloc fn) fnames) then
-              let name = nameAllocVar loc in
+              let moreID = self#checkUsed loc in
+              let name = nameAllocVar loc moreID in
               let finalT = 
                 if (isVoidType t) then
                   (* turn void types in arrays of uchar (arbitrary size) *)
@@ -97,8 +116,12 @@ class allocVisitor = object
 
 
   method vglob (g:global) : global list visitAction =
-    let addDecls (loc:location) (globs:global list) =
-      if (!newVars <> []) then
+    let addDecls (parentFun:fundec) (loc:location) (globs:global list) =
+      if (!newVars <> []) then begin
+        (* Hack to know what the malloc callers are *)
+        Printf.fprintf stderr "Trans_alloc: %s %s\n" parentFun.svar.vname 
+          (D.string_of_loc loc);
+
         (* add global var decls to the list of globals *)
         let newGs = List.fold_left 
           (fun curGlobs newVar ->
@@ -106,13 +129,14 @@ class allocVisitor = object
              GVarDecl (newVar, loc) :: curGlobs) globs !newVars in
         newVars := [];
         newGs
+      end
       else
         globs
     in
     
     match g with
-      GFun (_, loc) -> (* only place that can have instructions? *)
-        ChangeDoChildrenPost ([g], addDecls loc)
+      GFun (f, loc) -> (* only place that can have instructions? *)
+        ChangeDoChildrenPost ([g], addDecls f loc)
     | _ ->
         SkipChildren
 
@@ -124,7 +148,7 @@ end
      @arg f   a parsed Cil file  *)      
 let transformAlloc (f:file) =
   let vis = new allocVisitor in
-  visitCilFile vis f
+  visitCilFile (vis :> cilVisitor) f
 
 
 

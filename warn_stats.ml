@@ -43,7 +43,7 @@ open Gc_stats
 open Cil
 open Pretty
 open Fstructs
-open Scc
+open Scc_cg
 open Stdutil
 open Cilfiles
 open Cilinfos

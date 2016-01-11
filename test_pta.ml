@@ -34,6 +34,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 *)
+
 (** Test the pta (post-compile phase) *)
 
 open Gc_stats
@@ -44,7 +45,10 @@ open Fstructs
 open Stdutil
 open Cilfiles
 
-module PTA = Pta_fi_eq
+module PTA_Steens = Pta_fi_eq
+module PTA_Ander = Pta_fs_dir
+module PLT = Pta_link_test
+module PTFP = Pta_fp_test
 module FC = Filecache
 module DC = Default_cache
 module L = Logging
@@ -60,30 +64,168 @@ let printVars = ref false
 
 let printFP = ref false
 
+let printFTypes = ref false
+
 let noRestart = ref false
 
 let printConstraints = ref false
 
+let doSteens = ref false
+
+let doAnders = ref false
+
+let filterTypes = ref true
+
+let whyBulk = ref ""
+
+let inspectAlias = ref []
+let inspectPtsTo = ref []
+
 (* Command-line argument parsing *)
+
+let anonArgFun (arg:string) : unit =
+  ()
+
+let setRecurseLimit n =
+  PLT.CheckAnders.setLimit n
+
+let usageMsg = getUsageString "-cg dirname [options]\n"
   
-let argSpecs = 
+let rec argSpecs = 
   [("-cg", Arg.Set_string cgDir, "name of call graph directory");
    ("-ps", Arg.Set printResults, "print pts to sets");
    ("-pv", Arg.Set printVars, "print var id -> varname / decl mappings");
    ("-pf", Arg.Set printFP, "print function pointer mappings");
+   ("-pft", Arg.Set printFTypes, "print function types");
    ("-pc", Arg.Set printConstraints, "print constraints");
-   ("-nr", Arg.Set noRestart, "don't restart -- use old results")]
+   ("-nr", Arg.Set noRestart, "don't restart -- use old results");
+   ("-s", Arg.Set doSteens, "test Steensgaard"); 
+   ("-a", Arg.Set doAnders, "test Andersen");
+   ("-nt", Arg.Clear filterTypes, "don't filter funcs w/ type");
+   ("-wa", Arg.String whyAliased, "check why ptrs alias: 'sc1:lv1/sc2:lv2'");
+   ("-wp", Arg.String whyPoints, "check why ptr pts to targ: 'sc1:ptr/sc2:t");
+   ("-o", Arg.Set_string PLT.outDir, "write output of why XYZ to given dir");
+   ("-wb", Arg.Set_string whyBulk, "answer a batch of queries from file");
+   ("-lim", Arg.Int setRecurseLimit, "limit recursive explaination");
+  ]
 
+and parseLvPair lvpair =
+  match Str.split (Str.regexp "/") lvpair with
+    [lv1; lv2] -> (lv1, lv2)
+  | _ -> 
+      begin 
+        Arg.usage argSpecs usageMsg;
+        exit 1
+      end 
+        
+and whyAliased lvpair =
+  let pair = parseLvPair lvpair in
+  inspectAlias := addOnce !inspectAlias pair
 
-let anonArgFun (arg:string) : unit = 
-  ()
-
-let usageMsg = getUsageString "-cg dirname [options]\n"
+and whyPoints lvpair =
+  let pair = parseLvPair lvpair in
+  inspectPtsTo := addOnce !inspectPtsTo pair
 
 
 (***************************************************)
 (* Run                                             *)
 
+let printHeaderDoAnalysis name analyzeAll =
+  L.logStatusF "Testing %s\n===============================\n" name;
+  L.logStatus "Loading / linking PTA info";
+  analyzeAll !cgDir (not !noRestart);
+  L.logStatus "analysis pass done"
+
+let testSteens () =
+  if !doSteens then begin
+    (* Either solve normally and print normal stats, or do
+       the inspect solve, and print those results *)
+    if (!inspectAlias <> [] 
+        || !inspectPtsTo <> []
+        || !whyBulk <> "") then begin
+      printHeaderDoAnalysis "Steens-Test" PLT.CheckSteens.analyzeAll;
+
+      List.iter PLT.CheckSteens.whyAliased !inspectAlias;
+      List.iter PLT.CheckSteens.whyPointsTo !inspectPtsTo;
+      PLT.BulkSteens.bulkQuery !whyBulk;
+
+    end
+    else begin
+      printHeaderDoAnalysis "Steensgaard" PTA_Steens.analyzeAll;
+      
+      
+      if (!printResults) then
+      PTA_Steens.printPtsToSets ()
+      ;
+      
+      if (!printFP) then begin
+        let tester = new PTFP.fpTestDriver 
+          (new PTA_Steens.fpTest) (new PTFP.cilFPTest) in
+        tester#testFunPtrs !cgDir
+      end;
+      
+    end;
+
+    printStatistics ();
+  end
+
+      
+let testAnders () =
+  if !doAnders then begin
+    (* Either solve normally and print normal stats, or do
+       the inspect solve, and print those results *)
+    if (!inspectAlias <> [] 
+        || !inspectPtsTo <> []
+        || !whyBulk <> "") then begin
+      printHeaderDoAnalysis "Anders-Test" PLT.CheckAnders.analyzeAll;
+
+      if !printResults then
+        PTA_Ander.DebugSolver.printPtsToSets () 
+          (* TODO: this is still not the same solver in above analyzeAll... *)
+      ;
+
+      PLT.CheckAnders.resetStats ();
+      List.iter PLT.CheckAnders.whyAliased !inspectAlias;
+      List.iter PLT.CheckAnders.whyPointsTo !inspectPtsTo;
+      PLT.CheckAnders.printStats ();
+
+      PLT.BulkAnders.bulkQuery !whyBulk;
+
+    end
+    else begin
+
+      printHeaderDoAnalysis "Andersen" PTA_Ander.analyzeAll;
+
+      if (!printResults) then
+        PTA_Ander.DebugFinal.printPtsToSets ()
+      ;
+
+      if (!printFP) then begin
+        let tester = new PTFP.fpTestDriver 
+          (new PTA_Ander.fpTest) (new PTFP.cilFPTest) in
+        tester#testFunPtrs !cgDir
+      end;
+      
+      (*** DEBUG ***)
+      PTA_Ander.checkAllTargets ();
+      
+    end;
+    
+    printStatistics ();
+  end
+
+let init () = begin
+  Cil.initCIL ();
+  setGCConfig ();
+        
+  DC.makeLCaches !cgDir;
+  Cilinfos.reloadRanges !cgDir;
+
+  PTA_Steens.setFilter !filterTypes;
+  PTA_Ander.setFilter !filterTypes;
+
+  Random.self_init ();
+end
 
 (** Entry point *)
 let main () = 
@@ -98,30 +240,21 @@ let main () =
       end
     else
       begin
-        Cil.initCIL ();
-        setGCConfig ();
-        
-        DC.makeLCaches !cgDir;
-        Cilinfos.reloadRanges !cgDir;
+        init ();
+        if (!printVars) then
+          Pta_compile.printVarIDs !cgDir
+        ;
+
+        if (!printFTypes) then
+          Pta_compile.printFunTypes ()
+        ;
 
         if (!printConstraints) then
-          PTA.printConstraints !cgDir;
-
-        if (!printVars) then
-          PTA.printVarIDs !cgDir;
-        
-        L.logStatus "Loading / linking PTA info";
-        PTA.analyzeAll !cgDir (not !noRestart);
-        L.logStatus "Pre-pass done";
-
-        if (!printResults) then
-          PTA.printPtsToSets ()
-        ;
-
-        if (!printFP) then
-          PTA.testFunPtrs !cgDir
+          Pta_compile.printConstraints !cgDir
         ;
         
+        testSteens ();
+        testAnders ();
         printStatistics ();
         exit 0;
       end

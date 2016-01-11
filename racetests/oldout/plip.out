@@ -1,0 +1,4564 @@
+Sun Aug 10 21:12:51 PDT 2008
+reserved status file: /tmp/temp.LMw6BJ
+running analysis on /home/jan/research/relay/racetests/plip/ciltrees
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rss
+Registered summary type: mods
+Checking for data races
+-----
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.0.1
+using /tmp/relay_scratch to store acquired files
+using: /tmp/temp.LMw6BJ to track status
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Reached end of /home/jan/research/relay/racetests/plip/ciltrees/calls.cil call graph file
+Num funcs: 108
+summary database will use:
+	/home/jan/research/relay/racetests/plip/ciltrees/relay_sums
+Initializing summary mods
+Checking left-over state in mods
+Initializing summary rss
+Checking left-over state in rss
+Initializing summary ss
+Checking left-over state in ss
+Initializing summary rs
+Checking left-over state in rs
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: false
+file server will use: 14440
+trying to clear old summaries / local srcs, etc.
+Scc_cg: Pruned 29 funcs w/out bodies for scc DAG
+Starting bottomup analysis
+-----
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #37
+=================================
+Summarizing function: current_thread_info : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	26	0	0	0	0	
+
+TIMES : SCC:37 : 0.000241994857788
+TIMES : FUN:26 : 0.000234842300415
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 26
+=======
+
+SUMS (fk, lo, un, wr, re):	26	0	0	0	0	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*ti)
+
+SIZES: 26 : 34
+>>> PROGRESS 1/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #38
+=================================
+Summarizing function: test_and_set_bit : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	8	0	0	0	0	
+
+TIMES : SCC:38 : 0.000242948532104
+TIMES : FUN:8 : 0.000236988067627
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 8
+=======
+
+SUMS (fk, lo, un, wr, re):	8	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: oldbit
+SIZES: 8 : 34
+>>> PROGRESS 2/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #36
+=================================
+Summarizing function: __netif_schedule : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	154	0	0	2	2	
+
+TIMES : FUN:154 : 0.00148797035217
+TIMES : SCC:36 : 0.00149512290955
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 154
+=======
+
+SUMS (fk, lo, un, wr, re):	154	0	0	2	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 154 : 63256
+>>> PROGRESS 3/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #39
+=================================
+Summarizing function: test_and_clear_bit : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	12	0	0	0	0	
+
+TIMES : FUN:12 : 0.000220060348511
+TIMES : SCC:39 : 0.000226020812988
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 12
+=======
+
+SUMS (fk, lo, un, wr, re):	12	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: oldbit
+SIZES: 12 : 34
+>>> PROGRESS 4/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #35
+=================================
+Summarizing function: netif_wake_queue : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	163	0	0	1	2	
+
+TIMES : SCC:35 : 0.00172400474548
+TIMES : FUN:163 : 0.00171804428101
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 163
+=======
+
+SUMS (fk, lo, un, wr, re):	163	0	0	1	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 163 : 63261
+>>> PROGRESS 5/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #48
+=================================
+Summarizing function: read_status : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	205	0	0	0	1	
+
+TIMES : FUN:205 : 0.00111389160156
+TIMES : SCC:48 : 0.00112199783325
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 205
+=======
+
+SUMS (fk, lo, un, wr, re):	205	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: tmp___0
+SIZES: 205 : 50865
+>>> PROGRESS 6/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #77
+=================================
+Summarizing function: netdev_priv : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	150	0	0	0	1	
+
+TIMES : FUN:150 : 0.000235080718994
+TIMES : SCC:77 : 0.000241994857788
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 150
+=======
+
+SUMS (fk, lo, un, wr, re):	150	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 150 : 62859
+>>> PROGRESS 7/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #21
+=================================
+Summarizing function: plip_interrupt : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	185	0	1	4	6	
+
+TIMES : SCC:21 : 0.0048520565033
+TIMES : FUN:185 : 0.00484395027161
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 185
+=======
+
+SUMS (fk, lo, un, wr, re):	185	0	1	4	6	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 185 : 71535
+>>> PROGRESS 8/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: dummy_interrupt : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 12	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	420	1	0	4	6	
+
+TIMES : SCC:0 : 0.00152683258057
+TIMES : FUN:420 : 0.00151920318604
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 420
+=======
+
+SUMS (fk, lo, un, wr, re):	420	1	0	4	6	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 420 : 71571
+>>> PROGRESS 9/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #20
+=================================
+Summarizing function: up : plip.ko_merged.c
+-----
+doing symstate
+TIMES : FUN:70 : 0.000105142593384
+TIMES : SCC:20 : 0.000112056732178
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 70
+=======
+
+SUMS (fk, lo, un, wr, re):	70	0	1	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 70 : 135
+>>> PROGRESS 10/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #19
+=================================
+Summarizing function: plip_timer_bh : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 9	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	184	0	2	4	8	
+
+TIMES : FUN:184 : 0.00604701042175
+TIMES : SCC:19 : 0.00605416297913
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 184
+=======
+
+SUMS (fk, lo, un, wr, re):	184	0	2	4	8	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 184 : 71623
+>>> PROGRESS 11/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #60
+=================================
+Summarizing function: set_bit : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 10	misses: 5
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	2	0	0	0	0	
+
+TIMES : SCC:60 : 0.000199794769287
+TIMES : FUN:2 : 0.000193119049072
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 2
+=======
+
+SUMS (fk, lo, un, wr, re):	2	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 2 : 34
+>>> PROGRESS 12/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #31
+=================================
+Summarizing function: netif_stop_queue : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	166	0	0	0	0	
+
+TIMES : SCC:31 : 0.000319957733154
+TIMES : FUN:166 : 0.00031304359436
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 166
+=======
+
+SUMS (fk, lo, un, wr, re):	166	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 166 : 34
+>>> PROGRESS 13/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #43
+=================================
+Summarizing function: atomic_dec_and_test : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	29	0	0	0	0	
+
+TIMES : SCC:43 : 0.000166177749634
+TIMES : FUN:29 : 0.000160932540894
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 29
+=======
+
+SUMS (fk, lo, un, wr, re):	29	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: c != 0
+SIZES: 29 : 34
+>>> PROGRESS 14/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #42
+=================================
+Summarizing function: kfree_skb : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	108	0	0	0	1	
+
+TIMES : SCC:42 : 0.00202798843384
+TIMES : FUN:108 : 0.00202083587646
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 108
+=======
+
+SUMS (fk, lo, un, wr, re):	108	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 108 : 62855
+>>> PROGRESS 15/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #46
+=================================
+Summarizing function: disable_parport_interrupts : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	198	0	0	0	2	
+
+TIMES : SCC:46 : 0.000792026519775
+TIMES : FUN:198 : 0.000785112380981
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 198
+=======
+
+SUMS (fk, lo, un, wr, re):	198	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 198 : 68998
+>>> PROGRESS 16/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #49
+=================================
+Summarizing function: write_data : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	201	0	0	0	1	
+
+TIMES : SCC:49 : 0.000737905502319
+TIMES : FUN:201 : 0.000732183456421
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 201
+=======
+
+SUMS (fk, lo, un, wr, re):	201	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 201 : 50859
+>>> PROGRESS 17/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #30
+=================================
+Summarizing function: plip_bh_timeout_error : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	223	0	1	9	12	
+
+TIMES : SCC:30 : 0.0065131187439
+TIMES : FUN:223 : 0.00650596618652
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 223
+=======
+
+SUMS (fk, lo, un, wr, re):	223	0	1	9	12	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 223 : 71741
+>>> PROGRESS 18/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #57
+=================================
+Summarizing function: clear_bit : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 20	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	5	0	0	0	0	
+
+TIMES : SCC:57 : 0.000216007232666
+TIMES : FUN:5 : 0.000209093093872
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 5
+=======
+
+SUMS (fk, lo, un, wr, re):	5	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 5 : 34
+>>> PROGRESS 19/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #33
+=================================
+Summarizing function: netif_start_queue : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	161	0	0	0	0	
+
+TIMES : FUN:161 : 0.000332832336426
+TIMES : SCC:33 : 0.000338077545166
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 161
+=======
+
+SUMS (fk, lo, un, wr, re):	161	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 161 : 34
+>>> PROGRESS 20/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #50
+=================================
+Summarizing function: enable_parport_interrupts : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	195	0	0	0	2	
+
+TIMES : SCC:50 : 0.000779867172241
+TIMES : FUN:195 : 0.000774145126343
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 195
+=======
+
+SUMS (fk, lo, un, wr, re):	195	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 195 : 68969
+>>> PROGRESS 21/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #32
+=================================
+Summarizing function: plip_error : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	222	0	0	4	5	
+
+TIMES : SCC:32 : 0.00564908981323
+TIMES : FUN:222 : 0.00563907623291
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 222
+=======
+
+SUMS (fk, lo, un, wr, re):	222	0	0	4	5	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 222 : 71366
+>>> PROGRESS 22/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #34
+=================================
+Summarizing function: plip_connection_close : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 11	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	221	0	1	4	6	
+
+TIMES : SCC:34 : 0.00236988067627
+TIMES : FUN:221 : 0.00236296653748
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 221
+=======
+
+SUMS (fk, lo, un, wr, re):	221	0	1	4	6	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 221 : 71302
+>>> PROGRESS 23/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #41
+=================================
+Summarizing function: plip_send : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	281	0	0	1	2	
+
+TIMES : SCC:41 : 0.00320911407471
+TIMES : FUN:281 : 0.00320100784302
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 281
+=======
+
+SUMS (fk, lo, un, wr, re):	281	0	0	1	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 281 : 51052
+>>> PROGRESS 24/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #40
+=================================
+Summarizing function: plip_send_packet : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 12	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	220	0	1	11	21	
+
+TIMES : FUN:220 : 0.0169959068298
+TIMES : SCC:40 : 0.0170049667358
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 220
+=======
+
+SUMS (fk, lo, un, wr, re):	220	0	1	11	21	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 220 : 135314
+>>> PROGRESS 25/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #47
+=================================
+Summarizing function: plip_receive : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 43	misses: 7
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	247	0	0	2	3	
+
+TIMES : SCC:47 : 0.00350213050842
+TIMES : FUN:247 : 0.00349307060242
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 247
+=======
+
+SUMS (fk, lo, un, wr, re):	247	0	0	2	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 247 : 51115
+>>> PROGRESS 26/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #52
+=================================
+Summarizing function: skb_is_nonlinear : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 12	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	115	0	0	0	1	
+
+TIMES : SCC:52 : 0.000259160995483
+TIMES : FUN:115 : 0.00025200843811
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 115
+=======
+
+SUMS (fk, lo, un, wr, re):	115	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 115 : 62767
+>>> PROGRESS 27/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #51
+=================================
+Summarizing function: skb_put : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	117	0	0	2	4	
+
+TIMES : FUN:117 : 0.00257897377014
+TIMES : SCC:51 : 0.00258588790894
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 117
+=======
+
+SUMS (fk, lo, un, wr, re):	117	0	0	2	4	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 117 : 62940
+>>> PROGRESS 28/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #55
+=================================
+Summarizing function: __skb_pull : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	126	0	0	2	3	
+
+TIMES : FUN:126 : 0.00084400177002
+TIMES : SCC:55 : 0.000853061676025
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 126
+=======
+
+SUMS (fk, lo, un, wr, re):	126	0	0	2	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 126 : 62901
+>>> PROGRESS 29/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #54
+=================================
+Summarizing function: skb_pull : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	130	0	0	2	3	
+
+TIMES : SCC:54 : 0.00173616409302
+TIMES : FUN:130 : 0.00172996520996
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 130
+=======
+
+SUMS (fk, lo, un, wr, re):	130	0	0	2	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 130 : 62920
+>>> PROGRESS 30/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #56
+=================================
+Summarizing function: __fswab16 : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 5	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	19	0	0	0	0	
+
+TIMES : SCC:56 : 0.000228881835938
+TIMES : FUN:19 : 0.000223159790039
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 19
+=======
+
+SUMS (fk, lo, un, wr, re):	19	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: ((x & 255) << 8) | ((x & 65280) >> 8)
+SIZES: 19 : 34
+>>> PROGRESS 31/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #58
+=================================
+Summarizing function: eth_hdr : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	147	0	0	0	1	
+
+TIMES : FUN:147 : 0.000244140625
+TIMES : SCC:58 : 0.000248908996582
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 147
+=======
+
+SUMS (fk, lo, un, wr, re):	147	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 147 : 62736
+>>> PROGRESS 32/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #53
+=================================
+Summarizing function: plip_type_trans : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	259	0	0	4	8	
+
+TIMES : SCC:53 : 0.00328898429871
+TIMES : FUN:259 : 0.00328302383423
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 259
+=======
+
+SUMS (fk, lo, un, wr, re):	259	0	0	4	8	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 259 : 63383
+>>> PROGRESS 33/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #63
+=================================
+Summarizing function: skb_reserve : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 8	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	135	0	0	2	2	
+
+TIMES : SCC:63 : 0.000303983688354
+TIMES : FUN:135 : 0.000298023223877
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 135
+=======
+
+SUMS (fk, lo, un, wr, re):	135	0	0	2	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 135 : 62756
+>>> PROGRESS 34/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #62
+=================================
+Summarizing function: __dev_alloc_skb : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	138	0	0	2	2	
+
+TIMES : SCC:62 : 0.00186681747437
+TIMES : FUN:138 : 0.00185990333557
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 138
+=======
+
+SUMS (fk, lo, un, wr, re):	138	0	0	2	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 138 : 62748
+>>> PROGRESS 35/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #61
+=================================
+Summarizing function: dev_alloc_skb : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 5	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	144	0	0	2	2	
+
+TIMES : SCC:61 : 0.00125098228455
+TIMES : FUN:144 : 0.00124502182007
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 144
+=======
+
+SUMS (fk, lo, un, wr, re):	144	0	0	2	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 144 : 62748
+>>> PROGRESS 36/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #45
+=================================
+Summarizing function: plip_receive_packet : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	219	0	1	22	30	
+
+TIMES : SCC:45 : 0.0189039707184
+TIMES : FUN:219 : 0.0188961029053
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 219
+=======
+
+SUMS (fk, lo, un, wr, re):	219	0	1	22	30	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 219 : 249853
+>>> PROGRESS 37/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #59
+=================================
+Summarizing function: plip_none : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 87	misses: 5
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	218	0	0	0	0	
+
+TIMES : FUN:218 : 0.0002281665802
+TIMES : SCC:59 : 0.000236034393311
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 218
+=======
+
+SUMS (fk, lo, un, wr, re):	218	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 218 : 34
+>>> PROGRESS 38/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #22
+=================================
+Summarizing function: plip_bh : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	183	0	1	32	45	
+
+TIMES : FUN:183 : 0.0709891319275
+TIMES : SCC:22 : 0.0709979534149
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 183
+=======
+
+SUMS (fk, lo, un, wr, re):	183	0	1	32	45	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 183 : 590558
+>>> PROGRESS 39/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: recv_packet : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 124	misses: 9
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	417	0	2	32	46	
+
+TIMES : SCC:2 : 0.0105550289154
+TIMES : FUN:417 : 0.0105459690094
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 417
+=======
+
+SUMS (fk, lo, un, wr, re):	417	0	2	32	46	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 417 : 661559
+>>> PROGRESS 40/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #29
+=================================
+Summarizing function: constant_test_bit : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 85	misses: 6
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	16	0	0	0	1	
+
+TIMES : FUN:16 : 0.000349044799805
+TIMES : SCC:29 : 0.000357151031494
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 16
+=======
+
+SUMS (fk, lo, un, wr, re):	16	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 16 : 88
+>>> PROGRESS 41/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #25
+=================================
+Summarizing function: netif_queue_stopped : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	168	0	0	0	1	
+
+TIMES : FUN:168 : 0.000598907470703
+TIMES : SCC:25 : 0.000606060028076
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 168
+=======
+
+SUMS (fk, lo, un, wr, re):	168	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 168 : 62619
+>>> PROGRESS 42/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #17
+=================================
+Summarizing function: plip_tx_packet : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	186	0	1	7	10	
+
+TIMES : FUN:186 : 0.00994515419006
+TIMES : SCC:17 : 0.00995302200317
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 186
+=======
+
+SUMS (fk, lo, un, wr, re):	186	0	1	7	10	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 186 : 196328
+>>> PROGRESS 43/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #3
+=================================
+Summarizing function: xmit_packet : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 7	misses: 5
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	414	0	1	8	10	
+
+TIMES : SCC:3 : 0.00407385826111
+TIMES : FUN:414 : 0.00406384468079
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 414
+=======
+
+SUMS (fk, lo, un, wr, re):	414	0	1	8	10	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 414 : 196380
+>>> PROGRESS 44/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #28
+=================================
+Summarizing function: get_current : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 15	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	57	0	0	0	1	
+
+TIMES : SCC:28 : 0.000669002532959
+TIMES : FUN:57 : 0.000661134719849
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 57
+=======
+
+SUMS (fk, lo, un, wr, re):	57	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 57 : 44822
+>>> PROGRESS 45/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #27
+=================================
+Summarizing function: capable : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	91	0	0	1	3	
+
+TIMES : SCC:27 : 0.00114297866821
+TIMES : FUN:91 : 0.00113701820374
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 91
+=======
+
+SUMS (fk, lo, un, wr, re):	91	0	0	1	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 91 : 44905
+>>> PROGRESS 46/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #6
+=================================
+Summarizing function: plip_ioctl : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	192	0	0	5	9	
+
+TIMES : SCC:6 : 0.0094850063324
+TIMES : FUN:192 : 0.0094780921936
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 192
+=======
+
+SUMS (fk, lo, un, wr, re):	192	0	0	5	9	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 192 : 133686
+>>> PROGRESS 47/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #7
+=================================
+Summarizing function: plip_get_stats : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 5	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	191	0	0	0	1	
+
+TIMES : SCC:7 : 0.00136399269104
+TIMES : FUN:191 : 0.00135803222656
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 191
+=======
+
+SUMS (fk, lo, un, wr, re):	191	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 191 : 62875
+>>> PROGRESS 48/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #9
+=================================
+Summarizing function: down : plip.ko_merged.c
+-----
+doing symstate
+TIMES : FUN:68 : 9.51290130615e-05
+TIMES : SCC:9 : 9.98973846436e-05
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 68
+=======
+
+SUMS (fk, lo, un, wr, re):	68	1	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 68 : 135
+>>> PROGRESS 49/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #12
+=================================
+Summarizing function: init_waitqueue_head : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	60	0	0	3	0	
+
+TIMES : SCC:12 : 0.000548124313354
+TIMES : FUN:60 : 0.000541925430298
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 60
+=======
+
+SUMS (fk, lo, un, wr, re):	60	0	0	3	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 60 : 365
+>>> PROGRESS 50/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #11
+=================================
+Summarizing function: sema_init : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	63	0	0	5	0	
+
+TIMES : FUN:63 : 0.000480890274048
+TIMES : SCC:11 : 0.000487089157104
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 63
+=======
+
+SUMS (fk, lo, un, wr, re):	63	0	0	5	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 63 : 614
+>>> PROGRESS 51/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #10
+=================================
+Summarizing function: init_MUTEX_LOCKED : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	66	0	0	5	0	
+
+TIMES : SCC:10 : 0.000464916229248
+TIMES : FUN:66 : 0.000458955764771
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 66
+=======
+
+SUMS (fk, lo, un, wr, re):	66	0	0	5	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 66 : 614
+>>> PROGRESS 52/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #8
+=================================
+Summarizing function: plip_close : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 5	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	190	0	0	11	6	
+
+TIMES : SCC:8 : 0.0368130207062
+TIMES : FUN:190 : 0.0368049144745
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 190
+=======
+
+SUMS (fk, lo, un, wr, re):	190	0	0	11	6	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 190 : 197031
+>>> PROGRESS 53/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #18
+=================================
+Summarizing function: __constant_memcpy : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 14	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	43	0	0	1	1	
+
+TIMES : SCC:18 : 0.0010449886322
+TIMES : FUN:43 : 0.00103807449341
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 43
+=======
+
+SUMS (fk, lo, un, wr, re):	43	0	0	1	1	
+
+SS Sum:
+ -> 
+Extptr (24):
+  lval = (*to)
+
+SIZES: 43 : 344
+>>> PROGRESS 54/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #13
+=================================
+Summarizing function: plip_open : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	189	0	0	10	10	
+
+TIMES : SCC:13 : 0.00456500053406
+TIMES : FUN:189 : 0.00455689430237
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 189
+=======
+
+SUMS (fk, lo, un, wr, re):	189	0	0	10	10	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 189 : 186623
+>>> PROGRESS 55/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: module_activity : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 11	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	418	0	5	49	56	
+
+TIMES : FUN:418 : 0.0411548614502
+TIMES : SCC:1 : 0.0411639213562
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 418
+=======
+
+SUMS (fk, lo, un, wr, re):	418	0	5	49	56	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 418 : 933360
+>>> PROGRESS 56/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #4
+=================================
+Summarizing function: plip_wakeup : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 145	misses: 15
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	194	0	0	1	4	
+
+TIMES : SCC:4 : 0.00344514846802
+TIMES : FUN:194 : 0.00343799591064
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 194
+=======
+
+SUMS (fk, lo, un, wr, re):	194	0	0	1	4	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 194 : 121206
+>>> PROGRESS 57/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #5
+=================================
+Summarizing function: plip_preempt : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 6	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	193	0	0	2	1	
+
+TIMES : FUN:193 : 0.00153708457947
+TIMES : SCC:5 : 0.00154399871826
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 193
+=======
+
+SUMS (fk, lo, un, wr, re):	193	0	0	2	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 193 : 70306
+>>> PROGRESS 58/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #76
+=================================
+Summarizing function: __constant_c_and_count_memset : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	50	0	0	1	0	
+
+TIMES : SCC:76 : 0.000495910644531
+TIMES : FUN:50 : 0.000488996505737
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 50
+=======
+
+SUMS (fk, lo, un, wr, re):	50	0	0	1	0	
+
+SS Sum:
+ -> 
+Extptr (5):
+  lval = (*s)
+
+SIZES: 50 : 152
+>>> PROGRESS 59/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #16
+=================================
+Summarizing function: plip_rewrite_address : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	329	0	0	3	4	
+
+TIMES : SCC:16 : 0.000864028930664
+TIMES : FUN:329 : 0.000857830047607
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 329
+=======
+
+SUMS (fk, lo, un, wr, re):	329	0	0	3	4	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 329 : 65049
+>>> PROGRESS 60/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #14
+=================================
+Summarizing function: plip_hard_header_cache : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 6	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	188	1	0	0	1	
+
+Summarizing function: plip_hard_header_cache : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	188	1	0	0	1	
+
+TIMES : SCC:14 : 0.00274300575256
+TIMES : FUN:188 : 0.00273108482361
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 188
+=======
+
+SUMS (fk, lo, un, wr, re):	188	1	0	0	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 188 : 62515
+>>> PROGRESS 61/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #15
+=================================
+Summarizing function: plip_hard_header : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	187	1	0	0	1	
+
+Summarizing function: plip_hard_header : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	187	1	0	0	1	
+
+TIMES : FUN:187 : 0.00388598442078
+TIMES : SCC:15 : 0.00389814376831
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 187
+=======
+
+SUMS (fk, lo, un, wr, re):	187	1	0	0	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 187 : 62920
+>>> PROGRESS 62/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #23
+=================================
+Summarizing function: plip_kick_bh : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	182	0	0	0	2	
+
+TIMES : SCC:23 : 0.00169086456299
+TIMES : FUN:182 : 0.00168418884277
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 182
+=======
+
+SUMS (fk, lo, un, wr, re):	182	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 182 : 133048
+>>> PROGRESS 63/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #69
+=================================
+Summarizing function: plip_detach : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	396	0	0	0	0	
+
+TIMES : FUN:396 : 0.000186920166016
+TIMES : SCC:69 : 0.000195026397705
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 396
+=======
+
+SUMS (fk, lo, un, wr, re):	396	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 396 : 34
+>>> PROGRESS 64/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #71
+=================================
+Summarizing function: plip_searchfor : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	383	0	0	0	1	
+
+TIMES : SCC:71 : 0.000357866287231
+TIMES : FUN:383 : 0.000349044799805
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 383
+=======
+
+SUMS (fk, lo, un, wr, re):	383	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 383 : 110
+>>> PROGRESS 65/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #72
+=================================
+Summarizing function: alloc_etherdev : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	174	0	0	1	0	
+
+TIMES : SCC:72 : 0.000218152999878
+TIMES : FUN:174 : 0.000212907791138
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 174
+=======
+
+SUMS (fk, lo, un, wr, re):	174	0	0	1	0	
+
+SS Sum:
+ -> 
+Mustptr -> lval = dummydev
+SIZES: 174 : 62489
+>>> PROGRESS 66/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #73
+=================================
+Summarizing function: strcpy : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	37	0	0	0	0	
+
+TIMES : SCC:73 : 0.000190019607544
+TIMES : FUN:37 : 0.000184059143066
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 37
+=======
+
+SUMS (fk, lo, un, wr, re):	37	0	0	0	0	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*dest)
+
+SIZES: 37 : 34
+>>> PROGRESS 67/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #75
+=================================
+Summarizing function: init_timer : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	86	0	0	3	0	
+
+TIMES : SCC:75 : 0.00048303604126
+TIMES : FUN:86 : 0.000478029251099
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 86
+=======
+
+SUMS (fk, lo, un, wr, re):	86	0	0	3	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 86 : 511
+>>> PROGRESS 68/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #74
+=================================
+Summarizing function: plip_init_netdev : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	210	0	0	41	4	
+
+TIMES : SCC:74 : 0.0032811164856
+TIMES : FUN:210 : 0.00327396392822
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 210
+=======
+
+SUMS (fk, lo, un, wr, re):	210	0	0	41	4	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 210 : 134703
+>>> PROGRESS 69/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #78
+=================================
+Summarizing function: register_netdev : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 15	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	172	0	0	0	0	
+
+TIMES : SCC:78 : 0.000204086303711
+TIMES : FUN:172 : 0.000195980072021
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 172
+=======
+
+SUMS (fk, lo, un, wr, re):	172	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 172 : 34
+>>> PROGRESS 70/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #70
+=================================
+Summarizing function: plip_attach : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	388	0	0	47	14	
+
+TIMES : SCC:70 : 0.00729203224182
+TIMES : FUN:388 : 0.00728416442871
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 388
+=======
+
+SUMS (fk, lo, un, wr, re):	388	0	0	47	14	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 388 : 72669
+>>> PROGRESS 71/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #66
+=================================
+Summarizing function: parport_unregister_driver : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 64	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	176	0	1	47	14	
+
+TIMES : FUN:176 : 0.00234484672546
+TIMES : SCC:66 : 0.00235199928284
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 176
+=======
+
+SUMS (fk, lo, un, wr, re):	176	0	1	47	14	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 176 : 72689
+>>> PROGRESS 72/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #65
+=================================
+Summarizing function: plip_cleanup_module : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 62	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	98	0	1	47	17	
+
+TIMES : SCC:65 : 0.00511884689331
+TIMES : FUN:98 : 0.00511121749878
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 98
+=======
+
+SUMS (fk, lo, un, wr, re):	98	0	1	47	17	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 98 : 135638
+>>> PROGRESS 73/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #24
+=================================
+Summarizing function: cleanup_module : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 65	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	99	0	1	47	17	
+
+TIMES : SCC:24 : 0.00287318229675
+TIMES : FUN:99 : 0.00286602973938
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 99
+=======
+
+SUMS (fk, lo, un, wr, re):	99	0	1	47	17	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 99 : 135650
+>>> PROGRESS 74/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #68
+=================================
+Summarizing function: parport_register_driver : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 63	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	175	0	1	47	14	
+
+TIMES : FUN:175 : 0.00256204605103
+TIMES : SCC:68 : 0.00256896018982
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 175
+=======
+
+SUMS (fk, lo, un, wr, re):	175	0	1	47	14	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 175 : 72701
+>>> PROGRESS 75/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #67
+=================================
+Summarizing function: plip_init : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 62	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	95	0	1	48	14	
+
+TIMES : SCC:67 : 0.00229811668396
+TIMES : FUN:95 : 0.00229001045227
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 95
+=======
+
+SUMS (fk, lo, un, wr, re):	95	0	1	48	14	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 95 : 72799
+>>> PROGRESS 76/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #26
+=================================
+Summarizing function: init_module : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 60	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	96	0	1	48	14	
+
+TIMES : FUN:96 : 0.00202989578247
+TIMES : SCC:26 : 0.00203704833984
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 96
+=======
+
+SUMS (fk, lo, un, wr, re):	96	0	1	48	14	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 96 : 72799
+>>> PROGRESS 77/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #44
+=================================
+Summarizing function: kmalloc : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 60	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	77	0	0	0	2	
+
+TIMES : SCC:44 : 0.00132608413696
+TIMES : FUN:77 : 0.00131893157959
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 77
+=======
+
+SUMS (fk, lo, un, wr, re):	77	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 77 : 304
+>>> PROGRESS 78/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #64
+=================================
+Summarizing function: main : plip.ko_merged.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	426	0	1	48	17	
+
+TIMES : SCC:64 : 0.00487494468689
+TIMES : FUN:426 : 0.0048668384552
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 426
+=======
+
+SUMS (fk, lo, un, wr, re):	426	0	1	48	17	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 426 : 135774
+>>> PROGRESS 79/79 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+
+
+
+Beginning Thread Analysis:
+-----
+Expected # thread-creation site pairs: 1
+checking a thread-creation pair
+Prev ldiffCache hits: 129	misses: 7
+
+doing symstate
+Prev ldiffCache hits: 213	misses: 7
+
+doing symstate
+now checking thread roots: module_activity, module_activity
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+now checking thread roots: module_activity, dummy_interrupt
+now checking thread roots: module_activity, module_activity
+now checking thread roots: dummy_interrupt, module_activity
+now checking thread roots: dummy_interrupt, dummy_interrupt
+now checking thread roots: dummy_interrupt, module_activity
+now checking thread roots: module_activity, module_activity
+now checking thread roots: module_activity, dummy_interrupt
+now checking thread roots: module_activity, module_activity
+done with pair, sending notification
+completed all thread pairs
+****
+Possible race between access to:
+dummydev.trans_start @ plip.ko_merged.c:19035 and
+dummydev.trans_start @ plip.ko_merged.c:19035
+	Cluster ID: 1
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18314] and
+	[plip.ko_merged.c:18314]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+dummydev.last_rx @ plip.ko_merged.c:19035 and
+dummydev.last_rx @ plip.ko_merged.c:19035
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17977] and
+	[plip.ko_merged.c:17977]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1] and
+(*([REP: 1].ifa_local))
+	Cluster ID: 31
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:7790, plip.ko_merged.c:7793, plip.ko_merged.c:7796, plip.ko_merged.c:7799, plip.ko_merged.c:7800, plip.ko_merged.c:7803, plip.ko_merged.c:7804, plip.ko_merged.c:7807, plip.ko_merged.c:7808, plip.ko_merged.c:7811, plip.ko_merged.c:7812]
+
+	Confidence: used PTA nodes ptSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	lval 1: (*([REP: 1].ifa_local))
+LS for 2nd access:
+L+ = empty;
+	lval 2: [REP: 1]
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	lval 1: (*([REP: 1].ifa_local))
+LS for 2nd access:
+L+ = empty;
+	lval 2: [REP: 1]
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 33].output_queue and
+[REP: 33].output_queue
+	Cluster ID: 30
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:16348] and
+	[plip.ko_merged.c:16348]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 33].output_queue and
+[REP: 33].output_queue
+	Cluster ID: 51
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:16348] and
+	[plip.ko_merged.c:16347]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(1)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].connection and
+[REP: 1].connection
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18268] and
+	[plip.ko_merged.c:18268]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.rx_dropped and
+[REP: 1].enet_stats.rx_dropped
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17741] and
+	[plip.ko_merged.c:17741]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.tx_aborted_errors and
+[REP: 1].enet_stats.tx_aborted_errors
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17725] and
+	[plip.ko_merged.c:17725]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.tx_errors and
+[REP: 1].enet_stats.tx_errors
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17724] and
+	[plip.ko_merged.c:17724]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].length.h and
+[REP: 1].length.h
+	Cluster ID: 40
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18316] and
+	[plip.ko_merged.c:17920, plip.ko_merged.c:17921, plip.ko_merged.c:17924, plip.ko_merged.c:17925, plip.ko_merged.c:17929, plip.ko_merged.c:17936, plip.ko_merged.c:17949, plip.ko_merged.c:17978, plip.ko_merged.c:18151]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].length.h and
+[REP: 1].length.h
+	Cluster ID: 19
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18316] and
+	[plip.ko_merged.c:18316]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].state and
+[REP: 1].state
+	Cluster ID: 27
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18267] and
+	[plip.ko_merged.c:18267]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].timeout_count and
+[REP: 1].timeout_count
+	Cluster ID: 49
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17704, plip.ko_merged.c:17706, plip.ko_merged.c:17714, plip.ko_merged.c:17733, plip.ko_merged.c:17734] and
+	[plip.ko_merged.c:18269, plip.ko_merged.c:18320, plip.ko_merged.c:18120, plip.ko_merged.c:17704, plip.ko_merged.c:17733]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].timeout_count and
+[REP: 1].timeout_count
+	Cluster ID: 29
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18269] and
+	[plip.ko_merged.c:18269]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1] and
+[REP: 1]
+	Cluster ID: 2
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: [REP: 1].length.b.msb
+	lval 2: [REP: 1].length.b.msb
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	lval 1: [REP: 1].length.b.lsb
+	lval 2: [REP: 1].length.b.lsb
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(2)
+	lval 1: [REP: 1].data
+	lval 2: [REP: 1].data
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1] and
+[REP: 1]
+	Cluster ID: 32
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:17955, plip.ko_merged.c:18146, plip.ko_merged.c:18157, plip.ko_merged.c:17821, plip.ko_merged.c:17859]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].byte and
+[REP: 1].byte
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17939, plip.ko_merged.c:17948, plip.ko_merged.c:17954, plip.ko_merged.c:18142, plip.ko_merged.c:18150, plip.ko_merged.c:18156] and
+	[plip.ko_merged.c:17939, plip.ko_merged.c:17948, plip.ko_merged.c:17954, plip.ko_merged.c:18142, plip.ko_merged.c:18150, plip.ko_merged.c:18156]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].byte and
+[REP: 1].byte
+	Cluster ID: 33
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17939, plip.ko_merged.c:17948, plip.ko_merged.c:17954, plip.ko_merged.c:18142, plip.ko_merged.c:18150, plip.ko_merged.c:18156] and
+	[plip.ko_merged.c:17944, plip.ko_merged.c:17948, plip.ko_merged.c:17949, plip.ko_merged.c:17954, plip.ko_merged.c:17956, plip.ko_merged.c:18150, plip.ko_merged.c:18151, plip.ko_merged.c:18156, plip.ko_merged.c:18158]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].checksum and
+[REP: 1].checksum
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17940, plip.ko_merged.c:17955, plip.ko_merged.c:18143, plip.ko_merged.c:18157] and
+	[plip.ko_merged.c:17940, plip.ko_merged.c:17955, plip.ko_merged.c:18143, plip.ko_merged.c:18157]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].checksum and
+[REP: 1].checksum
+	Cluster ID: 34
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17940, plip.ko_merged.c:17955, plip.ko_merged.c:18143, plip.ko_merged.c:18157] and
+	[plip.ko_merged.c:17955, plip.ko_merged.c:17966, plip.ko_merged.c:18157, plip.ko_merged.c:18164]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].connection and
+[REP: 1].connection
+	Cluster ID: 35
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18268, plip.ko_merged.c:18319, plip.ko_merged.c:18406, plip.ko_merged.c:18442, plip.ko_merged.c:17900, plip.ko_merged.c:17987, plip.ko_merged.c:17996, plip.ko_merged.c:18178, plip.ko_merged.c:18197, plip.ko_merged.c:18219, plip.ko_merged.c:17763] and
+	[plip.ko_merged.c:18263, plip.ko_merged.c:18265, plip.ko_merged.c:18266, plip.ko_merged.c:18272, plip.ko_merged.c:18274, plip.ko_merged.c:18318, plip.ko_merged.c:18095, plip.ko_merged.c:18107, plip.ko_merged.c:18196, plip.ko_merged.c:17702, plip.ko_merged.c:17727]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(1)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].data and
+[REP: 1].data
+	Cluster ID: 36
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:17966, plip.ko_merged.c:17821]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].data and
+[REP: 1].data
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:15528, plip.ko_merged.c:15643] and
+	[plip.ko_merged.c:15528, plip.ko_merged.c:15529, plip.ko_merged.c:15643, plip.ko_merged.c:17942, plip.ko_merged.c:18076, plip.ko_merged.c:17842, plip.ko_merged.c:17858]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].dev and
+[REP: 1].dev
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17937] and
+	[plip.ko_merged.c:17937]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.collisions and
+[REP: 1].enet_stats.collisions
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18097, plip.ko_merged.c:18111] and
+	[plip.ko_merged.c:18097, plip.ko_merged.c:18111]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.rx_bytes and
+[REP: 1].enet_stats.rx_bytes
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17978] and
+	[plip.ko_merged.c:17978]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.rx_crc_errors and
+[REP: 1].enet_stats.rx_crc_errors
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17967] and
+	[plip.ko_merged.c:17967]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.rx_packets and
+[REP: 1].enet_stats.rx_packets
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17979] and
+	[plip.ko_merged.c:17979]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.tx_bytes and
+[REP: 1].enet_stats.tx_bytes
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18168] and
+	[plip.ko_merged.c:18168]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.tx_packets and
+[REP: 1].enet_stats.tx_packets
+	Cluster ID: 16
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18170] and
+	[plip.ko_merged.c:18170]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].is_deferred and
+[REP: 1].is_deferred
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17667, plip.ko_merged.c:17673, plip.ko_merged.c:18407, plip.ko_merged.c:18441, plip.ko_merged.c:17899, plip.ko_merged.c:18179, plip.ko_merged.c:18228] and
+	[plip.ko_merged.c:17667, plip.ko_merged.c:17673, plip.ko_merged.c:18407, plip.ko_merged.c:18441, plip.ko_merged.c:17899, plip.ko_merged.c:18179, plip.ko_merged.c:18228]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].kill_timer.counter and
+[REP: 1].kill_timer.counter
+	Cluster ID: 37
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18399, plip.ko_merged.c:18438] and
+	[plip.ko_merged.c:17687]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].len and
+[REP: 1].len
+	Cluster ID: 18
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:15475, plip.ko_merged.c:15517] and
+	[plip.ko_merged.c:15475, plip.ko_merged.c:15517, plip.ko_merged.c:15519, plip.ko_merged.c:15540, plip.ko_merged.c:18168]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].length.b.lsb and
+[REP: 1].length.b.lsb
+	Cluster ID: 38
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:18131, plip.ko_merged.c:17821]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].length.b.msb and
+[REP: 1].length.b.msb
+	Cluster ID: 39
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:18137, plip.ko_merged.c:17821]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].mac.raw and
+[REP: 1].mac.raw
+	Cluster ID: 41
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17842] and
+	[plip.ko_merged.c:16056]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].mac.raw and
+[REP: 1].mac.raw
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17842] and
+	[plip.ko_merged.c:17842]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].nibble and
+[REP: 1].nibble
+	Cluster ID: 42
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18544] and
+	[plip.ko_merged.c:18536, plip.ko_merged.c:17881, plip.ko_merged.c:18069]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].nibble and
+[REP: 1].nibble
+	Cluster ID: 43
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17893, plip.ko_merged.c:18119, plip.ko_merged.c:17804, plip.ko_merged.c:17823, plip.ko_merged.c:18019, plip.ko_merged.c:18035, plip.ko_merged.c:18050] and
+	[plip.ko_merged.c:17786, plip.ko_merged.c:17805, plip.ko_merged.c:17824, plip.ko_merged.c:18017, plip.ko_merged.c:18020, plip.ko_merged.c:18036]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].nibble and
+[REP: 1].nibble
+	Cluster ID: 21
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17893, plip.ko_merged.c:18119, plip.ko_merged.c:17804, plip.ko_merged.c:17823, plip.ko_merged.c:18019, plip.ko_merged.c:18035, plip.ko_merged.c:18050] and
+	[plip.ko_merged.c:17893, plip.ko_merged.c:18119, plip.ko_merged.c:17804, plip.ko_merged.c:17823, plip.ko_merged.c:18019, plip.ko_merged.c:18035, plip.ko_merged.c:18050]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].pkt_type and
+[REP: 1].pkt_type
+	Cluster ID: 22
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17849, plip.ko_merged.c:17851] and
+	[plip.ko_merged.c:17849, plip.ko_merged.c:17851]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].port_owner and
+[REP: 1].port_owner
+	Cluster ID: 44
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18302, plip.ko_merged.c:18393, plip.ko_merged.c:18445, plip.ko_merged.c:18202] and
+	[plip.ko_merged.c:18297, plip.ko_merged.c:18388, plip.ko_merged.c:18443, plip.ko_merged.c:18203]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].port_owner and
+[REP: 1].port_owner
+	Cluster ID: 23
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18302, plip.ko_merged.c:18393, plip.ko_merged.c:18445, plip.ko_merged.c:18202] and
+	[plip.ko_merged.c:18302, plip.ko_merged.c:18393, plip.ko_merged.c:18445, plip.ko_merged.c:18202]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].protocol and
+[REP: 1].protocol
+	Cluster ID: 24
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17975] and
+	[plip.ko_merged.c:17975]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].should_relinquish and
+[REP: 1].should_relinquish
+	Cluster ID: 45
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18395, plip.ko_merged.c:18203, plip.ko_merged.c:18220] and
+	[plip.ko_merged.c:18201]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].should_relinquish and
+[REP: 1].should_relinquish
+	Cluster ID: 25
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18395, plip.ko_merged.c:18203, plip.ko_merged.c:18220] and
+	[plip.ko_merged.c:18395, plip.ko_merged.c:18203, plip.ko_merged.c:18220]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].skb and
+[REP: 1].skb
+	Cluster ID: 26
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18315, plip.ko_merged.c:18450, plip.ko_merged.c:18455, plip.ko_merged.c:17929, plip.ko_merged.c:17980, plip.ko_merged.c:18073, plip.ko_merged.c:18080, plip.ko_merged.c:18174, plip.ko_merged.c:17747, plip.ko_merged.c:17752] and
+	[plip.ko_merged.c:18315, plip.ko_merged.c:18450, plip.ko_merged.c:18455, plip.ko_merged.c:17929, plip.ko_merged.c:17980, plip.ko_merged.c:18073, plip.ko_merged.c:18080, plip.ko_merged.c:18174, plip.ko_merged.c:17747, plip.ko_merged.c:17752]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].skb and
+[REP: 1].skb
+	Cluster ID: 46
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18315, plip.ko_merged.c:18450, plip.ko_merged.c:18455, plip.ko_merged.c:17929, plip.ko_merged.c:17980, plip.ko_merged.c:18073, plip.ko_merged.c:18080, plip.ko_merged.c:18174, plip.ko_merged.c:17747, plip.ko_merged.c:17752] and
+	[plip.ko_merged.c:18448, plip.ko_merged.c:18449, plip.ko_merged.c:18453, plip.ko_merged.c:18454, plip.ko_merged.c:17931, plip.ko_merged.c:17935, plip.ko_merged.c:17936, plip.ko_merged.c:17975, plip.ko_merged.c:17976, plip.ko_merged.c:18070, plip.ko_merged.c:18169, plip.ko_merged.c:17745, plip.ko_merged.c:17746, plip.ko_merged.c:17750, plip.ko_merged.c:17751]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].state and
+[REP: 1].state
+	Cluster ID: 47
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17883, plip.ko_merged.c:17894, plip.ko_merged.c:17895, plip.ko_merged.c:17915, plip.ko_merged.c:17941, plip.ko_merged.c:17961, plip.ko_merged.c:17974, plip.ko_merged.c:17986, plip.ko_merged.c:18085, plip.ko_merged.c:18130, plip.ko_merged.c:18136, plip.ko_merged.c:18144, plip.ko_merged.c:18163, plip.ko_merged.c:18172, plip.ko_merged.c:17720, plip.ko_merged.c:17728, plip.ko_merged.c:17739] and
+	[plip.ko_merged.c:18267, plip.ko_merged.c:18317, plip.ko_merged.c:18447, plip.ko_merged.c:18452, plip.ko_merged.c:17892, plip.ko_merged.c:17898, plip.ko_merged.c:17914, plip.ko_merged.c:17938, plip.ko_merged.c:17960, plip.ko_merged.c:17973, plip.ko_merged.c:18072, plip.ko_merged.c:18079, plip.ko_merged.c:18118, plip.ko_merged.c:18135, plip.ko_merged.c:18141, plip.ko_merged.c:18162, plip.ko_merged.c:18171, plip.ko_merged.c:17744, plip.ko_merged.c:17749]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].tail and
+[REP: 1].tail
+	Cluster ID: 48
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:15474, plip.ko_merged.c:15644] and
+	[plip.ko_merged.c:15458, plip.ko_merged.c:15474, plip.ko_merged.c:15476, plip.ko_merged.c:15644]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].tail and
+[REP: 1].tail
+	Cluster ID: 28
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:15474, plip.ko_merged.c:15644] and
+	[plip.ko_merged.c:15474, plip.ko_merged.c:15644]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].trigger and
+[REP: 1].trigger
+	Cluster ID: 50
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18543] and
+	[plip.ko_merged.c:18535, plip.ko_merged.c:17896, plip.ko_merged.c:18091]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+
+$$$$$$
+Total Warnings: 52
+
+
+Printing Alias assumptions used by warnings
+-----
+wp	31	g:189:plip_open/g:404:dummydev	13	13
+nc	30	[REP: 33].output_queue#g/[REP: 33].output_queue#g	0	0
+nc	51	[REP: 33].output_queue#g/[REP: 33].output_queue#g	0	0
+nc	5	[REP: 1].connection#g/[REP: 1].connection#g	13	13
+nc	11	[REP: 1].enet_stats.rx_dropped#g/[REP: 1].enet_stats.rx_dropped#g	13	13
+nc	13	[REP: 1].enet_stats.tx_aborted_errors#g/[REP: 1].enet_stats.tx_aborted_errors#g	13	13
+nc	15	[REP: 1].enet_stats.tx_errors#g/[REP: 1].enet_stats.tx_errors#g	13	13
+nc	40	[REP: 1].length.h#g/[REP: 1].length.h#g	13	13
+nc	19	[REP: 1].length.h#g/[REP: 1].length.h#g	13	13
+nc	27	[REP: 1].state#g/[REP: 1].state#g	13	13
+nc	49	[REP: 1].timeout_count#g/[REP: 1].timeout_count#g	13	13
+nc	29	[REP: 1].timeout_count#g/[REP: 1].timeout_count#g	13	13
+nc	2	[REP: 1]#g/[REP: 1]#g	13	13
+nc	32	[REP: 1]#g/[REP: 1]#g	13	13
+nc	3	[REP: 1].byte#g/[REP: 1].byte#g	13	13
+nc	33	[REP: 1].byte#g/[REP: 1].byte#g	13	13
+nc	4	[REP: 1].checksum#g/[REP: 1].checksum#g	13	13
+nc	34	[REP: 1].checksum#g/[REP: 1].checksum#g	13	13
+nc	35	[REP: 1].connection#g/[REP: 1].connection#g	13	13
+nc	36	[REP: 1].data#g/[REP: 1].data#g	13	13
+nc	6	[REP: 1].data#g/[REP: 1].data#g	13	13
+nc	7	[REP: 1].dev#g/[REP: 1].dev#g	13	13
+nc	8	[REP: 1].enet_stats.collisions#g/[REP: 1].enet_stats.collisions#g	13	13
+nc	9	[REP: 1].enet_stats.rx_bytes#g/[REP: 1].enet_stats.rx_bytes#g	13	13
+nc	10	[REP: 1].enet_stats.rx_crc_errors#g/[REP: 1].enet_stats.rx_crc_errors#g	13	13
+nc	12	[REP: 1].enet_stats.rx_packets#g/[REP: 1].enet_stats.rx_packets#g	13	13
+nc	14	[REP: 1].enet_stats.tx_bytes#g/[REP: 1].enet_stats.tx_bytes#g	13	13
+nc	16	[REP: 1].enet_stats.tx_packets#g/[REP: 1].enet_stats.tx_packets#g	13	13
+nc	17	[REP: 1].is_deferred#g/[REP: 1].is_deferred#g	13	13
+nc	37	[REP: 1].kill_timer.counter#g/[REP: 1].kill_timer.counter#g	13	13
+nc	18	[REP: 1].len#g/[REP: 1].len#g	13	13
+nc	38	[REP: 1].length.b.lsb#g/[REP: 1].length.b.lsb#g	13	13
+nc	39	[REP: 1].length.b.msb#g/[REP: 1].length.b.msb#g	13	13
+nc	41	[REP: 1].mac.raw#g/[REP: 1].mac.raw#g	13	13
+nc	20	[REP: 1].mac.raw#g/[REP: 1].mac.raw#g	13	13
+nc	42	[REP: 1].nibble#g/[REP: 1].nibble#g	13	13
+nc	43	[REP: 1].nibble#g/[REP: 1].nibble#g	13	13
+nc	21	[REP: 1].nibble#g/[REP: 1].nibble#g	13	13
+nc	22	[REP: 1].pkt_type#g/[REP: 1].pkt_type#g	13	13
+nc	44	[REP: 1].port_owner#g/[REP: 1].port_owner#g	13	13
+nc	23	[REP: 1].port_owner#g/[REP: 1].port_owner#g	13	13
+nc	24	[REP: 1].protocol#g/[REP: 1].protocol#g	13	13
+nc	45	[REP: 1].should_relinquish#g/[REP: 1].should_relinquish#g	13	13
+nc	25	[REP: 1].should_relinquish#g/[REP: 1].should_relinquish#g	13	13
+nc	26	[REP: 1].skb#g/[REP: 1].skb#g	13	13
+nc	46	[REP: 1].skb#g/[REP: 1].skb#g	13	13
+nc	47	[REP: 1].state#g/[REP: 1].state#g	13	13
+nc	48	[REP: 1].tail#g/[REP: 1].tail#g	13	13
+nc	28	[REP: 1].tail#g/[REP: 1].tail#g	13	13
+nc	50	[REP: 1].trigger#g/[REP: 1].trigger#g	13	13
+writeState: Not needed for CIL PTA
+writeState: Not needed for Steens PTA
+Golden lvals hash stats (len, ents, sum/min/median/max bucket)
+	597	127	405	0	0	6	
+Golden lvals hash stats (len, ents, sum/min/median/max bucket)
+	173	0	0	0	0	0	
+Golden types hash stats (len, ents, sum/min/median/max bucket)
+	173	88	189	0	0	6	
+Golden compInfos hash stats (len, ents, sum/min/median/max bucket)
+	173	0	0	0	0	0	
+Elapsed time (secs): 0.936058
+Top heap size (words): 3695616
+Current heap size (words): 3695616
+Lifetime allocated bytes: 82725016.
+Collections -- minor: 43 major: 17 compactions: 5
+return value is 0
+ran 1 times
+cleared status file: /tmp/temp.LMw6BJ
+Sun Aug 10 21:12:52 PDT 2008

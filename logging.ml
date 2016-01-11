@@ -59,46 +59,24 @@ let err_log = ref elog'
 
 let withTime = ref false
 
-
 (**** Priority/Verbosity levels ****)
 
 (** Only print warning messages up to this priority (lower number is 
     greater priority (so that it maxes at 0)) *)
 let priority = ref 1
 
-
-(************************************************************)
-
-
-(** Writes a status message (along with a timestamp and newline) *)
-let logStatus s =
-  if !withTime then
-    output_string !stat_log ((string_of_float (Sys.time ())) ^ "> ")
-  ;
-  output_string !stat_log s;
-  output_char !stat_log '\n'
-    
-
-(** Flushes the status log *)
-let flushStatus () =
-  flush !stat_log
+let printPriority = ref false
 
 
-(** Writes an error message (along with a timestamp and newline) *)
-let logError ?(prior=0) s =
-  if prior <= !priority then begin
-    output_string !err_log ("<" ^ (string_of_int prior) ^ "> ");
-    (if !withTime then
-       output_string !err_log ((string_of_float (Sys.time ())) ^ "> ")
-    );
-    output_string !err_log s;
-    output_char !err_log '\n';
-    flush !err_log
-  end
+
+
+(************************************************************
+ Changing Settings
+************************************************************)
 
 
 (** Create a temp file in the given directory w/ a given prefix 
-    (first 5 chars) *)
+    (first 5 chars). ASSUMES "tempfile" program exists. *)
 let tmpFile dir prefix =
   let result = ref "" in
   let in_chan = 
@@ -111,7 +89,6 @@ let tmpFile dir prefix =
   | _ ->
       prerr_string "couldn't make tempfile\n";
       "/tmp/_123BLAH"
-
 
 
 (** Set file to store status logs. Keeps file open! *)
@@ -132,9 +109,10 @@ let setErrLog dir =
   let fileName = tmpFile dir "rerr" in
   print_string ("logging errors to " ^ fileName ^ "\n");
   if (!err_log == elog') then
-    (* previously stderr *)
+    (* previously stderr, don't need to close stderr *)
     err_log := open_out fileName
   else (
+    (* not previously stderr, close previous err_log *)
     close_out !err_log;
     err_log := open_out fileName
   )    
@@ -142,3 +120,112 @@ let setErrLog dir =
 (** Toggle time-stamps in log messages *)
 let doWithTime b =
   withTime := b
+
+
+
+(************************************************************)
+
+(** Prepend output with timestamp *)
+let timestampOut chan =
+  if !withTime then
+    output_string chan ((string_of_float (Sys.time ())) ^ "> ")
+  
+(** Prepend output w/ priority level *)
+let priorityOut chan prior =
+  if (!printPriority) then
+    Printf.fprintf chan "<%d>" prior
+
+(* Internal status logger *)
+let doStatus doer item =
+  let () = timestampOut !stat_log in
+  doer !stat_log item
+    
+(** Writes a status message (w/ a newline) *)
+let logStatus s : unit = 
+  doStatus output_string s;
+  output_char !stat_log '\n'
+
+(** Write a status message using printf-style arguments *)
+let logStatusF (fmt:('a, out_channel, unit) format) : 'a =
+  doStatus Printf.fprintf fmt
+
+(** Flushes the status log *)
+let flushStatus () : unit =
+  flush !stat_log
+
+
+
+(** Writes an error message (along with a timestamp and newline) *)
+let logError ?(prior=0) =
+  if prior <= !priority then
+    (fun s ->
+       priorityOut !err_log prior;
+       timestampOut !err_log;
+       Printf.fprintf !err_log "%s\n" s;
+       flush !err_log
+    )
+  else 
+    ignore (* Too bad arg still get evaluated? *)
+
+(* No logErrorF for now (wait till we migrate to 3.10), 
+   because we need Printf.ifprintf to consume the args in the 
+   case where the priority is not enough *)
+
+
+(************************************************************
+ Higher-level printing
+************************************************************)  
+
+(**** Write collections to string buffers ****)
+
+let seq_to_ sep iter doElem seq add_to target =
+  let firstElem = ref true in
+  iter (fun elem ->
+          if not (!firstElem) then add_to target sep
+          else firstElem := false
+          ;
+          add_to target (doElem elem);
+       ) seq
+
+let map_to_ sep iter doKeyVal map add_to target =
+  let firstElem = ref true in
+  iter (fun k v ->
+          if not (!firstElem) then add_to target sep
+          else firstElem := false
+          ;
+          add_to target (doKeyVal k v);
+       ) map
+    
+let seq_to_buf ?(sep=", ") iter doElem seq buff = 
+  seq_to_ sep iter doElem seq Buffer.add_string buff
+    (* TODO: Hmm, by using Buffer.add_string, we make it so that
+       doElem is not recursive, but returns a string representation? *)
+    
+let map_to_buf ?(sep=", ") iter doKeyVal map buff =
+  map_to_ sep iter doKeyVal map Buffer.add_string buff
+
+let logStatusB buf =
+  doStatus Buffer.output_buffer buf
+
+
+(**** Same as string buffer operations, but for Pretty.doc ****)
+
+open Pretty
+
+let concatToRef cur newTail =
+  cur := !cur ++ newTail
+
+let seq_to_doc sep iter doElem seq doc =
+  (* Use mutation, or make the seq_to_x / map_to_x 
+     return new x instead of unit *)
+  let result = ref doc in
+  seq_to_ sep iter doElem seq concatToRef result; 
+  !result
+
+let map_to_doc sep iter doElem map doc =
+  let result = ref doc in
+  map_to_ sep iter doElem map concatToRef result;
+  !result
+
+let logStatusD doc =
+  doStatus (Pretty.fprint ~width:80) doc

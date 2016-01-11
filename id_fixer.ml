@@ -90,9 +90,9 @@ let loadRanges (root:string) =
 
 (**************** Visitor to do the work **************)
 
-let nextGlobVID = ref 0
+let nextGlobVID = ref 1
 
-let nextCompKey = ref 0
+let nextCompKey = ref 1
 
 
 (* Consistently reassign vids to each global var. For local var,
@@ -187,24 +187,24 @@ class globalIDVisitor = object (self)
     self#handleVI vi;
     DoChildren
 
+  method handleCompinfo ci =
+    try 
+      let oldCKey = Hashtbl.find compKeys (ci.cstruct, ci.cname) in
+      ci.ckey <- oldCKey
+    with Not_found ->
+      let newCKey = getNextCKey () in
+      ci.ckey <- newCKey;
+      (* remember the change *)
+      Hashtbl.add compKeys (ci.cstruct, ci.cname) newCKey;
+      (* make index of compinfos *)
+      IH.add seenCinfos ci.ckey ci
+        (* TODO: beware _anon_structs, which can give different names
+           for the SAME struct !!! *)
 
   method vglob = function
       GCompTag (ci, _)
     | GCompTagDecl (ci, _) ->
-        (try 
-           let oldCKey = Hashtbl.find compKeys (ci.cstruct, ci.cname) in
-           ci.ckey <- oldCKey
-         with Not_found ->
-           let newCKey = getNextCKey () in
-           
-           (* re-assign *)
-           ci.ckey <- newCKey;
-           
-           (* remember that it's done *)
-           Hashtbl.add compKeys (ci.cstruct, ci.cname) newCKey;
-           (* make index of compinfos *)
-           IH.add seenCinfos ci.ckey ci;
-        );
+        self#handleCompinfo ci;
         DoChildren
     | _ ->
         DoChildren    
@@ -216,6 +216,8 @@ end
 
 
 let doEnsureUniqueIDs (root : string) =
+  L.logStatus "Fixing IDs";
+  L.flushStatus ();
   Filetools.walkDir 
     (fun ast file ->
        let startVid = !nextGlobVID in
@@ -236,7 +238,10 @@ let doEnsureUniqueIDs (root : string) =
 
        CF.addRanges startVid endVid startCkey endCkey ast.fileName;
 
-    ) root
+    ) root;
+  L.logStatus "IDs are now fixed";
+  L.flushStatus ()
+  
     
 
 let initState () =

@@ -81,3 +81,25 @@ let addStringMT s =
 
 
 module StringSet = Set.Make(String)
+
+
+(*********** substringing *********)
+
+(** Summarize a string, only keeping the header *)
+let sumStrHead ?(maxlen=15) str =
+  if String.length str > maxlen then
+    let tail = "..." in
+    let taillen = String.length tail in
+    String.sub str 0 (maxlen - taillen) ^ tail
+  else str
+
+(** Summarize a string, keeping only the tail *)
+let sumStrTail ?(maxlen=15) str =
+  let len = String.length str in
+  if len > maxlen then
+    let header = "..." in
+    let headerlen = String.length header in
+    let bodylen = maxlen - headerlen in
+    header ^ (String.sub str (len - bodylen) bodylen)
+  else str
+

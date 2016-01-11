@@ -32,7 +32,8 @@ module H = Hashtbl.Make(
 	     
 let node_table = (H.create 257 : unit H.t)
 
-let in_table o = try H.find node_table o; true with Not_found -> false
+let in_table o = (* try H.find node_table o; true with Not_found -> false *)
+  H.mem node_table o
 
 let add_in_table o = H.add node_table o ()
 

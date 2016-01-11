@@ -42,9 +42,9 @@
 *)
 
 open Cil
-open Scope
 open Fstructs
 open Callg
+open Scope
 
 module L = Logging
 module CLv = Cil_lvals
@@ -52,6 +52,7 @@ module Lv = Lvals
 module A = Alias
 module Th = Threads
 module DC = Default_cache
+module Stat = Mystats
 
 (*************************************************
              Super coarse, scope-based 
@@ -60,6 +61,10 @@ module DC = Default_cache
 let varShareable vi =
   vi.vglob && not (Cil.isFunctionType vi.vtype)
 
+let isGlobalDataVar vi =
+  vi.vglob && 
+    not ((Cil.isFunctionType vi.vtype) || (Trans_alloc.isAllocVar vi.vname))
+    
 
 (** Given an lval, determines if it is shareable and worth tracking.
     If so, then it will return the reason (in this case, the scope
@@ -92,83 +97,111 @@ let isShareable (curFunc:Cil.fundec) (lval:Cil.lval) : scope option =
         None
 
 
-(** For abs lvals *)
+(** Return scope indicating why a caller of the curFunc may be able to modify
+    the given lval, or return None *)
 let isShareableAbs (curFunc:Cil.fundec) lval : scope option =
-  match Scope.annotScope curFunc lval with
+  match Lv.getScopeParanoid curFunc lval with
     STBD
   | SFunc -> None
-  | s -> Some (s)
+  | (SFormal _) as s -> 
+      (match lval with 
+         (Lv.CVar _, _) -> None (* the formal itself is local *)
+       | _ -> Some (s))
+  | SGlobal -> Some (SGlobal)
+      
 
 
 (*************************************************
      Less coarse but still coarse FI-AA-based 
 **************************************************)
 
+let threadActuals = ref []
 let threadFormals = ref []
 
-let gatherFormals curList threadFunc =
-  match threadFunc.sformals with
-    [formal] -> 
-      (* Convert formal to the absNode representing its target *)
-      (try 
-         let targs = Lv.deref_absLval 
-           (Lv.CVar formal, NoOffset) in
-         List.rev_append targs curList
-       with 
-         Not_found 
-       | A.UnknownLoc ->
-           L.logError ("SH: No ptNode for: " ^ formal.vname ^ " in: " ^ 
-                         threadFunc.svar.vname ^ "\n");
-           curList
-      )
-  | [] -> curList
-  | _ -> 
-      L.logError ("SH: Thread root " ^ threadFunc.svar.vname ^ 
-                    " has more than one formal\n");
-      curList
-        
+(* DEBUG counts *)
+let reachFromActs = ref 0
+let reachFromForms = ref 0
+let reachFromGlob = ref 0
 
+let printEscStats () =
+  L.logStatusF "Reach from global %d" !reachFromGlob;
+  L.logStatusF "Reach from actual %d" !reachFromActs;
+  L.logStatusF "Reach from formal %d" !reachFromForms
 
-let initEscapebale cg =
+let sameNode n1 n2 = 
+  A.Abs.compare n1 n2 == 0
+
+let addOnceNode ls n =
+  Stdutil.addOnceP sameNode ls n
+
+let collectThreadActuals curList argExp =
+  try
+    (* Convert argument to the absNode representing its target
+       (reachability is reflexive) *)
+    let targs = A.Abs.deref_exp argExp in
+    List.fold_left (fun cur n -> addOnceNode cur n) curList targs
+  with A.UnknownLoc ->
+    L.logError ("SH: no target for thread argument " ^ 
+                 (Cildump.string_of_exp argExp));
+    curList 
+  
+let collectThreadFormals curList formalVar =
+  let lval = (Var formalVar, NoOffset) in
+  try
+    let targ = A.Abs.getNodeLval lval in
+    addOnceNode curList targ
+  with A.UnknownLoc ->
+    L.logError ("SH: not target for thread formal " ^
+                 (Cildump.string_of_lval lval));
+    curList
+
+let initEscapeable cg =
   (* Go through all the thread roots and gather their thread arguments *)
   let thCreators = Th.findTCCallers cg in
-  let thRoots = Th.getThreadRoots cg thCreators in
-  threadFormals := 
-    FSet.fold
-      (fun fk curList ->
-         try 
-           let finfo = FMap.find fk cg in
-           let ast = !DC.astFCache#getFile finfo.defFile in
-           match Cilinfos.getCFG fk ast with
-             Some func -> 
-               gatherFormals curList func
-           | _ ->
-               L.logError ("SH: No CFG for thread root:" ^ 
-                             finfo.name ^ "\n");
-               curList
-         with Not_found ->
-           L.logError ("SH: No call graph node for thread root:" ^ 
-                         (string_of_fkey fk) ^ "\n");
-           curList
-      ) thRoots []
+  let thActuals, thFormals = Th.getThreadActuals cg thCreators in
+  threadActuals := List.fold_left collectThreadActuals [] thActuals;
+  threadFormals := List.fold_left collectThreadFormals [] thFormals;
+  L.logStatusF "SH: initEscapeable found (%d, %d) thread (acts, formals)\n\n" 
+    (List.length !threadActuals) (List.length !threadFormals)
 
+let debugEscapeableNode n =
+  let rg = A.Abs.reachableFromG n in
+  let ra = A.Abs.reachableFrom n !threadActuals in
+  let rf = A.Abs.reachableFrom n !threadFormals in
+  if rg then incr reachFromGlob;
+  if ra then incr reachFromActs;
+  if rf then incr reachFromForms;
+  rg || ra || rf
 
-let escapeableAbs aLv : bool =
-  let escapeableNode n : bool =
+let escapeableNode n : bool =
+  A.Abs.reachableFromG n || 
+    A.Abs.reachableFrom n !threadActuals ||
     A.Abs.reachableFrom n !threadFormals
-    || A.Abs.reachableFromG n
-  in
+    
+let escapeableAbs aLv : bool =
   match aLv with
-    Lv.CVar vi, _ -> varShareable vi
+    Lv.CVar vi, _ -> 
+      let vi = Lv.var_of_abs vi in
+      isGlobalDataVar vi || 
+        (Trans_alloc.isAllocVar vi.vname &&
+           (try 
+              let node = Lv.node_of_absLval aLv in
+              escapeableNode node
+            with A.UnknownLoc -> false)
+        ) (* don't try the reach check w/ locals *)
   | Lv.CMem exp, _ -> 
       (try
          let targs = Lv.deref_absExp exp in
          List.exists (fun t -> escapeableNode t) targs
-       with 
-         Not_found 
-       | A.UnknownLoc->
-         false
-      )
+       with A.UnknownLoc-> false)
   | Lv.AbsHost n, _ -> 
-      escapeableNode n
+      (* Hmm... PTA doesn't have the constraints from parameter
+         passing for thread-creation sites when the code
+         of the thread-creator isn't available. This is the case
+         for Pthreads. Just say representatives escape for now. 
+         TODO: check reachability from both formals and actuals 
+      *)
+      (*       escapeableNode n *)
+      true
 
+  

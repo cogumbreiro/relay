@@ -101,8 +101,9 @@ let requestFiles srcAddr srcPaths dest =
         let to_read = 
           if (!left > buffSize) then buffSize else !left in
         let read = input sock_in buf 0 to_read in
+        (* TODO: what if read == 0? currently loops forever *)
         output oc buf 0 read;
-        left := !left - read;
+        left := !left - read; 
       done;
       flush oc;
     in

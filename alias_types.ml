@@ -41,11 +41,13 @@
 
 module CilPTA = Myptranal
 module Steens = Pta_fi_eq
+module Anders = Pta_fs_dir
 
 (* Make a type to allow unification of different PTA representative nodes *)
 type ptaNode =
     CilNode of CilPTA.absloc
   | SteensNode of Steens.Abs.t
+  | AndersNode of Anders.Abs.t
   | DummyNode
 
 exception NodeTypeMismatch

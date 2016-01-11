@@ -48,8 +48,14 @@ module type S =
     val union: ('a -> 'a -> 'a) -> 'a t -> 'a t -> 'a t
     val inter: ('a -> 'a -> 'a) -> 'a t -> 'a t -> 'a t
     val diff: 'a t -> 'a t -> 'a t
+
+    (* TODO: Is it worth it to change the comp to return true 
+       if value is "subset" instead of Some (-1) ?
+       makes people define multiple comparison functions though... *)
     val subset: ('a -> 'a -> int option) -> 'a t -> 'a t -> bool
     val subsetWithKey: (key -> 'a -> 'a -> int option) -> 'a t -> 'a t -> bool
+
+
     val min_binding: 'a t -> key * 'a
     val max_binding: 'a t -> key * 'a
     val choose: 'a t -> key * 'a
@@ -57,6 +63,7 @@ module type S =
     val for_all: (key -> 'a -> bool) -> 'a t -> bool
     val exists: (key -> 'a -> bool) -> 'a t -> bool
 
+    val sampleHash: (key -> 'a -> int) -> 'a t -> int
 
   end
 
@@ -185,6 +192,10 @@ module Make(Ord: OrderedType) = struct
         Empty               -> Empty
       | Node(l, v, d, r, h) -> Node(mapi f l, v, f v d, mapi f r, h)
 
+    (** Watch out! It might be wrong to actually use this 
+        _IF_ it disrupts the ordering of keys!
+        Currently only used to hash-cons the keys (so it's ok)
+    *)
     let rec mapk f = function
         Empty               -> Empty
       | Node(l, v, d, r, h) -> Node(mapk f l, f v, d, mapk f r, h)
@@ -410,6 +421,31 @@ module Make(Ord: OrderedType) = struct
       | Node(l, k, v, r, _) -> p k v || exists p l || exists p r
 
 
+    let rec sampleHelper hashElem m cur goLeft =
+      match m with 
+        Empty -> cur
+      | Node (l, k, d, r, h) ->
+          let newHash = cur lxor (hashElem k d) in
+          if goLeft then
+            sampleHelper hashElem l newHash false
+          else
+            sampleHelper hashElem r newHash false (* go left 1x *)   
+
+    let sampleHash hashElem x =
+      if (is_empty x) then 0
+      else
+        let size = (cardinal x) in
+        let sizeH = Hashtbl.hash size in
+        if size == 1 then
+          let lv, corr = choose x in
+          sizeH lxor (hashElem lv corr)
+        else
+          let min_lv, min_corr = min_binding x in
+          let minH = sizeH lxor (hashElem min_lv min_corr) in
+          let medH = sampleHelper hashElem x minH true in
+          let max_lv, max_corr = max_binding x in
+          medH lxor (hashElem max_lv max_corr)
+            
 end
 
 

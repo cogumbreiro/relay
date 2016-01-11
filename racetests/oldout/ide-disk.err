@@ -1,0 +1,154 @@
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+Multiple lock summaries for 5
+Multiple lock summaries for 36
+makeSimpleLock: Couldn't find global kernel_sem
+makeSimpleLock: Couldn't find global kernel_flag
+Multiple lock summaries for 35
+SH: not target for thread formal arg
+Checkpoint: No left-over status file
+substActForm returned 0 results for: drive->wcache#f0:304
+substExp: trimming ptrArith offset
+substExp encountered unknown exp: n << 9
+substExp: trimming ptrArith offset
+substExp encountered unknown exp: n << 9
+substExp: trimming ptrArith offset
+substExp encountered unknown exp: n << 9
+substExp: trimming ptrArith offset
+substExp encountered unknown exp: n << 9
+substActForm returned 0 results for: drive->addressing#f0:301
+substActForm returned 0 results for: drive->bios_cyl#f0:301
+substActForm returned 0 results for: drive->bios_head#f0:301
+substActForm returned 0 results for: drive->bios_sect#f0:301
+substActForm returned 0 results for: drive->capacity64#f0:301
+substActForm returned 0 results for: drive->doorlocking#f0:301
+substActForm returned 0 results for: drive->no_io_32bit#f0:301
+substActForm returned 0 results for: drive->select.b.lba#f0:301
+substActForm returned 0 results for: drive->wcache#f0:301
+substActForm returned 0 results for: drive->addressing#f0:301
+substActForm returned 0 results for: drive->bios_cyl#f0:301
+substActForm returned 0 results for: drive->bios_head#f0:301
+substActForm returned 0 results for: drive->bios_sect#f0:301
+substActForm returned 0 results for: drive->capacity64#f0:301
+substActForm returned 0 results for: drive->ctl#f0:301
+substActForm returned 0 results for: drive->cyl#f0:301
+substActForm returned 0 results for: drive->forced_geom#f0:301
+substActForm returned 0 results for: drive->head#f0:301
+substActForm returned 0 results for: drive->hwif#f0:301
+substActForm returned 0 results for: drive->id#f0:301
+substActForm returned 0 results for: drive->id_read#f0:301
+substActForm returned 0 results for: drive->is_flash#f0:301
+substActForm returned 0 results for: drive->queue#f0:301
+substActForm returned 0 results for: drive->removable#f0:301
+substActForm returned 0 results for: drive->sect#f0:301
+substActForm returned 0 results for: drive->sect0#f0:301
+substActForm returned 0 results for: drive->using_dma#f0:301
+substActForm returned 0 results for: drive->capacity64#f0:172
+substActForm returned 0 results for: drive->sect0#f0:172
+substLval: offset mismatch ide_drive_s.attach(227) on device(38) 2
+substActForm unsubstitutable arg: & dev formal: dev->attach
+substLval: offset mismatch ide_drive_s.head(227) on device(38) 2
+substActForm unsubstitutable arg: & dev formal: dev->head
+substLval: offset mismatch ide_drive_s.hwif(227) on device(38) 2
+substActForm unsubstitutable arg: & dev formal: dev->hwif
+substLval: offset mismatch ide_drive_s.media(227) on device(38) 2
+substActForm unsubstitutable arg: & dev formal: dev->media
+substLval: offset mismatch ide_drive_s.present(227) on device(38) 2
+substActForm unsubstitutable arg: & dev formal: dev->present
+substLval: offset mismatch ide_drive_s.removable(227) on device(38) 2
+substActForm unsubstitutable arg: & dev formal: dev->removable
+substLval: offset mismatch ide_drive_s.select(227) on device(38) 2
+substActForm unsubstitutable arg: & dev formal: dev->select.b.lba
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->dma_setup))
+post: funptr resolved to 0 fun(s): (*(hwif->dma_exec_cmd))
+post: funptr resolved to 0 fun(s): (*(hwif->dma_start))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+post: funptr resolved to 0 fun(s): (*(hwif->dma_setup))
+post: funptr resolved to 0 fun(s): (*(hwif->dma_exec_cmd))
+post: funptr resolved to 0 fun(s): (*(hwif->dma_start))
+post: funptr resolved to 0 fun(s): (*(hwif->OUTB))
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*(hwif->rw_disk))
+post: funptr resolved to 0 fun(s): (*(hwif->rw_disk))
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*((dev->bus)->suspend))
+substActForm returned 0 results for: drive->wcache#f0:304
+post: funptr resolved to 0 fun(s): (*((dev->bus)->suspend))

@@ -8,16 +8,44 @@ import re
 cillyroot = os.environ['CILLYROOT']
 cilly_bin = os.path.join(cillyroot,'cilly') 
 
+#figure out where the sources of the program are rooted
+progroot = os.path.abspath (os.environ['CURROOT'])
+if progroot[-1] != '/':
+    progroot = progroot + '/'
+
+def addFromRootPath (filename):
+    """ If the given filename is supposed to be rooted in the source 
+    directory add as a prefix, the directories between the 
+    progroot and the current directory of the file.
+
+    Examples (given progroot is /f1/f2):
+
+       /f1/f2/f3/foo.c --> f3/foo.c
+       foo.c --> f3/foo.c
+       /tmp/x.c --> /tmp/x.c
+
+    """
+    absPath = os.path.abspath(filename)
+    if (os.path.commonprefix ([progroot, absPath]) != progroot):
+        print >> sys.stderr, "addFromRootPath: file not in progroot (%s, %s)" \
+            % (progroot, absPath)
+        return filename
+    else:
+        truncated = absPath[len(progroot):]
+        #print >> sys.stderr, "addFromRootPath changed: %s to %s" % \
+        #    (filename, truncated)
+        return truncated
+
 
 #set CUR_CIL_FILE env variable to tell the cilly routine which file
 #is currently being processed
-matched = False;
-curFile = "-";
+matched = False
+curFile = "-"
 
 #assume file separator char is '/'
-valid_path_chars = "[_a-zA-Z0-9/.-]*?"; #path not required?
-valid_fname_chars = "[_a-zA-Z0-9-]+?";  #excluding the extension
-valid_prefix = valid_path_chars + valid_fname_chars;
+valid_path_chars = "[_a-zA-Z0-9/.-]*?" #path not required?
+valid_fname_chars = "[_a-zA-Z0-9-]+?"  #excluding the extension
+valid_prefix = valid_path_chars + valid_fname_chars
 
 #watch out for the order...
 #don't need .h files? inlining already done? src msg wrong though?
@@ -25,27 +53,29 @@ reg = re.compile(valid_prefix + "\.cil\.c|" +
                  valid_prefix + "\.cpp|" +
                  valid_prefix + "\.C|" +
                  valid_prefix + "\.cc|" +
-                 valid_prefix + "\.c");
+                 valid_prefix + "\.c")
 
 for a in sys.argv[1:]:
-    mat = reg.search(a);
+    mat = reg.search(a)
     if mat <> None:
         if matched:
-            print >> sys.stderr, "matched too many sources";
+            print >> sys.stderr, "matched too many sources"
         else:
-            matched = True;
-            curFile = mat.group(0);
+            matched = True
+            curFile = mat.group(0)
             
 if (not matched) :
-    print >> sys.stderr, "didn't match any sources";
+    print >> sys.stderr, "didn't match any sources"
 else :
-    os.environ['CUR_CIL_FILE'] = curFile
+    os.environ['CUR_CIL_FILE'] = addFromRootPath(curFile)
     print >> sys.stderr, "duppy'ing %s to %s" % (os.environ['CUR_CIL_FILE'],
                                                  os.environ['DUMPROOT'])
 
 
 
 # still need ptr analysis to check if fp calls are to malloc
-cillyargs = ['cilly', '--dotrans_alloc', '--domyptranal', '--dodumpfile'] + sys.argv[1:];
+cillyargs = ['cilly', '--dotrans_alloc', 
+#             '--verbose', '--tr', 'rmtmps',
+             '--domyptranal', '--dodumpfile'] + sys.argv[1:]
 
-os.execv(cilly_bin, cillyargs);
+os.execv(cilly_bin, cillyargs)

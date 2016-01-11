@@ -49,7 +49,7 @@ open Messages
 open Fstructs
 open Readcalls
 open Callg
-open Scc
+open Scc_cg
 open Gc_stats
 open Stdutil
 open Strutil
@@ -127,14 +127,16 @@ let initServerSettings settings =
     
     
 let initSettings () = begin
+  Cilinfos.reloadRanges !cgDir;
   let servSet = Config.initSettings !serverConfig in
   Dis.init servSet !cgDir;
   initServerSettings servSet;
   let clientSet = Config.initSettings !clientConfig in
   DC.makeLCaches (!cgDir);
-  Cilinfos.reloadRanges !cgDir;
   A.initSettings clientSet !cgDir;
   Th.initSettings clientSet;
+  Entry_points.initSettings clientSet;
+
 end
 
 (****** Error logging, termination, misc... ******)
@@ -201,8 +203,11 @@ let finishWarnings () =
 (* Handle ctrl-c by flushing existing warnings *)
 let handleCtrlC signal =
   if signal == Sys.sigint then
+    (*
     (L.logError "We get signal! (writing out warnings and quitting";
      finishWarnings ())
+    *)
+    (L.logError "Got sigint (quitting w/out writing warnings)")
   else
     (L.logError "We get signal (other than sigint in handleCtrlC)! Ignored";
      ())
@@ -263,17 +268,11 @@ let sccsDone = ref 0
 let pruneCG cg sccCG : sccGraph =
   (* Need everything reachable from thread roots, and need everything
      reachable from the thread creator! *)
-  let threadCreatorCallers = Th.findTCCallers cg in
-  let threadRoots = Th.getThreadRoots cg threadCreatorCallers in
-  let threadCreatorCallers = List.fold_left 
-    (fun cur (fk, tc) ->
-       FSet.add fk cur) FSet.empty threadCreatorCallers in
-  let spawnRoots = rootsThatReach cg threadCreatorCallers in
-  let entryRoots = Entry_points.getEntries !cgDir cg in
-  let roots = FSet.union entryRoots (FSet.union threadRoots spawnRoots) in
+  let rooter = new Entry_points.rootGetter cg !cgDir in
+  let roots = rooter#getRootKeys () in
   let reachable, _ = Callg.getReachableFunctions cg roots in
   (* Compute new scc graph with only the reachable functions *)
-  let newSCCCG = Scc.pruneUnreached sccCG reachable in
+  let newSCCCG = Scc_cg.pruneUnreached sccCG reachable in
   L.logStatus "Pruned nodes unreachable from thread roots/creators";
   L.logStatus ("Prev # SCCs: " ^ (string_of_int (mapSize sccCG IntMap.fold)) ^
                  "\t New: " ^ (string_of_int (mapSize newSCCCG IntMap.fold)));
@@ -315,7 +314,8 @@ let initSCCWork sccCG =
 let noteSccDone () =
   incr sccsDone;
   L.logStatus (">>> PROGRESS " ^ (string_of_int !sccsDone) ^ "/" ^
-                 (string_of_int !sccsTotal) ^ " SCCs DONE!\n")
+                 (string_of_int !sccsTotal) ^ " SCCs DONE!\n");
+  L.flushStatus ()
 
 
 (** Make persistent record of complete SCCs so server can resume on restart *)

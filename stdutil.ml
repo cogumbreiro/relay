@@ -92,6 +92,7 @@ let clearDirGen genNum genFile clearFunc =
   else
     L.logStatus "not clearing persistent state, same generation num"
       
+(*************************** List utils ****************************)
   
 (** add given [item] if it is not already in the given [lst] *)
 let addOnce (lst: 'a list) (item: 'a) =
@@ -128,6 +129,117 @@ let indexOf pred list =
     | x :: l -> if pred x then curIndex else indexHelp (curIndex + 1) l
   in
   indexHelp 0 list
+
+(** Remove n elements from the head of the list *)
+let rec listSliceHead curL n =
+  if n == 0 then curL
+  else match curL with
+    [] -> raise (Invalid_argument "out of bounds")
+  | _ :: t -> 
+      listSliceHead t (n - 1)
+
+(** Keep n elements from the list, truncating the rest from the tail.
+    The returned list is reverse *)
+let rec listSliceTailRev curL rest n =
+  if n == 0 then curL
+  else match rest with
+    [] -> raise (Invalid_argument "out of bounds")
+  | h :: t ->
+      listSliceTailRev (h :: curL) t (n - 1)
+        
+(** Get a slice of a list given the bounds. Bounds are 0-based and
+    does includes all up to [last - 1]. No fancy negative-indexing.
+    @raise Invalid_argument if out of bounds *)
+let listSlice lis first last =
+  let len = (last - first) in
+  if (len < 0) then raise (Invalid_argument "out of bounds")
+  else
+    let truncH = listSliceHead lis first in
+    let truncL = listSliceTailRev [] truncH len in
+    List.rev truncL
+
+let pickFromList ls randomize =
+  if randomize then begin
+    let len = List.length ls in
+    if len == 0 then None
+    else
+      let picked = Random.int len in
+      Some (List.nth ls picked)
+  end else
+    (* Pick first *)
+    match ls with
+      [] -> None
+    | x :: _ -> Some x
+
+let removeNth ls n =
+  let rec loop curLs curN curHead =
+    match ls with
+      [] -> failwith "removeNth"
+    | x :: t ->
+        if curN == 0 then x, t, curHead
+        else
+          loop t (n - 1) (x :: curHead)
+  in
+  let ele, finalTail, revHead = loop ls n [] in
+  (ele, List.rev_append revHead finalTail)
+
+let stealFromList ls randomize =
+  if randomize then begin
+    let len = List.length ls in
+    if len == 0 then (None, ls)
+    else
+      let picked = Random.int len in
+      let x, newLS = removeNth ls picked in
+      (Some x, newLS)
+  end else
+    (* Pick first *)
+    match ls with
+      [] -> None, ls
+    | x :: t -> (Some x, t)
+
+let pickK n k =
+  if n <= 0 || k > n then 
+    raise (Invalid_argument "pickK")
+  ;
+  let rec loop chosen left =
+    if left = 0 then chosen
+    else
+      let next = Random.int n in
+      if List.mem next chosen then loop chosen left
+      else loop (next :: chosen) (left - 1)
+  in
+  loop [] k
+
+
+(** Iterate through ordered pairs of [l1] and [l2] *)
+let listIterOrderedPairs foo l1 l2 =
+  List.iter (fun x1 -> List.iter (fun x2 -> foo x1 x2) l2) l1
+
+(** Iterate unordered pair combinations within given list [ls] *)
+let listIterPairs foo ls =
+  let rec iter l1 l2 l2start  =
+    match l1, l2, l2start with
+      [], _, _
+    | _, _, []  -> ()
+    | _ :: t1 , [], _ :: t2 ->
+        iter t1 t2 t2
+    | h1 :: _, h2 :: t2, _ ->
+        foo h1 h2;
+        iter l1 t2 l2start
+  in
+  iter ls ls ls
+
+
+let seqToString iter seq doElem sep =
+  let firstElem = ref true in
+  let buff = Buffer.create 10 in
+  iter (fun elem ->
+          if not (!firstElem) then Buffer.add_string buff sep
+          else firstElem := false
+          ;
+          Buffer.add_string buff (doElem elem);
+       ) seq;
+  Buffer.contents buff
 
 
 (***************************************************
@@ -225,4 +337,12 @@ let fileToTable ?(sep=":") (fname:string) : (string, string) Hashtbl.t =
   open_in_for fname doRead;
   result
 
+(* User must coordinate to make sure the "sep"arator char is the same *)
 
+
+(************************* Hashtbl utils ***************************)
+
+let string_of_hashstats statsFun hashtbl caption : string =
+  let tlen, entries, sum_buck_lens, min_buck, med_buck, max_buck =
+    statsFun hashtbl in
+  Printf.sprintf "%s hash stats (len, ents, sum/min/median/max bucket)\n\t%d\t%d\t%d\t%d\t%d\t%d\t" caption tlen entries sum_buck_lens min_buck med_buck max_buck

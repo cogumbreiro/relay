@@ -21,7 +21,20 @@ val mapSize : 'a -> (('b -> 'c -> int -> int) -> 'a -> int -> int) -> int
 
 val indexOf : ('a -> bool) -> 'a list -> int
 
+val listSlice : 'a list -> int -> int -> 'a list
 
+val pickFromList : 'a list -> bool -> 'a option
+
+val stealFromList : 'a list -> bool -> 'a option * 'a list
+
+val pickK : int -> int -> int list
+
+val listIterOrderedPairs : ('a -> 'a -> unit) -> 'a list -> 'a list -> unit
+
+val listIterPairs : ('a -> 'a -> unit) -> 'a list -> unit
+
+val seqToString : (('a -> unit) -> 'b -> unit) -> 'b -> 
+  ('a -> string) -> string -> string
 
 (***************************************************
  * File / resource functions
@@ -57,3 +70,9 @@ val open_conn_for : sockaddr ->
 val tableToFile : ?sep:string -> (string, string) Hashtbl.t -> string -> unit
 
 val fileToTable : ?sep:string -> string -> (string, string) Hashtbl.t 
+
+
+(********************** Hashtbl utils ***********************)
+
+val string_of_hashstats : ('t -> int * int * int * int * int * int) -> 
+  't -> string -> string

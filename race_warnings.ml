@@ -51,9 +51,10 @@ module RP = Race_reports
 
 module LS = Lockset
 module Th = Threads
-module GA = Guarded_access
+module BS = Backed_summary
 module RS = Racesummary
 module Race = Racestate
+module SPTA = Race.SPTA
 module Req = Request
 module L = Logging
 
@@ -75,27 +76,22 @@ let makeLockList ls =
   *)
   LS.LS.ditchMinus ls
 
-(** Return true if the lockset uses a summary lock to ensure race-freedom *)
-let hasSummaryLock ls =
-  LS.LS.S.exists
-    (fun lv _ -> match lv with 
-       Lv.AbsHost _, _ -> true
-     | _ -> false) (LS.LS.getPlus ls)
-    (** should check the size of the rep node too... *)
-
 
 
 (**************** CHECK *****************)
 
-let inter_isEmpty ls1 ls2 =
-  let ls1' = LS.LS.ditchMinus ls1 in
-  let ls2' = LS.LS.ditchMinus ls2 in
-  LS.LS.emptyPlus (LS.LS.inter ls1' ls2')
+(* TODO: make this not hardcoded *)
+let hardCodedSumTypes () =
+  BS.getDescriptors [RS.sum#sumTyp;
+                     SPTA.SS.sum#sumTyp;
+                    ]
+    
+
 
 class warningChecker cg cgDir = object (self)
   inherit [Roots.state] Roots.unordRootChecker 
-  inherit Roots.unordAccessChecker cg cgDir
-  inherit [Roots.state] Roots.netChecker
+  inherit Roots.ordAccessChecker cg cgDir
+  inherit Roots.netChecker
     
   val mutable curTR1 = ({line = 0;
                          file = "";
@@ -105,7 +101,7 @@ class warningChecker cg cgDir = object (self)
                          file = "";
                          byte = 0;}, "", 0 )
 
-
+    
   method notifyDone =
     L.logStatus "completed all thread pairs";
     L.flushStatus ();
@@ -123,42 +119,83 @@ class warningChecker cg cgDir = object (self)
     curTR2 <- (loc2, fn2, fk2);
     L.logStatus ("now checking thread roots: " ^ fn1 ^ ", " ^ fn2)
 
+
   (** Update race reports w/ a new race *)
-  method addRace imp lv1 lv2 corr1 corr2 =
-    let access1, access2 = corr1.GA.corrAccess, corr2.GA.corrAccess in
-    localRaces#addRace
+  method addRace imp lv1 lv2 (access1, locks1) (access2, locks2) esc1 esc2 =
+    let _ = localRaces#addRace
       ( { RP.access = access1;
           RP.threadRoot = curTR1;
           RP.imprec = imp;
-          RP.emptied = corr1.GA.corrLEmpty;
+          RP.emptied = Cil.locUnknown; (* corr1.RS.GA.corrLEmpty; *)
           RP.lval = lv1;
-          RP.locks = makeLockList corr1.GA.corrLocks; },
+          RP.locks = makeLockList locks1;
+          RP.threadEsc = esc1;
+        },
         { RP.access = access2;
           RP.threadRoot = curTR2;
           RP.imprec = imp;
-          RP.emptied = corr2.GA.corrLEmpty;
+          RP.emptied = Cil.locUnknown; (* corr2.RS.GA.corrLEmpty; *)
           RP.lval = lv2;
-          RP.locks = makeLockList corr2.GA.corrLocks; })
+          RP.locks = makeLockList locks2;
+          RP.threadEsc = esc2;
+        } ) in
+    ()
 
-  method checkPair (lv1, corr1) (lv2, corr2) =
+  (** Check if a pair of accesses is racey *)
+  method checkPair accessTypes (lv1, corr1) (lv2, corr2) =
     let lvCheck = Stat.time "sameLval" (Lv.sameLval lv1) lv2 in
     match lvCheck with
       None -> ()
-      | Some (imprec) ->
-          if (inter_isEmpty corr1.GA.corrLocks corr2.GA.corrLocks) then
-            self#addRace imprec lv1 lv2 corr1 corr2
-              (*        else if (hasSummaryLock corr1.GA.corrLocks 
-                        || hasSummaryLock corr2.GA.corrLocks ) 
-                        then self#addRace imprec lv1 lv2 corr1 corr2
-              *)
-              
+    | Some (imprec) ->
+        RS.GA.iterGuardedAccs 
+          (fun access1 locks1 _ ->
+             RS.GA.iterGuardedAccs
+               (fun access2 locks2 _ ->
+                  let noCommonLS = LS.inter_isEmpty locks1 locks2 in
+                  let sumLocks1 = LS.hasSummaryLock locks1 in
+                  let sumLocks2 = LS.hasSummaryLock locks2 in
+                  let esc1 = Shared.escapeableAbs lv1 in
+                  let esc2 = Shared.escapeableAbs lv2 in
+                  if noCommonLS then
+                    if esc1 && esc2 then
+                      self#addRace imprec lv1 lv2 
+                        (access1, locks1) (access2, locks2) esc1 esc2
+                    else begin
+                      (* Just have it there to see how many we prune 
+                         from esc analysis *)
+                      self#addRace imprec lv1 lv2 
+                        (access1, locks1) (access2, locks2) esc1 esc2
+                    end          
+                  else if (sumLocks1 || sumLocks2) then
+                    (* Record, lockset itself has info on whether on it 
+                       uses rep. nodes *)
+                    self#addRace imprec lv1 lv2 
+                      (access1, locks1) (access2, locks2) esc1 esc2
+               ) corr2
+          ) corr1       
+
+  (** Helper function to clear some memory between each checked pair *)
+  method evictSumms =
+    List.iter (fun s -> s#evictSummaries) (hardCodedSumTypes ())
+
+
 end
 
 (** Check for candidate pairs of accesses that may result in a data race 
     Assumes: function summaries computed *)
 let flagRacesFromSumms cg cgDir =
   let checker = new warningChecker cg cgDir in
-  checker#run 
+  checker#run;
+  (* For now, have the client write out the warning data (separate file).
+   *      TODO: give the server the race2pakey data so that the server
+   *           writes out the warnings w/ IDs that match *)
+  localRaces#saveToXML (Filename.concat cgDir "warnings2.xml")
 
 
+
+
+let printAliasUses () =
+  localRaces#printAliasAssumptions ()
+    (* TODO: make it happen at server side so that we have the
+       aggregated warnings instead of "localRaces"? *)
     

@@ -34,8 +34,10 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 *)
-(** Pre-pass to make IDs unique in files, run the PTA, 
-    and make the callgraph file in terms of the fixed function IDs.
+
+(** Pre-pass to make IDs unique in files, annotate scopes,
+    run the PTA, and make the callgraph file in terms of the unique 
+    function IDs.
     TODO: May want to separate the different phases into different
     executables, but right now we just use command-line options
 *)
@@ -70,7 +72,10 @@ let argSpecs =
   [("-cg", Arg.Set_string cgDir, "target path to store call graph file");
    ("-ng", Arg.Clear doCG, "do not generate the call graph");
    ("-ni", Arg.Clear idFix, "do not fix ids");
-   ("-np", Arg.Clear pta, "do not generate PTA info")]
+   ("-np", Arg.Clear pta, "do not generate PTA info");
+   ("-ns", Arg.Clear Pta_compile.simplify, 
+    "if doing PTA, don't simplify constraints");
+   ("-su", Arg.Set_string configFile, "set config / summary bootstrap file")]
     
 
 let anonArgFun (arg:string) : unit = 
@@ -109,31 +114,32 @@ let main () =
         setGCConfig ();
 
         if (!idFix) then begin
-          L.logStatus "Fixing IDs";
+          (* Do scope annotations first *)
+          Scope.doAnnotateScope !cgDir;
+
           Id_fixer.ensureUniqueIDs !cgDir;
-          L.logStatus "IDs are now fixed";
-          flush stdout;
         end;
         
-
+        (* TODO: split these up, but ensure that they happen in this order *)
         if (!pta) then begin
-          L.logStatus "Pre-pass analysis of pta / value flow";
-          Pta_compile.analyzeAll !cgDir;
+          L.logStatus "Pre-pass analysis of pta constraints";
+          L.flushStatus ();
+          (* Pta_compile.analyzeAll !cgDir; *)
+          Pta_compile.analyzeAllInOne !cgDir;
           L.logStatus "Pre-pass done";
-          flush stdout;
+          L.flushStatus ();
         end;
         
         if (!doCG) then begin
           (* Do this after the PTA pre-pass to choose which PTA to initialize *)
           initSettings ();
           (* Finally, dump the call graph based on the PTA results *)
-          L.logStatus "Preparing call graph file";
-          L.logStatus "-----";
+          L.logStatus "Preparing call graph file\n-------";
+          L.flushStatus ();
           Dumpcalls.setDumpTo !cgDir;
           Dumpcalls.writeCallgraph !cgDir;
-          printStatistics ();
         end;
-
+        printStatistics ();
         exit 0;
       end
   with e -> 

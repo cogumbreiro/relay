@@ -51,11 +51,11 @@ module BS = Backed_summary
  * Function return value summaries
  *********************************************************)
 
+type sumval = symVal
+
 module SymSum = struct
 
-  let id = BS.makeSumType "ss"
-
-  type t = symVal
+  type t = sumval
 
   type simpleSum = t
 
@@ -65,35 +65,26 @@ module SymSum = struct
 
   let initVal = Vbot
 
+  let unknownSummary = Vtop
+
 end
 
 module SS = Safer_sum.Make (SymSum)
 
-let sum = new SS.data
+type sumdb = SS.data
+
+class data = SS.data
+
+let sum = new data (BS.makeSumType "ss")
 
 let _ = BS.registerType sum
-
-let initSummaries cg = begin
-  (* Initialize the rest of the summaries for functions w/ no bodies *)
-  FMap.iter 
-    (fun k n ->
-       if (n.hasBody) then
-         () (* leave a missing entry *)
-       else begin
-         (* no def/body for the func, so just set to empty/done *)
-         if not (BS.isFinal k SymSum.id) then begin
-           sum#addReplace k SymSum.initVal;
-           BS.setFinal k SymSum.id;
-         end
-       end
-    ) cg
-end
 
 (*********************************************************
  * Test / Debug code
  *********************************************************)
 
-let printSummary fKey = 
+let printSummary sum fKey = 
   let sval = sum#find fKey in
+  L.logStatus "SS Sum:";
   printVal sval
 

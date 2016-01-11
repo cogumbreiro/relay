@@ -174,6 +174,24 @@ let rec unrollTypeNoAttrs (t: typ) : typ =
     TNamed (r, a') -> unrollTypeNoAttrs r.ttype
   | x -> x
 
+let rec typeOffsetUnsafe basetyp =
+  function
+      NoOffset -> basetyp
+    | Index (_, o) -> begin
+        match unrollTypeNoAttrs basetyp with
+          TArray (t, _, _) ->
+	        typeOffsetUnsafe t o
+        | TPtr (t, _) ->
+            L.logError "typeOffsetUnsafe: Index offset on a pointer\n";
+            typeOffsetUnsafe t o
+	    | t -> 
+            L.logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
+            typeOffsetUnsafe t o
+      end 
+    | Field (fi, o) ->
+        typeOffsetUnsafe fi.ftype o
+
+
 let rec typeOfUnsafe (e: exp) : typ = 
   match e with
   | Const(CInt64 (_, ik, _)) -> TInt(ik, [])
@@ -218,7 +236,7 @@ and typeOfLvalUnsafe = function
       typeOffsetUnsafe vi.vtype off
   | Mem addr, off -> begin
       match unrollTypeNoAttrs (typeOfUnsafe addr) with
-        TPtr (t, _) -> typeOffsetUnsafe t off
+        TPtr (t, _) -> unrollTypeNoAttrs (typeOffsetUnsafe t off)
       | t -> begin
           match off with
             NoOffset ->
@@ -228,22 +246,6 @@ and typeOfLvalUnsafe = function
         end
     end
       
-and typeOffsetUnsafe basetyp =
-  function
-      NoOffset -> basetyp
-    | Index (_, o) -> begin
-        match unrollTypeNoAttrs basetyp with
-          TArray (t, _, _) ->
-	        typeOffsetUnsafe t o
-        | TPtr (t, _) ->
-            L.logError "typeOffsetUnsafe: Index offset on a pointer\n";
-            typeOffsetUnsafe t o
-	    | t -> 
-            L.logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
-            typeOffsetUnsafe t o
-      end 
-    | Field (fi, o) ->
-        typeOffsetUnsafe fi.ftype o
 
 let typeAfterDeref (exp:Cil.exp) =
   match unrollTypeNoAttrs (typeOfUnsafe exp) with
@@ -252,97 +254,125 @@ let typeAfterDeref (exp:Cil.exp) =
   | _ ->
       raise TypeNotFound
 
+(** Non-unrolled type stuff *)
 
-exception OffsetMismatch
+let typeAfterDerefNoUnroll (exp:Cil.exp) =
+  match unrollTypeNoAttrs (typeOfUnsafe exp) with
+    TPtr (t,_) -> t
+  | _ -> raise TypeNotFound
+
+let rec typeOfNoUnroll (e: exp) : typ = 
+  match e with
+  | Lval(lv) -> typeOfLvalNoUnroll lv
+  | AddrOf (lv) -> TPtr(typeOfLvalNoUnroll lv, [])
+  | _ -> 
+      (* base cases stay the same *) 
+      typeOfUnsafe e
+      
+and typeOfInitNoUnroll (i: init) : typ = 
+  match i with 
+    SingleInit e -> typeOfNoUnroll e
+  | CompoundInit (t, _) -> t
+
+and typeOfLvalNoUnroll = function
+    Var vi, off -> 
+      typeOffsetNoUnroll vi.vtype off
+  | Mem addr, off -> begin
+      match unrollTypeNoAttrs (typeOfUnsafe addr) with
+        TPtr (t, _) -> (typeOffsetNoUnroll t off)
+      | t -> begin
+          match off with
+            NoOffset ->
+              (* E.s (bug "typeOfLvalUnsafe: Mem on a non-pointer") *)
+              TVoid []
+          | _ -> typeOffsetNoUnroll t off
+        end
+    end
+      
+and typeOffsetNoUnroll basetyp =
+  function
+      NoOffset -> basetyp
+    | Index (_, o) -> begin
+        match unrollTypeNoAttrs basetyp with
+          TArray (t, _, _) ->
+	        typeOffsetNoUnroll t o
+        | TPtr (t, _) ->
+            L.logError "typeOffsetUnsafe: Index offset on a pointer\n";
+            typeOffsetNoUnroll basetyp o
+	    | t -> 
+            L.logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
+            typeOffsetNoUnroll basetyp o
+      end 
+    | Field (fi, o) ->
+        typeOffsetNoUnroll fi.ftype o
+          
+
+
+(** "Compatiblity" checking *)
+
+exception OffsetMismatch of (fieldinfo * typ) option
+
+let string_of_field fi =
+  fi.fcomp.cname ^ "." ^ fi.fname ^ "(" ^ string_of_int fi.fcomp.ckey ^ ")"
+
+let string_of_type t =
+  match t with
+    TComp (ci, _) ->
+      ci.cname ^ "(" ^ string_of_int ci.ckey ^ ")"
+  | _ ->
+      Cildump.string_of_type t
+
+let fieldMatchesComp fi ci =
+  List.exists 
+    (fun otherFi -> otherFi.fname = fi.fname && 
+        Ciltools.compare_type otherFi.ftype fi.ftype == 0
+    ) ci.cfields
+      
+let string_of_offsetMiss oMiss =
+  "offset mismatch " ^ 
+    (match oMiss with
+       Some (fi, t) ->
+         string_of_field fi ^ " on " ^ string_of_type t  
+     | None -> "")
+
+(* TODO: too much ptr / cast info being thrown away to make these
+   checks sound... (e.g., kernel.h  "container_of")   *)
+let rec canAttachOffset hostTyp offset =
+  match offset with
+    Field (fi, _) -> begin
+      match hostTyp with
+        TComp (ci, _) -> 
+          if Ciltools.compare_compi fi.fcomp ci == 0 ||
+            fieldMatchesComp fi ci then (true, None)
+          else (false, Some (fi, hostTyp))
+      | TVoid _ 
+      | TInt _ -> (* allow *)
+          (true, None)
+      | TNamed (tinfo, _) -> canAttachOffset tinfo.ttype offset
+      | _ -> (false, Some (fi, hostTyp))
+    end
+  | _ -> (true, None)
 
 
 (* TODO: too much ptr / cast info being thrown away to make these
    checks sound... (e.g., kernel.h  "container_of")   *)
 let attachOffset (host:Cil.lhost) (offset:Cil.offset) : Cil.lval =
-  match offset with
-    Field (fi, _) -> begin
-      let hostTyp = typeOfLvalUnsafe (host, NoOffset) in
-      match hostTyp with
-        TComp (ci, _) -> 
-          (* Assumes ckeys are fixed
-             TODO check if types/offs are compatible instead *)
-          if (fi.fcomp.cstruct <> ci.cstruct || 
-                fi.fcomp.cname <> ci.cname) then       
-(*
-          if (fi.fcomp.ckey <> ci.ckey) then
-*)
-            raise OffsetMismatch
-          else
-            (host, offset)
-      | TVoid _ 
-      | TInt _ -> (* allow *)
-          (host, offset)
-      | _ ->
-          raise OffsetMismatch
-    end
-  | _ -> 
-      (host, offset)
+  let hostTyp = typeOfLvalUnsafe (host, NoOffset) in
+  let canAttach, counter = canAttachOffset hostTyp offset in
+  if canAttach then (host, offset)
+  else raise (OffsetMismatch counter)
+
 
 let mkMemChecked (ptrExp:Cil.exp) (offset:Cil.offset) : Cil.lval =
-  match offset with
-    Field (fi, _) -> begin
-      try 
-        let hostTyp = typeAfterDeref ptrExp in
-        match hostTyp with
-          TComp (ci, _) ->
-            (* Assumes ckeys are fixed *)
-             if (fi.fcomp.cstruct <> ci.cstruct || 
-                   fi.fcomp.cname <> ci.cname) then
-            (*
-            if (fi.fcomp.ckey <> ci.ckey) then
-            *)
-              (* allow for now... *)
-              Cil.mkMem ptrExp offset
-                (* raise OffsetMismatch *)
-            else
-              Cil.mkMem ptrExp offset
-        | TVoid _ 
-        | TInt _ -> (* allow *)
-            Cil.mkMem ptrExp offset
-        | _ ->
-            raise OffsetMismatch
-      with 
-        Errormsg.Error 
-      | Failure _
-      | TypeNotFound ->
-          raise OffsetMismatch
-    end
-  | _ -> 
-      Cil.mkMem ptrExp offset
-
-let rec addOffsetChecked (toAdd: Cil.offset) (inner:Cil.offset) : Cil.offset =
-  match inner with
-    NoOffset -> toAdd
-  | Field(fi, NoOffset) -> begin
-      (* TODO: fix... should actually get the type of inner fi & 
-          - if it's a comp, toAdd is a Field offset w/ a matching comp
-          - if it's an array, see if toAdd is an Index, etc...
-      *)
-      match toAdd with
-        NoOffset -> inner
-      | Field(fi', moreOff) ->
-          (* Assumes ckeys are fixed *)
-            if (fi.fcomp.cstruct <> fi'.fcomp.cstruct || 
-            fi.fcomp.cname <> fi'.fcomp.cname) then
-          (*
-          if (fi.fcomp.ckey <> fi'.fcomp.ckey) then
-          *)
-            raise OffsetMismatch
-          else
-            Field (fi, toAdd)
-      | Index(e, moreOff) ->
-          Field (fi, toAdd)
-    end
-  | Field(fi, moreOff) ->
-      Field(fi, addOffsetChecked toAdd moreOff)
-  | Index(e, moreOff) ->
-      Index(e, addOffsetChecked toAdd moreOff)
-
+  try
+    let hostTyp = typeAfterDeref ptrExp in
+    let canAttach, counter = canAttachOffset hostTyp offset in
+    if canAttach then mkMem ptrExp offset
+    else raise (OffsetMismatch counter)
+  with E.Error 
+  | Failure _
+  | TypeNotFound ->
+      raise (OffsetMismatch None)
 
 
 let cZero = Cil.integer 0
@@ -509,7 +539,7 @@ let rec substActForm actual lvalWithFormal : Cil.lval =
       try
         mkMemChecked actual outerOff
       with 
-        OffsetMismatch
+        OffsetMismatch _
       | Errormsg.Error 
       | Failure _ ->
           raise SubstInvalidArg
@@ -519,7 +549,7 @@ let rec substActForm actual lvalWithFormal : Cil.lval =
         let newExp = substActFormExp actual ptrExp in
         mkMemChecked newExp outerOff
       with 
-        OffsetMismatch
+        OffsetMismatch _
       | Errormsg.Error 
       | Failure _ ->
           raise SubstInvalidArg
@@ -573,7 +603,7 @@ let rec substActFormDeref actual lvalWithFormal : Cil.lval =
         let (aHost, aOff) = actual in
         (aHost, Cil.addOffset outerOff aOff)
       with  
-        OffsetMismatch
+        OffsetMismatch _
       | Errormsg.Error 
       | Failure _ ->
           raise SubstInvalidArg
@@ -641,13 +671,45 @@ and substActFormExpDeref actual expWithFormal : Cil.exp =
 
 (****** Hash-consing / distillation *******)
 
+module HashedLval = struct
+  type t = Cil.lval
+  let equal a b = Ciltools.compare_lval a b == 0
+  let hash = Ciltools.hash_lval
+end
+
+module HashedExp = struct
+  type t = Cil.exp
+  let equal a b = (Ciltools.compare_exp a b) == 0
+  let hash = Ciltools.hash_exp
+end
+
 module LvHash = Weak.Make(HashedLval)
 
 module TyHash = Weak.Make(
   struct 
     type t = Cil.typ
-    let equal a b = Ciltools.compare_type a b == 0
-    let hash = Ciltools.hash_type
+    let equal a b = 
+      (*
+        Ciltools.compare_type a b == 0
+      *)
+      let s1 = D.string_of_type a in
+      let s2 = D.string_of_type b in
+      s1 = s2
+      
+    let hash x = 
+      (* 
+         Ciltools.hash_type
+      *)
+      Hashtbl.hash (D.string_of_type x)
+
+  end
+)
+
+module CIHash = Weak.Make(
+  struct
+    type t = Cil.compinfo
+    let equal a b = a.ckey = b.ckey
+    let hash a = Hashtbl.hash a.ckey
   end
 )
 
@@ -655,19 +717,17 @@ let goldenLvals = LvHash.create 173
 
 let goldenTypes = TyHash.create 173
 
+let goldenCompinfos = CIHash.create 173
+
 let locIsUnknown loc =
   loc == Cil.locUnknown || Cil.compareLoc loc Cil.locUnknown == 0
 
 let distillLoc loc =
-  if locIsUnknown loc then
-    Cil.locUnknown
-  else
-    loc
+  if locIsUnknown loc then Cil.locUnknown
+  else loc
 
 
-
-(** Try to reduce the memory footprint of lvals. For now, just remove
-    decl information. Ignore attribute lists, etc. *)
+(** Try to reduce the memory footprint of lvals. *)
 let rec distillLval = function
     Var(vi) as v, off ->
       distillVar vi;
@@ -726,6 +786,7 @@ and distillOff o =
   | Field (fi, moreO) ->
       fi.floc <- locUnknown; (* ignore compinfo and its other fields *)
       fi.fattr <- [];
+(*      fi.ftype <- mergeType fi.ftype; *)
       Field (fi, distillOff moreO)
 
   | Index (e, moreO) ->
@@ -765,17 +826,25 @@ and distillType t =
       tinfo.ttype <- mergeType tinfo.ttype;
       t
 
-  | TComp (ci, _) ->
-      ci.cattr <- [];
-      List.iter (fun fi ->
-                   fi.floc <- locUnknown;
-                ) ci.cfields;
+  | TComp (ci, _) ->(*
+      TComp(mergeCompinfo ci, [])
+                    *)
+      distillCompinfo ci;
       t
+
+and distillCompinfo ci =
+  ci.cattr <- [];
+  List.iter (fun fi ->
+               fi.floc <- locUnknown;
+(*               fi.ftype <- mergeType fi.ftype; *)
+(*               fi.fcomp <- ci; *)
+            ) ci.cfields
+      
 
 and distillEnuminfo einfo =
   (* only hash-cons the strings that describe the location for now *)
   einfo.eitems <- List.map (fun (s, e, l) ->
-                               (s, e, distillLoc l)) einfo.eitems
+                               (s, distillExp e, distillLoc l)) einfo.eitems
 
 
 (***** Distill and Hash-cons ******)
@@ -797,3 +866,24 @@ and mergeLv lv =
     let newLv = distillLval lv in
     LvHash.add goldenLvals newLv;
     newLv
+
+and mergeCompinfo ci = 
+  try 
+    CIHash.find goldenCompinfos ci
+  with Not_found ->
+    (* make sure it finds the dude to terminate loops *)
+    CIHash.add goldenCompinfos ci; 
+    distillCompinfo ci;
+    ci
+
+let printHashStats () =
+  let hashStats = Stdutil.string_of_hashstats LvHash.stats 
+    goldenLvals "Golden lvals" in
+  L.logStatus hashStats;
+  let hashStats = Stdutil.string_of_hashstats TyHash.stats 
+    goldenTypes "Golden types" in
+  L.logStatus hashStats;
+  let hashStats = Stdutil.string_of_hashstats CIHash.stats 
+    goldenCompinfos "Golden compInfos" in
+  L.logStatus hashStats
+  

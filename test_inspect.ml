@@ -50,17 +50,16 @@ open Callg
 open Cil
 open Pretty
 open Fstructs
-open Scc
+open Scc_cg
 open Stdutil
 open Cilfiles
 open Cilinfos
 
 module A = Alias
-module GA = Guarded_access
+module Intra = IntraDataflow
 module RS = Racesummary
-module SS = Symsummary
-module SPTA = Symstate2
 module Race = Racestate
+module SPTA = Race.SPTA
 module Du = Cildump
 module Th = Threads
 module BS = Backed_summary  
@@ -123,12 +122,10 @@ let initSettings (cg) =
     Th.initSettings settings;
     Cilinfos.reloadRanges !cgDir;
     A.initSettings settings !cgDir;
-    RS.initSummaries settings cg;
-    SS.initSummaries cg;
-    BS.init settings !cgDir ;
+    let () = BS.init settings !cgDir cg in
     Dis.init settings !cgDir;
     Req.setUser !userName;
-    SPTA.init settings cg (RS.sum :> Modsummary.modSumm);
+    SPTA.init settings cg (RS.sum :> Modsummaryi.absModSumm);
     (* Don't communicate w/ server or anything *)
 
   with e -> Printf.printf "Exc. in initSettings: %s\n"
@@ -137,7 +134,9 @@ let initSettings (cg) =
 
 (* TODO: make this not hardCoded to all types, just what's needed *)
 let hardCodedSumTypes () =
-  !BS.allTypes
+  BS.getDescriptors [RS.sum#sumTyp;
+                     SPTA.SS.sum#sumTyp;]
+    
 
 let inspectFun cg sccCG fname = begin
   L.logStatus ("Inspecting: " ^ fname);
@@ -164,7 +163,6 @@ let doRaceAnal () : unit =
   let sccCG = getSCCGraph cg in 
   begin
     initSettings cg;
-    GA.clearCache ();
     
     (* Then do a bottom-up analysis *)
     let neededFuncs = [] in

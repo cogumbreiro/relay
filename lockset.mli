@@ -32,6 +32,16 @@ val scopeLockset : Cil.fundec ->  fullLS -> fullLS
 
 val string_of_lock : aLval -> lockInfo -> string
 
+val set_to_buf : Buffer.t -> lockInfo LS.S.t -> unit
+
+val d_lockset : unit -> lockInfo LS.S.t -> Pretty.doc
+
+val d_fullLS : unit -> fullLS -> Pretty.doc
+
+val inter_isEmpty : fullLS -> fullLS -> bool
+
+val hasSummaryLock : fullLS -> bool
+
 (******* XML printer *******)
 
 class locksXMLPrinter : object 
@@ -40,4 +50,17 @@ class locksXMLPrinter : object
   method pLocks : unit -> fullLS -> Pretty.doc
 
 end
+
+
+(*******************************************************************)
+(* Cache of common operation results                               *)
+
+val clearCache : unit -> unit
+
+module LSPH : Hashtbl.S with type key = (fullLS * fullLS)
+
+module LSPHC : Hashtbl.S with type key = (fullLS * fullLS)
+
+val combineLS : fullLS -> fullLS -> fullLS
+
 

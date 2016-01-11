@@ -1,0 +1,5209 @@
+Sun Aug 10 21:12:45 PDT 2008
+incrementing generation number
+incrementing value in gen_num.txt
+
+running server on /home/jan/research/relay/racetests/synclink/ciltrees
+Registered summary type: rs
+Server ip is: 127.0.0.1
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Resizing VID/CKEY cache to: 2216
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: SERVER
+Done reading config file
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Entry points use roots: false
+trying to clear logs
+Callgraph, etc.
+-----
+Reached end of /home/jan/research/relay/racetests/synclink/ciltrees/calls.cil call graph file
+Num funcs: 217
+Scc_cg: Pruned 53 funcs w/out bodies for scc DAG
+Starting server
+-----
+>>> PROGRESS 1/164 SCCs DONE!
+
+>>> PROGRESS 2/164 SCCs DONE!
+
+>>> PROGRESS 3/164 SCCs DONE!
+
+>>> PROGRESS 4/164 SCCs DONE!
+
+>>> PROGRESS 5/164 SCCs DONE!
+
+>>> PROGRESS 6/164 SCCs DONE!
+
+>>> PROGRESS 7/164 SCCs DONE!
+
+>>> PROGRESS 8/164 SCCs DONE!
+
+>>> PROGRESS 9/164 SCCs DONE!
+
+>>> PROGRESS 10/164 SCCs DONE!
+
+>>> PROGRESS 11/164 SCCs DONE!
+
+>>> PROGRESS 12/164 SCCs DONE!
+
+>>> PROGRESS 13/164 SCCs DONE!
+
+>>> PROGRESS 14/164 SCCs DONE!
+
+>>> PROGRESS 15/164 SCCs DONE!
+
+>>> PROGRESS 16/164 SCCs DONE!
+
+>>> PROGRESS 17/164 SCCs DONE!
+
+>>> PROGRESS 18/164 SCCs DONE!
+
+>>> PROGRESS 19/164 SCCs DONE!
+
+>>> PROGRESS 20/164 SCCs DONE!
+
+>>> PROGRESS 21/164 SCCs DONE!
+
+>>> PROGRESS 22/164 SCCs DONE!
+
+>>> PROGRESS 23/164 SCCs DONE!
+
+>>> PROGRESS 24/164 SCCs DONE!
+
+>>> PROGRESS 25/164 SCCs DONE!
+
+>>> PROGRESS 26/164 SCCs DONE!
+
+>>> PROGRESS 27/164 SCCs DONE!
+
+>>> PROGRESS 28/164 SCCs DONE!
+
+>>> PROGRESS 29/164 SCCs DONE!
+
+>>> PROGRESS 30/164 SCCs DONE!
+
+>>> PROGRESS 31/164 SCCs DONE!
+
+>>> PROGRESS 32/164 SCCs DONE!
+
+>>> PROGRESS 33/164 SCCs DONE!
+
+>>> PROGRESS 34/164 SCCs DONE!
+
+>>> PROGRESS 35/164 SCCs DONE!
+
+>>> PROGRESS 36/164 SCCs DONE!
+
+>>> PROGRESS 37/164 SCCs DONE!
+
+>>> PROGRESS 38/164 SCCs DONE!
+
+>>> PROGRESS 39/164 SCCs DONE!
+
+>>> PROGRESS 40/164 SCCs DONE!
+
+>>> PROGRESS 41/164 SCCs DONE!
+
+>>> PROGRESS 42/164 SCCs DONE!
+
+>>> PROGRESS 43/164 SCCs DONE!
+
+>>> PROGRESS 44/164 SCCs DONE!
+
+>>> PROGRESS 45/164 SCCs DONE!
+
+>>> PROGRESS 46/164 SCCs DONE!
+
+>>> PROGRESS 47/164 SCCs DONE!
+
+>>> PROGRESS 48/164 SCCs DONE!
+
+>>> PROGRESS 49/164 SCCs DONE!
+
+>>> PROGRESS 50/164 SCCs DONE!
+
+>>> PROGRESS 51/164 SCCs DONE!
+
+>>> PROGRESS 52/164 SCCs DONE!
+
+>>> PROGRESS 53/164 SCCs DONE!
+
+>>> PROGRESS 54/164 SCCs DONE!
+
+>>> PROGRESS 55/164 SCCs DONE!
+
+>>> PROGRESS 56/164 SCCs DONE!
+
+>>> PROGRESS 57/164 SCCs DONE!
+
+>>> PROGRESS 58/164 SCCs DONE!
+
+>>> PROGRESS 59/164 SCCs DONE!
+
+>>> PROGRESS 60/164 SCCs DONE!
+
+>>> PROGRESS 61/164 SCCs DONE!
+
+>>> PROGRESS 62/164 SCCs DONE!
+
+>>> PROGRESS 63/164 SCCs DONE!
+
+>>> PROGRESS 64/164 SCCs DONE!
+
+>>> PROGRESS 65/164 SCCs DONE!
+
+>>> PROGRESS 66/164 SCCs DONE!
+
+>>> PROGRESS 67/164 SCCs DONE!
+
+>>> PROGRESS 68/164 SCCs DONE!
+
+>>> PROGRESS 69/164 SCCs DONE!
+
+>>> PROGRESS 70/164 SCCs DONE!
+
+>>> PROGRESS 71/164 SCCs DONE!
+
+>>> PROGRESS 72/164 SCCs DONE!
+
+>>> PROGRESS 73/164 SCCs DONE!
+
+>>> PROGRESS 74/164 SCCs DONE!
+
+>>> PROGRESS 75/164 SCCs DONE!
+
+>>> PROGRESS 76/164 SCCs DONE!
+
+>>> PROGRESS 77/164 SCCs DONE!
+
+>>> PROGRESS 78/164 SCCs DONE!
+
+>>> PROGRESS 79/164 SCCs DONE!
+
+>>> PROGRESS 80/164 SCCs DONE!
+
+>>> PROGRESS 81/164 SCCs DONE!
+
+>>> PROGRESS 82/164 SCCs DONE!
+
+>>> PROGRESS 83/164 SCCs DONE!
+
+>>> PROGRESS 84/164 SCCs DONE!
+
+>>> PROGRESS 85/164 SCCs DONE!
+
+>>> PROGRESS 86/164 SCCs DONE!
+
+>>> PROGRESS 87/164 SCCs DONE!
+
+>>> PROGRESS 88/164 SCCs DONE!
+
+>>> PROGRESS 89/164 SCCs DONE!
+
+>>> PROGRESS 90/164 SCCs DONE!
+
+>>> PROGRESS 91/164 SCCs DONE!
+
+>>> PROGRESS 92/164 SCCs DONE!
+
+>>> PROGRESS 93/164 SCCs DONE!
+
+>>> PROGRESS 94/164 SCCs DONE!
+
+>>> PROGRESS 95/164 SCCs DONE!
+
+>>> PROGRESS 96/164 SCCs DONE!
+
+>>> PROGRESS 97/164 SCCs DONE!
+
+>>> PROGRESS 98/164 SCCs DONE!
+
+>>> PROGRESS 99/164 SCCs DONE!
+
+>>> PROGRESS 100/164 SCCs DONE!
+
+>>> PROGRESS 101/164 SCCs DONE!
+
+>>> PROGRESS 102/164 SCCs DONE!
+
+>>> PROGRESS 103/164 SCCs DONE!
+
+>>> PROGRESS 104/164 SCCs DONE!
+
+>>> PROGRESS 105/164 SCCs DONE!
+
+>>> PROGRESS 106/164 SCCs DONE!
+
+>>> PROGRESS 107/164 SCCs DONE!
+
+>>> PROGRESS 108/164 SCCs DONE!
+
+>>> PROGRESS 109/164 SCCs DONE!
+
+>>> PROGRESS 110/164 SCCs DONE!
+
+>>> PROGRESS 111/164 SCCs DONE!
+
+>>> PROGRESS 112/164 SCCs DONE!
+
+>>> PROGRESS 113/164 SCCs DONE!
+
+>>> PROGRESS 114/164 SCCs DONE!
+
+>>> PROGRESS 115/164 SCCs DONE!
+
+>>> PROGRESS 116/164 SCCs DONE!
+
+>>> PROGRESS 117/164 SCCs DONE!
+
+>>> PROGRESS 118/164 SCCs DONE!
+
+>>> PROGRESS 119/164 SCCs DONE!
+
+>>> PROGRESS 120/164 SCCs DONE!
+
+>>> PROGRESS 121/164 SCCs DONE!
+
+>>> PROGRESS 122/164 SCCs DONE!
+
+>>> PROGRESS 123/164 SCCs DONE!
+
+>>> PROGRESS 124/164 SCCs DONE!
+
+>>> PROGRESS 125/164 SCCs DONE!
+
+>>> PROGRESS 126/164 SCCs DONE!
+
+>>> PROGRESS 127/164 SCCs DONE!
+
+>>> PROGRESS 128/164 SCCs DONE!
+
+>>> PROGRESS 129/164 SCCs DONE!
+
+>>> PROGRESS 130/164 SCCs DONE!
+
+>>> PROGRESS 131/164 SCCs DONE!
+
+>>> PROGRESS 132/164 SCCs DONE!
+
+>>> PROGRESS 133/164 SCCs DONE!
+
+>>> PROGRESS 134/164 SCCs DONE!
+
+>>> PROGRESS 135/164 SCCs DONE!
+
+>>> PROGRESS 136/164 SCCs DONE!
+
+>>> PROGRESS 137/164 SCCs DONE!
+
+>>> PROGRESS 138/164 SCCs DONE!
+
+>>> PROGRESS 139/164 SCCs DONE!
+
+>>> PROGRESS 140/164 SCCs DONE!
+
+>>> PROGRESS 141/164 SCCs DONE!
+
+>>> PROGRESS 142/164 SCCs DONE!
+
+>>> PROGRESS 143/164 SCCs DONE!
+
+>>> PROGRESS 144/164 SCCs DONE!
+
+>>> PROGRESS 145/164 SCCs DONE!
+
+>>> PROGRESS 146/164 SCCs DONE!
+
+>>> PROGRESS 147/164 SCCs DONE!
+
+>>> PROGRESS 148/164 SCCs DONE!
+
+>>> PROGRESS 149/164 SCCs DONE!
+
+>>> PROGRESS 150/164 SCCs DONE!
+
+>>> PROGRESS 151/164 SCCs DONE!
+
+>>> PROGRESS 152/164 SCCs DONE!
+
+>>> PROGRESS 153/164 SCCs DONE!
+
+>>> PROGRESS 154/164 SCCs DONE!
+
+>>> PROGRESS 155/164 SCCs DONE!
+
+>>> PROGRESS 156/164 SCCs DONE!
+
+>>> PROGRESS 157/164 SCCs DONE!
+
+>>> PROGRESS 158/164 SCCs DONE!
+
+>>> PROGRESS 159/164 SCCs DONE!
+
+>>> PROGRESS 160/164 SCCs DONE!
+
+>>> PROGRESS 161/164 SCCs DONE!
+
+>>> PROGRESS 162/164 SCCs DONE!
+
+>>> PROGRESS 163/164 SCCs DONE!
+
+>>> PROGRESS 164/164 SCCs DONE!
+
+Finished all SCCs
+Received warnings from worker. Status: 1/1
+****
+Possible race between access to:
+tmp_buf @ synclink.ko_merged.c:18463 and
+tmp_buf @ synclink.ko_merged.c:18463
+	Cluster ID: 87
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21375] and
+	[synclink.ko_merged.c:19581, synclink.ko_merged.c:21366, synclink.ko_merged.c:21372]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+tmp_buf @ synclink.ko_merged.c:18463 and
+tmp_buf @ synclink.ko_merged.c:18463
+	Cluster ID: 82
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21375] and
+	[synclink.ko_merged.c:21375]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 115].flags and
+[REP: 115].flags
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:10724] and
+	[synclink.ko_merged.c:10724]
+
+	Confidence: used PTA nodes lblSet(1, 1)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].cts_chkcount and
+[REP: 4].cts_chkcount
+	Cluster ID: 74
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19336] and
+	[synclink.ko_merged.c:19336]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].dcd_chkcount and
+[REP: 4].dcd_chkcount
+	Cluster ID: 71
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19335] and
+	[synclink.ko_merged.c:19335]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].drop_rts_on_tx_done and
+[REP: 4].drop_rts_on_tx_done
+	Cluster ID: 69
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22981, synclink.ko_merged.c:22987] and
+	[synclink.ko_merged.c:22981, synclink.ko_merged.c:22987]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].dsr_chkcount and
+[REP: 4].dsr_chkcount
+	Cluster ID: 68
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19338] and
+	[synclink.ko_merged.c:19338]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].icount.tx and
+[REP: 4].icount.tx
+	Cluster ID: 65
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23114, synclink.ko_merged.c:23138] and
+	[synclink.ko_merged.c:23114, synclink.ko_merged.c:23138, synclink.ko_merged.c:21526]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].idle_mode and
+[REP: 4].idle_mode
+	Cluster ID: 64
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19973] and
+	[synclink.ko_merged.c:19973]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].idle_mode and
+[REP: 4].idle_mode
+	Cluster ID: 90
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19973] and
+	[synclink.ko_merged.c:23319, synclink.ko_merged.c:23322, synclink.ko_merged.c:23325, synclink.ko_merged.c:23328, synclink.ko_merged.c:23331, synclink.ko_merged.c:23334, synclink.ko_merged.c:23337, synclink.ko_merged.c:23348, synclink.ko_merged.c:23351, synclink.ko_merged.c:23354, synclink.ko_merged.c:23355, synclink.ko_merged.c:23358, synclink.ko_merged.c:23359, synclink.ko_merged.c:23362, synclink.ko_merged.c:19945]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].irq_occurred and
+[REP: 4].irq_occurred
+	Cluster ID: 59
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23916] and
+	[synclink.ko_merged.c:23916]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].irq_occurred and
+[REP: 4].irq_occurred
+	Cluster ID: 129
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23916] and
+	[synclink.ko_merged.c:23935, synclink.ko_merged.c:23946]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].loopback_bits and
+[REP: 4].loopback_bits
+	Cluster ID: 107
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22727, synclink.ko_merged.c:22732, synclink.ko_merged.c:23168] and
+	[synclink.ko_merged.c:22395, synclink.ko_merged.c:22382, synclink.ko_merged.c:22338]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].loopback_bits and
+[REP: 4].loopback_bits
+	Cluster ID: 53
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22727, synclink.ko_merged.c:22732, synclink.ko_merged.c:23168] and
+	[synclink.ko_merged.c:22727, synclink.ko_merged.c:22732, synclink.ko_merged.c:23168]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].loopmode_insert_requested and
+[REP: 4].loopmode_insert_requested
+	Cluster ID: 52
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:24358] and
+	[synclink.ko_merged.c:24358]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].loopmode_send_done_requested and
+[REP: 4].loopmode_send_done_requested
+	Cluster ID: 51
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:24338, synclink.ko_merged.c:24325] and
+	[synclink.ko_merged.c:24338, synclink.ko_merged.c:24325]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].mbre_bit and
+[REP: 4].mbre_bit
+	Cluster ID: 119
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23167, synclink.ko_merged.c:22641, synclink.ko_merged.c:22644] and
+	[synclink.ko_merged.c:22373, synclink.ko_merged.c:22361, synclink.ko_merged.c:22350]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].mbre_bit and
+[REP: 4].mbre_bit
+	Cluster ID: 49
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23167, synclink.ko_merged.c:22641, synclink.ko_merged.c:22644] and
+	[synclink.ko_merged.c:23167, synclink.ko_merged.c:22641, synclink.ko_merged.c:22644]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].misc_ctrl_value and
+[REP: 4].misc_ctrl_value
+	Cluster ID: 47
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23154, synclink.ko_merged.c:23161] and
+	[synclink.ko_merged.c:23154, synclink.ko_merged.c:23155, synclink.ko_merged.c:23161, synclink.ko_merged.c:23162]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.mode and
+[REP: 4].params.mode
+	Cluster ID: 108
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23258, synclink.ko_merged.c:23291] and
+	[synclink.ko_merged.c:22921, synclink.ko_merged.c:22924, synclink.ko_merged.c:22990, synclink.ko_merged.c:23003, synclink.ko_merged.c:23017, synclink.ko_merged.c:23345, synclink.ko_merged.c:22426, synclink.ko_merged.c:22450, synclink.ko_merged.c:23257, synclink.ko_merged.c:20013, synclink.ko_merged.c:21101, synclink.ko_merged.c:21104, synclink.ko_merged.c:19321, synclink.ko_merged.c:19324, synclink.ko_merged.c:19480, synclink.ko_merged.c:19534, synclink.ko_merged.c:19537, synclink.ko_merged.c:19586, synclink.ko_merged.c:19589, synclink.ko_merged.c:19592, synclink.ko_merged.c:19701, synclink.ko_merged.c:19704, synclink.ko_merged.c:21494, synclink.ko_merged.c:21497]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.mode and
+[REP: 4].params.mode
+	Cluster ID: 44
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23258, synclink.ko_merged.c:23291] and
+	[synclink.ko_merged.c:23258, synclink.ko_merged.c:23291]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].ri_chkcount and
+[REP: 4].ri_chkcount
+	Cluster ID: 35
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19337] and
+	[synclink.ko_merged.c:19337]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rx_enabled and
+[REP: 4].rx_enabled
+	Cluster ID: 113
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22961, synclink.ko_merged.c:22896] and
+	[synclink.ko_merged.c:20036, synclink.ko_merged.c:20040]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rx_enabled and
+[REP: 4].rx_enabled
+	Cluster ID: 32
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22961, synclink.ko_merged.c:22896] and
+	[synclink.ko_merged.c:22961, synclink.ko_merged.c:22896]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rx_overflow and
+[REP: 4].rx_overflow
+	Cluster ID: 31
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22897] and
+	[synclink.ko_merged.c:22897]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rx_rcc_underrun and
+[REP: 4].rx_rcc_underrun
+	Cluster ID: 30
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22898] and
+	[synclink.ko_merged.c:22898]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tcsr_value and
+[REP: 4].tcsr_value
+	Cluster ID: 96
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23342, synclink.ko_merged.c:23343, synclink.ko_merged.c:22547, synclink.ko_merged.c:22549] and
+	[synclink.ko_merged.c:22992, synclink.ko_merged.c:23011, synclink.ko_merged.c:23026, synclink.ko_merged.c:23058, synclink.ko_merged.c:23342, synclink.ko_merged.c:23343, synclink.ko_merged.c:23344, synclink.ko_merged.c:23089, synclink.ko_merged.c:22537, synclink.ko_merged.c:22544, synclink.ko_merged.c:22549, synclink.ko_merged.c:22551, synclink.ko_merged.c:23224, synclink.ko_merged.c:23227, synclink.ko_merged.c:23271, synclink.ko_merged.c:23274, synclink.ko_merged.c:24058, synclink.ko_merged.c:24084, synclink.ko_merged.c:20017]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tcsr_value and
+[REP: 4].tcsr_value
+	Cluster ID: 25
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23342, synclink.ko_merged.c:23343, synclink.ko_merged.c:22547, synclink.ko_merged.c:22549] and
+	[synclink.ko_merged.c:23342, synclink.ko_merged.c:23343, synclink.ko_merged.c:22547, synclink.ko_merged.c:22549]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_active and
+[REP: 4].tx_active
+	Cluster ID: 105
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23032, synclink.ko_merged.c:23070] and
+	[synclink.ko_merged.c:22991, synclink.ko_merged.c:20012, synclink.ko_merged.c:24324, synclink.ko_merged.c:21106, synclink.ko_merged.c:19483, synclink.ko_merged.c:19533, synclink.ko_merged.c:19591, synclink.ko_merged.c:19667, synclink.ko_merged.c:19706, synclink.ko_merged.c:21548]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_active and
+[REP: 4].tx_active
+	Cluster ID: 22
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23032, synclink.ko_merged.c:23070] and
+	[synclink.ko_merged.c:23032, synclink.ko_merged.c:23070]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_enabled and
+[REP: 4].tx_enabled
+	Cluster ID: 106
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23035, synclink.ko_merged.c:23069] and
+	[synclink.ko_merged.c:23034, synclink.ko_merged.c:19989, synclink.ko_merged.c:19996, synclink.ko_merged.c:21126, synclink.ko_merged.c:18511, synclink.ko_merged.c:18533, synclink.ko_merged.c:19792]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_enabled and
+[REP: 4].tx_enabled
+	Cluster ID: 18
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23035, synclink.ko_merged.c:23069] and
+	[synclink.ko_merged.c:23035, synclink.ko_merged.c:23069]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_timer.expires and
+[REP: 4].tx_timer.expires
+	Cluster ID: 120
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23029] and
+	[synclink.ko_merged.c:10479]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_timer.expires and
+[REP: 4].tx_timer.expires
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23029] and
+	[synclink.ko_merged.c:23029]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].usc_idle_mode and
+[REP: 4].usc_idle_mode
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23341, synclink.ko_merged.c:23169] and
+	[synclink.ko_merged.c:23341, synclink.ko_merged.c:23169]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].xmit_head and
+[REP: 4].xmit_head
+	Cluster ID: 2
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19319, synclink.ko_merged.c:19487, synclink.ko_merged.c:19489, synclink.ko_merged.c:19654, synclink.ko_merged.c:19765] and
+	[synclink.ko_merged.c:19319, synclink.ko_merged.c:19487, synclink.ko_merged.c:19489, synclink.ko_merged.c:19654, synclink.ko_merged.c:19765]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].xmit_head and
+[REP: 4].xmit_head
+	Cluster ID: 85
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19319, synclink.ko_merged.c:19487, synclink.ko_merged.c:19489, synclink.ko_merged.c:19654, synclink.ko_merged.c:19765] and
+	[synclink.ko_merged.c:19320, synclink.ko_merged.c:19486, synclink.ko_merged.c:19487, synclink.ko_merged.c:19489, synclink.ko_merged.c:19635, synclink.ko_merged.c:19652, synclink.ko_merged.c:19654, synclink.ko_merged.c:19766]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].xmit_tail and
+[REP: 4].xmit_tail
+	Cluster ID: 137
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23105, synclink.ko_merged.c:23107, synclink.ko_merged.c:23109, synclink.ko_merged.c:23111, synclink.ko_merged.c:23132, synclink.ko_merged.c:23135, synclink.ko_merged.c:19318, synclink.ko_merged.c:19764] and
+	[synclink.ko_merged.c:23104, synclink.ko_merged.c:23105, synclink.ko_merged.c:23107, synclink.ko_merged.c:23108, synclink.ko_merged.c:23109, synclink.ko_merged.c:23111, synclink.ko_merged.c:23131, synclink.ko_merged.c:23132, synclink.ko_merged.c:23135, synclink.ko_merged.c:19319, synclink.ko_merged.c:19765]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].xmit_tail and
+[REP: 4].xmit_tail
+	Cluster ID: 1
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23105, synclink.ko_merged.c:23107, synclink.ko_merged.c:23109, synclink.ko_merged.c:23111, synclink.ko_merged.c:23132, synclink.ko_merged.c:23135, synclink.ko_merged.c:19318, synclink.ko_merged.c:19764] and
+	[synclink.ko_merged.c:23105, synclink.ko_merged.c:23107, synclink.ko_merged.c:23109, synclink.ko_merged.c:23111, synclink.ko_merged.c:23132, synclink.ko_merged.c:23135, synclink.ko_merged.c:19318, synclink.ko_merged.c:19764]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4] and
+[REP: 4]
+	Cluster ID: 81
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:7372, synclink.ko_merged.c:7375, synclink.ko_merged.c:7378, synclink.ko_merged.c:7381, synclink.ko_merged.c:7382, synclink.ko_merged.c:7385, synclink.ko_merged.c:7386, synclink.ko_merged.c:7389, synclink.ko_merged.c:7390, synclink.ko_merged.c:7393, synclink.ko_merged.c:7394, synclink.ko_merged.c:7513, synclink.ko_merged.c:7516, synclink.ko_merged.c:7519, synclink.ko_merged.c:7520, synclink.ko_merged.c:7523, synclink.ko_merged.c:23155, synclink.ko_merged.c:23162, synclink.ko_merged.c:23163, synclink.ko_merged.c:24012, synclink.ko_merged.c:24196, synclink.ko_merged.c:24204, synclink.ko_merged.c:23472, synclink.ko_merged.c:23447, synclink.ko_merged.c:19488] and
+	[synclink.ko_merged.c:7372, synclink.ko_merged.c:7375, synclink.ko_merged.c:7378, synclink.ko_merged.c:7381, synclink.ko_merged.c:7382, synclink.ko_merged.c:7385, synclink.ko_merged.c:7386, synclink.ko_merged.c:7389, synclink.ko_merged.c:7390, synclink.ko_merged.c:7393, synclink.ko_merged.c:7394, synclink.ko_merged.c:7513, synclink.ko_merged.c:7516, synclink.ko_merged.c:7519, synclink.ko_merged.c:7520, synclink.ko_merged.c:7523, synclink.ko_merged.c:23155, synclink.ko_merged.c:23162, synclink.ko_merged.c:23163, synclink.ko_merged.c:24012, synclink.ko_merged.c:24196, synclink.ko_merged.c:24204, synclink.ko_merged.c:23472, synclink.ko_merged.c:23447, synclink.ko_merged.c:19488]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(2)
+	lval 1: [REP: 4].params
+	lval 2: [REP: 4].params
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].blocked_open and
+[REP: 4].blocked_open
+	Cluster ID: 123
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21235, synclink.ko_merged.c:21295] and
+	[synclink.ko_merged.c:21025, synclink.ko_merged.c:21235, synclink.ko_merged.c:21295]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].blocked_open and
+[REP: 4].blocked_open
+	Cluster ID: 80
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21235, synclink.ko_merged.c:21295] and
+	[synclink.ko_merged.c:21235, synclink.ko_merged.c:21295]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].buffer_list and
+[REP: 4].buffer_list
+	Cluster ID: 79
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21694, synclink.ko_merged.c:21699, synclink.ko_merged.c:21747] and
+	[synclink.ko_merged.c:21694, synclink.ko_merged.c:21699, synclink.ko_merged.c:21747]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].buffer_list and
+[REP: 4].buffer_list
+	Cluster ID: 114
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21694, synclink.ko_merged.c:21699, synclink.ko_merged.c:21747] and
+	[synclink.ko_merged.c:21700, synclink.ko_merged.c:21703, synclink.ko_merged.c:21705, synclink.ko_merged.c:21706, synclink.ko_merged.c:21707, synclink.ko_merged.c:21742, synclink.ko_merged.c:21744]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].buffer_list_phys and
+[REP: 4].buffer_list_phys
+	Cluster ID: 78
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21695, synclink.ko_merged.c:21703] and
+	[synclink.ko_merged.c:21695, synclink.ko_merged.c:21703]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].buffer_list_phys and
+[REP: 4].buffer_list_phys
+	Cluster ID: 133
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21695, synclink.ko_merged.c:21703] and
+	[synclink.ko_merged.c:21711, synclink.ko_merged.c:21714, synclink.ko_merged.c:21723, synclink.ko_merged.c:21727]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].cmr_value and
+[REP: 4].cmr_value
+	Cluster ID: 77
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22460, synclink.ko_merged.c:24361, synclink.ko_merged.c:24339, synclink.ko_merged.c:23783] and
+	[synclink.ko_merged.c:22460, synclink.ko_merged.c:24361, synclink.ko_merged.c:24339, synclink.ko_merged.c:23783]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].cmr_value and
+[REP: 4].cmr_value
+	Cluster ID: 94
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22460, synclink.ko_merged.c:24361, synclink.ko_merged.c:24339, synclink.ko_merged.c:23783] and
+	[synclink.ko_merged.c:24361, synclink.ko_merged.c:24362, synclink.ko_merged.c:24339, synclink.ko_merged.c:24340, synclink.ko_merged.c:23783, synclink.ko_merged.c:23787]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].count and
+[REP: 4].count
+	Cluster ID: 76
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:24004, synclink.ko_merged.c:24016, synclink.ko_merged.c:24019, synclink.ko_merged.c:24020, synclink.ko_merged.c:23789, synclink.ko_merged.c:23807] and
+	[synclink.ko_merged.c:24004, synclink.ko_merged.c:24016, synclink.ko_merged.c:24019, synclink.ko_merged.c:24020, synclink.ko_merged.c:23789, synclink.ko_merged.c:23807]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].count and
+[REP: 4].count
+	Cluster ID: 136
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:24004, synclink.ko_merged.c:24016, synclink.ko_merged.c:24019, synclink.ko_merged.c:24020, synclink.ko_merged.c:23789, synclink.ko_merged.c:23807] and
+	[synclink.ko_merged.c:24049]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].count and
+[REP: 4].count
+	Cluster ID: 104
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:20999, synclink.ko_merged.c:21002, synclink.ko_merged.c:21168, synclink.ko_merged.c:21232, synclink.ko_merged.c:21293, synclink.ko_merged.c:21389, synclink.ko_merged.c:21415] and
+	[synclink.ko_merged.c:20986, synclink.ko_merged.c:20989, synclink.ko_merged.c:20997, synclink.ko_merged.c:20998, synclink.ko_merged.c:21002, synclink.ko_merged.c:21003, synclink.ko_merged.c:21036, synclink.ko_merged.c:21225, synclink.ko_merged.c:21232, synclink.ko_merged.c:21281, synclink.ko_merged.c:21293, synclink.ko_merged.c:21297, synclink.ko_merged.c:21346, synclink.ko_merged.c:21389, synclink.ko_merged.c:21391, synclink.ko_merged.c:21414, synclink.ko_merged.c:21415]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].count and
+[REP: 4].count
+	Cluster ID: 75
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:20999, synclink.ko_merged.c:21002, synclink.ko_merged.c:21168, synclink.ko_merged.c:21232, synclink.ko_merged.c:21293, synclink.ko_merged.c:21389, synclink.ko_merged.c:21415] and
+	[synclink.ko_merged.c:20999, synclink.ko_merged.c:21002, synclink.ko_merged.c:21168, synclink.ko_merged.c:21232, synclink.ko_merged.c:21293, synclink.ko_merged.c:21389, synclink.ko_merged.c:21415]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].current_rx_buffer and
+[REP: 4].current_rx_buffer
+	Cluster ID: 73
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23475] and
+	[synclink.ko_merged.c:23475]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].current_tx_buffer and
+[REP: 4].current_tx_buffer
+	Cluster ID: 72
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23450, synclink.ko_merged.c:23812] and
+	[synclink.ko_merged.c:23450, synclink.ko_merged.c:23812]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].current_tx_buffer and
+[REP: 4].current_tx_buffer
+	Cluster ID: 125
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23450, synclink.ko_merged.c:23812] and
+	[synclink.ko_merged.c:23785]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].dma_requested and
+[REP: 4].dma_requested
+	Cluster ID: 70
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21996, synclink.ko_merged.c:22027] and
+	[synclink.ko_merged.c:21996, synclink.ko_merged.c:22027]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].dma_requested and
+[REP: 4].dma_requested
+	Cluster ID: 115
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21996, synclink.ko_merged.c:22027] and
+	[synclink.ko_merged.c:22024]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].flags and
+[REP: 4].flags
+	Cluster ID: 67
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19420, synclink.ko_merged.c:19422, synclink.ko_merged.c:19425, synclink.ko_merged.c:19427, synclink.ko_merged.c:19249, synclink.ko_merged.c:19305, synclink.ko_merged.c:21006, synclink.ko_merged.c:21032, synclink.ko_merged.c:21169, synclink.ko_merged.c:21211, synclink.ko_merged.c:21215, synclink.ko_merged.c:21301] and
+	[synclink.ko_merged.c:19420, synclink.ko_merged.c:19422, synclink.ko_merged.c:19425, synclink.ko_merged.c:19427, synclink.ko_merged.c:21079, synclink.ko_merged.c:19216, synclink.ko_merged.c:19249, synclink.ko_merged.c:19262, synclink.ko_merged.c:19305, synclink.ko_merged.c:21006, synclink.ko_merged.c:21015, synclink.ko_merged.c:21032, synclink.ko_merged.c:21169, synclink.ko_merged.c:21211, synclink.ko_merged.c:21215, synclink.ko_merged.c:21252, synclink.ko_merged.c:21254, synclink.ko_merged.c:21265, synclink.ko_merged.c:21301, synclink.ko_merged.c:21353, synclink.ko_merged.c:21355, synclink.ko_merged.c:21358, synclink.ko_merged.c:21378]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].get_tx_holding_index and
+[REP: 4].get_tx_holding_index
+	Cluster ID: 111
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23453, synclink.ko_merged.c:21864, synclink.ko_merged.c:21892, synclink.ko_merged.c:21894] and
+	[synclink.ko_merged.c:21892, synclink.ko_merged.c:21893]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].get_tx_holding_index and
+[REP: 4].get_tx_holding_index
+	Cluster ID: 66
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23453, synclink.ko_merged.c:21864, synclink.ko_merged.c:21892, synclink.ko_merged.c:21894] and
+	[synclink.ko_merged.c:23453, synclink.ko_merged.c:21864, synclink.ko_merged.c:21892, synclink.ko_merged.c:21894]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].ignore_status_mask and
+[REP: 4].ignore_status_mask
+	Cluster ID: 63
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19441, synclink.ko_merged.c:19445, synclink.ko_merged.c:19448] and
+	[synclink.ko_merged.c:19441, synclink.ko_merged.c:19445, synclink.ko_merged.c:19448]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].init_error and
+[REP: 4].init_error
+	Cluster ID: 62
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:24153, synclink.ko_merged.c:24160, synclink.ko_merged.c:24167] and
+	[synclink.ko_merged.c:24153, synclink.ko_merged.c:24160, synclink.ko_merged.c:24167]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].intermediate_rxbuffer and
+[REP: 4].intermediate_rxbuffer
+	Cluster ID: 61
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21813, synclink.ko_merged.c:21827] and
+	[synclink.ko_merged.c:21813, synclink.ko_merged.c:21827]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].intermediate_rxbuffer and
+[REP: 4].intermediate_rxbuffer
+	Cluster ID: 131
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21813, synclink.ko_merged.c:21827] and
+	[synclink.ko_merged.c:21814, synclink.ko_merged.c:21824, synclink.ko_merged.c:21825]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].io_addr_requested and
+[REP: 4].io_addr_requested
+	Cluster ID: 60
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21941, synclink.ko_merged.c:22034] and
+	[synclink.ko_merged.c:21941, synclink.ko_merged.c:22034]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].io_addr_requested and
+[REP: 4].io_addr_requested
+	Cluster ID: 103
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21941, synclink.ko_merged.c:22034] and
+	[synclink.ko_merged.c:22032]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].irq_requested and
+[REP: 4].irq_requested
+	Cluster ID: 58
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21949, synclink.ko_merged.c:22022] and
+	[synclink.ko_merged.c:21949, synclink.ko_merged.c:22022]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].irq_requested and
+[REP: 4].irq_requested
+	Cluster ID: 102
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21949, synclink.ko_merged.c:22022] and
+	[synclink.ko_merged.c:22020]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].last_mem_alloc and
+[REP: 4].last_mem_alloc
+	Cluster ID: 57
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21631, synclink.ko_merged.c:21764, synclink.ko_merged.c:21696] and
+	[synclink.ko_merged.c:21631, synclink.ko_merged.c:21764, synclink.ko_merged.c:21696]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].last_mem_alloc and
+[REP: 4].last_mem_alloc
+	Cluster ID: 122
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21631, synclink.ko_merged.c:21764, synclink.ko_merged.c:21696] and
+	[synclink.ko_merged.c:21762, synclink.ko_merged.c:21763, synclink.ko_merged.c:21764, synclink.ko_merged.c:21694, synclink.ko_merged.c:21695, synclink.ko_merged.c:21696]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].lcr_base and
+[REP: 4].lcr_base
+	Cluster ID: 56
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21982, synclink.ko_merged.c:22051] and
+	[synclink.ko_merged.c:21982, synclink.ko_merged.c:22051]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].lcr_base and
+[REP: 4].lcr_base
+	Cluster ID: 109
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21982, synclink.ko_merged.c:22051] and
+	[synclink.ko_merged.c:23152, synclink.ko_merged.c:23153, synclink.ko_merged.c:21983, synclink.ko_merged.c:22049, synclink.ko_merged.c:22050]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].lcr_mem_requested and
+[REP: 4].lcr_mem_requested
+	Cluster ID: 55
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21967, synclink.ko_merged.c:22043] and
+	[synclink.ko_merged.c:21967, synclink.ko_merged.c:22043]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].lcr_mem_requested and
+[REP: 4].lcr_mem_requested
+	Cluster ID: 101
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21967, synclink.ko_merged.c:22043] and
+	[synclink.ko_merged.c:22040]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].link and
+[REP: 4].link
+	Cluster ID: 54
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21714, synclink.ko_merged.c:21716, synclink.ko_merged.c:21727, synclink.ko_merged.c:21730] and
+	[synclink.ko_merged.c:21714, synclink.ko_merged.c:21716, synclink.ko_merged.c:21727, synclink.ko_merged.c:21730]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].link and
+[REP: 4].link
+	Cluster ID: 89
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21714, synclink.ko_merged.c:21716, synclink.ko_merged.c:21727, synclink.ko_merged.c:21730] and
+	[synclink.ko_merged.c:21716, synclink.ko_merged.c:21730]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].low_latency and
+[REP: 4].low_latency
+	Cluster ID: 50
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21379, synclink.ko_merged.c:21381] and
+	[synclink.ko_merged.c:21379, synclink.ko_merged.c:21381]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].memory_base and
+[REP: 4].memory_base
+	Cluster ID: 48
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21968, synclink.ko_merged.c:22047] and
+	[synclink.ko_merged.c:21968, synclink.ko_merged.c:22047]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].memory_base and
+[REP: 4].memory_base
+	Cluster ID: 93
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21968, synclink.ko_merged.c:22047] and
+	[synclink.ko_merged.c:24193, synclink.ko_merged.c:24208, synclink.ko_merged.c:24217, synclink.ko_merged.c:21970, synclink.ko_merged.c:22045, synclink.ko_merged.c:22046, synclink.ko_merged.c:21762, synclink.ko_merged.c:21694]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.data_bits and
+[REP: 4].params.data_bits
+	Cluster ID: 46
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19379, synclink.ko_merged.c:19382, synclink.ko_merged.c:19385, synclink.ko_merged.c:19388, synclink.ko_merged.c:19391] and
+	[synclink.ko_merged.c:19379, synclink.ko_merged.c:19382, synclink.ko_merged.c:19385, synclink.ko_merged.c:19388, synclink.ko_merged.c:19391]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.data_bits and
+[REP: 4].params.data_bits
+	Cluster ID: 121
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19379, synclink.ko_merged.c:19382, synclink.ko_merged.c:19385, synclink.ko_merged.c:19388, synclink.ko_merged.c:19391] and
+	[synclink.ko_merged.c:23198, synclink.ko_merged.c:23213, synclink.ko_merged.c:19410]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.data_rate and
+[REP: 4].params.data_rate
+	Cluster ID: 45
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19413] and
+	[synclink.ko_merged.c:19413]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.data_rate and
+[REP: 4].params.data_rate
+	Cluster ID: 86
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19413] and
+	[synclink.ko_merged.c:23230, synclink.ko_merged.c:19412, synclink.ko_merged.c:19415, synclink.ko_merged.c:19416, synclink.ko_merged.c:21083]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.parity and
+[REP: 4].params.parity
+	Cluster ID: 43
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19399, synclink.ko_merged.c:19402, synclink.ko_merged.c:19404, synclink.ko_merged.c:19407] and
+	[synclink.ko_merged.c:19399, synclink.ko_merged.c:19402, synclink.ko_merged.c:19404, synclink.ko_merged.c:19407]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.parity and
+[REP: 4].params.parity
+	Cluster ID: 134
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19399, synclink.ko_merged.c:19402, synclink.ko_merged.c:19404, synclink.ko_merged.c:19407] and
+	[synclink.ko_merged.c:23201, synclink.ko_merged.c:23203, synclink.ko_merged.c:23216, synclink.ko_merged.c:23218]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.stop_bits and
+[REP: 4].params.stop_bits
+	Cluster ID: 42
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19395, synclink.ko_merged.c:19397] and
+	[synclink.ko_merged.c:19395, synclink.ko_merged.c:19397]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].params.stop_bits and
+[REP: 4].params.stop_bits
+	Cluster ID: 99
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19395, synclink.ko_merged.c:19397] and
+	[synclink.ko_merged.c:23193, synclink.ko_merged.c:19410]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].pending_bh and
+[REP: 4].pending_bh
+	Cluster ID: 41
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19227] and
+	[synclink.ko_merged.c:19227]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].pending_bh and
+[REP: 4].pending_bh
+	Cluster ID: 118
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19227] and
+	[synclink.ko_merged.c:21548]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].phys_addr and
+[REP: 4].phys_addr
+	Cluster ID: 40
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21773] and
+	[synclink.ko_merged.c:21773]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].phys_entry and
+[REP: 4].phys_entry
+	Cluster ID: 39
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21711, synclink.ko_merged.c:21723] and
+	[synclink.ko_merged.c:21711, synclink.ko_merged.c:21723]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].phys_entry and
+[REP: 4].phys_entry
+	Cluster ID: 84
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21711, synclink.ko_merged.c:21723] and
+	[synclink.ko_merged.c:22926, synclink.ko_merged.c:23008, synclink.ko_merged.c:24023, synclink.ko_merged.c:24051]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].put_tx_holding_index and
+[REP: 4].put_tx_holding_index
+	Cluster ID: 126
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23454, synclink.ko_merged.c:21865, synclink.ko_merged.c:21916, synclink.ko_merged.c:21918] and
+	[synclink.ko_merged.c:21916, synclink.ko_merged.c:21917]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].put_tx_holding_index and
+[REP: 4].put_tx_holding_index
+	Cluster ID: 38
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23454, synclink.ko_merged.c:21865, synclink.ko_merged.c:21916, synclink.ko_merged.c:21918] and
+	[synclink.ko_merged.c:23454, synclink.ko_merged.c:21865, synclink.ko_merged.c:21916, synclink.ko_merged.c:21918]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rcc and
+[REP: 4].rcc
+	Cluster ID: 132
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23004, synclink.ko_merged.c:24005, synclink.ko_merged.c:23788] and
+	[synclink.ko_merged.c:23002]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rcc and
+[REP: 4].rcc
+	Cluster ID: 37
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23004, synclink.ko_merged.c:24005, synclink.ko_merged.c:23788] and
+	[synclink.ko_merged.c:23004, synclink.ko_merged.c:24005, synclink.ko_merged.c:23788]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].read_status_mask and
+[REP: 4].read_status_mask
+	Cluster ID: 36
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19429, synclink.ko_merged.c:19431, synclink.ko_merged.c:19434, synclink.ko_merged.c:19437] and
+	[synclink.ko_merged.c:19429, synclink.ko_merged.c:19431, synclink.ko_merged.c:19434, synclink.ko_merged.c:19437]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].read_status_mask and
+[REP: 4].read_status_mask
+	Cluster ID: 112
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19429, synclink.ko_merged.c:19431, synclink.ko_merged.c:19434, synclink.ko_merged.c:19437] and
+	[synclink.ko_merged.c:19431, synclink.ko_merged.c:19434, synclink.ko_merged.c:19437]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rx_buffer_count and
+[REP: 4].rx_buffer_count
+	Cluster ID: 34
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21638, synclink.ko_merged.c:21641, synclink.ko_merged.c:21643] and
+	[synclink.ko_merged.c:21638, synclink.ko_merged.c:21641, synclink.ko_merged.c:21643]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rx_buffer_count and
+[REP: 4].rx_buffer_count
+	Cluster ID: 98
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21638, synclink.ko_merged.c:21641, synclink.ko_merged.c:21643] and
+	[synclink.ko_merged.c:23471, synclink.ko_merged.c:21642, synclink.ko_merged.c:21647, synclink.ko_merged.c:21656, synclink.ko_merged.c:21803, synclink.ko_merged.c:21708, synclink.ko_merged.c:21710, synclink.ko_merged.c:21715, synclink.ko_merged.c:21723, synclink.ko_merged.c:21727]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rx_buffer_list and
+[REP: 4].rx_buffer_list
+	Cluster ID: 92
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21706, synclink.ko_merged.c:21748] and
+	[synclink.ko_merged.c:21656, synclink.ko_merged.c:21803]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].rx_buffer_list and
+[REP: 4].rx_buffer_list
+	Cluster ID: 33
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21706, synclink.ko_merged.c:21748] and
+	[synclink.ko_merged.c:21706, synclink.ko_merged.c:21748]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].serial_signals and
+[REP: 4].serial_signals
+	Cluster ID: 138
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22985, synclink.ko_merged.c:23376, synclink.ko_merged.c:23379, synclink.ko_merged.c:23382, synclink.ko_merged.c:23385, synclink.ko_merged.c:23388, synclink.ko_merged.c:20494, synclink.ko_merged.c:20497, synclink.ko_merged.c:20500, synclink.ko_merged.c:20503, synclink.ko_merged.c:19373, synclink.ko_merged.c:19375, synclink.ko_merged.c:19292, synclink.ko_merged.c:19296, synclink.ko_merged.c:19819, synclink.ko_merged.c:19850, synclink.ko_merged.c:20942, synclink.ko_merged.c:20950, synclink.ko_merged.c:20952, synclink.ko_merged.c:20956, synclink.ko_merged.c:21239] and
+	[synclink.ko_merged.c:22984, synclink.ko_merged.c:22985, synclink.ko_merged.c:23376, synclink.ko_merged.c:23379, synclink.ko_merged.c:23382, synclink.ko_merged.c:23385, synclink.ko_merged.c:23388, synclink.ko_merged.c:23398, synclink.ko_merged.c:20444, synclink.ko_merged.c:20449, synclink.ko_merged.c:20454, synclink.ko_merged.c:20459, synclink.ko_merged.c:20464, synclink.ko_merged.c:20469, synclink.ko_merged.c:20494, synclink.ko_merged.c:20497, synclink.ko_merged.c:20500, synclink.ko_merged.c:20503, synclink.ko_merged.c:20125, synclink.ko_merged.c:19373, synclink.ko_merged.c:19375, synclink.ko_merged.c:19292, synclink.ko_merged.c:19296, synclink.ko_merged.c:19819, synclink.ko_merged.c:19850, synclink.ko_merged.c:20942, synclink.ko_merged.c:20950, synclink.ko_merged.c:20952, synclink.ko_merged.c:20956, synclink.ko_merged.c:21239, synclink.ko_merged.c:21269, synclink.ko_merged.c:21476, synclink.ko_merged.c:21479, synclink.ko_merged.c:21482, synclink.ko_merged.c:21485, synclink.ko_merged.c:21488, synclink.ko_merged.c:21491]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].serial_signals and
+[REP: 4].serial_signals
+	Cluster ID: 29
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:22985, synclink.ko_merged.c:23376, synclink.ko_merged.c:23379, synclink.ko_merged.c:23382, synclink.ko_merged.c:23385, synclink.ko_merged.c:23388, synclink.ko_merged.c:20494, synclink.ko_merged.c:20497, synclink.ko_merged.c:20500, synclink.ko_merged.c:20503, synclink.ko_merged.c:19373, synclink.ko_merged.c:19375, synclink.ko_merged.c:19292, synclink.ko_merged.c:19296, synclink.ko_merged.c:19819, synclink.ko_merged.c:19850, synclink.ko_merged.c:20942, synclink.ko_merged.c:20950, synclink.ko_merged.c:20952, synclink.ko_merged.c:20956, synclink.ko_merged.c:21239] and
+	[synclink.ko_merged.c:22985, synclink.ko_merged.c:23376, synclink.ko_merged.c:23379, synclink.ko_merged.c:23382, synclink.ko_merged.c:23385, synclink.ko_merged.c:23388, synclink.ko_merged.c:20494, synclink.ko_merged.c:20497, synclink.ko_merged.c:20500, synclink.ko_merged.c:20503, synclink.ko_merged.c:19373, synclink.ko_merged.c:19375, synclink.ko_merged.c:19292, synclink.ko_merged.c:19296, synclink.ko_merged.c:19819, synclink.ko_merged.c:19850, synclink.ko_merged.c:20942, synclink.ko_merged.c:20950, synclink.ko_merged.c:20952, synclink.ko_merged.c:20956, synclink.ko_merged.c:21239]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].shared_mem_requested and
+[REP: 4].shared_mem_requested
+	Cluster ID: 28
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21958, synclink.ko_merged.c:22038] and
+	[synclink.ko_merged.c:21958, synclink.ko_merged.c:22038]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].shared_mem_requested and
+[REP: 4].shared_mem_requested
+	Cluster ID: 97
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21958, synclink.ko_merged.c:22038] and
+	[synclink.ko_merged.c:22036]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].start_tx_dma_buffer and
+[REP: 4].start_tx_dma_buffer
+	Cluster ID: 27
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23451, synclink.ko_merged.c:23786] and
+	[synclink.ko_merged.c:23451, synclink.ko_merged.c:23786]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].status and
+[REP: 4].status
+	Cluster ID: 26
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:24006, synclink.ko_merged.c:24015, synclink.ko_merged.c:23787] and
+	[synclink.ko_merged.c:24006, synclink.ko_merged.c:24015, synclink.ko_merged.c:23787]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].status and
+[REP: 4].status
+	Cluster ID: 83
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:24006, synclink.ko_merged.c:24015, synclink.ko_merged.c:23787] and
+	[synclink.ko_merged.c:24113, synclink.ko_merged.c:24119, synclink.ko_merged.c:24123]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].timeout and
+[REP: 4].timeout
+	Cluster ID: 24
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19416, synclink.ko_merged.c:19418] and
+	[synclink.ko_merged.c:19416, synclink.ko_merged.c:19418]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].timeout and
+[REP: 4].timeout
+	Cluster ID: 88
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19416, synclink.ko_merged.c:19418] and
+	[synclink.ko_merged.c:19418, synclink.ko_merged.c:21084, synclink.ko_merged.c:21016]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tty and
+[REP: 4].tty
+	Cluster ID: 95
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21024, synclink.ko_merged.c:21170, synclink.ko_merged.c:21344, synclink.ko_merged.c:21412] and
+	[synclink.ko_merged.c:19361, synclink.ko_merged.c:19413, synclink.ko_merged.c:19238, synclink.ko_merged.c:19246, synclink.ko_merged.c:19291, synclink.ko_merged.c:19302]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tty and
+[REP: 4].tty
+	Cluster ID: 23
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21024, synclink.ko_merged.c:21170, synclink.ko_merged.c:21344, synclink.ko_merged.c:21412] and
+	[synclink.ko_merged.c:21024, synclink.ko_merged.c:21170, synclink.ko_merged.c:21344, synclink.ko_merged.c:21412]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_buffer_count and
+[REP: 4].tx_buffer_count
+	Cluster ID: 21
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21637, synclink.ko_merged.c:21640] and
+	[synclink.ko_merged.c:21637, synclink.ko_merged.c:21640]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_buffer_count and
+[REP: 4].tx_buffer_count
+	Cluster ID: 117
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21637, synclink.ko_merged.c:21640] and
+	[synclink.ko_merged.c:23446, synclink.ko_merged.c:23463, synclink.ko_merged.c:23794, synclink.ko_merged.c:21638, synclink.ko_merged.c:21642, synclink.ko_merged.c:21643, synclink.ko_merged.c:21647, synclink.ko_merged.c:21662, synclink.ko_merged.c:21804, synclink.ko_merged.c:21722, synclink.ko_merged.c:21729]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_buffer_list and
+[REP: 4].tx_buffer_list
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21707, synclink.ko_merged.c:21708, synclink.ko_merged.c:21749] and
+	[synclink.ko_merged.c:21707, synclink.ko_merged.c:21708, synclink.ko_merged.c:21749]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_buffer_list and
+[REP: 4].tx_buffer_list
+	Cluster ID: 116
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21707, synclink.ko_merged.c:21708, synclink.ko_merged.c:21749] and
+	[synclink.ko_merged.c:23793, synclink.ko_merged.c:21662, synclink.ko_merged.c:21804, synclink.ko_merged.c:21708]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_dma_buffers_used and
+[REP: 4].tx_dma_buffers_used
+	Cluster ID: 19
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23452, synclink.ko_merged.c:23810] and
+	[synclink.ko_merged.c:23452, synclink.ko_merged.c:23810]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_dma_buffers_used and
+[REP: 4].tx_dma_buffers_used
+	Cluster ID: 91
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23452, synclink.ko_merged.c:23810] and
+	[synclink.ko_merged.c:23463, synclink.ko_merged.c:23810]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_holding_buffers and
+[REP: 4].tx_holding_buffers
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:7513, synclink.ko_merged.c:7516, synclink.ko_merged.c:7519, synclink.ko_merged.c:7520, synclink.ko_merged.c:7523] and
+	[synclink.ko_merged.c:7513, synclink.ko_merged.c:7516, synclink.ko_merged.c:7519, synclink.ko_merged.c:7520, synclink.ko_merged.c:7523]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_holding_buffers[0].buffer and
+[REP: 4].tx_holding_buffers[0].buffer
+	Cluster ID: 16
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21842, synclink.ko_merged.c:21860] and
+	[synclink.ko_merged.c:21842, synclink.ko_merged.c:21860]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_holding_buffers[0].buffer and
+[REP: 4].tx_holding_buffers[0].buffer
+	Cluster ID: 130
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21842, synclink.ko_merged.c:21860] and
+	[synclink.ko_merged.c:21844, synclink.ko_merged.c:21858, synclink.ko_merged.c:21859, synclink.ko_merged.c:21890, synclink.ko_merged.c:21914]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_holding_buffers[0].buffer_size and
+[REP: 4].tx_holding_buffers[0].buffer_size
+	Cluster ID: 110
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21913] and
+	[synclink.ko_merged.c:21884, synclink.ko_merged.c:21885, synclink.ko_merged.c:21889, synclink.ko_merged.c:21890]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+LS for 1st access:
+L+ = {[REP: 4].irq_spinlock#g} (1)
+	(rep. lock)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_holding_buffers[0].buffer_size and
+[REP: 4].tx_holding_buffers[0].buffer_size
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21913] and
+	[synclink.ko_merged.c:21913]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_holding_count and
+[REP: 4].tx_holding_count
+	Cluster ID: 135
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23455, synclink.ko_merged.c:21866, synclink.ko_merged.c:21891, synclink.ko_merged.c:21915] and
+	[synclink.ko_merged.c:21880, synclink.ko_merged.c:21891, synclink.ko_merged.c:21909, synclink.ko_merged.c:21915, synclink.ko_merged.c:19596]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_holding_count and
+[REP: 4].tx_holding_count
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23455, synclink.ko_merged.c:21866, synclink.ko_merged.c:21891, synclink.ko_merged.c:21915] and
+	[synclink.ko_merged.c:23455, synclink.ko_merged.c:21866, synclink.ko_merged.c:21891, synclink.ko_merged.c:21915]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_timer.base and
+[REP: 4].tx_timer.base
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:10452] and
+	[synclink.ko_merged.c:10452]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_timer.data and
+[REP: 4].tx_timer.data
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19229] and
+	[synclink.ko_merged.c:19229]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_timer.function and
+[REP: 4].tx_timer.function
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19230] and
+	[synclink.ko_merged.c:19230]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_timer.lock and
+[REP: 4].tx_timer.lock
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:10456] and
+	[synclink.ko_merged.c:10456]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].tx_timer.magic and
+[REP: 4].tx_timer.magic
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:10453] and
+	[synclink.ko_merged.c:10453]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].virt_addr and
+[REP: 4].virt_addr
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21762, synclink.ko_merged.c:21767, synclink.ko_merged.c:21791] and
+	[synclink.ko_merged.c:21762, synclink.ko_merged.c:21767, synclink.ko_merged.c:21791]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].virt_addr and
+[REP: 4].virt_addr
+	Cluster ID: 124
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:21762, synclink.ko_merged.c:21767, synclink.ko_merged.c:21791] and
+	[synclink.ko_merged.c:24007, synclink.ko_merged.c:24017, synclink.ko_merged.c:24127, synclink.ko_merged.c:23803, synclink.ko_merged.c:23805, synclink.ko_merged.c:21768, synclink.ko_merged.c:21771, synclink.ko_merged.c:21787, synclink.ko_merged.c:21789]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].x_char and
+[REP: 4].x_char
+	Cluster ID: 128
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23129, synclink.ko_merged.c:19789, synclink.ko_merged.c:19843] and
+	[synclink.ko_merged.c:23085, synclink.ko_merged.c:23103, synclink.ko_merged.c:23127, synclink.ko_merged.c:23128, synclink.ko_merged.c:19842]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].x_char and
+[REP: 4].x_char
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23129, synclink.ko_merged.c:19789, synclink.ko_merged.c:19843] and
+	[synclink.ko_merged.c:23129, synclink.ko_merged.c:19789, synclink.ko_merged.c:19843]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].xmit_buf and
+[REP: 4].xmit_buf
+	Cluster ID: 127
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19220, synclink.ko_merged.c:19273] and
+	[synclink.ko_merged.c:19219, synclink.ko_merged.c:19221, synclink.ko_merged.c:19271, synclink.ko_merged.c:19272, synclink.ko_merged.c:19475, synclink.ko_merged.c:19522, synclink.ko_merged.c:19540, synclink.ko_merged.c:19578, synclink.ko_merged.c:19616, synclink.ko_merged.c:19652]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].xmit_buf and
+[REP: 4].xmit_buf
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:19220, synclink.ko_merged.c:19273] and
+	[synclink.ko_merged.c:19220, synclink.ko_merged.c:19273]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].xmit_cnt and
+[REP: 4].xmit_cnt
+	Cluster ID: 100
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23113, synclink.ko_merged.c:23136, synclink.ko_merged.c:21889, synclink.ko_merged.c:19320, synclink.ko_merged.c:19490, synclink.ko_merged.c:19627, synclink.ko_merged.c:19655, synclink.ko_merged.c:19766] and
+	[synclink.ko_merged.c:22980, synclink.ko_merged.c:23084, synclink.ko_merged.c:23095, synclink.ko_merged.c:23101, synclink.ko_merged.c:23113, synclink.ko_merged.c:23136, synclink.ko_merged.c:19485, synclink.ko_merged.c:19490, synclink.ko_merged.c:19506, synclink.ko_merged.c:19513, synclink.ko_merged.c:19539, synclink.ko_merged.c:19540, synclink.ko_merged.c:19614, synclink.ko_merged.c:19616, synclink.ko_merged.c:19634, synclink.ko_merged.c:19655, synclink.ko_merged.c:19663, synclink.ko_merged.c:19693]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(3)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+****
+Possible race between access to:
+[REP: 4].xmit_cnt and
+[REP: 4].xmit_cnt
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[synclink.ko_merged.c:23113, synclink.ko_merged.c:23136, synclink.ko_merged.c:21889, synclink.ko_merged.c:19320, synclink.ko_merged.c:19490, synclink.ko_merged.c:19627, synclink.ko_merged.c:19655, synclink.ko_merged.c:19766] and
+	[synclink.ko_merged.c:23113, synclink.ko_merged.c:23136, synclink.ko_merged.c:21889, synclink.ko_merged.c:19320, synclink.ko_merged.c:19490, synclink.ko_merged.c:19627, synclink.ko_merged.c:19655, synclink.ko_merged.c:19766]
+
+	Confidence: used PTA nodes lblSet(11, 11)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+(1)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24694 784849 w/ func: f
+(2)
+	Th. 1 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+	Th. 2 spawned: synclink.ko_merged.c:24695 784880 w/ func: f
+
+
+$$$$$$
+Total Warnings: 139
+Elapsed time (secs): 0.288018
+Top heap size (words): 2009088
+Current heap size (words): 2009088
+Lifetime allocated bytes: 19313996.
+Collections -- minor: 57 major: 5 compactions: 0
+Sun Aug 10 21:12:50 PDT 2008

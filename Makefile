@@ -46,15 +46,18 @@ endif
 #zip.cma
 #zip.cmxa
 
-OCAMLC := ocamlc
-OCAMLOPT := ocamlopt
-OCAMLDEP := ocamldep
-OCAMLDOC := ocamldoc
+OCAMLC := $(shell if ocamlc.opt > /dev/null 2>&1; then echo 'ocamlc.opt'; else echo 'ocamlc'; fi)
+OCAMLOPT := $(shell if ocamlopt.opt > /dev/null 2>&1; then echo 'ocamlopt.opt'; else echo 'ocamlopt'; fi)
+OCAMLDEP := $(shell if ocamldep.opt > /dev/null 2>&1; then echo 'ocamldep.opt'; else echo 'ocamldep'; fi)
+OCAMLDOC := $(shell if ocamldoc.opt > /dev/null 2>&1; then echo 'ocamldoc.opt'; else echo 'ocamldoc'; fi)
+
+
 
 INCLUDES := $(CIL_INCLUDE) -I $(DS_DIR) -I $(PTA_DIR)
-OCAMLFLAGS := -thread $(INCLUDES) -g -ccopt -L$(CIL_OBJS) \
+TO_LINK := -ccopt -L$(CIL_OBJS) 
+OCAMLFLAGS := -thread $(INCLUDES) -g $(TO_LINK) \
 	unix.cma str.cma threads.cma statfs_c.o
-OCAMLOPTFLAGS := -thread $(INCLUDES) -dtypes -ccopt -L$(CIL_OBJS) \
+OCAMLOPTFLAGS := -thread $(INCLUDES) -dtypes $(TO_LINK) \
 	unix.cmxa str.cmxa threads.cmxa statfs_c.o 
 
 
@@ -62,123 +65,147 @@ OCAMLOPTFLAGS := -thread $(INCLUDES) -dtypes -ccopt -L$(CIL_OBJS) \
 # Objs/targets
 
 UTILS := gen_num strutil logging mystats gc_stats stdutil statfs \
-	config gz_marshal scp inspect timeout
+	config gz_marshal scp inspect timeout size osize
+
+CIL_EXTRAS := pp_visitor cil_lvals cilinfos offset cast_hierarchy
 
 DATA_STRUCTS := queueset stackset mapset iset uf intrange hashcons hset hmap \
-	simplehc
+	simplehc distributions graph
 
-PTA := pta_types pta_compile pta_fi_eq pta_fb_eq
+PTA := pta_types pta_compile pta_fp_test pta_fi_eq pta_fb_eq pta_fs_dir 
 
 BACKING_STORE := backed_summary
 
 REQUEST := messages distributed file_serv request
 
-FCACHE := cache filecache default_cache
+FCACHE := cache cilfiles filecache default_cache
 
-ID_FIX_CG = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer $(FCACHE) \
-	cilinfos $(PTA) alias_types alias lvals scope \
-	callg dumpcalls readcalls \
-	fix_id_cg 
+GUARDED_ACCS := access_info guarded_access_base guarded_access \
+	guarded_access_sep guarded_access_clust
 
-TEST_PTA = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer $(FCACHE) \
-	cilinfos $(PTA) alias_types \
-	alias lvals scope callg dumpcalls readcalls test_pta 
+MODSUMS := modsummaryi
 
+ORIG_SYMEX := sym_types symsummary symstate2
 
-RACE = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer offset $(FCACHE) $(BACKING_STORE) cilinfos \
-	$(PTA) alias_types alias lvals scope callg dumpcalls readcalls \
-	scc entry_points threads shared \
-	checkpoint relative_set lockset guarded_access warn_reports race_reports \
-	$(REQUEST) safer_sum modsummary racesummary interDataflow \
-	sym_types symsummary manage_sums \
-	symstate2 intraDataflow racestate \
+NEW_SYMEX := symex_types symex_sum symex
+
+SYMEX := symex_base $(ORIG_SYMEX) $(NEW_SYMEX)
+
+ID_FIX_CG = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(PTA) \
+	alias_types alias scope lvals \
+	callg dumpcalls readcalls fix_id_cg 
+
+TEST_PTA = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(PTA) pta_link_test alias_types \
+	alias scope lvals callg dumpcalls readcalls test_pta 
+
+RACE = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(BACKING_STORE) \
+	$(PTA) alias_types alias scope lvals callg dumpcalls readcalls \
+	scc scc_cg threads entry_points shared \
+	checkpoint relative_set lockset $(GUARDED_ACCS) \
+	warn_reports race_reports \
+	$(REQUEST) safer_sum $(MODSUMS) racesummary analysis_dep interDataflow \
+	manage_sums intraDataflow knowledge_pass $(SYMEX) modsummary racestate \
 	roots race_warnings race_anal 
 
 
-SERVER_SOCKET = $(UTILS) $(DATA_STRUCTS) fstructs callg cil_lvals \
-	cilfiles id_fixer $(FCACHE) $(BACKING_STORE) \
-	cilinfos $(PTA) alias_types \
-	alias lvals scope dumpcalls readcalls scc relative_set lockset \
-	guarded_access warn_reports race_reports $(REQUEST) \
-	checkpoint safer_sum modsummary racesummary \
-	entry_points threads server_socket
+PSEUDO_FILTER = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(BACKING_STORE) \
+	$(PTA) alias_types alias scope lvals callg dumpcalls readcalls \
+	scc scc_cg threads entry_points shared \
+	relative_set lockset $(GUARDED_ACCS) warn_reports \
+	race_reports \
+	$(REQUEST) checkpoint safer_sum $(MODSUMS) racesummary \
+	analysis_dep interDataflow manage_sums intraDataflow \
+	$(SYMEX) relative_df racestate roots \
+	all_unlocks lockset_partitioner pseudo_access race_warnings2 \
+	knowledge_pass rns null_warnings nullstate2 pseudo_filter
 
-CG_DOT = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer $(FCACHE) \
-	cilinfos $(PTA) alias_types alias lvals scope \
-	callg dumpcalls readcalls scc entry_points threads cg_to_dot 
 
-SCC_STATS = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer $(FCACHE) distributed \
-	cilinfos $(PTA) alias_types alias lvals scope \
-	callg dumpcalls readcalls scc scc_stats
+SERVER_SOCKET = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	callg id_fixer $(CIL_EXTRAS) \
+	$(BACKING_STORE) $(PTA) alias_types \
+	alias scope lvals dumpcalls readcalls scc scc_cg \
+	threads entry_points shared relative_set lockset \
+	$(GUARDED_ACCS) warn_reports race_reports $(REQUEST) \
+	checkpoint safer_sum $(MODSUMS) racesummary \
+	server_socket
 
-INSTR_STATS = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer $(FCACHE) \
-	cilinfos $(PTA) alias_types alias lvals scope \
-	callg dumpcalls readcalls scc instr_stats
+CG_DOT = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(PTA) alias_types alias scope lvals \
+	callg dumpcalls readcalls scc scc_cg threads entry_points cg_to_dot 
+
+CAST_GRAPH_DOT = $(UTILS) $(DATA_STRUCTS) $(FCACHE) id_fixer $(CIL_EXTRAS) \
+	test_cast_graph 
+
+SCC_STATS = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer distributed $(CIL_EXTRAS) $(PTA) alias_types alias scope lvals \
+	callg dumpcalls readcalls scc scc_cg threads entry_points scc_stats
+
+INSTR_STATS = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(PTA) alias_types alias scope lvals \
+	callg dumpcalls readcalls \
+	scc scc_cg \
+	threads entry_points shared relative_set lockset \
+	instr_stats
 
 MERGE = $(UTILS) merge_sources
 
-TEST_MEMUSAGE = $(UTILS) test_memusage
+TEST_PP_UNIQUENESS = $(UTILS) test_pp_uniqueness
 
-PRINTSUMM = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer $(FCACHE) $(BACKING_STORE) cilinfos \
-	$(PTA) alias_types alias lvals scope relative_set lockset \
-	offset guarded_access warn_reports race_reports $(REQUEST) \
-	checkpoint safer_sum modsummary racesummary \
-	sym_types symsummary print_summary	
+PRINTSUMM = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(BACKING_STORE) $(CIL_EXTRAS) \
+	$(PTA) alias_types alias scope lvals relative_set lockset \
+	scc callg dumpcalls readcalls scc_cg threads entry_points \
+	shared $(GUARDED_ACCS) warn_reports race_reports $(REQUEST) \
+	checkpoint safer_sum $(MODSUMS) racesummary \
+	analysis_dep interDataflow manage_sums intraDataflow \
+	$(SYMEX) relative_df racestate \
+	lockset_partitioner pseudo_access \
+	all_unlocks print_summary
 
-PRINTWARN = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer offset $(FCACHE) cilinfos $(PTA) \
-	alias_types alias lvals scope callg dumpcalls readcalls \
+PRINTCIL = print_cil
+
+PRINTWARN = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(PTA) \
+	alias_types alias scope lvals callg dumpcalls readcalls \
+	scc scc_cg threads entry_points \
 	checkpoint relative_set lockset \
-	$(BACKING_STORE) guarded_access warn_reports race_reports \
-	$(REQUEST) safer_sum modsummary racesummary scc entry_points threads \
-	interDataflow shared sym_types symsummary manage_sums symstate2 racestate \
+	$(BACKING_STORE) shared $(GUARDED_ACCS) warn_reports race_reports \
+	$(REQUEST) safer_sum $(MODSUMS) racesummary \
+	analysis_dep interDataflow manage_sums intraDataflow $(SYMEX) racestate \
 	roots race_warnings print_warnings
 
-WARNSTATS = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer offset $(FCACHE) cilinfos $(PTA) \
-	alias_types alias lvals scope $(BACKING_STORE) \
-	relative_set lockset guarded_access warn_reports race_reports $(REQUEST) \
-	checkpoint safer_sum modsummary racesummary warn_stats 
+WARNSTATS = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(PTA) alias_types alias \
+	scope lvals $(BACKING_STORE) threads shared \
+	relative_set lockset $(GUARDED_ACCS) warn_reports race_reports $(REQUEST) \
+	checkpoint safer_sum $(MODSUMS) racesummary warn_stats 
 
 
-SYMSTATE = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer offset $(FCACHE) $(BACKING_STORE) \
-	cilinfos $(PTA) alias_types alias lvals scope callg \
-	dumpcalls readcalls scc checkpoint relative_set lockset guarded_access \
-	warn_reports race_reports $(REQUEST) \
-	safer_sum modsummary racesummary entry_points threads \
-	shared interDataflow sym_types symsummary symstate2 test_symstate
-
-TEST_DS = $(UTILS) $(DATA_STRUCTS) test_datastructs
-
-
-TEST_INSPECT = $(UTILS) $(DATA_STRUCTS) fstructs cil_lvals \
-	cilfiles id_fixer offset $(FCACHE) $(BACKING_STORE) cilinfos \
-	$(PTA) alias_types alias lvals scope callg dumpcalls readcalls \
-	scc entry_points threads shared \
-	relative_set lockset guarded_access warn_reports race_reports \
-	checkpoint $(REQUEST) safer_sum modsummary racesummary  \
-	sym_types symsummary manage_sums \
-	symstate2 interDataflow racestate test_inspect 
+TEST_INSPECT = $(UTILS) $(DATA_STRUCTS) $(FCACHE) fstructs \
+	id_fixer $(CIL_EXTRAS) $(BACKING_STORE) \
+	$(PTA) alias_types alias scope lvals callg dumpcalls readcalls \
+	scc scc_cg threads entry_points shared \
+	relative_set lockset $(GUARDED_ACCS) warn_reports race_reports \
+	checkpoint $(REQUEST) safer_sum $(MODSUMS) racesummary  \
+	manage_sums analysis_dep interDataflow intraDataflow \
+	$(SYMEX) racestate test_inspect 
 
 
-BIN_TARGETS = fix_id_cg.exe race_anal.exe printwarn.exe printsumm.exe \
-	scc_stats.exe merge_src.exe test_memusage.exe test_ds.exe \
-	test_symstate.exe cg_to_dot.exe \
+BIN_TARGETS = fix_id_cg.exe race_anal.exe printwarn.exe \
+	printsumm.exe scc_stats.exe merge_src.exe \
+	test_symstate.exe cg_to_dot.exe print_cil.exe \
 	test_pta.exe server.exe warn_stats.exe instr_stats.exe \
-	inspect.exe
+	inspect.exe cast_graph.exe
 
 BYTE_TARGETS = fix_id_cg_byte race_byte printwarn_byte printsumm_byte \
-	runtest_byte symstate_byte cg_to_dot_byte \
+	merge_byte symstate_byte cg_to_dot_byte \
 	test_pta_byte server_byte warn_stats_byte \
-	inspect_byte 
+	inspect_byte print_cil_byte cast_graph_byte
+
 
 TARGETS = .depend $(BIN_TARGETS) $(BYTE_TARGETS)
 
@@ -212,7 +239,7 @@ fix_id_cg.exe: $(ID_FIX_CG_OBJS)
 ID_FIX_CG_BYTE = $(addsuffix .cmo, $(ID_FIX_CG))
 
 fix_id_cg_byte: $(ID_FIX_CG_BYTE)
-	$(OCAMLC) -o fix_id_cg_byte $(OCAMLFLAGS)  \
+	$(OCAMLC) -o fix_id_cg_byte $(OCAMLFLAGS) \
 	$(CIL_OBJS)/cil.cma $(ID_FIX_CG_BYTE)
 
 
@@ -240,16 +267,15 @@ test_pta_byte: $(TEST_PTA_BYTE)
 RACE_BYTE_OBJS = $(addsuffix .cmo, $(RACE))
 
 race_byte: $(RACE_BYTE_OBJS)
-	$(OCAMLC) -o race_byte $(OCAMLFLAGS) \
+	$(OCAMLC) -o $@ $(OCAMLFLAGS) \
 	$(CIL_OBJS)/cil.cma $(RACE_BYTE_OBJS)
 
 # The list of object files for the native version
 RACE_NATIVE_OBJS = $(addsuffix .cmx, $(RACE))
 
 race_anal.exe: $(RACE_NATIVE_OBJS)
-	$(OCAMLOPT) -o race_anal.exe $(OCAMLOPTFLAGS) \
+	$(OCAMLOPT) -ccopt -static -o $@ $(OCAMLOPTFLAGS) \
 	$(CIL_OBJS)/cil.cmxa $(RACE_NATIVE_OBJS)
-
 
 
 #--------------------------------------------------
@@ -266,7 +292,7 @@ server_byte: $(SERVER_SOCKET_BYTE_OBJS)
 SERVER_SOCKET_NATIVE_OBJS = $(addsuffix .cmx, $(SERVER_SOCKET))
 
 server.exe: $(SERVER_SOCKET_NATIVE_OBJS)
-	$(OCAMLOPT) -o server.exe $(OCAMLOPTFLAGS) \
+	$(OCAMLOPT) -ccopt -static -o server.exe $(OCAMLOPTFLAGS) \
 	$(CIL_OBJS)/cil.cmxa $(SERVER_SOCKET_NATIVE_OBJS)
 
 
@@ -285,6 +311,21 @@ cg_to_dot_byte: $(CG_DOT_BYTE_OBJS)
 	$(OCAMLC) -o cg_to_dot_byte $(OCAMLFLAGS)  \
 	$(CIL_OBJS)/cil.cma $(CG_DOT_BYTE_OBJS)
 
+
+#--------------------------------------------------
+# Graph out type casting occurrences
+
+CAST_OBJS = $(addsuffix .cmx, $(CAST_GRAPH_DOT))
+
+cast_graph.exe: $(CAST_OBJS)
+	$(OCAMLOPT) -o $@ $(OCAMLOPTFLAGS) \
+	$(CIL_OBJS)/cil.cmxa $^
+
+CAST_BYTE_OBJS = $(addsuffix .cmo, $(CAST_GRAPH_DOT))
+
+cast_graph_byte: $(CAST_BYTE_OBJS)
+	$(OCAMLC) -o $@ $(OCAMLFLAGS) \
+	$(CIL_OBJS)/cil.cma $^
 
 #--------------------------------------------------
 # Scc stat printer
@@ -310,24 +351,16 @@ instr_stats.exe: $(INSTR_STATS_OBJS)
 MERGE_OBJS = $(addsuffix .cmx, $(MERGE))
 
 merge_src.exe: $(MERGE_OBJS)
-	$(OCAMLOPT) -o merge_src.exe $(OCAMLOPTFLAGS) \
+	$(OCAMLOPT) -o $@ $(OCAMLOPTFLAGS) \
 	$(CIL_OBJS)/cil.cmxa $(MERGE_OBJS)
 
 
-#--------------------------------------------------
-# Load / Run some analyses test
+MERGE_BYTE_OBJS = $(addsuffix .cmo, $(MERGE))
 
-TEST_MEMUSAGE_OBJS = $(addsuffix .cmx, $(TEST_MEMUSAGE))
+merge_byte: $(MERGE_BYTE_OBJS)
+	$(OCAMLC) -o $@ $(OCAMLFLAGS) \
+	$(CIL_OBJS)/cil.cma $^
 
-test_memusage.exe: $(TEST_MEMUSAGE_OBJS)
-	$(OCAMLOPT) -o test_memusage.exe $(OCAMLOPTFLAGS) \
-	$(CIL_OBJS)/cil.cmxa $(TEST_MEMUSAGE_OBJS)
-
-TEST_MEMUSAGE_BYTE_OBJS = $(addsuffix .cmo, $(TEST_MEMUSAGE))
-
-runtest_byte: $(TEST_MEMUSAGE_BYTE_OBJS)
-	$(OCAMLC) -o runtest_byte $(OCAMLFLAGS)  \
-	$(CIL_OBJS)/cil.cma $(TEST_MEMUSAGE_BYTE_OBJS)
 
 #--------------------------------------------------
 # Load / Echo a summary
@@ -335,14 +368,29 @@ runtest_byte: $(TEST_MEMUSAGE_BYTE_OBJS)
 PRINTSUMM_OBJS = $(addsuffix .cmx, $(PRINTSUMM))
 
 printsumm.exe: $(PRINTSUMM_OBJS)
-	$(OCAMLOPT) -o printsumm.exe $(OCAMLOPTFLAGS) \
+	$(OCAMLOPT) -o $@ $(OCAMLOPTFLAGS) \
 	$(CIL_OBJS)/cil.cmxa $(PRINTSUMM_OBJS)
 
 PRINTSUMM_BYTE_OBJS = $(addsuffix .cmo, $(PRINTSUMM))
 
 printsumm_byte: $(PRINTSUMM_BYTE_OBJS)
-	$(OCAMLC) -o printsumm_byte $(OCAMLFLAGS)  \
+	$(OCAMLC) -o $@ $(OCAMLFLAGS)  \
 	$(CIL_OBJS)/cil.cma $(PRINTSUMM_BYTE_OBJS)
+
+#--------------------------------------------------
+# Load and print a CIL ast
+
+PRINT_CIL_OBJS = $(addsuffix .cmx, $(PRINTCIL))
+
+print_cil.exe: $(PRINT_CIL_OBJS)
+	$(OCAMLOPT) -o $@ $(OCAMLOPTFLAGS) \
+	$(CIL_OBJS)/cil.cmxa $(PRINT_CIL_OBJS)
+
+PRINT_CIL_BYTE_OBJS = $(addsuffix .cmo, $(PRINTCIL))
+
+print_cil_byte: $(PRINT_CIL_BYTE_OBJS)
+	$(OCAMLC) -o $@ $(OCAMLFLAGS)  \
+	$(CIL_OBJS)/cil.cma $(PRINT_CIL_BYTE_OBJS)
 
 #--------------------------------------------------
 # Load summaries, print race_warnings
@@ -418,6 +466,8 @@ test_ds.exe: $(TEST_DS_OBJS)
 	$(OCAMLOPT) -o test_ds.exe $(OCAMLOPTFLAGS) \
 	$(CIL_OBJS)/cil.cmxa $(TEST_DS_OBJS)
 
+
+
 #--------------------------------------------------
 # Common rules
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
@@ -438,7 +488,7 @@ test_ds.exe: $(TEST_DS_OBJS)
 #--------------------------------------------------
 # Clean up
 
-	
+
 clean:
 	rm -f $(TARGETS)
 	rm -f *.cm[iox]

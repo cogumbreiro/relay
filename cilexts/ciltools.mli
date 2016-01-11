@@ -8,6 +8,8 @@ val compare_offset : Cil.offset -> Cil.offset -> int
 
 val compare_var : Cil.varinfo -> Cil.varinfo -> int
 
+val compare_var_attr : Cil.varinfo -> Cil.varinfo -> int
+
 val compare_type : Cil.typ -> Cil.typ -> int
 
 val compare_lval : Cil.lval -> Cil.lval -> int
@@ -16,11 +18,9 @@ val compare_lhost : Cil.lhost -> Cil.lhost -> int
 
 val compare_exp : Cil.exp -> Cil.exp -> int
 
-val compare_instr : Cil.instr -> Cil.instr -> int
-
 val compare_fundec : Cil.fundec -> Cil.fundec -> int
 
-val hash_instr : Cil.instr -> int
+val compare_compi : Cil.compinfo -> Cil.compinfo -> int
 
 val hash_exp : Cil.exp -> int
 
@@ -34,6 +34,8 @@ val hash_offset : Cil.offset -> int
 
 val hash_var : Cil.varinfo -> int
 
+val hash_var_attr : Cil.varinfo -> int
+
 val hash_fundec : Cil.fundec -> int
 
 val isSubchainOffset : Cil.offset -> Cil.offset -> int option
@@ -45,3 +47,13 @@ val cutEQSuffixOffsets : Cil.offset -> Cil.offset -> (Cil.offset * Cil.offset)
 val typeAfterDeref : Cil.typ -> Cil.typ
 
 val eq_offset_tail : Cil.offset -> Cil.offset -> bool
+
+val predPP : Cil.stmt -> Cil.prog_point list
+
+module PPHash : Hashtbl.S with type key = Cil.prog_point
+
+module PPSet : Set.S with type elt = Cil.prog_point
+
+(************** Deprecated ***************)
+
+module InstrHash : Hashtbl.S with type key = Cil.instr

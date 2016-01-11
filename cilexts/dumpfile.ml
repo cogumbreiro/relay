@@ -37,18 +37,30 @@ let curFile =
 let getTargetFile (_:unit) =
   Filename.concat !dumpTo !curFile
 
+let makeCFG fundec =
+  Cil.prepareCFG fundec;
+  Cil.computeCFGInfo fundec false    
 
 (* dumps the pre-processed / parsed file *) 
 let dumpFile (f:file) =
   try
     (* Assume first character of f.fileName is '/' -- we skip that *)
     let dumpToFile = getTargetFile () in
+    if Sys.file_exists dumpToFile then
+      prerr_string ("Dumpfile: File " ^ dumpToFile ^ " already exists\n")      
+    ;
     f.fileName <- !curFile; (* store relative path/file name *)
     ensurePath (Filename.dirname dumpToFile);
     let outFile = (open_out_gen 
                      [Open_creat; Open_wronly] 
                      0o644 
                      dumpToFile) in
+    
+    (* Xform functions to CFGs first (non-unique stmt ids)... *)
+    Cil.iterGlobals f (fun glob -> match glob with
+                         Cil.GFun(fundec, _) -> makeCFG fundec
+                       | _ -> ());
+
     (*
       Cil.dumpFile Cil.defaultCilPrinter outFile f;
     *)

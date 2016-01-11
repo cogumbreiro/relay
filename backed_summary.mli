@@ -8,15 +8,14 @@ type sumType
 val string_of_token : dbToken -> string
 val token_of_string : string -> dbToken
 
-type 'a sumStub = (* parameter is summary type *)
-    InMemSumm of (dbToken option * 'a) (* old storage location, if known *)
-  | OnDiskSumm of dbToken
 
 val dummyToken : dbToken
 
-val init : Config.settings -> string -> unit 
+val init : Config.settings -> string -> Callg.simpleCallG -> unit 
 
-val deserializeFromToken : fKey -> sumType -> dbToken -> 'a
+val getBasename : fKey -> sumType -> string
+
+val getFName : fKey -> sumType -> string -> string
 
 val pathFromToken : dbToken -> string
 
@@ -33,8 +32,6 @@ val discover : fKey -> sumType -> (fKey -> sumType -> dbToken option) -> dbToken
 val deserializeFromPath : fKey -> string -> string -> 'a * dbToken
 
 val deserializeFromFile : string -> string -> 'a
-
-val serializeSummary : fKey -> string -> 'a -> dbToken
 
 val removeSummary : fKey -> sumType -> dbToken -> unit
 
@@ -66,55 +63,93 @@ module type Summarizeable = sig
   
   type simpleSum 
 
-  val id : sumType
-
   val simplify : t -> simpleSum
 
   val desimplify : simpleSum -> t
 
-  (** value to use when summary isn't found *)
+  (** value to use when summary isn't found the first time 
+      (e.g., 1st iteration of SCC) *)
   val initVal : t 
 
+  (** default value for external functions *)
+  val unknownSummary : t
+
 end
 
 
-(** Class representing interface to summary database *)
-class type ['sum] base = object
-  
+(** Interface to summary database for maintainence, inspection, etc. 
+    Things does not depend on the actual summaries *)
+class type dbManagement = object
+
+  val mutable initialized : bool
+
+  (** Bit of reflection to identify the kind of summary tracked *)
+  method sumTyp : sumType
+
+  (** Handles any cleanup of partially read/written summaries on reboot *)
   method cleanup : unit -> unit
-    
-  method find : fKey -> 'sum
-    
-  method addReplace : fKey -> 'sum -> unit
-    
+
+  (** Save all (in-memory) summaries to disk, and allow garbage collection *)
   method serializeAndFlush : unit
     
+  (** evict all in-memory summaries which have already been written to disk *)
   method evictSummaries : unit
-    
-  method getFromFile : string -> 'sum
-    
+
+  (** Given a list of functions and storage locations, assume 
+      the summaries for those functions can be found at 
+      the corresponding locations *)
   method assumeComplete : ((fKey * dbToken) list) -> unit 
-    
-  method private serialize : fKey -> 'sum -> dbToken
-    
-  method private deserialize : fKey -> dbToken -> 'sum * dbToken
-    
-  method err : string-> unit
-    
+
+  (** Write the summary for the given function to disk *)
   method flushOne : fKey -> unit
     
-  method locate : (fKey list) -> (fKey * dbToken) list
+  method evictOne : fKey -> unit
+
+  method locate : fKey list -> (fKey * dbToken) list
     
-  method typ : sumType
-    
+  method sizeInMem : unit -> int
+
+  method sizesOf : fKey list -> (fKey * int) list
+
+  (** Initialize the summaries for special functions / external funcs *)
+  method initSummaries : Config.settings -> Callg.simpleCallG -> unit
+
 end
+  
+(** "Full" Interface to summary database *)
+class type ['sum] base = object
+  inherit dbManagement
+    
+  (** Find and return the summary for the given function. If "Not_found",
+      return a specified initial value instead of raising the exception *)
+  method find : fKey -> 'sum
+    
+  (** Replace an old summary (if any) for the given function w/ a new one *)
+  method addReplace : fKey -> 'sum -> unit
+        
+  (** Load the summary from the given file *)
+  method getFromFile : string -> 'sum
+        
+  (** Low-level serialization. Avoid using, but feel free to extend *)
+  method private serialize : fKey -> 'sum -> dbToken
+    
+  (** Low-level deserialization. Avoid using, but feel free to extend *)
+  method private deserialize : fKey -> dbToken -> 'sum * dbToken
+    
+  (** Log an error, given the body of the message *)
+  method err : string-> unit
+    
+  method fold : 'a. ('sum -> 'a -> 'a) -> 'a -> 'a
+
+end
+
 
 module type S  = sig
 
   (** The type of summaries *)
   type sum
 
-  class data : [sum] base
+  class data : sumType -> [sum] base
 
 end
 
@@ -123,18 +158,16 @@ module Make (I:Summarizeable) : S with type sum = I.t
 
 
 (************************************************************
-  Interface / callbacks that are not parametric 
-  (and therefore can be placed in collections (like lists)
+ Operations on all known summary DBs
  ************************************************************)
 
-type sumDescriptor = {
-  sumTyp : sumType;
-  sumCompletor : (fKey * dbToken) list -> unit;
-  (* locator, etc ? *)
-}
+val registerType : 'a base -> unit
 
-val registerType : ('a) base -> unit
+val getDescriptors : sumType list -> dbManagement list
 
-(* TODO: don't expose this... only expose what's needed (how to
-   link summary type w/ the analysis? *)
-val allTypes : sumDescriptor list ref
+val flushAll : unit -> unit
+
+val sizeOfAll : unit -> int
+
+val printSizeOfAll : string -> unit
+

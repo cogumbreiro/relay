@@ -3,6 +3,7 @@
     Adapted around CIL's ocamlutil "Stats" to measure wall-clock time
     instead of user-mode time. *)
 
+let doTime = ref false
 
 type t = { name : string;
            mutable time : float; (* In seconds *)
@@ -25,34 +26,33 @@ let reset =
 (* TODO: make this work w/ my Logging module *)
   
 let print chn msg =
-(*
-  (* Total up *)
-  top.time <- List.fold_left (fun sum f -> sum +. f.time) 0.0 top.sub;
-  let rec prTree ind node = 
-    (Printf.fprintf chn "%s%-20s          %6.3f s\n" 
-       (String.make ind ' ') node.name node.time);
-    
-    List.iter (prTree (ind + 2)) (List.rev node.sub)
-  in
-  Printf.fprintf chn "%s" msg; 
-  List.iter (prTree 0) [ top ];
-  let gc = Gc.quick_stat () in 
-  let printM (w: float) : string = 
-    Printf.sprintf "%.2fMb" (w *. 4.0 /. 1000000.0)
-  in
-  Printf.fprintf chn 
-    "Memory statistics: total=%s, max=%s, minor=%s, major=%s, promoted=%s\n    minor collections=%d  major collections=%d compactions=%d\n"
-    (printM (gc.Gc.minor_words +. gc.Gc.major_words 
-             -. gc.Gc.promoted_words))
-    (printM (float_of_int gc.Gc.top_heap_words))
-    (printM gc.Gc.minor_words)
-    (printM gc.Gc.major_words)
-    (printM gc.Gc.promoted_words)
-    gc.Gc.minor_collections
-    gc.Gc.major_collections
-    gc.Gc.compactions;
-*)
-  ()
+  if !doTime then begin
+    (* Total up *)
+    top.time <- List.fold_left (fun sum f -> sum +. f.time) 0.0 top.sub;
+    let rec prTree ind node = 
+      (Printf.fprintf chn "%s%-20s          %6.3f s\n" 
+         (String.make ind ' ') node.name node.time);
+      
+      List.iter (prTree (ind + 2)) (List.rev node.sub)
+    in
+    Printf.fprintf chn "%s" msg; 
+    List.iter (prTree 0) [ top ];
+    let gc = Gc.quick_stat () in 
+    let printM (w: float) : string = 
+      Printf.sprintf "%.2fMb" (w *. 4.0 /. 1000000.0)
+    in
+    Printf.fprintf chn 
+      "Memory statistics: total=%s, max=%s, minor=%s, major=%s, promoted=%s\n    minor collections=%d  major collections=%d compactions=%d\n"
+      (printM (gc.Gc.minor_words +. gc.Gc.major_words 
+               -. gc.Gc.promoted_words))
+      (printM (float_of_int gc.Gc.top_heap_words))
+      (printM gc.Gc.minor_words)
+      (printM gc.Gc.major_words)
+      (printM gc.Gc.promoted_words)
+      gc.Gc.minor_collections
+      gc.Gc.major_collections
+      gc.Gc.compactions;
+  end
         
   
 
@@ -65,7 +65,7 @@ let getWCTime = Unix.gettimeofday
 
 
 let repeatTime getTime limit str f arg = 
-                                        (* Find the right stat *)
+  (* Find the right stat *)
   let stat : t = 
     let curr = match !current with h :: _ -> h | _ -> assert false in
     let rec loop = function
@@ -99,17 +99,19 @@ let repeatTime getTime limit str f arg =
    not time at all *)
 
 let time str f arg =
-(*
-  try 
-    repeatTime getWCTime 0.0 str f arg
-  with e ->
-    prerr_string ("Uncaught exc. in Mystats (shouldn't escape like this!): " ^
-                  (Printexc.to_string e) ^ "\n") ;
-    prerr_string ("Currently timing " ^ str ^ "\n");
-    print stdout "STATS:\n";
-    exit 1
-*)
-  f arg
+  if !doTime then begin
+    try 
+      repeatTime getWCTime 0.0 str f arg
+    with e ->
+      prerr_string ("Uncaught exc. in Mystats (shouldn't escape like this!): " ^
+                      (Printexc.to_string e) ^ "\n") ;
+      prerr_string ("Currently timing " ^ str ^ "\n");
+      print stdout "STATS:\n";
+      exit 1
+  end 
+  else
+    f arg
+
 
 let lastTime = ref 0.0
 let timethis (f: 'a -> 'b) (arg: 'a) : 'b = 
@@ -117,4 +119,54 @@ let timethis (f: 'a -> 'b) (arg: 'a) : 'b =
   let res = f arg in 
   lastTime := getUserTime () -. start; 
   res
-  
+    
+
+(************************************************************)
+
+module type IndexOps = sig
+
+  type t (* type of index *)
+
+  val hash : t -> int
+
+  val equal : t -> t -> bool
+
+  val to_string : t -> string
+
+  val getTime : unit -> float (* slipped this in there... *)
+
+(* TODO: make output channel a parameter? *)
+
+  val prefix : string
+
+end
+
+module IndexedTimer (I:IndexOps) = struct
+
+  module HI = Hashtbl.Make(I)
+
+  let times = ref (HI.create 4)
+
+  let updateTime idx moreTime =
+    let oldTime = try HI.find !times idx with Not_found -> 0.0 in
+    HI.replace !times idx (oldTime +. moreTime)
+
+  let time idx foo arg =
+    let start = I.getTime () in
+    let res = foo arg in
+    let newTime = I.getTime () -. start in
+    updateTime idx newTime;
+    res
+
+  let printTime idx time =
+    print_string (I.prefix ^ I.to_string idx ^ 
+                    " : " ^ string_of_float time ^ "\n")
+
+  let printTimes () =
+    HI.iter printTime !times
+
+  let reset () = 
+    times := HI.create 4
+      
+end
+

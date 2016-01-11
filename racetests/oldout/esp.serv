@@ -1,0 +1,955 @@
+Sun Aug 10 21:12:41 PDT 2008
+incrementing generation number
+incrementing value in gen_num.txt
+
+running server on /home/jan/research/relay/racetests/esp/ciltrees
+Registered summary type: rs
+Server ip is: 127.0.0.1
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: SERVER
+Done reading config file
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Entry points use roots: false
+trying to clear logs
+Callgraph, etc.
+-----
+Reached end of /home/jan/research/relay/racetests/esp/ciltrees/calls.cil call graph file
+Num funcs: 143
+Scc_cg: Pruned 38 funcs w/out bodies for scc DAG
+Starting server
+-----
+>>> PROGRESS 1/104 SCCs DONE!
+
+>>> PROGRESS 2/104 SCCs DONE!
+
+>>> PROGRESS 3/104 SCCs DONE!
+
+>>> PROGRESS 4/104 SCCs DONE!
+
+>>> PROGRESS 5/104 SCCs DONE!
+
+>>> PROGRESS 6/104 SCCs DONE!
+
+>>> PROGRESS 7/104 SCCs DONE!
+
+>>> PROGRESS 8/104 SCCs DONE!
+
+>>> PROGRESS 9/104 SCCs DONE!
+
+>>> PROGRESS 10/104 SCCs DONE!
+
+>>> PROGRESS 11/104 SCCs DONE!
+
+>>> PROGRESS 12/104 SCCs DONE!
+
+>>> PROGRESS 13/104 SCCs DONE!
+
+>>> PROGRESS 14/104 SCCs DONE!
+
+>>> PROGRESS 15/104 SCCs DONE!
+
+>>> PROGRESS 16/104 SCCs DONE!
+
+>>> PROGRESS 17/104 SCCs DONE!
+
+>>> PROGRESS 18/104 SCCs DONE!
+
+>>> PROGRESS 19/104 SCCs DONE!
+
+>>> PROGRESS 20/104 SCCs DONE!
+
+>>> PROGRESS 21/104 SCCs DONE!
+
+>>> PROGRESS 22/104 SCCs DONE!
+
+>>> PROGRESS 23/104 SCCs DONE!
+
+>>> PROGRESS 24/104 SCCs DONE!
+
+>>> PROGRESS 25/104 SCCs DONE!
+
+>>> PROGRESS 26/104 SCCs DONE!
+
+>>> PROGRESS 27/104 SCCs DONE!
+
+>>> PROGRESS 28/104 SCCs DONE!
+
+>>> PROGRESS 29/104 SCCs DONE!
+
+>>> PROGRESS 30/104 SCCs DONE!
+
+>>> PROGRESS 31/104 SCCs DONE!
+
+>>> PROGRESS 32/104 SCCs DONE!
+
+>>> PROGRESS 33/104 SCCs DONE!
+
+>>> PROGRESS 34/104 SCCs DONE!
+
+>>> PROGRESS 35/104 SCCs DONE!
+
+>>> PROGRESS 36/104 SCCs DONE!
+
+>>> PROGRESS 37/104 SCCs DONE!
+
+>>> PROGRESS 38/104 SCCs DONE!
+
+>>> PROGRESS 39/104 SCCs DONE!
+
+>>> PROGRESS 40/104 SCCs DONE!
+
+>>> PROGRESS 41/104 SCCs DONE!
+
+>>> PROGRESS 42/104 SCCs DONE!
+
+>>> PROGRESS 43/104 SCCs DONE!
+
+>>> PROGRESS 44/104 SCCs DONE!
+
+>>> PROGRESS 45/104 SCCs DONE!
+
+>>> PROGRESS 46/104 SCCs DONE!
+
+>>> PROGRESS 47/104 SCCs DONE!
+
+>>> PROGRESS 48/104 SCCs DONE!
+
+>>> PROGRESS 49/104 SCCs DONE!
+
+>>> PROGRESS 50/104 SCCs DONE!
+
+>>> PROGRESS 51/104 SCCs DONE!
+
+>>> PROGRESS 52/104 SCCs DONE!
+
+>>> PROGRESS 53/104 SCCs DONE!
+
+>>> PROGRESS 54/104 SCCs DONE!
+
+>>> PROGRESS 55/104 SCCs DONE!
+
+>>> PROGRESS 56/104 SCCs DONE!
+
+>>> PROGRESS 57/104 SCCs DONE!
+
+>>> PROGRESS 58/104 SCCs DONE!
+
+>>> PROGRESS 59/104 SCCs DONE!
+
+>>> PROGRESS 60/104 SCCs DONE!
+
+>>> PROGRESS 61/104 SCCs DONE!
+
+>>> PROGRESS 62/104 SCCs DONE!
+
+>>> PROGRESS 63/104 SCCs DONE!
+
+>>> PROGRESS 64/104 SCCs DONE!
+
+>>> PROGRESS 65/104 SCCs DONE!
+
+>>> PROGRESS 66/104 SCCs DONE!
+
+>>> PROGRESS 67/104 SCCs DONE!
+
+>>> PROGRESS 68/104 SCCs DONE!
+
+>>> PROGRESS 69/104 SCCs DONE!
+
+>>> PROGRESS 70/104 SCCs DONE!
+
+>>> PROGRESS 71/104 SCCs DONE!
+
+>>> PROGRESS 72/104 SCCs DONE!
+
+>>> PROGRESS 73/104 SCCs DONE!
+
+>>> PROGRESS 74/104 SCCs DONE!
+
+>>> PROGRESS 75/104 SCCs DONE!
+
+>>> PROGRESS 76/104 SCCs DONE!
+
+>>> PROGRESS 77/104 SCCs DONE!
+
+>>> PROGRESS 78/104 SCCs DONE!
+
+>>> PROGRESS 79/104 SCCs DONE!
+
+>>> PROGRESS 80/104 SCCs DONE!
+
+>>> PROGRESS 81/104 SCCs DONE!
+
+>>> PROGRESS 82/104 SCCs DONE!
+
+>>> PROGRESS 83/104 SCCs DONE!
+
+>>> PROGRESS 84/104 SCCs DONE!
+
+>>> PROGRESS 85/104 SCCs DONE!
+
+>>> PROGRESS 86/104 SCCs DONE!
+
+>>> PROGRESS 87/104 SCCs DONE!
+
+>>> PROGRESS 88/104 SCCs DONE!
+
+>>> PROGRESS 89/104 SCCs DONE!
+
+>>> PROGRESS 90/104 SCCs DONE!
+
+>>> PROGRESS 91/104 SCCs DONE!
+
+>>> PROGRESS 92/104 SCCs DONE!
+
+>>> PROGRESS 93/104 SCCs DONE!
+
+>>> PROGRESS 94/104 SCCs DONE!
+
+>>> PROGRESS 95/104 SCCs DONE!
+
+>>> PROGRESS 96/104 SCCs DONE!
+
+>>> PROGRESS 97/104 SCCs DONE!
+
+>>> PROGRESS 98/104 SCCs DONE!
+
+>>> PROGRESS 99/104 SCCs DONE!
+
+>>> PROGRESS 100/104 SCCs DONE!
+
+>>> PROGRESS 101/104 SCCs DONE!
+
+>>> PROGRESS 102/104 SCCs DONE!
+
+>>> PROGRESS 103/104 SCCs DONE!
+
+>>> PROGRESS 104/104 SCCs DONE!
+
+Finished all SCCs
+Received warnings from worker. Status: 1/1
+****
+Possible race between access to:
+__this_module.unsafe @ esp-2.5.62.c:4437 and
+__this_module.unsafe @ esp-2.5.62.c:4437
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:4460] and
+	[esp-2.5.62.c:4460]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+__this_module.unsafe @ esp-2.5.62.c:4437 and
+__this_module.unsafe @ esp-2.5.62.c:4437
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:4460] and
+	[esp-2.5.62.c:4460]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+tmp_buf @ esp-2.5.62.c:7132 and
+tmp_buf @ esp-2.5.62.c:7132
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8622] and
+	[esp-2.5.62.c:8621, esp-2.5.62.c:8623]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+tmp_buf @ esp-2.5.62.c:7132 and
+tmp_buf @ esp-2.5.62.c:7132
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8622] and
+	[esp-2.5.62.c:8622]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+tty.driver_data @ esp-2.5.62.c:8896 and
+tty.driver_data @ esp-2.5.62.c:8896
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8619] and
+	[esp-2.5.62.c:8619]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1] and
+[REP: 1]
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8635, esp-2.5.62.c:8637] and
+	[esp-2.5.62.c:8635, esp-2.5.62.c:8637]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].blocked_open and
+[REP: 1].blocked_open
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8555, esp-2.5.62.c:8597] and
+	[esp-2.5.62.c:8555, esp-2.5.62.c:8597]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].count and
+[REP: 1].count
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8553, esp-2.5.62.c:8596, esp-2.5.62.c:8618] and
+	[esp-2.5.62.c:8553, esp-2.5.62.c:8596, esp-2.5.62.c:8618, esp-2.5.62.c:8633]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].flags and
+[REP: 1].flags
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7769, esp-2.5.62.c:7773, esp-2.5.62.c:7775, esp-2.5.62.c:7777, esp-2.5.62.c:7670, esp-2.5.62.c:8531, esp-2.5.62.c:8538, esp-2.5.62.c:8600] and
+	[esp-2.5.62.c:7756, esp-2.5.62.c:7769, esp-2.5.62.c:7773, esp-2.5.62.c:7775, esp-2.5.62.c:7777, esp-2.5.62.c:7603, esp-2.5.62.c:7660, esp-2.5.62.c:7662, esp-2.5.62.c:7664, esp-2.5.62.c:7666, esp-2.5.62.c:7670, esp-2.5.62.c:8511, esp-2.5.62.c:8513, esp-2.5.62.c:8515, esp-2.5.62.c:8521, esp-2.5.62.c:8523, esp-2.5.62.c:8527, esp-2.5.62.c:8531, esp-2.5.62.c:8536, esp-2.5.62.c:8538, esp-2.5.62.c:8541, esp-2.5.62.c:8559, esp-2.5.62.c:8572, esp-2.5.62.c:8574, esp-2.5.62.c:8583, esp-2.5.62.c:8600, esp-2.5.62.c:8633]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].flags and
+[REP: 1].flags
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7769, esp-2.5.62.c:7773, esp-2.5.62.c:7775, esp-2.5.62.c:7777, esp-2.5.62.c:7670, esp-2.5.62.c:8531, esp-2.5.62.c:8538, esp-2.5.62.c:8600] and
+	[esp-2.5.62.c:7769, esp-2.5.62.c:7773, esp-2.5.62.c:7775, esp-2.5.62.c:7777, esp-2.5.62.c:7670, esp-2.5.62.c:8531, esp-2.5.62.c:8538, esp-2.5.62.c:8600]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].ignore_status_mask and
+[REP: 1].ignore_status_mask
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7784, esp-2.5.62.c:7786, esp-2.5.62.c:7789] and
+	[esp-2.5.62.c:7784, esp-2.5.62.c:7786, esp-2.5.62.c:7789]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].ignore_status_mask and
+[REP: 1].ignore_status_mask
+	Cluster ID: 18
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7784, esp-2.5.62.c:7786, esp-2.5.62.c:7789] and
+	[esp-2.5.62.c:7786, esp-2.5.62.c:7789]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].pgrp and
+[REP: 1].pgrp
+	Cluster ID: 19
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8641] and
+	[esp-2.5.62.c:8527]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].pgrp and
+[REP: 1].pgrp
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8641] and
+	[esp-2.5.62.c:8641]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].read_status_mask and
+[REP: 1].read_status_mask
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7779, esp-2.5.62.c:7781, esp-2.5.62.c:7783, esp-2.5.62.c:7787, esp-2.5.62.c:7790] and
+	[esp-2.5.62.c:7779, esp-2.5.62.c:7781, esp-2.5.62.c:7783, esp-2.5.62.c:7787, esp-2.5.62.c:7790]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].read_status_mask and
+[REP: 1].read_status_mask
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7779, esp-2.5.62.c:7781, esp-2.5.62.c:7783, esp-2.5.62.c:7787, esp-2.5.62.c:7790] and
+	[esp-2.5.62.c:7781, esp-2.5.62.c:7783, esp-2.5.62.c:7787, esp-2.5.62.c:7790]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].session and
+[REP: 1].session
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8640] and
+	[esp-2.5.62.c:8523]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].session and
+[REP: 1].session
+	Cluster ID: 2
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8640] and
+	[esp-2.5.62.c:8640]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].timeout and
+[REP: 1].timeout
+	Cluster ID: 1
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7767] and
+	[esp-2.5.62.c:7767]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].tty and
+[REP: 1].tty
+	Cluster ID: 16
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8620] and
+	[esp-2.5.62.c:7732, esp-2.5.62.c:7755, esp-2.5.62.c:7630, esp-2.5.62.c:7656, esp-2.5.62.c:7659]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].tty and
+[REP: 1].tty
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8620] and
+	[esp-2.5.62.c:8620]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+
+$$$$$$
+Total Warnings: 21
+Elapsed time (secs): 0.060003
+Top heap size (words): 410624
+Current heap size (words): 410624
+Lifetime allocated bytes: 4212432.
+Collections -- minor: 26 major: 3 compactions: 0
+Sun Aug 10 21:12:43 PDT 2008

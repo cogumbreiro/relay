@@ -48,7 +48,8 @@ module U = Util
 (* Set on the command-line: *)
 let keepUnused = ref false
 let rmUnusedInlines = ref false
-
+let keepStatic = ref false 
+  (* keep static functions in case it is only used through funptrs *)
 
 let trace = Trace.trace "rmtmps"
 
@@ -346,14 +347,14 @@ let isExportedRoot global =
       true, "non-static variable"
   | GFun ({svar = v}, _) -> begin 
       if hasExportingAttribute v then 
-	true, "constructor or destructor function"
-      else if v.vstorage = Static then 
-        false, "static function"
+        true, "constructor or destructor function"
       else if v.vinline && v.vstorage != Extern
               && (!msvcMode || !rmUnusedInlines) then 
         false, "inline function"
+      else if (not !keepStatic) && v.vstorage = Static then 
+        false, "static function"
       else
-	true, "other function"
+        true, "other function"
   end
   | GVarDecl(v,_) when hasAttribute "alias" v.vattr ->
       true, "has GCC alias attribute"

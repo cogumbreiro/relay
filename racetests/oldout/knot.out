@@ -1,0 +1,1795 @@
+Sun Aug 10 21:12:40 PDT 2008
+reserved status file: /tmp/temp.DUib0w
+running analysis on /home/jan/research/relay/racetests/knot/ciltrees
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rss
+Registered summary type: mods
+Checking for data races
+-----
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.0.1
+using /tmp/relay_scratch to store acquired files
+using: /tmp/temp.DUib0w to track status
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Reached end of /home/jan/research/relay/racetests/knot/ciltrees/calls.cil call graph file
+Num funcs: 75
+summary database will use:
+	/home/jan/research/relay/racetests/knot/ciltrees/relay_sums
+Initializing summary mods
+Checking left-over state in mods
+Initializing summary rss
+Checking left-over state in rss
+Initializing summary ss
+Checking left-over state in ss
+Initializing summary rs
+Checking left-over state in rs
+SH: initEscapeable found (3, 3) thread (acts, formals)
+
+Entry points use roots: false
+file server will use: 14440
+trying to clear old summaries / local srcs, etc.
+Scc_cg: Pruned 46 funcs w/out bodies for scc DAG
+Starting bottomup analysis
+-----
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: cache_init : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	21	0	0	1	1	
+
+TIMES : SCC:1 : 0.000280141830444
+TIMES : FUN:21 : 0.000272989273071
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 21
+=======
+
+SUMS (fk, lo, un, wr, re):	21	0	0	1	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 21 : 103
+>>> PROGRESS 1/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: current_usecs : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	139	0	0	0	1	
+
+TIMES : FUN:139 : 0.00023889541626
+TIMES : SCC:2 : 0.000247001647949
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 139
+=======
+
+SUMS (fk, lo, un, wr, re):	139	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 139 : 81
+>>> PROGRESS 2/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: main : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	230	0	0	10	14	
+
+TIMES : FUN:230 : 0.010055065155
+TIMES : SCC:0 : 0.0100650787354
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 230
+=======
+
+SUMS (fk, lo, un, wr, re):	230	0	0	10	14	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 230 : 1003
+>>> PROGRESS 3/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #24
+=================================
+Summarizing function: allow_file : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 42	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	151	0	0	0	1	
+
+TIMES : SCC:24 : 0.00132489204407
+TIMES : FUN:151 : 0.00131821632385
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 151
+=======
+
+SUMS (fk, lo, un, wr, re):	151	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 151 : 213
+>>> PROGRESS 4/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #26
+=================================
+Summarizing function: input_get_line : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	87	0	0	4	3	
+
+TIMES : FUN:87 : 0.00216889381409
+TIMES : SCC:26 : 0.00217509269714
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 87
+=======
+
+SUMS (fk, lo, un, wr, re):	87	0	0	4	3	
+
+SS Sum:
+ -> 
+Extptr (12):
+  lval = (*state).buf[0]
+  lval = (*$NULL)(sum)
+
+SIZES: 87 : 580
+>>> PROGRESS 5/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #27
+=================================
+Summarizing function: input_init : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	86	0	0	3	0	
+
+TIMES : SCC:27 : 0.000503063201904
+TIMES : FUN:86 : 0.000497102737427
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 86
+=======
+
+SUMS (fk, lo, un, wr, re):	86	0	0	3	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 86 : 254
+>>> PROGRESS 6/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #25
+=================================
+Summarizing function: http_parse : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	89	0	0	5	3	
+
+TIMES : FUN:89 : 0.0037670135498
+TIMES : SCC:25 : 0.00377511978149
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 89
+=======
+
+SUMS (fk, lo, un, wr, re):	89	0	0	5	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 89 : 674
+>>> PROGRESS 7/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #23
+=================================
+Summarizing function: get_request_filename : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 20	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	157	0	0	5	5	
+
+TIMES : SCC:23 : 0.00146889686584
+TIMES : FUN:157 : 0.00146198272705
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 157
+=======
+
+SUMS (fk, lo, un, wr, re):	157	0	0	5	5	
+
+SS Sum:
+ -> 
+Extptr (5):
+  lval = (*request).url
+  lval = (*$NULL)(sum)
+
+SIZES: 157 : 889
+>>> PROGRESS 8/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #9
+=================================
+Summarizing function: get_request_fd : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 10	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	162	0	0	5	5	
+
+TIMES : SCC:9 : 0.0012378692627
+TIMES : FUN:162 : 0.00123119354248
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 162
+=======
+
+SUMS (fk, lo, un, wr, re):	162	0	0	5	5	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 162 : 889
+>>> PROGRESS 9/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #8
+=================================
+Summarizing function: process_client_nocache : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 10	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	167	0	0	6	7	
+
+TIMES : SCC:8 : 0.00252604484558
+TIMES : FUN:167 : 0.00251889228821
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 167
+=======
+
+SUMS (fk, lo, un, wr, re):	167	0	0	6	7	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 167 : 976
+>>> PROGRESS 10/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #14
+=================================
+Summarizing function: fstat__extinline : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 14	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	15	0	0	0	0	
+
+TIMES : SCC:14 : 0.00078010559082
+TIMES : FUN:15 : 0.000772953033447
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 15
+=======
+
+SUMS (fk, lo, un, wr, re):	15	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 15 : 34
+>>> PROGRESS 11/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #13
+=================================
+Summarizing function: cache_new : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	44	0	0	6	2	
+
+TIMES : SCC:13 : 0.00428915023804
+TIMES : FUN:44 : 0.00428199768066
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 44
+=======
+
+SUMS (fk, lo, un, wr, re):	44	0	0	6	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 44 : 821
+>>> PROGRESS 12/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #17
+=================================
+Summarizing function: cache_add : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 18	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	58	0	0	5	9	
+
+TIMES : SCC:17 : 0.00140309333801
+TIMES : FUN:58 : 0.00139594078064
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 58
+=======
+
+SUMS (fk, lo, un, wr, re):	58	0	0	5	9	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 58 : 955
+>>> PROGRESS 13/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #21
+=================================
+Summarizing function: cache_remove : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 11	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	61	0	0	6	11	
+
+TIMES : SCC:21 : 0.00443696975708
+TIMES : FUN:61 : 0.00442910194397
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 61
+=======
+
+SUMS (fk, lo, un, wr, re):	61	0	0	6	11	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 61 : 1218
+>>> PROGRESS 14/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #16
+=================================
+Summarizing function: cache_use : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 12	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	71	0	0	5	11	
+
+TIMES : SCC:16 : 0.000930070877075
+TIMES : FUN:71 : 0.000924110412598
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 71
+=======
+
+SUMS (fk, lo, un, wr, re):	71	0	0	5	11	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 71 : 1775
+>>> PROGRESS 15/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #18
+=================================
+Summarizing function: cache_entry_addref : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 31	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	23	0	1	1	1	
+
+TIMES : FUN:23 : 0.00114393234253
+TIMES : SCC:18 : 0.00115013122559
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 23
+=======
+
+SUMS (fk, lo, un, wr, re):	23	0	1	1	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 23 : 604
+>>> PROGRESS 16/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #20
+=================================
+Summarizing function: cache_entry_release : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	24	0	1	1	3	
+
+TIMES : SCC:20 : 0.00209712982178
+TIMES : FUN:24 : 0.00209212303162
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 24
+=======
+
+SUMS (fk, lo, un, wr, re):	24	0	1	1	3	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 24 : 702
+>>> PROGRESS 17/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #19
+=================================
+Summarizing function: cache_evict : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 5	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	66	0	1	7	12	
+
+TIMES : SCC:19 : 0.0018138885498
+TIMES : FUN:66 : 0.00180697441101
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 66
+=======
+
+SUMS (fk, lo, un, wr, re):	66	0	1	7	12	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 66 : 1896
+>>> PROGRESS 18/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #15
+=================================
+Summarizing function: cache_finish_get : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 22	misses: 5
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	73	0	2	8	15	
+
+TIMES : SCC:15 : 0.00124597549438
+TIMES : FUN:73 : 0.00124001502991
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 73
+=======
+
+SUMS (fk, lo, un, wr, re):	73	0	2	8	15	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 73 : 2288
+>>> PROGRESS 19/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #22
+=================================
+Summarizing function: cache_find : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 35	misses: 5
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	68	0	0	0	1	
+
+TIMES : FUN:68 : 0.000558853149414
+TIMES : SCC:22 : 0.000564098358154
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 68
+=======
+
+SUMS (fk, lo, un, wr, re):	68	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 68 : 78
+>>> PROGRESS 20/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #12
+=================================
+Summarizing function: cache_get : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	22	0	2	15	16	
+
+TIMES : SCC:12 : 0.00260519981384
+TIMES : FUN:22 : 0.00259804725647
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 22
+=======
+
+SUMS (fk, lo, un, wr, re):	22	0	2	15	16	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 22 : 3191
+>>> PROGRESS 21/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #11
+=================================
+Summarizing function: get_request_entry : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 66	misses: 12
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	178	0	2	20	21	
+
+TIMES : SCC:11 : 0.00173401832581
+TIMES : FUN:178 : 0.00172686576843
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 178
+=======
+
+SUMS (fk, lo, un, wr, re):	178	0	2	20	21	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 178 : 4053
+>>> PROGRESS 22/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #10
+=================================
+Summarizing function: process_client_cache : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 39	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	184	0	2	22	24	
+
+TIMES : SCC:10 : 0.00410795211792
+TIMES : FUN:184 : 0.00410103797913
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 184
+=======
+
+SUMS (fk, lo, un, wr, re):	184	0	2	22	24	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 184 : 4319
+>>> PROGRESS 23/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #28
+=================================
+Summarizing function: http_init : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 49	misses: 7
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	88	0	0	4	0	
+
+TIMES : SCC:28 : 0.000607013702393
+TIMES : FUN:88 : 0.000602006912231
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 88
+=======
+
+SUMS (fk, lo, un, wr, re):	88	0	0	4	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 88 : 432
+>>> PROGRESS 24/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #7
+=================================
+Summarizing function: process_client : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	195	0	2	21	24	
+
+TIMES : SCC:7 : 0.00475907325745
+TIMES : FUN:195 : 0.00475192070007
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 195
+=======
+
+SUMS (fk, lo, un, wr, re):	195	0	2	21	24	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 195 : 3876
+>>> PROGRESS 25/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #6
+=================================
+Summarizing function: accept_loop : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 62	misses: 8
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	208	1	0	24	28	
+
+TIMES : SCC:6 : 0.0061149597168
+TIMES : FUN:208 : 0.00610613822937
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 208
+=======
+
+SUMS (fk, lo, un, wr, re):	208	1	0	24	28	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 208 : 4225
+>>> PROGRESS 26/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #3
+=================================
+Summarizing function: thread_main : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 61	misses: 6
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	224	1	0	24	30	
+
+TIMES : SCC:3 : 0.00131893157959
+TIMES : FUN:224 : 0.0013120174408
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 224
+=======
+
+SUMS (fk, lo, un, wr, re):	224	1	0	24	30	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 224 : 4354
+>>> PROGRESS 27/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #4
+=================================
+Summarizing function: thread_process_client : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 50	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	205	0	2	22	25	
+
+TIMES : FUN:205 : 0.0010290145874
+TIMES : SCC:4 : 0.00103402137756
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 205
+=======
+
+SUMS (fk, lo, un, wr, re):	205	0	2	22	25	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 205 : 3950
+>>> PROGRESS 28/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #5
+=================================
+Summarizing function: thread_main_autospawn : knot_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 44	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	221	1	0	24	28	
+
+TIMES : SCC:5 : 0.000895023345947
+TIMES : FUN:221 : 0.000890970230103
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 221
+=======
+
+SUMS (fk, lo, un, wr, re):	221	1	0	24	28	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 221 : 4231
+>>> PROGRESS 29/29 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+
+
+
+Beginning Thread Analysis:
+-----
+Expected # thread-creation site pairs: 3
+checking a thread-creation pair
+Prev ldiffCache hits: 50	misses: 2
+
+doing symstate
+Prev ldiffCache hits: 103	misses: 3
+
+doing symstate
+now checking thread roots: thread_main, thread_main
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+now checking thread roots: thread_main, thread_main_autospawn
+now checking thread roots: thread_main_autospawn, thread_main
+now checking thread roots: thread_main_autospawn, thread_main_autospawn
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 103	misses: 3
+
+doing symstate
+Prev ldiffCache hits: 103	misses: 3
+
+doing symstate
+now checking thread roots: thread_main, thread_process_client
+New race added to race reports
+now checking thread roots: thread_main_autospawn, thread_process_client
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 45	misses: 2
+
+doing symstate
+Prev ldiffCache hits: 45	misses: 2
+
+doing symstate
+now checking thread roots: thread_process_client, thread_process_client
+New race added to race reports
+done with pair, sending notification
+completed all thread pairs
+****
+Possible race between access to:
+g_conn_open @ knot_comb.c:760 and
+g_conn_open @ knot_comb.c:760
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1072] and
+	[knot_comb.c:1072]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+g_conn_fail @ knot_comb.c:761 and
+g_conn_fail @ knot_comb.c:761
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1012, knot_comb.c:1035, knot_comb.c:1092] and
+	[knot_comb.c:1012, knot_comb.c:1035]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+g_conn_succeed @ knot_comb.c:762 and
+g_conn_succeed @ knot_comb.c:762
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1010] and
+	[knot_comb.c:1010]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+g_conn_active @ knot_comb.c:763 and
+g_conn_active @ knot_comb.c:763
+	Cluster ID: 21
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1045] and
+	[knot_comb.c:1045]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+g_conn_active @ knot_comb.c:763 and
+g_conn_active @ knot_comb.c:763
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1073, knot_comb.c:1093, knot_comb.c:1099] and
+	[knot_comb.c:1045]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+****
+Possible race between access to:
+g_conn_active @ knot_comb.c:763 and
+g_conn_active @ knot_comb.c:763
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1073, knot_comb.c:1093, knot_comb.c:1099] and
+	[knot_comb.c:1073, knot_comb.c:1093, knot_comb.c:1099]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+g_bytes_sent @ knot_comb.c:766 and
+g_bytes_sent @ knot_comb.c:766
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:901, knot_comb.c:958, knot_comb.c:1022] and
+	[knot_comb.c:901, knot_comb.c:958, knot_comb.c:1022]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+attr_init_done @ knot_comb.c:1051 and
+attr_init_done @ knot_comb.c:1051
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1087] and
+	[knot_comb.c:1081]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+attr_init_done @ knot_comb.c:1051 and
+attr_init_done @ knot_comb.c:1051
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1087] and
+	[knot_comb.c:1087]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+[REP: 0].refs and
+[REP: 0].refs
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:511, knot_comb.c:525] and
+	[knot_comb.c:511, knot_comb.c:525, knot_comb.c:526]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+[REP: 11] and
+[REP: 11]
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:605, knot_comb.c:610, knot_comb.c:632] and
+	[knot_comb.c:605, knot_comb.c:610, knot_comb.c:632]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+[REP: 50] and
+[REP: 50]
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:693] and
+	[knot_comb.c:693]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+[REP: 50] and
+(*$NULL) @ :-1
+	Cluster ID: 19
+	Escapes? true / false 
+	Accessed at locs:
+	[knot_comb.c:693] and
+	[knot_comb.c:593]
+
+	Confidence: Same type
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: (*$NULL)
+	lval 2: [REP: 50]
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	lval 1: (*$NULL)
+	lval 2: [REP: 50]
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+[REP: 11] and
+(*$NULL) @ :-1
+	Cluster ID: 18
+	Escapes? true / false 
+	Accessed at locs:
+	[knot_comb.c:605, knot_comb.c:610, knot_comb.c:632] and
+	[knot_comb.c:593]
+
+	Confidence: Same type
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: (*$NULL)
+	lval 2: [REP: 11]
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	lval 1: (*$NULL)
+	lval 2: [REP: 11]
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+_a939_27720_knot_comb_1 @ knot_comb.c:922 and
+_a939_27720_knot_comb_1 @ knot_comb.c:922
+	Cluster ID: 11
+	Escapes? false / false 
+	Accessed at locs:
+	[knot_comb.c:945] and
+	[knot_comb.c:945]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+_a319_9679_knot_comb_1.total @ knot_comb.c:268 and
+_a319_9679_knot_comb_1.total @ knot_comb.c:268
+	Cluster ID: 5
+	Escapes? false / false 
+	Accessed at locs:
+	[knot_comb.c:328] and
+	[knot_comb.c:328]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+_a319_9679_knot_comb_1.refs @ knot_comb.c:268 and
+_a319_9679_knot_comb_1.refs @ knot_comb.c:268
+	Cluster ID: 4
+	Escapes? false / false 
+	Accessed at locs:
+	[knot_comb.c:329] and
+	[knot_comb.c:329]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+_a319_9679_knot_comb_1.prev @ knot_comb.c:268 and
+_a319_9679_knot_comb_1.prev @ knot_comb.c:268
+	Cluster ID: 3
+	Escapes? false / false 
+	Accessed at locs:
+	[knot_comb.c:332] and
+	[knot_comb.c:332]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+_a319_9679_knot_comb_1.next @ knot_comb.c:268 and
+_a319_9679_knot_comb_1.next @ knot_comb.c:268
+	Cluster ID: 2
+	Escapes? false / false 
+	Accessed at locs:
+	[knot_comb.c:331] and
+	[knot_comb.c:331]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+_a319_9679_knot_comb_1.filename @ knot_comb.c:268 and
+_a319_9679_knot_comb_1.filename @ knot_comb.c:268
+	Cluster ID: 1
+	Escapes? false / false 
+	Accessed at locs:
+	[knot_comb.c:323] and
+	[knot_comb.c:323]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+_a319_9679_knot_comb_1.data @ knot_comb.c:268 and
+_a319_9679_knot_comb_1.data @ knot_comb.c:268
+	Cluster ID: 0
+	Escapes? false / false 
+	Accessed at locs:
+	[knot_comb.c:327] and
+	[knot_comb.c:327]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+****
+Possible race between access to:
+_a319_9679_knot_comb_1.filename @ knot_comb.c:268 and
+_a319_9679_knot_comb_1.filename @ knot_comb.c:268
+	Cluster ID: 16
+	Escapes? false / false 
+	Accessed at locs:
+	[knot_comb.c:323] and
+	[knot_comb.c:324]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+(3)
+	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+
+
+$$$$$$
+Total Warnings: 22
+
+
+Printing Alias assumptions used by warnings
+-----
+nc	13	[REP: 0].refs#g/[REP: 0].refs#g	0	0
+nc	14	[REP: 11]#g/[REP: 11]#g	0	0
+nc	15	[REP: 50]#g/[REP: 50]#g	0	0
+writeState: Not needed for CIL PTA
+writeState: Not needed for Steens PTA
+Golden lvals hash stats (len, ents, sum/min/median/max bucket)
+	173	78	516	0	3	6	
+Golden lvals hash stats (len, ents, sum/min/median/max bucket)
+	173	0	0	0	0	0	
+Golden types hash stats (len, ents, sum/min/median/max bucket)
+	173	43	123	0	0	3	
+Golden compInfos hash stats (len, ents, sum/min/median/max bucket)
+	173	0	0	0	0	0	
+Elapsed time (secs): 0.208012
+Top heap size (words): 552960
+Current heap size (words): 552960
+Lifetime allocated bytes: 24146328.
+Collections -- minor: 18 major: 5 compactions: 0
+return value is 0
+ran 1 times
+cleared status file: /tmp/temp.DUib0w
+Sun Aug 10 21:12:41 PDT 2008

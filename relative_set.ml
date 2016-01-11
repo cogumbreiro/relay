@@ -106,9 +106,18 @@ module type S = sig
 
   val equal : relSet -> relSet -> bool
 
+  val compare : relSet -> relSet -> int
+
   module HashedRS : Hashtbl.HashedType with type t = relSet
+
+  (* hacky exposure... *)
+  val uniquePart : value S.t -> value S.t
     
   val unique : relSet ->  relSet
+
+  val clearCache : unit -> unit
+
+  val string_of_hashstats : string -> string
 
   (****** special singleton instances *******)
 
@@ -154,6 +163,12 @@ module Make (T:RelType) = struct
     minus : T.value S.t;  (* What's been removed *)
   }
 
+  (* Wrapper for compareV that ditches the option *)
+  let simpleCompareV a b : int =
+    match T.compareV a b with
+      None -> -1
+    | Some x -> x
+
   (* Assumes plus is MUST and minus is MAY *)
   let inter a b = 
     if (a == b) then a
@@ -183,35 +198,36 @@ module Make (T:RelType) = struct
 
   (*********** Hash to single copies of these sets *************)
 
-  (** TODO: factor out to a general MapSet hash... *)
+  (** TODO: factor out to a general MapSet hash, 
+      or use Hashtbl.hash_param ... *)
+  let hashOne s =
+    if (S.is_empty s) then 0
+    else (* Hash on size, and a sample of possibly 3 keys *)
+      let size = S.cardinal s in
+      let size_h = Hashtbl.hash size in
+      if size == 1 then
+        size_h lxor T.hashK (fst (S.choose s)) (* Not hashing value *)
+      else
+        let min_k_h = T.hashK (fst (S.min_binding s)) in
+        let med_k_h = T.hashK (fst (S.choose s)) in
+        let max_k_h = T.hashK (fst (S.max_binding s)) in
+        size_h lxor min_k_h lxor med_k_h lxor max_k_h
 
   (** Hash function for S that only samples it *)
   let hash (x:relSet) =
-    let p_hash = if (S.is_empty x.plus) then
-      0
-    else
-      (* Hash on size, and a sample of possibly 3 keys *)
-      let size_p_h = Hashtbl.hash (S.cardinal x.plus) in
-      let min_k_p_h = T.hashK (fst (S.min_binding x.plus)) in
-      let med_k_p_h = T.hashK (fst (S.choose x.plus)) in
-      let max_k_p_h = T.hashK (fst (S.max_binding x.plus)) in
-      size_p_h lxor min_k_p_h lxor med_k_p_h lxor max_k_p_h
-    in  
-    if (S.is_empty x.minus) then 
-      p_hash
-    else 
-      let size_m_h = Hashtbl.hash (S.cardinal x.minus) in
-      let min_k_m_h = T.hashK (fst (S.min_binding x.minus)) in
-      let med_k_m_h = T.hashK (fst (S.choose x.minus)) in
-      let max_k_m_h = T.hashK (fst (S.max_binding x.minus)) in
-      p_hash lxor size_m_h lxor min_k_m_h lxor med_k_m_h lxor max_k_m_h 
-        
+    (hashOne x.plus) lxor (hashOne x.minus)
   
-  let equal (x:relSet) (y:relSet) : bool=
+  let equal (x:relSet) (y:relSet) : bool =
     (x == y) ||
       ((S.equal T.equalV x.plus y.plus) && 
          (S.equal T.equalV x.minus y.minus))
 
+  let compare (x:relSet) (y:relSet) : int =
+    if (x == y) then 0
+    else 
+      let c = S.compare simpleCompareV x.plus y.plus in
+      if (c == 0) then S.compare simpleCompareV x.minus y.minus
+      else c
 
   module HashedRS = 
   struct
@@ -224,14 +240,22 @@ module Make (T:RelType) = struct
     
   let cache = WH.create 237
     
+  let uniquePart s = S.mapk (fun k -> T.uniqueK k) s
+
   let unique (possiblyNew : relSet) : relSet =
     try 
       WH.find cache possiblyNew
     with Not_found ->
-      let uniq = { plus = S.mapk (fun k -> T.uniqueK k) possiblyNew.plus;
-                   minus = S.mapk (fun k -> T.uniqueK k) possiblyNew.minus; } in
+      let uniq = { plus = uniquePart possiblyNew.plus;
+                   minus = uniquePart possiblyNew.minus; } in
       WH.add cache uniq;
       uniq
+
+  let clearCache () =
+    WH.clear cache
+
+  let string_of_hashstats caption =
+    Stdutil.string_of_hashstats WH.stats cache caption
 
   (****** special singleton instances *******)
 

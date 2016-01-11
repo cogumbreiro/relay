@@ -1,0 +1,3 @@
+duppy -c lock.c -o lock.o
+duppy -c fplock.c -o fplock.o
+duppy lock.o fplock.o -o locktest

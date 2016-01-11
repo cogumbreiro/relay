@@ -2,7 +2,7 @@ open Fstructs
 open Backed_summary
 open Readcalls
 open Backed_summary
-open Scc
+open Scc_cg
 
 type sccLock
 

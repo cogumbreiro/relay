@@ -1,0 +1,11 @@
+gcc -D_GNUCC -E -DCIL=1 locktest_comb.c -o /tmp/cil-FTw8r0c2.i
+/home/jan/research/locksmith/cil/obj/x86_LINUX/cilly.asm.exe --out /tmp/cil-IexbVpfS.cil.c --list-shared --list-guardedby /tmp/cil-FTw8r0c2.i
+
+************************* STARTING *************************
+
+
+lock.c:6: Warning: trying to access field locked of non-struct type:
+  lock(*lock:lock.c:5)
+
+Fatal error: exception Locktype.TypingBug("trying to access a field of non-struct type
+")

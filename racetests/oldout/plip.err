@@ -1,0 +1,60 @@
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+Multiple lock summaries for 35
+Multiple lock summaries for 70
+makeSimpleLock: Couldn't find global kernel_sem
+makeSimpleLock: Couldn't find global kernel_flag
+Multiple lock summaries for 33
+Multiple lock summaries for 32
+Multiple lock summaries for 34
+Multiple lock summaries for 68
+Checkpoint: No left-over status file
+substLval: local variable oldbit stayed in summary?
+substLval: local variable ti stayed in summary?
+substLval: local variable oldbit stayed in summary?
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*((port->ops)->read_status))
+post: funptr resolved to 0 fun(s): (*((port->ops)->read_status))
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable c stayed in summary?
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*((port->ops)->disable_irq))
+post: funptr resolved to 0 fun(s): (*((port->ops)->disable_irq))
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*((port->ops)->write_data))
+post: funptr resolved to 0 fun(s): (*((port->ops)->write_data))
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*((port->ops)->enable_irq))
+post: funptr resolved to 0 fun(s): (*((port->ops)->enable_irq))
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substLval: local variable tmp___0 stayed in summary?
+substExp: trimming ptrArith offset
+substExp encountered unknown exp: x & 255
+substLval: local variable ti stayed in summary?
+handleCallArgs: origTarget constant? ((struct ifreq *)0)->ifr_ifru.trigger
+handleCallArgs: origTarget constant? ((struct ifreq *)0)->ifr_ifru.nibble
+substActForm returned 0 results for: rq->ifr_ifru.nibble#f1:378
+substActForm returned 0 results for: rq->ifr_ifru.trigger#f1:378
+substActForm returned 0 results for: rq->ifr_ifru.nibble#f1:378
+substActForm returned 0 results for: rq->ifr_ifru.pcmd#f1:378
+substActForm returned 0 results for: rq->ifr_ifru.trigger#f1:378
+SS: modSumm is BOTTOM for: 188
+SS: modSumm is BOTTOM for: 187

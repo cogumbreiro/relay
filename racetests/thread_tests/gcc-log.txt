@@ -1,0 +1,8 @@
+cd /home/jan/research/relay-race/tests/thread_tests
+duppy -Wall -W -pedantic -DDEBUG=y -g -c -o test_dir/threads2.o test_dir/threads2.c
+cd /home/jan/research/relay-race/tests/thread_tests
+duppy -Wall -W -pedantic -DDEBUG=y -g -c -o test_dir/threads.o test_dir/threads.c
+cd /home/jan/research/relay-race/tests/thread_tests
+duppy -Wall -W -pedantic -DDEBUG=y -g -c -o test_dir/lock.o test_dir/lock.c
+cd /home/jan/research/relay-race/tests/thread_tests
+duppy test_dir/threads2.o test_dir/threads.o test_dir/lock.o -pthread

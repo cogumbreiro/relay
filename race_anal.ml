@@ -39,22 +39,21 @@
 (** Worker process for analyzing a program for possible 
     data races (launch these processes along w/ the server) *)
 
-open Gc_stats
 open Readcalls
 open Callg
 open Cil
 open Pretty
 open Fstructs
-open Scc
+open Scc_cg
 open Stdutil
 open Cilfiles
 open Cilinfos
 
 module A = Alias
-module GA = Guarded_access
+
+module CLv = Cil_lvals
+module Lv = Lvals
 module RS = Racesummary
-module SS = Symsummary
-module SPTA = Symstate2
 module Race = Racestate
 module Du = Cildump
 module Th = Threads
@@ -67,6 +66,8 @@ module Req = Request
 module Stat = Mystats
 module FS = File_serv
 module I = Inspect
+
+module SPTA = Race.SPTA
 
 module Checkp = Checkpoint
 
@@ -95,6 +96,9 @@ let userName = ref ""
 
 let statusFile = ref ""
 
+let setVerboseSums yesno =
+  RS.verboseSum := yesno
+
 (* Command-line argument parsing *)
 
 let argSpecs = 
@@ -107,7 +111,12 @@ let argSpecs =
    ("-u", Arg.Set_string userName, "username to use");
    ("-l", Arg.Set_string logDir, "log status and errors to given dir");
    ("-st", Arg.Set_string statusFile,
-    "file storing work status (current scc/pass/analysis)")]
+    "file storing work status (current scc/pass/analysis)");
+   ("-vs", Arg.Bool setVerboseSums, 
+    "print verbose function summaries");
+   ("-time", Arg.Set Stat.doTime, "Time operations");
+   ("-mem", Arg.Set Osize.checkSizes, "Check memory usage");
+  ]
 
 let anonArgFun (arg:string) : unit =
   ()
@@ -163,23 +172,21 @@ end
     functions (e.g., pthread_create) *)
 let initSettings () : simpleCallG =
   try
+    Cilinfos.reloadRanges !cgDir;
     let settings = Config.initSettings !configFile in
     Req.init settings;
+    Req.setUser !userName;
     Checkp.init !statusFile;
     DC.makeLCaches (!cgDir);
     Th.initSettings settings;
-    Cilinfos.reloadRanges !cgDir;
     A.initSettings settings !cgDir;
     let cgFile = Dumpcalls.getCallsFile !cgDir in
     let cg = readCalls cgFile in
-    RS.initSummaries settings cg;
-    SS.initSummaries cg;
-    BS.init settings !cgDir ;
-    RS.sum#cleanup ();  (* TODO: make this just happen in BS init? *)
-    SS.sum#cleanup ();
-    SPTA.init settings cg (RS.sum :> Modsummary.modSumm);
+    let () = BS.init settings !cgDir cg in
+
+    SPTA.init settings cg (RS.sum :> Modsummaryi.modSum);
     Dis.init settings !cgDir;
-    Req.setUser !userName;
+    Entry_points.initSettings settings;
     let _ = FS.init settings in (* ignore thread created *)
     let gen_num = Req.initServer () in
     if ( !restart ) then begin
@@ -188,7 +195,6 @@ let initSettings () : simpleCallG =
       BS.clearState gen_num;
       Req.clearState gen_num;
     end;
-    GA.clearCache ();
     cg
 
   with e -> Printf.printf "Exc. in initSettings: %s\n"
@@ -223,8 +229,23 @@ let doRaceAnal () : unit =
       L.logStatus "-----";
       L.flushStatus ();  
       Warn.flagRacesFromSumms cg !cgDir;
-    end
+
+      (* Try printing alias example requests *)
+      L.logStatus "\n\nPrinting Alias assumptions used by warnings";
+      L.logStatus "-----";
+      L.flushStatus ();
+      Warn.printAliasUses ();
+    end;
+    
+    A.finalizeAll ();
   end
+
+
+let printStatistics () = begin
+  Lv.printHashStats ();
+  CLv.printHashStats ();
+  Gc_stats.printStatistics ();
+end
 
 
 (** Entry point *)
@@ -246,7 +267,7 @@ let main () =
           )
         ;
         Cil.initCIL ();
-        setGCConfig ();
+        Gc_stats.setGCConfig ();
 
         L.logStatus "Checking for data races";
         L.logStatus "-----";

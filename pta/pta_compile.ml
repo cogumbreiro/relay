@@ -44,9 +44,10 @@
 open Cil
 open Filetools
 open Pta_types
-open Simplehc
 
-module Lv = Cil_lvals
+module HC = Simplehc
+module CLv = Cil_lvals
+module D = Cildump
 
 (* 
    TODO: Support field-based analysis:
@@ -85,29 +86,42 @@ module Lv = Cil_lvals
 
 *)
 
-(*************** File interface / per-file state ****)
 
-(* Table of base assignments involving each ptaLv *)
+(*************** State management **************)
+
+(** Table of base assignments involving each ptaLv *)
 let baseAssigns = VarH.create 101
 
-
-(* Table of complex assignments. Indexed by the base var of the RHS exp *)
+(** Table of complex assignments. Indexed by the base var of the RHS exp *)
 let compAssigns = VarH.create 101
 
-
-(* Table of function calls. Indexed by the base var of call exp/actual exp *)
+(** Table of function calls. Indexed by the base var of call exp/actual exp *)
 let calls = VarH.create 101
 
-
-(* List of functions in the file *)
+(** List of functions in the file *)
 let funsInFile = ref []
+
+
+(** Flag: true if assignments should be simplified to have one deref *)
+let simplify = ref true
+
+(** Pseudo-var -> orig lval *)
+let pseudoToOrig = VarH.create 101
+
+(** Orig lval -> pseudo-var *)
+let origToPseudo = LvalH.create 101
+
+let nextTempID = ref 0
 
 
 let initState () =
   funsInFile := [];
   VarH.clear baseAssigns;
   VarH.clear compAssigns;
-  VarH.clear calls
+  VarH.clear calls;
+  nextTempID := 0;
+  VarH.clear pseudoToOrig;
+  LvalH.clear origToPseudo
 
 
 let getPTAFile (forFile:string) = 
@@ -119,7 +133,7 @@ let saveState (forFile:string) =
   let newFile = getPTAFile forFile in
   let out_chan = open_out_bin newFile in
   Marshal.to_channel out_chan 
-    (!funsInFile, baseAssigns, compAssigns, calls)
+    (!funsInFile, baseAssigns, compAssigns, calls, pseudoToOrig)
     [Marshal.Closures] ;
   close_out out_chan
 
@@ -127,15 +141,16 @@ let saveState (forFile:string) =
 (** Loads constraints of one file. User is responsible for rehashing *)
 let loadState (f:string) = 
   let in_chan = open_in_bin f in
-  let funs, baseAss, compAss, callsTab = 
+  let funs, baseAss, compAss, callsTab, pseudoTab = 
     (Marshal.from_channel in_chan : 
        funInfo list * 
        (ptaAssign list) VarH.t * 
        (ptaAssign list) VarH.t *
-       (ptaCall list) VarH.t 
+       (ptaCall list) VarH.t *
+       ptaLv VarH.t
     ) in
   close_in in_chan;
-  (funs, baseAss, compAss, callsTab)
+  (funs, baseAss, compAss, callsTab, pseudoTab)
 
 
 let rehashFuns funs =
@@ -175,7 +190,7 @@ let loadFor (forFile:string) =
 
 
 let dummyFun = { funId = -1337;
-                 funType = makeType (TVoid ([]));
+                 funType = dummyTyp;
                  funFormals = [];
                }
     
@@ -192,37 +207,33 @@ let isFunPtrType (t : typ) : bool =
   | _ -> false
       
 let isGlobal v =
+  (* TODO: have this in one place *)
   (v.vglob) && (not (Trans_alloc.isAllocVar v.vname))
 
 let host_of_var (v : varinfo ) : ptaHost =
   let h = if isGlobal v then 
     PVar (makeVar 
             (PGlobal (v.vid, 
-                      (* makeType v.vtype *) 
-                      makeType (TVoid []))))
+                      cil_type_to_ptype v.vtype)))
   else 
     PVar (makeVar 
             (PLocal  (v.vid, 
-                      (* makeType v.vtype *)
-                      makeType (TVoid [])))) in
+                      cil_type_to_ptype v.vtype))) in
   makeHost h
-    
-    
-let lv_of_hostOff (ho:ptaHost) (o:Cil.offset) : ptaLv =
-  makeLv (ho, makeOff o)
 
 let rec analyze_lval (lv : lval ) : ptaLv list = 
   match lv with
-    Var v, off -> 
-      [(lv_of_hostOff (host_of_var v) off)]
+    Var v, off ->
+      let baseT = v.vtype in
+      [makeLv ((host_of_var v), (makeOff baseT off))]
 
   | Mem e, off ->
       let lvsInExp = analyze_exp e in
+      let baseT = CLv.typeOfLvalUnsafe (Mem e, NoOffset) in
+      let ptOff = makeOff baseT off in
       let lvs = List.fold_left 
         (fun curL lv ->
-           let host, innerOff = (makeDeref lv).node in
-           let newOff = Cil.addOffset off innerOff.node in
-           let newLv = lv_of_hostOff host newOff in
+           let newLv = makeDeref lv ptOff in
            newLv :: curL
         ) [] lvsInExp in
       lvs
@@ -273,7 +284,7 @@ and analyze_exp (e : exp ) : ptaRv list =
         (fun rv -> 
            makeRv (PCast 
                      ((* makeType t *)
-                       makeType (TVoid []), 
+                       dummyTyp, 
                        rv))) rvs
 
   | AddrOf l
@@ -287,87 +298,198 @@ and analyze_exp (e : exp ) : ptaRv list =
       in
       rvs
 
-let newAssign (lhs:ptaLv) (rhs:ptaRv) =
-  match rhs.node with
-    PAddrOf lv -> begin
-      let v = baseVar lv in
-      try
-        let assigns = VarH.find baseAssigns v in
-        VarH.replace baseAssigns v (addOnceAssign (lhs, rhs) assigns)
-      with Not_found ->
-        VarH.add baseAssigns v [(lhs, rhs)]
-    end
 
-  (* What if there's a series of casts then an AddrOf? *)
-  | _ -> begin
-      let rVar = baseVarRv rhs in
-      try 
-        let assigns = VarH.find compAssigns rVar in
-        VarH.replace compAssigns rVar (addOnceAssign (lhs, rhs) assigns)
-      with Not_found ->
-        VarH.add compAssigns rVar [(lhs, rhs)]
-    end
+let addToCollectionList find replace addonce key value =
+  try 
+    let old = find key in
+    replace key (addonce old value);
+  with Not_found ->
+    replace key [value]
 
-let handleAssign (lhs : ptaLv list) (rhs : ptaRv list) =
-  List.iter 
+let addToBase =
+  addToCollectionList 
+    (VarH.find baseAssigns)
+    (VarH.replace baseAssigns)
+    addOnceAssign
+
+let addToComp =
+  addToCollectionList
+    (VarH.find compAssigns)
+    (VarH.replace compAssigns)
+    addOnceAssign
+
+let addToCall =
+  addToCollectionList
+    (VarH.find calls)
+    (VarH.replace calls)
+    addOnceCall
+
+(** Actually add an assignment constraint *)
+let doAssign lhs rhs loc =
+  let assign = makeAssign lhs rhs loc in
+  if isAddrOf rhs then
+    let v = baseVarRv rhs in
+    addToBase v assign
+  else
+    let rVar = baseVarRv rhs in
+    addToComp rVar assign
+
+
+(** Make a new temp variable *)
+let nextTemp () =
+  let i = !nextTempID in
+  incr nextTempID;
+  makeVar (PTemp i)
+
+
+(** Map the given lval to its pseudo-variable-lval *)
+let getPseudo lval =
+  try
+    let existingTemp = LvalH.find origToPseudo lval in
+    let tempLv = makeLv (makeHost (PVar existingTemp), noOffset) in
+    tempLv
+  with Not_found ->
+    let tempVar = nextTemp () in
+    LvalH.add origToPseudo lval tempVar;
+    VarH.add pseudoToOrig tempVar lval;
+
+    (* Make an assignment constraint in both directions, to express equality *)
+    let tempLv = makeLv (makeHost (PVar tempVar), noOffset) in
+    let rval = makeRv (PLv lval) in
+    let () = doAssign tempLv rval Cil.locUnknown in
+    let tempRv = makeRv (PLv tempLv) in
+    let () = doAssign lval tempRv Cil.locUnknown in
+    tempLv
+
+let rec simplifyLval (lv : ptaLv) (derefsLeft : int) : ptaLv =
+  let host, off = lv in
+  match host.HC.node with
+    PVar _ -> lv
+  | PDeref (rv) ->
+      let newRv = simplifyRval rv (derefsLeft - 1) in
+      if derefsLeft <= 0 then
+        (* Hmm... pseudo var only for host? *)
+        let (lvNoOff : ptaLv) = makeLv (makeHost (PDeref newRv), noOffset) in
+        let (pseudo : ptaLv) = addLvalOffset (getPseudo lvNoOff) off in
+        pseudo
+      else
+        makeLv (makeHost (PDeref newRv), off)
+          
+and simplifyRval (rv : ptaRv) (derefsLeft : int) : ptaRv =
+  match rv.HC.node with
+    PLv lv -> makeRv (PLv (simplifyLval lv derefsLeft))
+  | PCast (t, r) -> makeRv (PCast (t, simplifyRval r derefsLeft))
+  | PAddrOf lv -> 
+      (* Disallow derefs within an addrOf *)
+      makeRv (PAddrOf (simplifyLval lv 0))
+        
+(** Simplify an assignment *)
+let rec simplifyAssign lhs rhs =
+  let allowedLDerefs, allowedRDerefs = 
+    (* If the RHS is an addrOf thing, don't allow any derefs *)
+    if isAddrOf rhs then 0, 0 
+      (* Can only allow one deref, usually leave it to the LHS *)
+    else if isDeref lhs then 1, 0
+    else 1, 1 in
+  let newLHS = simplifyLval lhs allowedLDerefs in
+  let newRHS = simplifyRval rhs allowedRDerefs in
+  (newLHS, newRHS)
+
+
+(** Decide to simplify an assignment, then do the actual assignment *)
+let newAssign (lhs:ptaLv) (rhs:ptaRv) loc =
+  let newL, newR = if !simplify then simplifyAssign lhs rhs
+  else (lhs, rhs) in
+  doAssign newL newR loc
+
+(** Begin handling an assignment instruction *)
+let handleAssign (lhs : ptaLv list) (rhs : ptaRv list) loc =
+  List.iter
     (fun llv ->
        List.iter 
          (fun rlv ->
-            newAssign llv rlv
+            newAssign llv rlv loc
          ) rhs
     ) lhs
 
+(* MAKE simplifier connect stuff like ***x to the right temp, otherwise,
+   queries directly from the code will not work? *)
 
-let newCall ((cinfo, index, actExp) as c) =
+let simplifyCallExps cexps =
+  List.map (fun lv -> simplifyLval lv 1) cexps
+
+let simplifyCallArgs args =
+  List.map 
+    (fun (actuals, index) ->
+       (List.map (fun rv -> simplifyRval rv 1) actuals, index)) args
+
+
+(** Make a new assignment induced by a function call (i.e., param passing, 
+    or return value capture). The [index] is the index of the 
+    assigned-to parameter, or a special index for the return value *)
+let newCall (cinfo, args) =
+  let newArgs = if !simplify then simplifyCallArgs args else args in
+
+  let newCinfo = if !simplify 
+  then { cinfo with cexp = simplifyCallExps cinfo.cexp; } 
+  else cinfo in
+
   (* index by call expression's variable *)
   let cVars = baseVars cinfo.cexp in
+  let c = (newCinfo, newArgs) in
   List.iter 
     (fun cv ->
-       try 
-         let callList = VarH.find calls cv in
-         VarH.replace calls cv (addOnceCall c callList)
-       with Not_found ->
-         VarH.add calls cv [c]
+       addToCall cv c
     ) cVars
-        
+
+
+let analyzeCall retopt fexpr actuals loc =
+  let callRvs = analyze_exp fexpr in
+  let callLvs = List.fold_left  
+    (fun curL rv -> 
+       match rv.HC.node with
+         PLv lv -> lv :: curL
+       | _ -> 
+           prerr_string "ignoring call expr that's not an lval\n";
+           curL
+    ) [] callRvs in
+
+
+  let ctyp = CLv.typeOfUnsafe fexpr in
+
+
+  let cinfo = { cexp = callLvs;
+                cloc = loc;
+                ctype = cil_type_to_ptype ctyp;
+              } in
+  (* Generate constraints for parameter passing (actuals) *)
+  let _, args = List.fold_left 
+    (fun (curIndex, curArgs) actExp -> 
+       (curIndex + 1,
+        (analyze_exp actExp, curIndex) :: curArgs)
+    ) (0, []) actuals in
+  (* Generate a constraint for the return value *)
+  let args = 
+    (match retopt with
+       Some lv ->
+         (analyze_exp (Lval lv), retIndex) :: args 
+     | None ->
+         args) in
+  let args = List.rev args in
+  newCall (cinfo, args)
+
 
 let analyze_instr (i : instr ) : unit =
   match i with
     Set (lval, rhs, loc) ->
       let lvs = analyze_lval lval in
       let rvs = analyze_exp rhs in
-      handleAssign lvs rvs
+
+      (* TODO: Handle struct copies or does CIL make it explicit? *)
+      handleAssign lvs rvs loc
         
   | Call (res, fexpr, actuals, loc) ->
-      let callRvs = analyze_exp fexpr in
-      let callLvs = List.fold_left  
-        (fun curL rv -> 
-           match rv.node with
-             PLv lv -> lv :: curL
-           | _ -> 
-               prerr_string "ignoring call expr that's not an lval\n";
-               curL
-        ) [] callRvs in
-      let ctyp = Lv.typeOfUnsafe fexpr in
-      let cinfo = { cexp = callLvs;
-                    cloc = loc;
-                    ctype = makeType ctyp;
-                  } in
-      (* Generate constraints for actuals and return value *)
-      let _ = List.fold_left 
-        (fun curIndex actExp -> 
-           let callOp = (cinfo, curIndex, analyze_exp actExp) in
-           newCall callOp;
-           curIndex + 1
-        ) 0 actuals in
-        
-      (match res with
-         Some lv ->
-           let callOp = (cinfo, retIndex, analyze_exp (Lval lv)) in 
-           newCall callOp
-       | None ->
-           ()
-      )
+      analyzeCall res fexpr actuals loc
 
   | Asm _ -> ()
       
@@ -380,11 +502,13 @@ let rec analyze_stmt (s : stmt ) : unit =
       match eo with
         Some e ->
           let fid =  !curFun.funId in
-          let retLv = makeLv (makeHost 
-                                (PVar (makeVar (PRet fid))), 
-                              makeOff NoOffset) in
+          let retLv = makeLv (makeHost (PVar (makeVar (PRet fid))), 
+                              noOffset) in
           let retRHS = analyze_exp e in
-          handleAssign [retLv] retRHS
+
+  (* TODO: Handle struct copies or does CIL make it explicit? *)
+
+          handleAssign [retLv] retRHS loc
       | None -> ()
     end
   | Goto (s', l) -> 
@@ -421,13 +545,13 @@ let analyze_function (f : fundec ) : unit =
   (* Make the function header *)
   let formals = List.map 
     (fun v -> 
-       match (host_of_var v).node with
+       match (host_of_var v).HC.node with
          PVar x -> x
        | _ -> failwith "host_of_var returned non-var"
     ) f.sformals in
   
   curFun := { funId = f.svar.vid; 
-              funType = makeType f.svar.vtype;
+              funType = cil_type_to_ptype f.svar.vtype;
               funFormals = formals;
             };
   funsInFile := !curFun :: !funsInFile;
@@ -437,22 +561,24 @@ let analyze_function (f : fundec ) : unit =
     
     
 let analyze_init (v:varinfo) (i:init) =
+  let loc = v.vdecl in (* say that initializer runs at declaration? *)
   let rec loop_init (curLv:ptaLv) (i : init ) =
-    let host, off = curLv.node in
     match i with
       SingleInit e ->
         let rhses = analyze_exp e in
         List.iter 
           (fun r ->
-             newAssign curLv r) rhses
+             newAssign curLv r loc) rhses
     | CompoundInit (t, offInit) ->
         List.iter
-          (fun (o, i) -> 
-             let lhs = lv_of_hostOff host (Cil.addOffset o off.node) in
+          (fun (o, i) ->
+             let outerOff = makeOff t o in
+             let lhs = addLvalOffset curLv outerOff in
              loop_init lhs i
           ) offInit
   in
-  (loop_init (lv_of_hostOff (host_of_var v) NoOffset) i)
+  let baseLv = makeLv ((host_of_var v), noOffset) in
+  (loop_init baseLv i)
 
 
 let analyze_global (g : global ) : unit =
@@ -474,17 +600,189 @@ let analyze_global (g : global ) : unit =
 
 
 let analyze_file (f : file) : unit =
+  print_string ("Analyzing file " ^ f.fileName ^ "\n");
   iterGlobals f analyze_global
 
 
 
 (*************** Analyze All *************************)
 
+(** Compile constraints, and place them in files named after the 
+    original source. For example if we analyze foo.c and bar.c, we
+    will write constraints to foo.pta and bar.pta *)
 let analyzeAll (root : string) : unit =
-  Filetools.walkDir 
+  Filetools.walkDir
     (fun ast file ->
        initState ();
        analyze_file ast;
        saveState file;
     ) root
-    
+
+
+let singleConsFile = "__pta_constraints"
+
+let getConstraintFile root =
+  (Filename.concat root singleConsFile)
+
+(** Compile constraints and place them all in one single file *)
+let analyzeAllInOne (root :string) : unit =
+  initState ();
+  Filetools.walkDir
+    (fun ast file ->
+       analyze_file ast;
+    ) root;
+  saveState (getConstraintFile root);
+  initState ()
+
+(*************** Check function info ***********)
+
+(** Table of fun id -> funInfo *)
+let funTable = Hashtbl.create 101
+
+let funcsUninit () =
+  Hashtbl.length funTable == 0
+
+let getFunInfo (id:vid) : funInfo =
+  Hashtbl.find funTable id
+
+let isFunc (id:vid) =
+  Hashtbl.mem funTable id
+
+(** Reload func info and add to the given funTable *)
+let loadFuncTypes root funTable =
+  let filename = getConstraintFile root in
+  let funs, _, _, _, _ = loadFor filename in
+  List.iter 
+    (fun finfo ->
+       Hashtbl.replace funTable finfo.funId finfo
+    ) (rehashFuns funs)
+
+let loadFuncInfo root =
+  if funcsUninit () then begin
+    print_string "Loading function info\n";
+    flush stdout;
+    loadFuncTypes root funTable;
+  end
+
+let printFunTypes () =
+  print_string "Printing function info\n========================\n";
+  Pta_types.printFunTypes funTable
+
+(** true if the lval is based on a global but not a function... *)
+let rec isGlobalLv (lv : ptaLv) : bool =
+  let host, _ = lv in
+  match host.HC.node with
+    PVar v ->
+      (match v.HC.node with
+         PGlobal (id, _) -> not (isFunc id)
+       | _ -> false
+      )
+  | PDeref ptrRv ->
+      isGlobalRv ptrRv
+
+and isGlobalRv (rv : ptaRv) : bool = 
+  match rv.HC.node with
+    PLv lv -> 
+      isGlobalLv lv
+  | PAddrOf lv ->
+      isGlobalLv lv
+  | PCast (_, rv) ->
+      isGlobalRv rv
+
+let isFuncLv (lv : ptaLv) : bool =
+  let host, _ = lv in
+  match host.HC.node with 
+    PVar v ->
+      (match v.HC.node with
+         PGlobal (id, _) -> isFunc id
+       | _ -> false)
+  | PDeref _ -> false
+
+
+(*************** Debug *************************)
+
+(** Assume all constraints in one file *)
+let printConstraints root =
+  print_string "PTA constraints:\n";
+  let numBase = ref 0 in
+  let numComplex = ref 0 in
+  let numCallCons = ref 0 in
+  let numPseudo = ref 0 in
+
+  (* Assume it ran in one-file mode... 
+     TODO: check disk to see if that is the case *)
+  
+  let filename = getConstraintFile root in
+  let _, baseAssign, complexAssign, calls, pseudo = loadFor filename in
+  print_string "Base cons:\n";
+  VarH.iter
+    (fun vinfo aList ->
+       List.iter 
+         (fun a -> printAssignment a; incr numBase) 
+         aList
+    ) baseAssign;
+  
+  print_string "\nComplex cons:\n";
+  VarH.iter
+    (fun vinfo aList ->
+       List.iter 
+         (fun a -> printAssignment a; incr numComplex) aList
+    ) complexAssign;
+
+  print_string "\nCall cons:\n";
+  VarH.iter
+    (fun vinfo callList ->
+       List.iter
+         (fun call -> printCallCons call; incr numCallCons) callList
+    ) calls;
+
+  print_string "\nTemp var -> lvals:\n";
+  VarH.iter
+    (fun vinfo lv ->
+       printVinfo vinfo;
+       print_string " <- ";
+       printPtaLv lv;
+       print_string "\n";
+       incr numPseudo;
+    ) pseudo;
+  Printf.printf "=============================\n Constraint STATS\n";
+  Printf.printf "Base constraints:\t %d\n" !numBase;
+  Printf.printf "Complex constraints:\t %d\n" !numComplex;
+  Printf.printf "Call constraints:\t %d\n" !numCallCons;
+  Printf.printf "Temp constraints:\t %d\n" !numPseudo;
+  print_string "\n\n"
+
+
+(*********** Print variable ids so that we actually understand the output *)
+
+let tempVIDSet = Hashtbl.create 101
+
+let string_of_loc l = 
+  Pretty.sprint 80 (Cil.d_loc () l)
+
+class vidCollector = object
+  inherit nopCilVisitor 
+
+  method vvdec (vi:varinfo) =
+    Hashtbl.replace tempVIDSet vi.vid (vi.vname, vi.vdecl);
+    SkipChildren
+end
+
+let collectVidsFile f =
+  let collector = new vidCollector in
+  visitCilFileSameGlobals collector f
+
+let printVarIDs root =
+  Filetools.walkDir
+    (fun ast filename ->
+       collectVidsFile ast
+    ) root;
+  Hashtbl.iter 
+    (fun vid (vname, vdecl) ->
+       print_string ("vid : " ^ (string_of_int vid) ^ " == " ^
+                       vname ^ " @ ");
+       print_string ((string_of_loc vdecl) ^ "\n");
+    ) tempVIDSet;
+  Hashtbl.clear tempVIDSet
+
+

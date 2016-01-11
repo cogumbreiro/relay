@@ -46,10 +46,12 @@ open Alias_types
 
 module CilPTA = Myptranal
 module Steens = Pta_fi_eq
+module Anders = Pta_fs_dir
 
 module D = Cildump
 module FC = Filecache
 module L = Logging
+module Stats = Mystats
 
 (***** Structs for CIL PTA *****)
 
@@ -91,10 +93,10 @@ class virtual aliasAnalyzer = object (self)
 
   method virtual getNodeLval : Cil.lval -> ptaNode
 
+  method virtual getNodeExp : Cil.exp -> ptaNode
+
   (* Operations on abstract nodes (e.g., convert back) *)
   method virtual represents : ptaNode -> Cil.lval list
-
-  method virtual may_alias_abs : ptaNode -> ptaNode -> bool
 
   method virtual deref_abs : ptaNode -> ptaNode
 
@@ -104,23 +106,33 @@ class virtual aliasAnalyzer = object (self)
 
   method virtual string_of : ptaNode -> string
 
-  method virtual size_of : ptaNode -> int
+  method virtual pts_size : ptaNode -> int
+
+  method virtual label_size : ptaNode -> int
+
+  method virtual may_alias_abs : ptaNode -> ptaNode -> bool
+
+  method virtual points_to_abs : ptaNode -> ptaNode -> bool 
+
+  method virtual location_alias_abs : ptaNode -> ptaNode -> bool
 
   method virtual reachableFrom : ptaNode -> ptaNode list -> bool
 
   method virtual reachableFromG : ptaNode -> bool
 
+  method virtual writeState : unit -> unit
+
 end
 
 
 
-class dummyAnalyzer = object 
+class dummyAnalyzer = object (self)
   inherit aliasAnalyzer
 
   method identity = "dummy"
 
-  val error_msg = "using dummy alias analyzer\n"
-
+  val error_msg = ("Dummy alias analyzer doesn't support this\n")
+    
   method deref_funptr fexp =
     failwith error_msg 
 
@@ -142,10 +154,19 @@ class dummyAnalyzer = object
   method getNodeLval lv =
     failwith error_msg
 
+  method getNodeExp e =
+    failwith error_msg
+
   method represents abs =
     failwith error_msg
 
   method may_alias_abs abs1 abs2 =
+    failwith error_msg
+
+  method location_alias_abs abs1 abs2 =
+    failwith error_msg
+
+  method points_to_abs ptr targ =
     failwith error_msg
 
   method deref_abs abs =
@@ -160,13 +181,19 @@ class dummyAnalyzer = object
   method string_of abs =
     failwith error_msg
 
-  method size_of abs =
+  method pts_size abs =
+    failwith error_msg
+
+  method label_size abs =
     failwith error_msg
 
   method reachableFrom abs srcs =
     failwith error_msg
 
   method reachableFromG abs =
+    failwith error_msg
+
+  method writeState () =
     failwith error_msg
 
 end
@@ -233,12 +260,21 @@ class cilAnalyzer = object
 
   (* TODO: figure out how to get an abstract rep for CIL nodes *)
 
+  method writeState () =
+    L.logStatus "writeState: Not needed for CIL PTA"
+
 end
 
 
 (********* Steensgaard Analysis interface *********) 
 
+let getSteensNode n =
+  match n with
+    SteensNode s -> s
+  | _ -> raise NodeTypeMismatch
 
+let makeSteensNode s =
+  SteensNode s
 
 class steensAnalyzer = object (self)
   inherit aliasAnalyzer
@@ -247,7 +283,7 @@ class steensAnalyzer = object (self)
     L.logStatus "Initializing Steensgaard AA info";
     Steens.analyzeAll !rootPath false
 
-  method identity = "steens"
+  method identity = Steens.aaName
 
   method deref_funptr fexp =
     Steens.resolve_funptr fexp
@@ -267,79 +303,213 @@ class steensAnalyzer = object (self)
 
   method deref_exp_abs e =
     let nodes = Steens.Abs.deref_exp e in
-    List.map (fun n -> SteensNode n) nodes
+    List.map makeSteensNode nodes
 
   method deref_lval_abs lv =
     let nodes = Steens.Abs.deref_lval lv in
-    List.map (fun n -> SteensNode n) nodes
+    List.map makeSteensNode nodes
 
   method getNodeLval lv =
     match Steens.Abs.getNodeLval lv with 
       None -> raise UnknownLoc
-    | Some n -> SteensNode n 
+    | Some n -> makeSteensNode n 
+        
+  method getNodeExp e =
+    match Steens.Abs.getNodeExp e with
+      None -> raise UnknownLoc
+    | Some n -> makeSteensNode n
 
   method represents abs =
-    match abs with
-      SteensNode n ->
-        Steens.Abs.lvals_of n
-    | _ -> raise NodeTypeMismatch
-
+    let n = getSteensNode abs in
+    Steens.Abs.lvals_of n
 
   method may_alias_abs abs1 abs2 =
-    match abs1, abs2 with
-      SteensNode n1, SteensNode n2 ->
-        Steens.Abs.may_alias n1 n2
-    | _ -> raise NodeTypeMismatch
+    let n1 = getSteensNode abs1 in
+    let n2 = getSteensNode abs2 in
+    Steens.Abs.may_alias n1 n2
+    
+  method location_alias_abs abs1 abs2 =
+    let n1 = getSteensNode abs1 in
+    let n2 = getSteensNode abs2 in
+    Steens.Abs.location_alias n1 n2
+
+  method points_to_abs ptr targ =
+    let n1 = getSteensNode ptr in
+    let n2 = getSteensNode targ in
+    Steens.Abs.points_to n1 n2
 
   method deref_abs abs =
-    match abs with
-      SteensNode n ->
-        SteensNode (Steens.Abs.deref n)
-    | _ -> raise NodeTypeMismatch
+    try
+      let n = getSteensNode abs in
+      makeSteensNode (Steens.Abs.deref n)
+    with Not_found ->
+      raise UnknownLoc
 
   method compare abs1 abs2 =
-    match abs1, abs2 with
-      SteensNode n1, SteensNode n2 ->
-        Steens.Abs.compare n1 n2
-    | _ -> raise NodeTypeMismatch
-
+    let n1 = getSteensNode abs1 in
+    let n2 = getSteensNode abs2 in
+    Steens.Abs.compare n1 n2
+    
   method hash abs =
-    match abs with 
-      SteensNode n ->
-        Steens.Abs.hash n
-    | _ -> raise NodeTypeMismatch
-
+    let n = getSteensNode abs in
+    Steens.Abs.hash n
 
   method string_of abs =
-    match abs with 
-      SteensNode n -> 
-        Steens.Abs.string_of n
-    | _ -> raise NodeTypeMismatch
+    let n = getSteensNode abs in
+    Steens.Abs.string_of n
 
+  method pts_size abs =
+    let n = getSteensNode abs in
+    Steens.Abs.pts_size n
 
-  method size_of abs =
-    match abs with 
-      SteensNode n -> 
-        Steens.Abs.size_of n
-    | _ -> raise NodeTypeMismatch
-
+  method label_size abs =
+    let n = getSteensNode abs in
+    Steens.Abs.label_size n
+    
   method reachableFrom abs srcs =
-    match abs with 
-      SteensNode n ->
-        let ss = List.map (fun x -> match x with 
-                               SteensNode m -> m
-                             | _ -> raise NodeTypeMismatch) srcs in
-        Steens.Abs.reachableFrom n ss
-    | _ -> raise NodeTypeMismatch
-
+    let n = getSteensNode abs in
+    let ss = List.map getSteensNode srcs in
+    Steens.Abs.reachableFrom n ss
+    
   method reachableFromG abs =
-    match abs with 
-      SteensNode n ->
-        Steens.Abs.reachableFromG n 
-    | _ -> raise NodeTypeMismatch
+    let n = getSteensNode abs in
+    Steens.Abs.reachableFromG n 
 
+  method writeState () =
+    L.logStatus "writeState: Not needed for Steens PTA"
+    
 end
 
+(********* Andersen's Analysis interface *********) 
+
+let getAndersNode n =
+  match n with
+    AndersNode x -> x
+  | _ -> raise NodeTypeMismatch
+
+let makeAndersNode x =
+  AndersNode x
+
+class andersAnalyzer = object (self)
+  inherit aliasAnalyzer
+
+  initializer
+    L.logStatus "Initializing Andersen's AA info";
+    Anders.analyzeAll !rootPath false
+
+  method identity = Anders.aaName
+
+  method deref_funptr fexp =
+    Anders.resolve_funptr fexp
+
+  method deref_exp e =
+    try
+      Anders.deref_exp e
+    with Not_found ->
+      L.logError "0 targets from deref_exp";
+      []
+
+  method may_alias e1 e2 =
+    Anders.may_alias e1 e2
+
+  method points_to e v =
+    Anders.points_to e v
+
+  method deref_exp_abs e =
+    let nodes = Anders.Abs.deref_exp e in
+    List.map makeAndersNode nodes
+
+  method deref_lval_abs lv =
+    let nodes = Anders.Abs.deref_lval lv in
+    List.map makeAndersNode nodes
+
+  method getNodeLval lv =
+    match Anders.Abs.getNodeLval lv with 
+      None -> raise UnknownLoc
+    | Some n -> makeAndersNode n
+        
+
+  method getNodeExp e =
+    match Anders.Abs.getNodeExp e with
+      None -> raise UnknownLoc
+    | Some n -> makeAndersNode n
+
+  method represents abs =
+    let n = getAndersNode abs in
+    Anders.Abs.lvals_of n
+
+  method may_alias_abs abs1 abs2 =
+    let n1 = getAndersNode abs1 in
+    let n2 = getAndersNode abs2 in
+    Anders.Abs.may_alias n1 n2
+
+  method location_alias_abs abs1 abs2 =
+    let n1 = getAndersNode abs1 in
+    let n2 = getAndersNode abs2 in
+    Anders.Abs.location_alias n1 n2
+
+  method points_to_abs abs1 abs2 = 
+    let n1 = getAndersNode abs1 in
+    let n2 = getAndersNode abs2 in
+    Anders.Abs.points_to n1 n2
+
+  method deref_abs abs =
+    try
+      let n = getAndersNode abs in
+      makeAndersNode (Anders.Abs.deref n)
+    with Not_found ->
+      raise UnknownLoc
+
+  method compare abs1 abs2 =
+    let n1 = getAndersNode abs1 in
+    let n2 = getAndersNode abs2 in
+    Anders.Abs.compare n1 n2
+    
+  method hash abs =
+    let n = getAndersNode abs in
+    Anders.Abs.hash n
+
+  method string_of abs =
+    let n = getAndersNode abs in
+    Anders.Abs.string_of n
+
+  method pts_size abs =
+    let n = getAndersNode abs in
+    Anders.Abs.pts_size n
+
+  method label_size abs =
+    let n = getAndersNode abs in
+    Anders.Abs.label_size n
+    
+  method reachableFrom abs srcs =
+    let n = getAndersNode abs in
+    let ss = List.map getAndersNode srcs in
+    Anders.Abs.reachableFrom n ss
+    
+  method reachableFromG abs =
+    let n = getAndersNode abs in
+    Anders.Abs.reachableFromG n
+
+  method writeState () =
+    Anders.writeState !rootPath
+      
+    
+end
+
+(***** Finalizer ******)
+  
+let toFinalize = ref []
+
+let finalize pta =
+  pta#writeState ()
+
+let addFinalizer pta =
+  toFinalize := Stdutil.addOnce !toFinalize pta
+
+let finalizeAll () =
+  List.iter finalize !toFinalize
+
+(* ... now each user of alias is responsible for calling finalizeAll() *)
 
 
 (***** singleton analyzers *****)
@@ -350,17 +520,32 @@ let cilAA = ref dummyAA (* lazily create *)
 
 let steensAA = ref dummyAA (* lazily create *)
 
+let andersAA = ref dummyAA (* lazily create *)
+
 let getCilAA () =
-  if (!cilAA == dummyAA) then
-    cilAA := new cilAnalyzer
-  ;
+  if (!cilAA == dummyAA) then begin
+    cilAA := new cilAnalyzer;
+    addFinalizer !cilAA
+  end;
   !cilAA
 
 let getFiCiEqAA () =
-  if (!steensAA == dummyAA) then
-    steensAA := new steensAnalyzer
-  ;
+  if (!steensAA == dummyAA) then begin
+    steensAA := new steensAnalyzer;
+    addFinalizer !steensAA
+  end;
   !steensAA
+
+let getAndersAA () =
+  if (!andersAA == dummyAA) then begin
+    andersAA := new andersAnalyzer;
+    addFinalizer !andersAA
+  end;
+  !andersAA
+
+(* Hmm, could have done the above more easily w/ macros, or
+   a language where identifiers are first class *)
+
 
 
 (***** the particular analyzer to use for each query *****)
@@ -400,8 +585,6 @@ let setCurrentFile (f:Cil.file) : unit =
 (* Set up                                                  *)
 
 
-
-
 let ws = "[ \r\n\t]*"
 
 (* Top level split, between the field name and value  *)
@@ -410,15 +593,15 @@ let topSplitter = Str.split_delim (Str.regexp (ws ^ "[:]" ^ ws))
 let groupEnd = Str.regexp (ws ^ "[}]" ^ ws)
 
 let assignAnalysis aspect analysis =
-  let analysis = String.lowercase analysis in
-  let aspect = String.lowercase aspect in
+  let analysis = Strutil.strip (String.lowercase analysis) in
+  let aspect = Strutil.strip (String.lowercase aspect) in
   let chosen = 
     match analysis with
       "cil" -> getCilAA ()
     | "fi_ci_eq" -> getFiCiEqAA ()
+    | "anders" -> getAndersAA ()
     | _ ->
-        (L.logError ("bad AA value " ^ analysis ^ " -- defaulting to Cil\n");
-         getFiCiEqAA ())
+        failwith ("bad AA value " ^ analysis ^ " -- defaulting to Cil\n")
   in
   match aspect with
     "funptrs" -> fpAA := chosen
@@ -426,7 +609,7 @@ let assignAnalysis aspect analysis =
   | "lvals" -> lvalAA := chosen
   | "may_alias" -> mayAA := chosen
   | _ ->
-      L.logError ("bad AA aspect value " ^ aspect ^ "  -- doing nothing\n")
+      failwith ("bad AA aspect value " ^ aspect ^ "  -- doing nothing\n")
       
 
 let initSettings settings rootPath = begin
@@ -497,15 +680,18 @@ struct
   (* Interface for CIL lvals/exps *)
 
   let deref_lval lv =
-    !lvalAA#deref_lval_abs lv
+    Stat.time "derefLval" !lvalAA#deref_lval_abs lv
       
   let deref_exp exp =
-    !expAA#deref_exp_abs exp
+    Stat.time "derefExp" !expAA#deref_exp_abs exp
 
   let getNodeLval lv =
-    !lvalAA#getNodeLval lv
+    Stat.time "getNodeLval" !lvalAA#getNodeLval lv
 
-  let getNodeVar  var =
+  let getNodeExp exp =
+    Stat.time "getNodeExp" !expAA#getNodeExp exp
+
+  let getNodeVar var =
     getNodeLval (Var var, NoOffset)
 
   (* Interface for Abstract nodes *)
@@ -519,6 +705,12 @@ struct
   let may_alias abs1 abs2 =
     !expAA#may_alias_abs abs1 abs2
 
+  let location_alias abs1 abs2 =
+    !expAA#location_alias_abs abs1 abs2
+
+  let points_to abs1 abs2 =
+    !expAA#points_to_abs abs1 abs2
+
   let compare abs1 abs2 =
     !lvalAA#compare abs1 abs2
 
@@ -528,14 +720,18 @@ struct
   let string_of abs =
     !lvalAA#string_of abs
 
-  let size_of abs =
-    !lvalAA#size_of abs
+  let pts_size abs =
+    !lvalAA#pts_size abs
+
+  let label_size abs =
+    !lvalAA#label_size abs
 
   let reachableFrom abs srcs =
-    !lvalAA#reachableFrom abs srcs
+    Stat.time "reachableFrom"
+      (!lvalAA#reachableFrom abs) srcs
 
   let reachableFromG abs =
-    !lvalAA#reachableFromG abs
+    Stat.time "reachableFromG" !lvalAA#reachableFromG abs
 
 end
 

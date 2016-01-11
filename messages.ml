@@ -41,7 +41,7 @@
 
 open Cil
 open Fstructs
-open Scc
+open Scc_cg
 open Warn_reports
 
 module RP = Race_reports
@@ -49,7 +49,11 @@ module RP = Race_reports
 
 (***** Message types ******)
 
-type warnKey = fKey * fKey
+type root = 
+    MEntry of fKey
+  | MThread of fKey
+              
+type warnKey = root * root
     
 type userName = string
     
@@ -84,15 +88,8 @@ type message =
   | MReqSum of fKey list
   | MReplySum of (userName * Unix.sockaddr, (fKey * path) list) Hashtbl.t 
 
-(*
-  | MNotiWarn of (#warnReports as 'a)
-*)
-
+  (* Different warning tag for different kinds of warning reports *)
   | MNotiRace of RP.raceTable
-
-(*
-  | MNotiRace of RP.raceReports
-*)
 
   | MReqData of string * path
 

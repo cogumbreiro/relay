@@ -52,12 +52,13 @@ module Make (I:BS.Summarizeable) = struct
 
   type sum = I.t
 
-  let checkSep = ","
 
-  let checkPointK = "deserial " ^ (BS.string_of_sumType I.id)
+  class data sumID : [sum] BS.base = object(self)
+    inherit Basic.data sumID as super
 
-  class data : [sum] BS.base = object(self)
-    inherit Basic.data as super
+    val checkSep = ","
+
+    val checkPointK = "deserial " ^ (BS.string_of_sumType sumID)
 
     val numRetries = 6
       
@@ -67,7 +68,7 @@ module Make (I:BS.Summarizeable) = struct
         Assumes the summary can be re-obtained *)
     method cleanup () =
       L.logStatus ("Checking left-over state in " ^ 
-                     (BS.string_of_sumType I.id));
+                     (BS.string_of_sumType sumID));
       L.flushStatus ();
       match Checkpoint.getPrevCheck checkPointK with
         Some (info) ->
@@ -77,7 +78,7 @@ module Make (I:BS.Summarizeable) = struct
                let fkey, token = 
                  (fkey_of_string keyStr, BS.token_of_string tokStr) in
                self#err ("Recovering from deserialization. Nuking: " ^ keyStr);
-               BS.removeSummary fkey I.id token;
+               BS.removeSummary fkey sumID token;
                Checkpoint.clearCheck checkPointK;
            | _ ->
                self#err "Corrupt checkpoint info";
@@ -104,9 +105,11 @@ module Make (I:BS.Summarizeable) = struct
         Out_of_memory ->
           (* The file is not corrupt *)
           let result = ref (I.initVal, token) in
+          (* Serialize other summaries, and free some memory *)
           Timeout.retry 
             (fun () ->
-               super#serializeAndFlush;
+               BS.flushAll ();
+               (* super#serializeAndFlush; *)
                Gc.full_major ();
                result := doDeserial fkey token;
             )
@@ -129,7 +132,7 @@ module Make (I:BS.Summarizeable) = struct
           let result = ref (I.initVal, token) in
           let redo = 
             (fun () ->
-               let keyToks = Req.requestSumm [(fkey, self#typ)] in
+               let keyToks = Req.requestSumm [(fkey, self#sumTyp)] in
                match keyToks with
                  [(k, _, tok)] when k = fkey ->
                    result := doDeserial k tok

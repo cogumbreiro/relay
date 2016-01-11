@@ -52,11 +52,20 @@ type fKey = int
 
 let funToKey (f:fundec) : fKey =
   f.svar.vid
-
 let compareFKey a b = a - b
+let dummyFKey = -1
+
+let string_of_fkey = string_of_int
+
+let fkey_of_string = int_of_string
+
+let getFkey cilF =
+  cilF.svar.vid
+
+(**** Basic comparators / data structures ****)
 
 module OrderedInt = 
-  struct 
+  struct
     type t = int
     let compare a b = a - b
   end
@@ -72,13 +81,6 @@ module IntSet = Set.Make(OrderedInt)
 module FMap = IntMap
 
 module FSet = IntSet
-
-let string_of_fkey = string_of_int
-
-let fkey_of_string = int_of_string
-
-let getFkey cilF =
-  cilF.svar.vid
 
 
 (*** Name + type string data structures *)
@@ -120,39 +122,3 @@ module FNTHash = Hashtbl.Make(HashedFNTs)
 (* Set of (function name, types) *)
 module FNTSet = Set.Make(OrderedFNTs)
 
-
-(************************************************************)
-
-
-(* Set of expressions, useful for arguments *)
-module OrderedExp = struct 
-  type t = Cil.exp
-  let compare = Ciltools.compare_exp
-end
-
-module ExpSet = Set.Make (OrderedExp)
-module ExpMap = Map.Make (OrderedExp)
-
-module OrderedLval = struct
-  type t = Cil.lval
-  let compare = Ciltools.compare_lval
-end
-
-module LvalSet = Set.Make (OrderedLval)
-module LvalMap = Map.Make (OrderedLval)
-
-(* Hash tables *)
-
-module HashedLval = struct
-  type t = Cil.lval
-  let equal a b = Ciltools.compare_lval a b == 0
-  let hash = Ciltools.hash_lval
-end
-
-module HashedExp = struct
-  type t = Cil.exp
-  let equal a b = (Ciltools.compare_exp a b) == 0
-  let hash = Ciltools.hash_exp
-end
-
-module ExpHash = Hashtbl.Make (HashedExp)

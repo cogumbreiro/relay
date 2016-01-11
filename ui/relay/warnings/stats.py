@@ -77,6 +77,10 @@ def num_lval_contains(run, substr):
     filter2 = {'access2__lval__printed__icontains' : substr}
     return num_filter2(run, filter1, filter2)
 
+def num_lval_regex(run, regex):
+    filter1 = {'access1__lval__printed__regex' : regex}
+    filter2 = {'access2__lval__printed__regex' : regex}
+    return num_filter2(run, filter1, filter2)
 
 # test code
 """
@@ -142,6 +146,11 @@ def num_blob_n_races(run, n):
     """
     return num_matches(run, uses_blob(n), 4)
     
+def num_blob_n_races2(run, n):
+    rcs = Race_cluster.objects.filter(run = run)
+    return rcs.filter(uses_blob_lt_filter(n)).distinct.count()
+
+
 # test code
 """
 from relay.warnings.stats import *

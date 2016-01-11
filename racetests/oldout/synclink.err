@@ -1,0 +1,44 @@
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+Checkpoint: No left-over status file
+makeSimpleLock: Couldn't find global kernel_sem
+makeSimpleLock: Couldn't find global kernel_flag
+Multiple lock summaries for 28
+Multiple lock summaries for 27
+Multiple lock summaries for 29
+Multiple lock summaries for 30
+SH: not target for thread formal ign
+Checkpoint: No left-over status file
+lookupVal: given null addr
+lookupVal: given null addr
+lookupVal: given null addr
+lookupVal: given null addr
+lookupVal: given null addr
+lookupVal: given null addr
+lookupVal: given null addr
+lookupVal: given null addr
+lookupVal: given null addr
+lookupVal: given null addr
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*(ld->receive_buf))
+post: funptr resolved to 0 fun(s): (*(ld->receive_buf))
+substLval: local variable value stayed in summary?
+substLval: local variable value stayed in summary?
+substLval: local variable ti stayed in summary?
+substLval: local variable oldbit stayed in summary?
+eval bin op, operands are non-Vval
+substExp: trimming ptrArith offset
+substExp encountered unknown exp: (unsigned long )address - 3221225472UL
+substExp: trimming ptrArith offset
+substExp encountered unknown exp: (unsigned long )address - 3221225472UL
+substExp: trimming ptrArith offset
+substExp encountered unknown exp: (unsigned long )address - 3221225472UL
+SS handleInstr: res_funptr returned 0 fun(s)
+post: funptr resolved to 0 fun(s): (*((tty->driver)->flush_buffer))
+post: funptr resolved to 0 fun(s): (*((tty->driver)->flush_buffer))
+handleCallArgs: origTarget constant? (*((int *)0))
+handleCallArgs: origTarget constant? (*((char **)0))
+substActForm returned 0 results for: (*buf)#f1:455
+substActForm returned 0 results for: (*start)#f1:766
+substActForm returned 0 results for: (*eof)#f4:769

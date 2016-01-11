@@ -1,0 +1,1470 @@
+Other to do stuff
+
+  - write paper
+
+  - reduce disk/mem usage by canonicizing Cil.locations? (DIDN'T HELP?)
+
+  - reduce time/disk/mem usage by only analyzing functions reachable
+    from roots -> other threads (that will be everything...)
+
+  - find the missing unification preventing my steensgaard from being
+    as sound as the Cil PTA
+
+  - record more access locations in correlation info
+
+ 
+-------------------------------------------------------------
+
+based on change log from 2.6.17 to 2.6.18
+
+
+commit 86998aa6534e839ec003ed2ef7067d6fe8696ccc
+Author: Ingo Molnar <mingo@elte.hu>
+Date:   Tue Sep 19 11:14:34 2006 +0200
+
+    [PATCH] genirq core: fix handle_level_irq()
+    
+    while porting the -rt tree to 2.6.18-rc7 i noticed the following
+    screaming-IRQ scenario on an SMP system:
+    
+     2274  0Dn.:1 0.001ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.010ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.020ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.029ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.039ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.048ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.058ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.068ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.077ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.087ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+     2274  0Dn.:1 0.097ms: do_IRQ+0xc/0x103  <= (ret_from_intr+0x0/0xf)
+    
+    as it turns out, the bug is caused by handle_level_irq(), which if it
+    races with another CPU already handling this IRQ, it _unmasks_ the IRQ
+    line on the way out. This is not how 2.6.17 works, and we introduced
+    this bug in one of the early genirq cleanups right before it went into
+    -mm. (the bug was not in the genirq patchset for a long time, and we
+    didnt notice the bug due to the lack of -rt rebase to the new genirq
+    code. -rt, and hardirq-preemption in particular opens up such races much
+    wider than anything else.)
+
+
+
+commit 09d2d38a152419467f764c0f730821e896766c1f
+Author: Frank Pavlic <fpavlic@de.ibm.com>
+Date:   Fri Sep 15 16:26:34 2006 +0200
+
+    [PATCH] s390: qeth driver fixes [4/6]
+    
+    [PATCH 7/9] s390: qeth driver fixes [4/6]
+    
+    From: Frank Pavlic <fpavlic@de.ibm.com>
+    	- fix kernel crash due to race,
+    	  set card->state to SOFTSETUP after
+    	  card and card->dev are initialized properly.
+    	- remove CONFIG_QETH_PERF_STATS, use sysfs attribute instead,
+    	  as we want to have the ability to turn on/off the
+    	  statistics at runtime.
+
+
+
+commit eeac5c142b8687e35780b11b54b4c2f95b1a2436
+Author: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Date:   Wed Sep 13 22:12:52 2006 +1000
+
+    [POWERPC] Fix G5 DART (IOMMU) race causing occasional data corruption
+    
+    It seems that the occasional data corruption observed with the tg3
+    driver wasn't due to missing barriers after all, but rather seems to
+    be due to the DART (= IOMMU) in the U4 northbridge reading stale
+    IOMMU table entries from memory due to a race.  This fixes it by
+    making the CPU read the entry back from memory before using it.
+    
+
+commit 016eb4a0ed06a3677d67a584da901f0e9a63c666
+Author: Andrew Morton <akpm@osdl.org>
+Date:   Fri Sep 8 09:48:38 2006 -0700
+
+    [PATCH] invalidate_complete_page() race fix
+    
+  If a CPU faults this page into pagetables after invalidate_mapping_pages()
+ checked page_mapped(), invalidate_complete_page() will still proceed to remove
+    the page from pagecache.  This leaves the page-faulting process with a
+    detached page.  If it was MAP_SHARED then file data loss will ensue.
+    
+    Fix that up by checking the page's refcount after taking tree_lock.
+    
+
+
+
+commit 5db9fa9593e2ff69f2b95f9d59229dc4faaa564d
+Author: Nathan Lynch <ntl@pobox.com>
+Date:   Tue Aug 22 20:36:05 2006 -0500
+
+    [POWERPC] Fix gettimeofday inaccuracies
+    
+    There are two problems in the powerpc gettimeofday code which can
+    cause incorrect results to be returned.
+    
+    The first is that there is a race between do_gettimeofday and the
+    timer interrupt:
+    
+    1. do_gettimeofday does get_tb()
+    
+    2. decrementer exception on boot cpu which runs timer_recalc_offset,
+       which also samples the timebase and updates the do_gtod structure
+       with a greater timebase value.
+    
+    3. do_gettimeofday calls __do_gettimeofday, which leads to the
+       negative result from tb_val - temp_varp->tb_orig_stamp.
+    
+    The second is caused by taking the boot cpu offline, which can cause
+    the value of tb_last_jiffy to be increased past the currently
+    available timebase, causing the same underflow as above.
+    
+    [paulus@samba.org - define and use data_barrier() instead of mb().]
+
+
+commit 9f83e45eb54fc7198dc59fc63255341851ba4c48
+Author: Oleg Nesterov <oleg@tv-sign.ru>
+Date:   Mon Aug 21 08:34:15 2006 +0200
+
+    [PATCH] Fix current_io_context() vs set_task_ioprio() race
+    
+    I know nothing about io scheduler, but I suspect set_task_ioprio() is not safe.
+    
+    current_io_context() initializes "struct io_context", then sets ->io_context.
+    set_task_ioprio() running on another cpu may see the changes out of order, so
+    ->set_ioprio(ioc) may use io_context which was not initialized properly.
+    
+
+commit a90f56847e8df9034c1c05d1157e1b0cd96987fb
+Author: James Smart <James.Smart@Emulex.Com>
+Date:   Thu Aug 17 11:58:04 2006 -0400
+
+    [SCSI] lpfc 8.1.9 : Stall eh handlers if resetting while rport blocked
+    
+    Stall error handler if attempting resets/aborts while an rport is blocked.
+    This avoids device offline scenarios due to errors in the error handler.
+    
+    Background:
+      Although the transport is using the scsi_timed_out functionality to
+      restart the timeout if the rport is blocked, if the timeout has already
+      fired before the block occurs, the eh handler still runs and can take
+      the device offline. Ultimately, this window cannot be resolved without
+      significant work in the error handler thread. Christoph noted the first
+      level of these issues when he noted the poor error response handling
+      by the error thread.
+    
+      We found, under heavy load and error testing, that time window from when
+      the scsi_times_out() adds the io to the queue to when the scsi_error_handler
+      gets around to servicing it, can be in the several seconds range. In most
+      cases, these test conditions are highly unusual, but possible.
+      As a result, we're stalling the error handler in this race window so that
+      we can avoid the device_offline transitions.
+
+
+commit 2f8af120a159a843948749ea88bcacda9779b132
+Author: Michael Chan <mchan@broadcom.com>
+Date:   Tue Aug 15 01:39:10 2006 -0700
+
+    [BNX2]: Fix tx race condition.
+    
+    Fix a subtle race condition between bnx2_start_xmit() and bnx2_tx_int()
+    similar to the one in tg3 discovered by Herbert Xu:
+    
+    CPU0					CPU1
+    bnx2_start_xmit()
+    	if (tx_ring_full) {
+    		tx_lock
+    					bnx2_tx()
+    						if (!netif_queue_stopped)
+    		netif_stop_queue()
+    		if (!tx_ring_full)
+    						update_tx_ring
+    			netif_wake_queue()
+    		tx_unlock
+    	}
+    
+    Even though tx_ring is updated before the if statement in bnx2_tx_int() in
+    program order, it can be re-ordered by the CPU as shown above.  This
+    scenario can cause the tx queue to be stopped forever if bnx2_tx_int() has
+    just freed up the entire tx_ring.  The possibility of this happening
+    should be very rare though.
+    
+    The following changes are made, very much identical to the tg3 fix:
+    
+    1. Add memory barrier to fix the above race condition.
+    
+    2. Eliminate the private tx_lock altogether and rely solely on
+    netif_tx_lock.  This eliminates one spinlock in bnx2_start_xmit()
+    when the ring is full.
+    
+    3. Because of 2, use netif_tx_lock in bnx2_tx_int() before calling
+    netif_wake_queue().
+    
+    4. Add memory barrier to bnx2_tx_avail().
+    
+    5. Add bp->tx_wake_thresh which is set to half the tx ring size.
+    
+    6. Check for the full wake queue condition before getting
+    netif_tx_lock in tg3_tx().  This reduces the number of unnecessary
+    spinlocks when the tx ring is full in a steady-state condition.
+    
+
+commit 1b2a720506ccf7c30baaeda5d990c29b31e21726
+Author: Michael Chan <mchan@broadcom.com>
+Date:   Mon Aug 7 21:46:02 2006 -0700
+
+    [TG3]: Fix tx race condition
+    
+    Fix a subtle race condition between tg3_start_xmit() and tg3_tx()
+    discovered by Herbert Xu <herbert@gondor.apana.org.au>:
+    
+    CPU0					CPU1
+    tg3_start_xmit()
+    	if (tx_ring_full) {
+    		tx_lock
+    					tg3_tx()
+    						if (!netif_queue_stopped)
+    		netif_stop_queue()
+    		if (!tx_ring_full)
+    						update_tx_ring
+    			netif_wake_queue()
+    		tx_unlock
+    	}
+    
+    Even though tx_ring is updated before the if statement in tg3_tx() in
+    program order, it can be re-ordered by the CPU as shown above.  This
+    scenario can cause the tx queue to be stopped forever if tg3_tx() has
+    just freed up the entire tx_ring.  The possibility of this happening
+    should be very rare though.
+    
+    The following changes are made:
+    
+    1. Add memory barrier to fix the above race condition.
+    
+    2. Eliminate the private tx_lock altogether and rely solely on
+    netif_tx_lock.  This eliminates one spinlock in tg3_start_xmit()
+    when the ring is full.
+    
+    3. Because of 2, use netif_tx_lock in tg3_tx() before calling
+    netif_wake_queue().
+    
+    4. Change TX_BUFFS_AVAIL to an inline function with a memory barrier.
+    Herbert and David suggested using the memory barrier instead of
+    volatile.
+    
+    5. Check for the full wake queue condition before getting
+    netif_tx_lock in tg3_tx().  This reduces the number of unnecessary
+    spinlocks when the tx ring is full in a steady-state condition.
+    
+    6. Update version to 3.65.
+    
+
+
+commit a23eac99d4392b8b779305498d7614e41a0e16e9
+Author: Kurt Hackel <kurt.hackel@oracle.com>
+Date:   Sun Jun 18 21:28:01 2006 -0700
+
+    ocfs2: do not modify lksb->status in the unlock ast
+    
+    This can race with other ast notification, which can cause bad status values
+    to propagate into the unlock ast.
+    
+
+
+commit 1c067a42413c4f39c907443b8f5979cd4d82f0ff
+Author: James Smart <James.Smart@Emulex.Com>
+Date:   Tue Aug 1 07:33:52 2006 -0400
+
+    [SCSI] lpfc 8.1.7 : Fix race condition between lpfc_sli_issue_mbox and lpfc_online
+    
+    Fix race condition between lpfc_sli_issue_mbox and lpfc_online
+    
+
+commit 2f34931fdc78b4895553aaa33748939cc7697c99
+Author: Neil Brown <neilb@suse.de>
+Date:   Sat Aug 5 12:14:29 2006 -0700
+
+    [PATCH] knfsd: fix race related problem when adding items to and svcrpc auth cache
+    
+    If we don't find the item we are lookng for, we allocate a new one, and
+    then grab the lock again and search to see if it has been added while we
+    did the alloc.  If it had been added we need to 'cache_put' the newly
+    created item that we are never going to use.  But as it hasn't been
+    initialised properly, putting it can cause an oops.
+    
+    So move the ->init call earlier to that it will always be fully initilised
+    if we have to put it.
+    
+    Thanks to Philipp Matthias Hahn <pmhahn@svs.Informatik.Uni-Oldenburg.de>
+    for reporting the problem.
+
+
+
+commit 1fb32b7bd8203d0175649a75ede3ee7634d6a941
+Author: Evgeniy Dushistov <dushistov@mail.ru>
+Date:   Sat Aug 5 12:13:55 2006 -0700
+
+    [PATCH] ufs: ufs_get_locked_page() race fix
+    
+    As discussed earlier:
+    http://lkml.org/lkml/2006/6/28/136
+    this patch fixes such issue:
+    
+    `ufs_get_locked_page' takes page from cache
+    after that `vmtruncate' takes page and deletes it from cache
+    `ufs_get_locked_page' locks page, and reports about EIO error.
+    
+    Also because of find_lock_page always return valid page or NULL, we have no
+    need to check it if page not NULL.
+
+
+
+commit e91467ecd1ef381377fd327c0ded922835ec52ab
+Author: Christian Borntraeger <borntrae@de.ibm.com>
+Date:   Sat Aug 5 12:13:52 2006 -0700
+
+    [PATCH] bug in futex unqueue_me
+    
+    This patch adds a barrier() in futex unqueue_me to avoid aliasing of two
+    pointers.
+
+
+???
+
+
+commit ce38cac48209d270d07fd6d1a8e94446b37abcd5
+Author: Guido Guenther <agx@sigxcpu.org>
+Date:   Sun Jul 30 03:04:21 2006 -0700
+
+    [PATCH] rivafb/nvidiafb: race between register_framebuffer and *_bl_init
+    
+    Since we now use the generic backlight infrastructure, I think we need to
+    call rivafb_bl_init before calling register_framebuffer since otherwise
+    rivafb_bl_init might race with the framebuffer layer already opening the
+    device and setting up the video mode.  In this case we might end up with a
+    not yet fully intialized backlight (info->bl_dev still NULL) when calling
+    riva_bl_set_power via rivafb_set_par/rivafb_load_video_mode and the kernel
+    dies without any further notice during boot.
+    
+    This fixes booting current git on a PB 6,1.  In this case radeonfb/atyfb
+    would be affected too - I can fix that too but don't have any hardware to
+    test this on.
+    
+
+
+commit d5a2601734bcc740ee78dc4cb0c56b5687da7bd9
+Author: Andi Kleen <ak@suse.de>
+Date:   Fri Jul 28 14:44:42 2006 +0200
+
+    [PATCH] i386/x86-64: Add user_mode checks to profile_pc for oprofile
+    
+    Fixes a obscure user space triggerable crash during oprofiling.
+    
+    Oprofile calls profile_pc from NMIs even when user_mode(regs) is not true and
+    the program counter is inside the kernel lock section. This opens
+    a race - when a user program jumps to a kernel lock address and
+    a NMI happens before the illegal page fault exception is raised
+    and the program has a unmapped esp or ebp then the kernel could
+    oops. NMIs have a higher priority than exceptions so that could
+    happen.
+    
+    Add user_mode checks to i386/x86-64 profile_pc to prevent that.
+
+
+
+commit cfdeef3282705a4b872d3559c4e7d2561251363c
+Author: Vlad Yasevich <vladislav.yasevich@hp.com>
+Date:   Fri Jul 21 14:48:26 2006 -0700
+
+    [SCTP]: Unhash the endpoint in sctp_endpoint_free().
+    
+    This prevents a race between the close of a socket and receive of an
+    incoming packet.
+
+
+
+commit 6d76fa58b050044994fe25f8753b8023f2b36737
+Author: Linus Torvalds <torvalds@evo.osdl.org>
+Date:   Sat Jul 15 12:26:45 2006 -0700
+
+    Don't allow chmod() on the /proc/<pid>/ files
+    
+    This just turns off chmod() on the /proc/<pid>/ files, since there is no
+    good reason to allow it, and had we disallowed it originally, the nasty
+    /proc race exploit wouldn't have been possible.
+    
+    The other patches already fixed the problem chmod() could cause, so this
+    is really just some final mop-up..
+    
+    This particular version is based off a patch by Eugene and Marcel which
+    had much better naming than my original equivalent one.
+
+
+ommit c38c8db7225465c8d124f38b24d3024decc26bbd
+Author: Anil Keshavamurthy <anil.s.keshavamurthy@intel.com>
+Date:   Fri Jul 14 00:23:57 2006 -0700
+
+    [PATCH] ia64: race flushing icache in COW path
+    
+    There is a race condition that showed up in a threaded JIT environment.
+    The situation is that a process with a JIT code page forks, so the page is
+    marked read-only, then some threads are created in the child.  One of the
+    threads attempts to add a new code block to the JIT page, so a
+    copy-on-write fault is taken, and the kernel allocates a new page, copies
+    the data, installs the new pte, and then calls lazy_mmu_prot_update() to
+    flush caches to make sure that the icache and dcache are in sync.
+    Unfortunately, the other thread runs right after the new pte is installed,
+    but before the caches have been flushed.  It tries to execute some old JIT
+    code that was already in this page, but it sees some garbage in the i-cache
+    from the previous users of the new physical page.
+    
+    Fix: we must make the caches consistent before installing the pte.  This is
+    an ia64 only fix because lazy_mmu_prot_update() is a no-op on all other
+    architectures.
+    
+
+
+commit d3d9e484b2ca502c87156b69fa6b8f8fd5fa18a0
+Author: Auke Kok <auke\-jan.h.kok@intel.com>
+Date:   Fri Jul 14 16:14:23 2006 -0700
+
+    e1000: Redo netpoll fix to address community concerns
+    
+    The original suggested fix for netpoll was found to be racy on SMP
+    kernels. While it is highly unlikely that this race would ever be seen
+    in the real world due to current netpoll usage models, we implemented
+    this updated fix to address concerns.
+    
+
+
+commit 00d6058ac93048b525b86fa48b413dcb87ac2728
+Author: Ian Abbott <abbotti@mev.co.uk>
+Date:   Mon Jun 26 11:44:22 2006 +0100
+
+    [PATCH] USB serial visor: fix race in open/close
+    
+    The anti user-DoS mechanism in the USB serial 'visor' driver can fail in
+    the following way:
+    
+    visor_open: priv->outstanding_urbs = 0
+    visor_write: ++priv->outstanding_urbs
+    visor_close:
+    visor_open: priv->outstanding_urbs = 0
+    visor_write_bulk_callback: --priv->outstanding_urbs
+    
+    So priv->outstanding_urbs ends up as (unsigned long)(-1).  Not good!
+    
+    I haven't seen this happen with the visor driver as I don't have the
+    hardware, but I have seen it while testing a patch to implement the same
+    functionality in the ftdi_sio driver (patch not yet submitted).
+    
+    The fix is pretty simple: don't reinitialize outstanding_urbs in
+    visor_open.  (Again, I haven't tested the fix in visor, but I have
+    tested it in ftdi_sio.)
+
+
+commit eecd11ed47c8c9bd8e7e3dff35baccae18dd0d84
+Author: Alan Stern <stern@rowland.harvard.edu>
+Date:   Mon Jun 19 14:50:15 2006 -0400
+
+    [PATCH] usb-storage: fix race between reset and disconnect
+    
+    My recent patch converting usb-storage to use
+    usb_reset_composite_device() added a bug, a race between reset and
+    disconnect.  It was necessary to drop the private lock while executing a
+    reset, and if a disconnect occurs at that time it will cause a crash.
+    
+    This patch (as722) fixes the problem by explicitly checking for an early
+    termination after executing each command.
+    
+
+
+commit ae3c20ccf84c88d45616f12122f781a900118f09
+Author: NeilBrown <neilb@suse.de>
+Date:   Mon Jul 10 04:44:17 2006 -0700
+
+    [PATCH] md: fix some small races in bitmap plugging in raid5
+    
+    The comment gives more details, but I didn't quite have the sequencing write,
+    so there was room for races to leave bits unset in the on-disk bitmap for
+    short periods of time.
+
+
+
+commit 7c785b7a18dc30572a49c6b75efd384269735d14
+Author: NeilBrown <neilb@suse.de>
+Date:   Mon Jul 10 04:44:16 2006 -0700
+
+    [PATCH] md: fix a plug/unplug race in raid5
+    
+    When a device is unplugged, requests are moved from one or two (depending on
+    whether a bitmap is in use) queues to the main request queue.
+    
+    So whenever requests are put on either of those queues, we should make sure
+    the raid5 array is 'plugged'.  However we don't.  We currently plug the raid5
+    queue just before putting requests on queues, so there is room for a race.  If
+    something unplugs the queue at just the wrong time, requests will be left on
+    the queue and nothing will want to unplug them.  Normally something else will
+    plug and unplug the queue fairly soon, but there is a risk that nothing will.
+    
+
+
+
+commit c9a4b35df9a5e24065e2dd80aa18a381da62339d
+Author: Daniel Drake <dsd@gentoo.org>
+Date:   Sun Jun 11 23:18:54 2006 +0100
+
+    [PATCH] zd1211rw: disable TX queue during stop
+    
+    This avoids some potential races.
+
+
+
+ommit a1d79aaaa564abc19b7bf3a024bb371fa7648a15
+Author: Michael Buesch <mb@bu3sch.de>
+Date:   Sat Jun 17 15:19:05 2006 +0200
+
+    [PATCH] bcm43xx: workaround init_board vs. IRQ race
+    
+    Place the Init-vs-IRQ workaround before any card register
+    access, because we might not have the wireless core mapped
+    at all times in init. So this will result in a Machine Check
+    caused by a bus error.
+    
+ 
+
+
+commit fbb9ce9530fd9b66096d5187fa6a115d16d9746c
+Author: Ingo Molnar <mingo@elte.hu>
+Date:   Mon Jul 3 00:24:50 2006 -0700
+
+    [PATCH] lockdep: core
+    
+    Do 'make oldconfig' and accept all the defaults for new config options -
+    reboot into the kernel and if everything goes well it should boot up fine and
+    you should have /proc/lockdep and /proc/lockdep_stats files.
+    
+    Typically if the lock validator finds some problem it will print out
+    voluminous debug output that begins with "BUG: ..." and which syslog output
+    can be used by kernel developers to figure out the precise locking scenario.
+    
+    What does the lock validator do?  It "observes" and maps all locking rules as
+    they occur dynamically (as triggered by the kernel's natural use of spinlocks,
+    rwlocks, mutexes and rwsems).  Whenever the lock validator subsystem detects a
+    new locking scenario, it validates this new rule against the existing set of
+    rules.  If this new rule is consistent with the existing set of rules then the
+    new rule is added transparently and the kernel continues as normal.  If the
+    new rule could create a deadlock scenario then this condition is printed out.
+    
+    When determining validity of locking, all possible "deadlock scenarios" are
+    considered: assuming arbitrary number of CPUs, arbitrary irq context and task
+    context constellations, running arbitrary combinations of all the existing
+    locking scenarios.  In a typical system this means millions of separate
+    scenarios.  This is why we call it a "locking correctness" validator - for all
+    rules that are observed the lock validator proves it with mathematical
+    certainty that a deadlock could not occur (assuming that the lock validator
+    implementation itself is correct and its internal data structures are not
+    corrupted by some other kernel subsystem).  [see more details and conditionals
+    of this statement in include/linux/lockdep.h and
+    Documentation/lockdep-design.txt]
+    
+    Furthermore, this "all possible scenarios" property of the validator also
+    enables the finding of complex, highly unlikely multi-CPU multi-context races
+    via single single-context rules, increasing the likelyhood of finding bugs
+    drastically.  In practical terms: the lock validator already found a bug in
+    the upstream kernel that could only occur on systems with 3 or more CPUs, and
+    which needed 3 very unlikely code sequences to occur at once on the 3 CPUs.
+    That bug was found and reported on a single-CPU system (!).  So in essence a
+    race will be found "piecemail-wise", triggering all the necessary components
+    for the race, without having to reproduce the race scenario itself!  In its
+    short existence the lock validator found and reported many bugs before they
+    actually caused a real deadlock.
+    
+    To further increase the efficiency of the validator, the mapping is not per
+    "lock instance", but per "lock-class".  For example, all struct inode objects
+    in the kernel have inode->inotify_mutex.  If there are 10,000 inodes cached,
+    then there are 10,000 lock objects.  But ->inotify_mutex is a single "lock
+    type", and all locking activities that occur against ->inotify_mutex are
+    "unified" into this single lock-class.  The advantage of the lock-class
+    approach is that all historical ->inotify_mutex uses are mapped into a single
+    (and as narrow as possible) set of locking rules - regardless of how many
+    different tasks or inode structures it took to build this set of rules.  The
+    set of rules persist during the lifetime of the kernel.
+    
+    To see the rough magnitude of checking that the lock validator does, here's a
+    portion of /proc/lockdep_stats, fresh after bootup:
+    
+     lock-classes:                            694 [max: 2048]
+     direct dependencies:                  1598 [max: 8192]
+     indirect dependencies:               17896
+     all direct dependencies:             16206
+     dependency chains:                    1910 [max: 8192]
+     in-hardirq chains:                      17
+     in-softirq chains:                     105
+     in-process chains:                    1065
+     stack-trace entries:                 38761 [max: 131072]
+     combined max dependencies:         2033928
+     hardirq-safe locks:                     24
+     hardirq-unsafe locks:                  176
+     softirq-safe locks:                     53
+     softirq-unsafe locks:                  137
+     irq-safe locks:                         59
+     irq-unsafe locks:                      176
+    
+    The lock validator has observed 1598 actual single-thread locking patterns,
+    and has validated all possible 2033928 distinct locking scenarios.
+    
+    More details about the design of the lock validator can be found in
+    Documentation/lockdep-design.txt, which can also found at:
+    
+       http://redhat.com/~mingo/lockdep-patches/lockdep-design.txt
+    
+
+
+???
+
+
+
+commit 3e541a4ae534a7e59ad464af9abea382b3035724
+Author: Ingo Molnar <mingo@elte.hu>
+Date:   Mon Jul 3 00:24:23 2006 -0700
+
+    [PATCH] lockdep: floppy.c irq release fix
+    
+    The lock validator triggered a number of bugs in the floppy driver, all
+    related to the floppy driver allocating and freeing irq and dma resources from
+    interrupt context.  The initial solution was to use schedule_work() to push
+    this into process context, but this caused further problems: for example the
+    current floppy driver in -mm2 is totally broken and all floppy commands time
+    out with an error.  (as reported by Barry K.  Nathan)
+    
+    This patch tries another solution: simply get rid of all that dynamic IRQ and
+    DMA allocation/freeing.  I doubt it made much sense back in the heydays of
+    floppies (if two devices raced for DMA or IRQ resources then we didnt handle
+    those cases too gracefully anyway), and today it makes near zero sense.
+    
+    So the new code does the simplest and most straightforward thing: allocate IRQ
+    and DMA resources at module init time, and free them at module removal time.
+    Dont try to release while the driver is operational.  This, besides making the
+    floppy driver functional again has an added bonus, floppy IRQ stats are
+    finally persistent and visible in /proc/interrupts:
+    
+      6: 63 XT-PIC-level floppy
+    
+    Besides normal floppy IO i have also tested IO error handling, motor-off
+    timeouts, etc.  - and everything seems to be working fine.
+
+
+
+commit f37bda92461313ad3bbfbf5660adc849c69718bf
+Author: Bryan O'Sullivan <bos@pathscale.com>
+Date:   Sat Jul 1 04:36:03 2006 -0700
+
+    [PATCH] IB/ipath: memory management cleanups
+    
+    Made in-memory rcvhdrq tail update be in dma_alloc'ed memory, not random user
+    or special kernel (needed for ppc, also "just the right thing to do").
+    
+    Some cleanups to make unexpected link transitions less likely to produce
+    complaints about packet errors, and also to not leave SMA packets stuck and
+    unable to go out.
+    
+    A few other random debug and comment cleanups.
+    
+    Always init rcvhdrq head/tail registers to 0, to avoid race conditions (should
+    have been that way some time ago).
+    
+
+
+commit f8891e5e1f93a128c3900f82035e8541357896a7
+Author: Christoph Lameter <clameter@sgi.com>
+Date:   Fri Jun 30 01:55:45 2006 -0700
+
+    [PATCH] Light weight event counters
+    
+    The remaining counters in page_state after the zoned VM counter patches
+    have been applied are all just for show in /proc/vmstat.  They have no
+    essential function for the VM.
+    
+    We use a simple increment of per cpu variables.  In order to avoid the most
+    severe races we disable preempt.  Preempt does not prevent the race between
+    an increment and an interrupt handler incrementing the same statistics
+    counter.  However, that race is exceedingly rare, we may only loose one
+    increment or so and there is no requirement (at least not in kernel) that
+    the vm event counters have to be accurate.
+    
+    In the non preempt case this results in a simple increment for each
+    counter.  For many architectures this will be reduced by the compiler to a
+    single instruction.  This single instruction is atomic for i386 and x86_64.
+     And therefore even the rare race condition in an interrupt is avoided for
+    both architectures in most cases.
+    
+    The patchset also adds an off switch for embedded systems that allows a
+    building of linux kernels without these counters.
+    
+    The implementation of these counters is through inline code that hopefully
+    results in only a single instruction increment instruction being emitted
+    (i386, x86_64) or in the increment being hidden though instruction
+    concurrency (EPIC architectures such as ia64 can get that done).
+    
+    Benefits:
+    - VM event counter operations usually reduce to a single inline instruction
+      on i386 and x86_64.
+    - No interrupt disable, only preempt disable for the preempt case.
+      Preempt disable can also be avoided by moving the counter into a spinlock.
+    - Handling is similar to zoned VM counters.
+    - Simple and easily extendable.
+    - Can be omitted to reduce memory use for embedded use.
+    
+    References:
+    
+    RFC http://marc.theaimsgroup.com/?l=linux-kernel&m=113512330605497&w=2
+    RFC http://marc.theaimsgroup.com/?l=linux-kernel&m=114988082814934&w=2
+    local_t http://marc.theaimsgroup.com/?l=linux-kernel&m=114991748606690&w=2
+    V2 http://marc.theaimsgroup.com/?t=115014808400007&r=1&w=2
+    V3 http://marc.theaimsgroup.com/?l=linux-kernel&m=115024767022346&w=2
+    V4 http://marc.theaimsgroup.com/?l=linux-kernel&m=115047968808926&w=2
+    
+
+....
+
+
+
+commit c6e8c6ccf96e9249805d0e9828b994f4c926ad51
+Author: KaiGai Kohei <kaigai@ak.jp.nec.com>
+Date:   Thu Jun 29 15:33:02 2006 +0100
+
+    [JFFS2][XATTR] Fix xd->refcnt race condition
+    
+    When xd->refcnt is checked whether this xdatum should be released
+    or not, atomic_dec_and_lock() is used to ensure holding the
+    c->erase_completion_lock.
+    
+    This fix change a specification of delete_xattr_datum().
+    Previously, it's only called when xd->refcnt equals zero.
+    (calling it with positive xd->refcnt cause a BUG())
+    If you applied this patch, the function checks whether
+    xd->refcnt is zero or not under the spinlock if necessary.
+    Then, it marks xd DEAD flahs and links with xattr_dead_list
+    or releases it immediately when xd->refcnt become zero.
+    
+commit 309bd271211caa5a04a8137649cebd7691376351
+Author: Brian King <brking@us.ibm.com>
+Date:   Tue Jun 27 11:10:43 2006 -0500
+
+    [SCSI] scsi: Device scanning oops for offlined devices (resend)
+    
+    If a device gets offlined as a result of the Inquiry sent
+    during scanning, the following oops can occur. After the
+    disk gets put into the SDEV_OFFLINE state, the error handler
+    sends back the failed inquiry, which wakes the thread doing
+    the scan. This starts a race between the scanning thread
+    freeing the scsi device and the error handler calling
+    scsi_run_host_queues to restart the host. Since the disk
+    is in the SDEV_OFFLINE state, scsi_device_get will still
+    work, which results in __scsi_iterate_devices getting
+    a reference to the scsi disk when it shouldn't.
+    
+    The following execution thread causes the oops:
+    
+    CPU 0 (scan)				CPU 1 (eh)
+    
+    ---------------------------------------------------------
+    scsi_probe_and_add_lun
+                            ....
+                                            scsi_eh_offline_sdevs
+                                            scsi_eh_flush_done_q
+    scsi_destroy_sdev
+    scsi_device_dev_release
+                                            scsi_restart_operations
+                                             scsi_run_host_queues
+                                              __scsi_iterate_devices
+                                               get_device
+    scsi_device_dev_release_usercontext
+                                              scsi_run_queue
+                                                <---OOPS--->
+    
+    The patch fixes this by changing the state of the sdev to SDEV_DEL
+    before doing the final put_device, which should prevent the race
+    from occurring.
+    
+    Original oops follows:
+...
+
+
+commit c87e2837be82df479a6bae9f155c43516d2feebc
+Author: Ingo Molnar <mingo@elte.hu>
+Date:   Tue Jun 27 02:54:58 2006 -0700
+
+    [PATCH] pi-futex: futex_lock_pi/futex_unlock_pi support
+    
+    This adds the actual pi-futex implementation, based on rt-mutexes.
+    
+    [dino@in.ibm.com: fix an oops-causing race]
+
+
+commit efc30814a88bdbe2bfe4ac94de2eb089ad80bee3
+Author: Kirill Korotaev <dev@sw.ru>
+Date:   Tue Jun 27 02:54:32 2006 -0700
+
+    [PATCH] sched: CPU hotplug race vs. set_cpus_allowed()
+    
+    There is a race between set_cpus_allowed() and move_task_off_dead_cpu().
+    __migrate_task() doesn't report any err code, so task can be left on its
+    runqueue if its cpus_allowed mask changed so that dest_cpu is not longer a
+    possible target.  Also, chaning cpus_allowed mask requires rq->lock being
+    held.
+    
+
+
+
+commit 7049027c6f0098eb6b23b8f6ca65a905541faf81
+Author: Yasunori Goto <y-goto@jp.fujitsu.com>
+Date:   Tue Jun 27 02:53:39 2006 -0700
+
+    [PATCH] pgdat allocation and update for ia64 of memory hotplug: update pgdat address array
+    
+    This is to refresh node_data[] array for ia64.  As I mentioned previous
+    patches, ia64 has copies of information of pgdat address array on each node as
+    per node data.
+    
+    At v2 of node_add, this function used stop_machine_run() to update them.  (I
+    wished that they were copied safety as much as possible.) But, in this patch,
+    this arrays are just copied simply, and set node_online_map bit after
+    completion of pgdat initialization.
+    
+    So, kernel must touch NODE_DATA() macro after checking node_online_map().
+    (Current code has already done it.) This is more simple way for just
+    hot-add.....
+    
+    Note : It will be problem when hot-remove will occur,
+           because, even if online_map bit is set, kernel may
+           touch NODE_DATA() due to race condition. :-(
+    
+
+
+commit 2db10a081c5c1082d58809a1bcf1a6073f4db160
+Author: Auke Kok <auke-jan.h.kok@intel.com>
+Date:   Tue Jun 27 09:06:28 2006 -0700
+
+    e1000: rework driver hardware reset locking
+    
+    After studying the driver mac reset code it was found that there
+    were multiple race conditions possible to reset the unit twice or
+    bring it e1000_up() double. This fixes all occurences where the
+    driver needs to reset the mac.
+    
+    We also remove irq requesting/releasing into _open and _close so
+    that while the device is _up we will never touch the irq's. This fixes
+    the double free irq bug that people saw.
+    
+    To make sure that the watchdog task doesn't cause another race we let
+    it run as a non-scheduled task.
+    
+
+
+commit 97dfd70c8958a634157e0b35711cca01ff6f959b
+Author: Nathan Scott <nathans@sgi.com>
+Date:   Tue Jun 27 16:13:46 2006 +1000
+
+    [XFS] Remove a race condition where a linked inode could BUG_ON in
+    d_instantiate, due to fast transaction committal removing the last
+    remaining reference before we were all done.
+    
+    SGI-PV: 953287
+    SGI-Modid: xfs-linux-melb:xfs-kern:26347a
+ 
+
+commit da5311258d2afb96fc592c8b11e818facfa46dc3
+Author: Andi Kleen <ak@suse.de>
+Date:   Mon Jun 26 13:59:20 2006 +0200
+
+    [PATCH] x86_64: Fix race in cpu_local_* on preemptible kernels
+    
+    When a process changes CPUs while doing the non atomic cpu_local_*
+    operations it might operate on the local_t of a different CPUs.
+    
+    Fix that by disabling preemption.
+    
+    Pointed out by Christopher Lameter
+    
+
+
+commit 7ec75f254742766eb729f1d1024a5b4e6692fc5f
+Author: Jeff Mahoney <jeffm@suse.com>
+Date:   Mon Jun 26 00:27:24 2006 -0700
+
+    [PATCH] dm: fix mapped device ref counting
+    
+    To avoid races, _minor_lock must be held while changing mapped device
+    reference counts.
+    
+    There are a few paths where a mapped_device pointer is returned before a
+    reference is taken.  This patch fixes them.
+    
+    [akpm: too late for 2.6.17 - suitable for 2.6.17.x after it has settled]
+
+
+commit cd6a3ce9ec040c0b56ea92a81ff710417798c559
+Author: Eric W. Biederman <ebiederm@xmission.com>
+Date:   Mon Jun 26 00:25:49 2006 -0700
+
+    [PATCH] proc: Close the race of a process dying durning lookup
+    
+    proc_lookup and task exiting are not synchronized, although some of the
+    previous code may have suggested that.  Every time before we reuse a dentry
+    namei.c calls d_op->derevalidate which prevents us from reusing a stale dcache
+    entry.  Unfortunately it does not prevent us from returning a stale dcache
+    entry.  This race has been explicitly plugged in proc_pid_lookup but there is
+    nothing to confine it to just that proc lookup function.
+    
+    So to prevent the race I call revalidate explictily in all of the proc lookup
+    functions after I call d_add, and report an error if the revalidate does not
+    succeed.
+    
+    Years ago Al Viro did something similar but those changes got lost in the
+    churn.
+    
+
+
+commit 6aa65472d18703064898eefb5eb58f7ecd0d8912
+Author: Michael Buesch <mb@bu3sch.de>
+Date:   Mon Jun 26 00:25:30 2006 -0700
+
+    [PATCH] CAPI crash / race condition
+    
+    I am getting more or less reproducible crashes from the CAPI subsystem
+    using the fcdsl driver:
+    
+    Unable to handle kernel NULL pointer dereference at virtual address 00000010
+     printing eip:
+    c39bbca4
+    *pde = 00000000
+    Oops: 0000 [#1]
+    Modules linked in: netconsole capi capifs 3c59x mii fcdsl kernelcapi uhci_hcd usbcore ide_cd cdrom
+    CPU:    0
+    EIP:    0060:[<c39bbca4>]    Tainted: P      VLI
+    EFLAGS: 00010202   (2.6.16.11 #3)
+    EIP is at handle_minor_send+0x17a/0x241 [capi]
+    eax: c24abbc0   ebx: c0b4c980   ecx: 00000010   edx: 00000010
+    esi: c1679140   edi: c2783016   ebp: 0000c28d   esp: c0327e24
+    ds: 007b   es: 007b   ss: 0068
+    Process swapper (pid: 0, threadinfo=c0326000 task=c02e1300)
+    Stack: <0>000005b4 c1679180 00000000 c28d0000 c1ce04e0 c2f69654 c221604e c1679140
+           c39bc19a 00000038 c20c0400 c075c560 c1f2f800 00000000 c01dc9b5 c1e96a40
+           c075c560 c2ed64c0 c1e96a40 c01dcd3b c2fb94e8 c075c560 c0327f00 c1e96a40
+    Call Trace:
+     [<c39bc19a>] capinc_tty_write+0xda/0xf3 [capi]
+     [<c01dc9b5>] ppp_sync_push+0x52/0xfe
+     [<c01dcd3b>] ppp_sync_send+0x1f5/0x204
+     [<c01d9bc1>] ppp_push+0x3e/0x9c
+     [<c01dacd4>] ppp_xmit_process+0x422/0x4cc
+     [<c01daf3f>] ppp_start_xmit+0x1c1/0x1f6
+     [<c0213ea5>] qdisc_restart+0xa7/0x135
+     [<c020b112>] dev_queue_xmit+0xba/0x19e
+     [<c0223f69>] ip_output+0x1eb/0x236
+     [<c0220907>] ip_forward+0x1c1/0x21a
+     [<c021fa6c>] ip_rcv+0x38e/0x3ea
+     [<c020b4c2>] netif_receive_skb+0x166/0x195
+     [<c020b55e>] process_backlog+0x6d/0xd2
+     [<c020a30f>] net_rx_action+0x6a/0xff
+     [<c0112909>] __do_softirq+0x35/0x7d
+     [<c0112973>] do_softirq+0x22/0x26
+     [<c0103a9d>] do_IRQ+0x1e/0x25
+     [<c010255a>] common_interrupt+0x1a/0x20
+     [<c01013c5>] default_idle+0x2b/0x53
+     [<c0101426>] cpu_idle+0x39/0x4e
+     [<c0328386>] start_kernel+0x20b/0x20d
+    Code: c0 e8 b3 b6 77 fc 85 c0 75 10 68 d8 c8 9b c3 e8 82 3d 75 fc 8b 43 60 5a eb 50 8d 56 50 c7 00 00 00 00 00 66 89 68 04 eb 02 89
+    ca <8b> 0a 85 c9 75 f8 89 02 89 da ff 46 54 8b 46 10 e8 30 79 fd ff
+     <0>Kernel panic - not syncing: Fatal exception in interrupt
+    
+    That oops took me to the "ackqueue" implementation in capi.c.  The crash
+    occured in capincci_add_ack() (auto-inlined by the compiler).
+    
+    I read the code a bit and finally decided to replace the custom linked list
+    implementation (struct capiminor->ackqueue) by a struct list_head.  That
+    did not solve the crash, but produced the following interresting oops:
+    
+....
+
+
+    I came up with the following patch.  With this, I could not reproduce the
+    crash anymore.  Clearly, this is not the correct fix for the issue.  As this
+    seems to be some locking issue, there might be more locking issues in that
+    code.  For example, doesn't the whole struct capiminor have to be locked
+    somehow?
+    
+
+...
+
+commit 1eec00565d849ceda67f425e089c3233e3ef2ca2
+Author: Sonny Rao <sonny@burdell.org>
+Date:   Sun Jun 25 05:49:34 2006 -0700
+
+    [PATCH] fix race in idr code
+    
+    I ran into a bug where the kernel died in the idr code:
+    
+    cpu 0x1d: Vector: 300 (Data Access) at [c000000b7096f710]
+        pc: c0000000001f8984: .idr_get_new_above_int+0x140/0x330
+        lr: c0000000001f89b4: .idr_get_new_above_int+0x170/0x330
+        sp: c000000b7096f990
+       msr: 800000000000b032
+       dar: 0
+     dsisr: 40010000
+      current = 0xc000000b70d43830
+      paca    = 0xc000000000556900
+        pid   = 2022, comm = hwup
+    1d:mon> t
+    [c000000b7096f990] c0000000000d2ad8 .expand_files+0x2e8/0x364 (unreliable)
+    [c000000b7096faa0] c0000000001f8bf8 .idr_get_new_above+0x18/0x68
+    [c000000b7096fb20] c00000000002a054 .init_new_context+0x5c/0xf0
+    [c000000b7096fbc0] c000000000049dc8 .copy_process+0x91c/0x1404
+    [c000000b7096fcd0] c00000000004a988 .do_fork+0xd8/0x224
+    [c000000b7096fdc0] c00000000000ebdc .sys_clone+0x5c/0x74
+    [c000000b7096fe30] c000000000008950 .ppc_clone+0x8/0xc
+
+
+
+commit bafa96541b250a7051e3fbc5de6e8369daf8ffec
+Author: Miklos Szeredi <miklos@szeredi.hu>
+Date:   Sun Jun 25 05:48:51 2006 -0700
+
+    [PATCH] fuse: add control filesystem
+    
+    Add a control filesystem to fuse, replacing the attributes currently exported
+    through sysfs.  An empty directory '/sys/fs/fuse/connections' is still created
+    in sysfs, and mounting the control filesystem here provides backward
+    compatibility.
+    
+    Advantages of the control filesystem over the previous solution:
+    
+      - allows the object directory and the attributes to be owned by the
+        filesystem owner, hence letting unpriviled users abort the
+        filesystem connection
+    
+      - does not suffer from module unload race
+    
+
+
+commit 1a23989475846547e5b7ce14e77f072894aaff54
+Author: Finn Thain <fthain@telegraphics.com.au>
+Date:   Fri Jun 23 02:04:59 2006 -0700
+
+    [PATCH] m68k: m68k mac VIA2 fixes and cleanups
+    
+    Some fixes and cleanups from the linux-mac68k repo.  Fix mac_esp by clearing
+    the VIA2 SCSI IRQ flag before the SCSI IRQ handler is invoked.  Also fix a
+    race condition caused by unmasking a nubus slot IRQ then setting the relevant
+    nubus_active bit.
+    
+
+
+commit 0feae5c47aabdde59cbbec32d150e17102de37f0
+Author: NeilBrown <neilb@suse.de>
+Date:   Thu Jun 22 14:47:28 2006 -0700
+
+    [PATCH] Fix dcache race during umount
+    
+    The race is that the shrink_dcache_memory shrinker could get called while a
+    filesystem is being unmounted, and could try to prune a dentry belonging to
+    that filesystem.
+    
+    If it does, then it will call in to iput on the inode while the dentry is
+    no longer able to be found by the umounting process.  If iput takes a
+    while, generic_shutdown_super could get all the way though
+    shrink_dcache_parent and shrink_dcache_anon and invalidate_inodes without
+    ever waiting on this particular inode.
+    
+    Eventually the superblock gets freed anyway and if the iput tried to touch
+    it (which some filesystems certainly do), it will lose.  The promised
+    "Self-destruct in 5 seconds" doesn't lead to a nice day.
+    
+    The race is closed by holding s_umount while calling prune_one_dentry on
+    someone else's dentry.  As a down_read_trylock is used,
+    shrink_dcache_memory will no longer try to prune the dentry of a filesystem
+    that is being unmounted, and unmount will not be able to start until any
+    such active prune_one_dentry completes.
+    
+    This requires that prune_dcache *knows* which filesystem (if any) it is
+    doing the prune on behalf of so that it can be careful of other
+    filesystems.  shrink_dcache_memory isn't called it on behalf of any
+    filesystem, and so is careful of everything.
+    
+    shrink_dcache_anon is now passed a super_block rather than the s_anon list
+    out of the superblock, so it can get the s_anon list itself, and can pass
+    the superblock down to prune_dcache.
+    
+    If prune_dcache finds a dentry that it cannot free, it leaves it where it
+    is (at the tail of the list) and exits, on the assumption that some other
+    thread will be removing that dentry soon.  To try to make sure that some
+    work gets done, a limited number of dnetries which are untouchable are
+    skipped over while choosing the dentry to work on.
+    
+    I believe this race was first found by Kirill Korotaev.
+
+
+
+ommit 09d967c6f32b35eab15b45862ae16e4f06259d8e
+Author: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+Date:   Thu Jun 22 14:47:21 2006 -0700
+
+    [PATCH] Fix a race condition between ->i_mapping and iput()
+    
+    This race became a cause of oops, and can reproduce by the following.
+    
+        while true; do
+    	dd if=/dev/zero of=/dev/.static/dev/hdg1 bs=512 count=1000 & sync
+        done
+    
+    This race condition was between __sync_single_inode() and iput().
+    
+              cpu0 (fs's inode)                 cpu1 (bdev's inode)
+              -----------------                 -------------------
+                                           close("/dev/hda2")
+                                           [...]
+    __sync_single_inode()
+       /* copy the bdev's ->i_mapping */
+       mapping = inode->i_mapping;
+    
+                                           generic_forget_inode()
+                                              bdev_clear_inode()
+    					     /* restre the fs's ->i_mapping */
+    				             inode->i_mapping = &inode->i_data;
+    				          /* bdev's inode was freed */
+                                              destroy_inode(inode);
+    
+       if (wait) {
+          /* dereference a freed bdev's mapping->host */
+          filemap_fdatawait(mapping);  /* Oops */
+    
+    Since __sync_single_inode() is only taking a ref-count of fs's inode, the
+    another process can be close() and freeing the bdev's inode while writing
+    fs's inode.  So, __sync_signle_inode() accesses the freed ->i_mapping,
+    oops.
+    
+    This patch takes a ref-count on the bdev's inode for the fs's inode before
+    setting a ->i_mapping, and the clear_inode() of the fs's inode does iput() on
+    the bdev's inode.  So if the fs's inode is still living, bdev's inode
+    shouldn't be freed.
+    
+
+
+
+commit 04c567d9313e4927b9835361d8ac0318ce65af6b
+Author: David Howells <dhowells@redhat.com>
+Date:   Thu Jun 22 14:47:18 2006 -0700
+
+    [PATCH] Keys: Fix race between two instantiators of a key
+    
+    Add a revocation notification method to the key type and calls it whilst
+    the key's semaphore is still write-locked after setting the revocation
+    flag.
+    
+    The patch then uses this to maintain a reference on the task_struct of the
+    process that calls request_key() for as long as the authorisation key
+    remains unrevoked.
+    
+    This fixes a potential race between two processes both of which have
+    assumed the authority to instantiate a key (one may have forked the other
+    for example).  The problem is that there's no locking around the check for
+    revocation of the auth key and the use of the task_struct it points to, nor
+    does the auth key keep a reference on the task_struct.
+    
+    Access to the "context" pointer in the auth key must thenceforth be done
+    with the auth key semaphore held.  The revocation method is called with the
+    target key semaphore held write-locked and the search of the context
+    process's keyrings is done with the auth key semaphore read-locked.
+    
+    The check for the revocation state of the auth key just prior to searching
+    it is done after the auth key is read-locked for the search.  This ensures
+    that the auth key can't be revoked between the check and the search.
+    
+    The revocation notification method is added so that the context task_struct
+    can be released as soon as instantiation happens rather than waiting for
+    the auth key to be destroyed, thus avoiding the unnecessary pinning of the
+    requesting process.
+
+
+
+commit 688956f23bdbfb1c3551bfafc819f989b36bb8ae
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Tue Jun 6 15:44:34 2006 +0200
+
+    [ALSA] Fix races in irq handler and ioremap
+    
+    Call ioremap before request_irq for avoiding possible races
+    in the irq handler.
+
+
+commit 0a50d2b2951cb7ae12726814f9a198e1c699aa0b
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Thu Jun 1 14:47:29 2006 +0200
+
+    [ALSA] Fix possible races in PCI driver removal
+    
+    Call free_irq() before releasing others to avoid races when
+    shared irq is issued.
+    
+
+
+commit f079c25ab8a7d223875c5bac9b23b484e4a18f88
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Thu Jun 1 11:42:14 2006 +0200
+
+    [ALSA] hda-intel - Fix race in remove
+    
+    Call iounmap after free_irq to avoid invalid accesses in the
+    shared irq.  The patch is taken from
+    	https://bugzilla.novell.com/show_bug.cgi?id=167869
+    
+
+commit 4ec223d02f4d5f5a3129edc0e3d22550d6ac8a32
+Author: Venkatesh Pallipadi <venkatesh.pallipadi@intel.com>
+Date:   Wed Jun 21 15:18:34 2006 -0700
+
+    [CPUFREQ] Fix ondemand vs suspend deadlock
+    
+    Rootcaused the bug to a deadlock in cpufreq and ondemand. Due to non-existent
+    ordering between cpu_hotplug lock and dbs_mutex. Basically a race condition
+    between cpu_down() and do_dbs_timer().
+    
+    cpu_down() flow:
+    * cpu_down() call for CPU 1
+    * Takes hot plug lock
+    * Calls pre down notifier
+    *     cpufreq notifier handler calls cpufreq_driver_target() which takes
+          cpu_hotplug lock again. OK as cpu_hotplug lock is recursive in same
+          process context
+    * CPU 1 goes down
+    * Calls post down notifier
+    *     cpufreq notifier handler calls ondemand event stop which takes dbs_mutex
+    
+    So, cpu_hotplug lock is taken before dbs_mutex in this flow.
+    
+    do_dbs_timer is triggerred by a periodic timer event.
+    It first takes dbs_mutex and then takes cpu_hotplug lock in
+    cpufreq_driver_target().
+    Note the reverse order here compared to above. So, if this timer event happens
+    at right moment during cpu_down, system will deadlok.
+    
+    Attached patch fixes the issue for both ondemand and conservative.
+    
+
+
+commit 10b8e47d6b32bfba22874354c62770cb4e42aa6c
+Author: Alan Stern <stern@rowland.harvard.edu>
+Date:   Fri May 19 16:39:52 2006 -0400
+
+    [PATCH] UHCI: fix race in ISO dequeuing
+    
+    This patch (as688) fixes a small race in uhci-hcd.  Because ISO queues
+    aren't controlled by queue headers, they can't be unlinked.  Only
+    individual URBs can.  So whenever multiple ISO URBs are dequeued, it's
+    necessary to make sure the hardware is done with each one.  We can't
+    assume that dequeuing the first URB will suffice to unlink the entire
+    queue.
+    
+
+
+commit d71374dafbba7ec3f67371d3b7e9f6310a588808
+Author: Zhang Yanmin <yanmin.zhang@intel.com>
+Date:   Fri Jun 2 12:35:43 2006 +0800
+
+    [PATCH] PCI: fix race with pci_walk_bus and pci_destroy_dev
+    
+    pci_walk_bus has a race with pci_destroy_dev. When cb is called
+    in pci_walk_bus, pci_destroy_dev might unlink the dev pointed by next.
+    Later on in the next loop, pointer next becomes NULL and cause
+    kernel panic.
+    
+    Below patch against 2.6.17-rc4 fixes it by changing pci_bus_lock (spin_lock)
+    to pci_bus_sem (rw_semaphore).
+
+
+commit 00b7050426da8e7e58c889c5c80a19920d2d41b3
+Author: Michael Chan <mchan@broadcom.com>
+Date:   Sat Jun 17 21:58:45 2006 -0700
+
+    [TG3]: Convert to non-LLTX
+    
+    Herbert Xu pointed out that it is unsafe to call netif_tx_disable()
+    from LLTX drivers because it uses dev->xmit_lock to synchronize
+    whereas LLTX drivers use private locks.
+    
+    Convert tg3 to non-LLTX to fix this issue. tg3 is a lockless driver
+    where hard_start_xmit and tx completion handling can run concurrently
+    under normal conditions. A tx_lock is only needed to prevent
+    netif_stop_queue and netif_wake_queue race condtions when the queue
+    is full.
+    
+    So whether we use LLTX or non-LLTX, it makes practically no
+    difference.
+
+
+commit 28df955a2ad484d602314b30183ea8496a9aa34a
+Author: Trond Myklebust <Trond.Myklebust@netapp.com>
+Date:   Fri Jun 9 09:40:27 2006 -0400
+
+    NLM: Fix reclaim races
+    
+    Currently it is possible for a task to remove its locks at the same time as
+    the NLM recovery thread is trying to recover them. This quickly leads to an
+    Oops.
+    Protect the locks using an rw semaphore while they are being recovered.
+
+
+commit c5cf0e30bf3d8cb56758abb612827647c0a821cf
+Author: Benjamin Herrenschmidt <benh@au1.ibm.com>
+Date:   Tue May 30 14:14:19 2006 +1000
+
+    [PATCH] powerpc: Fix buglet with MMU hash management
+    
+    Our MMU hash management code would not set the "C" bit (changed bit) in
+    the hardware PTE when updating a RO PTE into a RW PTE. That would cause
+    the hardware to possibly to a write back to the hash table to set it on
+    the first store access, which in addition to being a performance issue,
+    might also hit a bug when running with native hash management (non-HV)
+    as our code is specifically optimized for the case where no write back
+    happens.
+    
+    Thus there is a very small therocial window were a hash PTE can become
+    corrupted if that HPTE has just been upgraded to read write, a store
+    access happens on it, and that races with another processor evicting
+    that same slot. Since eviction (caused by an almost full hash) is
+    extremely rare, the bug is very unlikely to happen fortunately.
+    
+    This fixes by allowing the updating of the protection bits in the native
+    hash handling to also set (but not clear) the "C" bit, and, in order to
+    also improve performances in the general case, by always setting that
+    bit on newly inserted hash PTE so that writeback really never happens.
+
+
+commit 3219e5294150aee7d389e19029f49b44fb6b5c9f
+Author: Mike Christie <michaelc@cs.wisc.edu>
+Date:   Tue May 30 00:37:28 2006 -0500
+
+    [SCSI] iscsi: fix writepsace race
+    
+    We can race and misset the suspend bit if iscsi_write_space is
+    called then iscsi_send returns with a failure indicating
+    there is no space.
+    
+    To handle this this patch returns a error upwards allowing xmitworker
+    to decide if we need to try and transmit again. For the no
+    write space case xmitworker will not retry, and instead
+    let iscsi_write_space queue it back up if needed (this relies
+    on the work queue code to properly requeue us if needed).
+
+
+commit e59d16965ca38df91c4d9390d8eb5a62d7739589
+Author: Auke Kok <auke-jan.h.kok@intel.com>
+Date:   Fri May 26 09:35:28 2006 -0700
+
+    ixgb: fix smp polling race condition
+    
+    Moved interrupt masking to before requesting the interrupt from the OS.
+    Moved interrupt enable to after netif_poll_enable.  This fixes a racy
+    BUG() where polling would be running on another CPU at the same time
+    that netif_poll_enable would run.
+
+commit df3b7668715f9acfe6ff37dd886f68e46ccd677e
+Author: Mark Haverkamp <markh@osdl.org>
+Date:   Wed May 10 09:13:11 2006 -0700
+
+    [SCSI] aacraid: sa race condition fix
+    
+    Received From Mark Salyzyn
+    
+    A race condition existed that could result in a lost completion of a
+    command to the ppc based cards.
+
+
+commit aa98d7cf59b5b0764d3502662053489585faf2fe
+Author: KaiGai Kohei <kaigai@ak.jp.nec.com>
+Date:   Sat May 13 15:09:47 2006 +0900
+
+    [JFFS2][XATTR] XATTR support on JFFS2 (version. 5)
+    
+    This attached patches provide xattr support including POSIX-ACL and
+    SELinux support on JFFS2 (version.5).
+    
+    There are some significant differences from previous version posted
+    at last December.
+    The biggest change is addition of EBS(Erase Block Summary) support.
+    Currently, both kernel and usermode utility (sumtool) can recognize
+    xattr nodes which have JFFS2_NODETYPE_XATTR/_XREF nodetype.
+    
+    In addition, some bugs are fixed.
+    - A potential race condition was fixed.
+    - Unexpected fail when updating a xattr by same name/value pair was fixed.
+    - A bug when removing xattr name/value pair was fixed.
+    
+    The fundamental structures (such as using two new nodetypes and exclusion
+    mechanism by rwsem) are unchanged. But most of implementation were reviewed
+    and updated if necessary.
+    Espacially, we had to change several internal implementations related to
+    load_xattr_datum() to avoid a potential race condition.
+    
+    [1/2] xattr_on_jffs2.kernel.version-5.patch
+    [2/2] xattr_on_jffs2.utils.version-5.patch
+    
+
+
+
+commit 422138dd68202fbd8ca9fb0df65e92d733249374
+Author: Dmitry Bazhenov <atrey@emcraft.com>
+Date:   Fri May 5 22:46:49 2006 +0100
+
+    [JFFS2] Fix race in setting file attributes
+    
+    It seems like there is a potential race in the function jffs2_do_setattr()
+    in the case when attributes of a symlink are updated. The symlink metadata
+    is read without having f->sem locked.
+    
+    The following patch should fix the race.
+
+
+commit e3c5a64e7075dd066316f1685caadabcbc649427
+Author: Zhu Yi <yi.zhu@intel.com>
+Date:   Thu Apr 13 17:21:13 2006 +0800
+
+    [PATCH] ipw2200: Fix wpa_supplicant association problem
+    
+    The new ipw2200 scan completion event feature will cause a potential event
+    race condition in wpa_supplicant. The patch fixes this problem by move the
+    ipw_disassociate() to the IW_AUTH_WPA_ENABLED event handling code.
+    
+
+
+commit d96fb997c6174f98a2a0a98200f99ac13b053bd6
+Author: David Woodhouse <dwmw2@infradead.org>
+Date:   Mon Apr 17 00:19:48 2006 +0100
+
+    [JFFS2] Fix race in post-mount node checking
+    
+    For a while now, we've postponed CRC-checking of data nodes to be done
+    by the GC thread, instead of being done while the user is waiting for
+    mount to finish. The GC thread would iterate through all the inodes on
+    the system and check each of their data nodes. It would skip over inodes
+    which had already been used or were already being read in by
+    read_inode(), because their data nodes would have been examined anyway.
+    
+    However, we could sometimes reach the end of the for-each-inode loop and
+    still have some unchecked space left, if an inode we'd skipped was
+    _still_ in the process of being read. This fixes that race by actually
+    waiting for read_inode() to finish rather than just moving on.
+    
+    Thanks to Ladislav Michl for coming up with a reproducible test case and
+    helping to track it down.
+    
+
+--------
+
+60 patches
+
+

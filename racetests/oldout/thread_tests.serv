@@ -1,0 +1,804 @@
+Sun Aug 10 21:12:37 PDT 2008
+incrementing generation number
+incrementing value in gen_num.txt
+
+running server on /home/jan/research/relay/racetests/thread_tests/ciltrees
+Registered summary type: rs
+Server ip is: 127.0.0.1
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: SERVER
+Done reading config file
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Entry points use roots: false
+trying to clear logs
+Callgraph, etc.
+-----
+Reached end of /home/jan/research/relay/racetests/thread_tests/ciltrees/calls.cil call graph file
+Num funcs: 36
+Scc_cg: Pruned 3 funcs w/out bodies for scc DAG
+Starting server
+-----
+>>> PROGRESS 1/33 SCCs DONE!
+
+>>> PROGRESS 2/33 SCCs DONE!
+
+>>> PROGRESS 3/33 SCCs DONE!
+
+>>> PROGRESS 4/33 SCCs DONE!
+
+>>> PROGRESS 5/33 SCCs DONE!
+
+>>> PROGRESS 6/33 SCCs DONE!
+
+>>> PROGRESS 7/33 SCCs DONE!
+
+>>> PROGRESS 8/33 SCCs DONE!
+
+>>> PROGRESS 9/33 SCCs DONE!
+
+>>> PROGRESS 10/33 SCCs DONE!
+
+>>> PROGRESS 11/33 SCCs DONE!
+
+>>> PROGRESS 12/33 SCCs DONE!
+
+>>> PROGRESS 13/33 SCCs DONE!
+
+>>> PROGRESS 14/33 SCCs DONE!
+
+>>> PROGRESS 15/33 SCCs DONE!
+
+>>> PROGRESS 16/33 SCCs DONE!
+
+>>> PROGRESS 17/33 SCCs DONE!
+
+>>> PROGRESS 18/33 SCCs DONE!
+
+>>> PROGRESS 19/33 SCCs DONE!
+
+>>> PROGRESS 20/33 SCCs DONE!
+
+>>> PROGRESS 21/33 SCCs DONE!
+
+>>> PROGRESS 22/33 SCCs DONE!
+
+>>> PROGRESS 23/33 SCCs DONE!
+
+>>> PROGRESS 24/33 SCCs DONE!
+
+>>> PROGRESS 25/33 SCCs DONE!
+
+>>> PROGRESS 26/33 SCCs DONE!
+
+>>> PROGRESS 27/33 SCCs DONE!
+
+>>> PROGRESS 28/33 SCCs DONE!
+
+>>> PROGRESS 29/33 SCCs DONE!
+
+>>> PROGRESS 30/33 SCCs DONE!
+
+>>> PROGRESS 31/33 SCCs DONE!
+
+>>> PROGRESS 32/33 SCCs DONE!
+
+>>> PROGRESS 33/33 SCCs DONE!
+
+Finished all SCCs
+Received warnings from worker. Status: 1/1
+****
+Possible race between access to:
+_a264_61637_threads_1.x @ test_dir/threads.c:251 and
+_a264_61637_threads_1.x @ test_dir/threads.c:251
+	Cluster ID: 19
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:55] and
+	[test_dir/threads.c:50, test_dir/threads.c:55]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
+(1)
+	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
+(2)
+	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+(3)
+	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+****
+Possible race between access to:
+_a264_61637_threads_1.x @ test_dir/threads.c:251 and
+_a264_61637_threads_1.x @ test_dir/threads.c:251
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:55] and
+	[test_dir/threads.c:55]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+(1)
+	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:310 62736 w/ func: lockWithGoto
+(2)
+	Th. 1 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+	Th. 2 spawned: test_dir/threads.c:311 62814 w/ func: lockWithGoto
+****
+Possible race between access to:
+datlock->x @ test_dir/threads.c:89 and
+datlock->x @ test_dir/threads.c:89
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:69] and
+	[test_dir/threads.c:31, test_dir/threads.c:36]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:93 59057 w/ func: munge
+	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+	Th. 2 spawned: test_dir/threads.c:93 59057 w/ func: munge
+****
+Possible race between access to:
+datlock->x @ test_dir/threads.c:89 and
+datlock->x @ test_dir/threads.c:89
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:31, test_dir/threads.c:36] and
+	[test_dir/threads.c:36]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+****
+Possible race between access to:
+datlock->x @ test_dir/threads.c:89 and
+datlock->x @ test_dir/threads.c:89
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:36] and
+	[test_dir/threads.c:36]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+datlock->x @ test_dir/threads.c:89 and
+datlock->x @ test_dir/threads.c:89
+	Cluster ID: 16
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:69] and
+	[test_dir/threads.c:36]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:93 59057 w/ func: munge
+	Th. 2 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:94 59121 w/ func: mungeMax
+	Th. 2 spawned: test_dir/threads.c:93 59057 w/ func: munge
+****
+Possible race between access to:
+datlock->x @ test_dir/threads.c:89 and
+datlock->x @ test_dir/threads.c:89
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:69] and
+	[test_dir/threads.c:69]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:93 59057 w/ func: munge
+	Th. 2 spawned: test_dir/threads.c:93 59057 w/ func: munge
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: _a263_61586_threads_1.x
+	lval 2: _a263_61586_threads_1.x
+	Th. 1 spawned: test_dir/threads.c:294 62381 w/ func: munge
+	Th. 2 spawned: test_dir/threads.c:294 62381 w/ func: munge
+****
+Possible race between access to:
+_a108_59279_threads2_1.b @ test_dir/threads2.c:100 and
+_a108_59279_threads2_1.b @ test_dir/threads2.c:100
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads2.c:111] and
+	[test_dir/threads2.c:111]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+_a156_59781_threads2_1.a @ test_dir/threads2.c:148 and
+_a156_59781_threads2_1.a @ test_dir/threads2.c:148
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads2.c:36] and
+	[test_dir/threads2.c:36]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads2.c:164 59987 w/ func: unsafeThread
+	Th. 2 spawned: test_dir/threads2.c:164 59987 w/ func: unsafeThread
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads2.c:164 59987 w/ func: unsafeThread
+	Th. 2 spawned: test_dir/threads2.c:165 60053 w/ func: unsafeThread
+(1)
+	Th. 1 spawned: test_dir/threads2.c:165 60053 w/ func: unsafeThread
+	Th. 2 spawned: test_dir/threads2.c:164 59987 w/ func: unsafeThread
+(2)
+	Th. 1 spawned: test_dir/threads2.c:165 60053 w/ func: unsafeThread
+	Th. 2 spawned: test_dir/threads2.c:165 60053 w/ func: unsafeThread
+****
+Possible race between access to:
+_a157_59816_threads2_1.a @ test_dir/threads2.c:148 and
+_a157_59816_threads2_1.a @ test_dir/threads2.c:148
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads2.c:105, test_dir/threads2.c:116] and
+	[test_dir/threads2.c:116]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+****
+Possible race between access to:
+_a157_59816_threads2_1.a @ test_dir/threads2.c:148 and
+_a157_59816_threads2_1.a @ test_dir/threads2.c:148
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads2.c:116] and
+	[test_dir/threads2.c:116]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: _a108_59279_threads2_1.a
+	lval 2: _a108_59279_threads2_1.a
+	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+****
+Possible race between access to:
+_a157_59816_threads2_1.b @ test_dir/threads2.c:148 and
+_a157_59816_threads2_1.b @ test_dir/threads2.c:148
+	Cluster ID: 1
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads2.c:106] and
+	[test_dir/threads2.c:106]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+_a157_59816_threads2_1.c @ test_dir/threads2.c:148 and
+_a157_59816_threads2_1.c @ test_dir/threads2.c:148
+	Cluster ID: 2
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads2.c:117] and
+	[test_dir/threads2.c:117]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: _a108_59279_threads2_1.c
+	lval 2: _a108_59279_threads2_1.c
+	Th. 1 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+	Th. 2 spawned: test_dir/threads2.c:167 60120 w/ func: branch
+****
+Possible race between access to:
+dlracey->x @ test_dir/threads.c:98 and
+dlracey->x @ test_dir/threads.c:98
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:82] and
+	[test_dir/threads.c:82]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:102 59248 w/ func: raceyMunge
+	Th. 2 spawned: test_dir/threads.c:102 59248 w/ func: raceyMunge
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: _a260_61433_threads_1.x
+	lval 2: _a260_61433_threads_1.x
+	Th. 1 spawned: test_dir/threads.c:280 62125 w/ func: raceyMunge
+	Th. 2 spawned: test_dir/threads.c:280 62125 w/ func: raceyMunge
+(1)
+	lval 1: _a262_61535_threads_1.x
+	lval 2: _a262_61535_threads_1.x
+	Th. 1 spawned: test_dir/threads.c:288 62274 w/ func: raceyMunge
+	Th. 2 spawned: test_dir/threads.c:288 62274 w/ func: raceyMunge
+****
+Possible race between access to:
+[REP: 46].x and
+[REP: 46].x
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:209] and
+	[test_dir/threads.c:209]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:322 63091 w/ func: raceyGetterUse
+	Th. 2 spawned: test_dir/threads.c:322 63091 w/ func: raceyGetterUse
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:322 63091 w/ func: raceyGetterUse
+	Th. 2 spawned: test_dir/threads.c:323 63162 w/ func: raceyGetterUse
+(1)
+	Th. 1 spawned: test_dir/threads.c:323 63162 w/ func: raceyGetterUse
+	Th. 2 spawned: test_dir/threads.c:322 63091 w/ func: raceyGetterUse
+(2)
+	Th. 1 spawned: test_dir/threads.c:323 63162 w/ func: raceyGetterUse
+	Th. 2 spawned: test_dir/threads.c:323 63162 w/ func: raceyGetterUse
+****
+Possible race between access to:
+[REP: 25] and
+[REP: 25]
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads2.c:129] and
+	[test_dir/threads2.c:129]
+
+	Confidence: used PTA nodes lblSet(1, 1)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads2.c:171 60300 w/ func: modU
+	Th. 2 spawned: test_dir/threads2.c:171 60300 w/ func: modU
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+[REP: 42].x and
+[REP: 42].x
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:111] and
+	[test_dir/threads.c:111]
+
+	Confidence: used PTA nodes lblSet(1, 1)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:295 62452 w/ func: globMunge
+	Th. 2 spawned: test_dir/threads.c:295 62452 w/ func: globMunge
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+[REP: 30].x and
+[REP: 30].x
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:121] and
+	[test_dir/threads.c:121]
+
+	Confidence: used PTA nodes lblSet(5, 5)
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+(1)
+	Th. 1 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+(2)
+	Th. 1 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+****
+Possible race between access to:
+[REP: 30].x and
+[REP: 30].x
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:121] and
+	[test_dir/threads.c:150, test_dir/threads.c:156, test_dir/threads.c:161]
+
+	Confidence: used PTA nodes lblSet(5, 5)
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+****
+Possible race between access to:
+[REP: 30].x and
+[REP: 30].x
+	Cluster ID: 21
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:121] and
+	[test_dir/threads.c:161]
+
+	Confidence: used PTA nodes lblSet(5, 5)
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+(1)
+	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+(2)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:305 62591 w/ func: loopAndRecurse
+(3)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:306 62662 w/ func: loopAndRecurse
+****
+Possible race between access to:
+[REP: 30].x and
+[REP: 30].x
+	Cluster ID: 18
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:161] and
+	[test_dir/threads.c:150, test_dir/threads.c:156, test_dir/threads.c:161]
+
+	Confidence: used PTA nodes lblSet(5, 5)
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+(1)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+(3)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+****
+Possible race between access to:
+[REP: 30].x and
+[REP: 30].x
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[test_dir/threads.c:161] and
+	[test_dir/threads.c:161]
+
+	Confidence: used PTA nodes lblSet(5, 5)
+
+LS for 1st access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 30]#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+(1)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:315 62921 w/ func: loopWithGoto
+(2)
+	Th. 1 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+	Th. 2 spawned: test_dir/threads.c:316 62990 w/ func: loopWithGoto
+
+
+$$$$$$
+Total Warnings: 22
+Elapsed time (secs): 0.024001
+Top heap size (words): 184320
+Current heap size (words): 184320
+Lifetime allocated bytes: 2359084.
+Collections -- minor: 11 major: 2 compactions: 0
+Sun Aug 10 21:12:38 PDT 2008

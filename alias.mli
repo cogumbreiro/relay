@@ -15,6 +15,11 @@ val initSettings : Config.settings -> string -> unit
 val setCurrentFile : Cil.file -> unit
 
 (***********************************************************)
+(* Finish up                                               *)
+
+val finalizeAll : unit -> unit
+
+(***********************************************************)
 (* Wrapper functions around PTA                            *)
 
 exception UnknownLoc
@@ -50,11 +55,17 @@ module Abs : sig
 
   val getNodeLval : Cil.lval -> ptaNode
 
+  val getNodeExp : Cil.exp -> ptaNode
+
   val getNodeVar : Cil.varinfo -> ptaNode
 
   val represents : ptaNode -> Cil.lval list
 
   val may_alias : ptaNode -> ptaNode -> bool
+
+  val location_alias : ptaNode -> ptaNode -> bool
+
+  val points_to : ptaNode -> ptaNode -> bool
 
   val deref : ptaNode -> ptaNode
 
@@ -64,7 +75,9 @@ module Abs : sig
 
   val string_of : ptaNode -> string
 
-  val size_of : ptaNode -> int
+  val pts_size : ptaNode -> int
+
+  val label_size : ptaNode -> int
 
   val reachableFrom : ptaNode -> ptaNode list -> bool
 

@@ -44,13 +44,10 @@ open Fstructs
 
 module Req = Request
 module BS = Backed_summary
-module SS = Symsummary
-module RS = Racesummary
 
-
-(* Helper function to track where function summaries can be found. 
-   Bookkeeping is to be stored in the given [dict]. 
-   The given [sumTyp], [fkey], [tok] has just been discovered *)
+(** Helper function to track where function summaries can be found. 
+    Bookkeeping is to be stored in the given [dict]. 
+    The given [sumTyp], [fkey], [tok] has just been discovered *)
 let trackSum dict sumTyp (fkey, tok) =
   let oldList = try Hashtbl.find dict sumTyp with Not_found -> [] in
   let newList = (fkey, tok) :: oldList in
@@ -62,25 +59,28 @@ let trackSum dict sumTyp (fkey, tok) =
    Still need confirmation that the summary for the different analyses
    were actually acquired though... *)
 
-(* Helper function to find the original descriptor *)
+(** Helper function to find the original descriptor *)
 let getDescriptor descrips sumTyp = 
-  List.find (fun sumD -> sumD.BS.sumTyp = sumTyp) descrips
+  List.find (fun sumD -> sumD#sumTyp = sumTyp) descrips
 
-(* Helper function to notify summary managers which summaries are complete,
-   and where the files can be found *)
+
+(** Helper function to notify summary managers which summaries are complete,
+    and where the files can be found *)
 let completeSums dict =
   Hashtbl.iter 
     (fun sumT completed ->
-       sumT.BS.sumCompletor completed
+       sumT#assumeComplete completed
     ) dict
 
 
 (** Given a list of funs that need summaries. Acquire them 
     and mark them as ready for use. 
-    @raise SummariesNotFound if some are not acquired -- this means no
-    summary is too trivial to be written to disk!
+    @raise SummariesNotFound if some are not acquired -- 
+    (this means no summary should be too trivial to be exist on disk...
+    or you have some method of detecting such summaries on the
+    peer and have the peer reply)
 *)
-let prepareSumms (funs : fKey list) (sums : BS.sumDescriptor list) =
+let prepareSumms (funs : fKey list) (sums : BS.dbManagement list) =
   (* Identify list of func sums that need to be downloaded *)
   let toGet = ref [] in
   let addToGet fkey styp =
@@ -97,7 +97,7 @@ let prepareSumms (funs : fKey list) (sums : BS.sumDescriptor list) =
        (* Iter over typs *)
        List.iter
          (fun sum ->
-            match BS.discover fkey sum.BS.sumTyp
+            match BS.discover fkey sum#sumTyp
               addToGet with
                 None -> ()
               | Some tok -> trackSum availSums sum (fkey, tok)
@@ -117,7 +117,7 @@ let prepareSumms (funs : fKey list) (sums : BS.sumDescriptor list) =
     ()
   ;
   completeSums availSums
-  
+
 
 (** Given a list of functions (maybe the functions in the current SCC),
     check the disk to see if the summaries are already there. If they

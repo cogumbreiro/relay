@@ -1065,6 +1065,20 @@ and typsig =
   | TSBase of typ
 
 
+(** Describe a unique program point as a stmt id, 
+    and the instruction index within a basic block.
+    (can only be used once a CFG is created). 
+    -1 for either means unknown / inapplicable
+*)
+type prog_point = {
+  pp_stmt : int;
+  pp_instr: int;
+}
+    
+val ppUnknown : prog_point
+  
+val curProgPoint : prog_point ref
+
 
 (** {b Lowering Options} *)
 
@@ -1368,6 +1382,9 @@ val isPointerType: typ -> bool
 
 (** True if the argument is a function type *)
 val isFunctionType: typ -> bool
+
+(** True if the argument is a struct *)
+val isStructType: typ -> bool
 
 (** Obtain the argument list ([] if None) *)
 val argsToList: (string * typ * attributes) list option 
@@ -1789,9 +1806,15 @@ class type cilVisitor = object
     (** Invoked on each offset appearing in the list of a 
       * CompoundInit initializer.  *)
 
+  method vinstStart : instr list -> unit
+    (** Notify user that a list of instructions is about to be visited *)
+
   method vinst: instr -> instr list visitAction
     (** Invoked on each instruction occurrence. The [ChangeTo] action can
      * replace this instruction with a list of instructions *)
+
+  method vinstEnd : instr list -> unit
+    (** Notify user that visitation hours for the instruction list are over *)
 
   method vstmt: stmt -> stmt visitAction        
     (** Control-flow statement. The default [DoChildren] action does not 
@@ -1979,6 +2002,9 @@ val d_loc: unit -> location -> Pretty.doc
 
 (** Pretty-print the {!Cil.currentLoc} *)
 val d_thisloc: unit -> Pretty.doc
+
+(** Pretty-print a prog_point *)
+val d_pp: unit -> prog_point -> Pretty.doc
 
 (** Pretty-print an integer of a given kind *)
 val d_ikind: unit -> ikind -> Pretty.doc
@@ -2388,6 +2414,24 @@ val get_globalLoc: global -> location
 (** Return the location of a statement, or locUnknown *)
 val get_stmtLoc: stmtkind -> location 
 
+(** Get the current program point (for the current function) *)
+val getCurrentPP: unit -> prog_point
+
+(** Get the prog_point associated with the given statement *)
+val getStmtPP: stmt -> prog_point
+
+val getInstrPP: prog_point -> instr -> int -> prog_point
+
+(** @return Some(sid) if the pp is for a stmt, and not an instr.
+    If it was for an instr, return None *)
+val isStmtPP : prog_point -> int option
+
+(** Update current location and prog_point for given current stmt *)
+val setStmtLocation: stmt -> unit
+
+(** Update location for current instruction (within current stmt).
+    Assumes parent stmt has already been visited  *)
+val setInstrLocation: instr -> int -> unit
 
 (** Generate an {!Cil.exp} to be used in case of errors. *)
 val dExp: Pretty.doc -> exp 

@@ -35,19 +35,292 @@
   
 *)
 
-(** Basic mod summaries (track what externally visible writes occur
-    in a function). *)
 
+(** Basic mod summaries (track what externally visible 
+    writes occur in a function). *)
 
-open Lvals
-open Scope
+open Cil
+open Pretty
 open Fstructs
 
-exception BottomSummary
+module A = Alias
+module L = Logging
+module Stat = Mystats
+module BS = Backed_summary
+module Lv = Lvals
+module CLv = Cil_lvals
+module Sh = Shared
+module DF = Dataflow
+module Intra = IntraDataflow
+module SPTA = Symex 
+  (* hmm... centralize the choice in some Symex-chooser module? *)
 
-class modSumm = object (self)
+(************************************************************
+       An implementation -- Just a set of lvals
+  TODO: refactor and separate interface from implementation
+ ************************************************************)
+
+module Lvs = Set.Make (Lv.OrderedLval)
+
+type state = Lvs.t
+
+type summary = state
+
+(* Provide a hash-cons'er for sets? *)
+
+
+(****** Make a Singleton representing \bottom ********)
+
+let bottomLval = Lv.dummyLval
+
+let bottomSet = Lvs.add bottomLval Lvs.empty
+
+let bottomSummary = bottomSet
+
+let emptySummary = Lvs.empty
+
+let isBottom x =
+  x == bottomSet || Lvs.equal bottomSet x
+
+(****** Define + Instantiate the summary class *******)
+
+module ModSumType = struct
+
+  type t = summary
+
+  type simpleSum = summary
+
+  let simplify x = x (* TODO: have it do some hash-consing *)
+
+  let desimplify x = x
+
+  let initVal = bottomSummary
+
+  let unknownSummary = emptySummary
+
+end
+
+module ModSum = Safer_sum.Make (ModSumType)
+
+(*** Tack on the required getMods method ***)
+
+let listMods lvs =
+  Lvs.fold 
+    (fun lval cur ->
+       let scope = Lv.getScope lval in
+       (lval, scope) :: cur
+    ) lvs []
+
+let iterMods = Lvs.iter
+
+
+
+class modSummary sumID = object (self)
+  inherit ModSum.data sumID
+
+  method getMods fkey = 
+    let sum = self#find fkey in
+    if isBottom sum then
+      raise Modsummaryi.BottomSummary
+    else
+      let outSt = sum in
+      listMods outSt
+        
+end
+
+let sums = new modSummary (BS.makeSumType "mods")
+
+let _ = BS.registerType (sums :> ModSum.data)
+
+
+(************************************************************
+       Computing the mod summaries
+ ************************************************************)
+
+(** state lattice operations for mods *)
+class modStateLattice : [state, state] Intra.stateLattice  = object (self)
+
+  val mutable thesums = (sums :> ModSum.data)
+
+  method sums = thesums
+
+  method setTheSums newSumDB =
+    thesums <- newSumDB
+
+  (***** Special values of the state *****)
+
+  method bottom =
+    bottomSet
+    
+  method initialState =
+    Lvs.empty
+
+  method isBottom st =
+    isBottom st
+
+  method stateSubset st1 st2 =
+    if st1 == st2 then true
+    else if isBottom st1 then true
+    else Lvs.subset st1 st2
+    
+  method combineStates st1 st2 =
+    Lvs.union st1 st2
+            
+  (***** Debugging *****)
+ 
+  method printState st =
+    let doc = 
+      L.seq_to_doc 
+        (text ", ")
+        Lvs.iter
+        (fun lv -> text (Lv.string_of_lval lv))
+        st
+        Pretty.nil in
+    L.logStatusD doc;
+    L.logStatus "\n"
+
+  method printSummary fkey =
+    let theSum = sums#find fkey in
+    L.logStatus "Mod summary:";
+    self#printState theSum
+
+end
+
+
+(** transfer functions for mods *)
+class modTransfer stMan = object (self) 
+  inherit ([state] Intra.idTransFunc stMan) as super
+  inherit [state] Intra.inspectorGadget stMan "mods"
+    
+  method addWrite lv st =
+    Lvs.add lv st
+
+  (** Add any mods to the state. Eagerly filters lvals that should 
+      be considered *)
+  method handleAssignLeft (lv:Cil.lval) inSt =
+    match lv with
+      (* [COPY]  x = newVal *)
+      (Var(vi) as host, off) ->
+        if Sh.varShareable vi then
+          let newOff, _ = CLv.canonicizeOff off in
+          self#addWrite (Lv.abs_of_lval (host, newOff)) inSt
+        else
+          inSt
+            
+    (* [STORE] *e = newVal *)
+    | (Mem(ptrExp),_) -> begin
+        let pp = getCurrentPP () in
+        let mustPt, targets = SPTA.derefLvalAt pp lv in
+
+        (* Add correlation regardless of must/may point to status *)
+        List.fold_left 
+          (fun curSt curLv ->
+             match Sh.isShareableAbs self#curFunc curLv with
+               None -> curSt
+             | Some(scope) ->
+                 self#addWrite curLv curSt
+          ) inSt targets
+      end
+
+  (** Analyze assignment instructions of the form [lv := exp] *)
+  method handleAssign lv exp loc inSt =
+    DF.Done (self#handleAssignLeft lv inSt)
+
+  (** Analyze the return value of a function call [lv := callexp(acts)] *)
+  method handleCallRet lval callexp args loc inSt =
+    self#handleAssignLeft lval inSt
+
+  method foldSummaryWrites pp actuals sumLv curWrites =
+    curWrites
+
+  (** Accumulate the writes from callee *)
+  method findApplySum pp actuals fkey curState =
+    let sumWrites = stMan#sums#find fkey in
+    let apply = self#foldSummaryWrites pp actuals in
+    let applied = Lvs.fold apply sumWrites curState in
+    applied
+      
+  (** Analyze the actual call *)
+  method handleCallExp callexp args loc inSt =
+    let funs = A.funsForCall callexp in
+    let pp = getCurrentPP () in
+    List.fold_left 
+      (fun curState fkey ->
+         self#findApplySum pp args fkey curState 
+      ) inSt funs
+
+
+end
+
+let stLattice = new modStateLattice
+let transFunc = new modTransfer stLattice
+
+let scopeMods curFunc st =
+  let scopePruned = Lvs.filter 
+    (fun lv ->
+       match Shared.isShareableAbs curFunc lv with
+         None -> false | Some _ -> true
+    ) st in
+   scopePruned 
+
+(** Expected dataflow analysis interface *)
+module ModTransfer = struct
+
+  (** Debug settings for the CIL dataflow framework *)
+  let debug = false
+
+  (** Name of the analysis given to CIL *)
+  let name = "mod analysis"
+
+  (** The type of state tracked at each program point (possibly bottom) *)
+  type st = state
+
+  type sum = st
+
+  (** an instance of the class/interface for operations on state *)
+  let stMan = stLattice
+
+  (** an instance of the class/interface for transfer function operations *)
+  let transF = ref (transFunc :> st Intra.transFunc)
+
+
+end
+
+module ModIntraProc = IntraDataflow.FlowInsensitive (ModTransfer)
+  (* TODO: need to know if program points are reachable before adding writes? *)
+
+
+(** Package up the mods analysis *)
+class modAnalysis = object (self) 
   
-  method getMods (fkey: fKey) : (aLval * scope ) list =
-    failwith "Not implemented"
+  method setInspect yesno =
+    (* TODO: make this work if the flow function is changed *)
+    transFunc#setInspect yesno
 
+  method isFinal (fk:fKey) = 
+    false
+      
+  method compute cfg =
+    (* TODO: get rid of input *)
+    let input = Lvs.empty in
+    ModIntraProc.initialize cfg input;
+    L.logStatus "doing mods analysis";
+    L.flushStatus ();
+    Stat.time "mods analysis: " ModIntraProc.compute cfg
+
+  method summarize fkey cfg =
+    if self#isFinal fkey then
+      false
+    else begin
+      let newSummary = ModIntraProc.getOutState () in
+      Intra.checkupSummary fkey cfg newSummary 
+        stLattice#sums#find
+        stLattice#isBottom
+        stLattice#stateSubset
+        stLattice#combineStates
+        scopeMods
+        stLattice#sums#addReplace
+        transFunc#inspect
+        stLattice#printState;
+    end
 end

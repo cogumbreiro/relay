@@ -1,12 +1,15 @@
 from django.db import models
 from django.db.models import permalink
 import re
+import sys
 
+def warn(msg):
+    sys.stderr.write(msg)
 
 class Code_base(models.Model):
-    program_name = models.CharField(maxlength=50, core=True)
-    version = models.CharField(maxlength=40, core=True)
-    compile_options = models.CharField(maxlength=100)
+    program_name = models.CharField(max_length=50, core=True)
+    version = models.CharField(max_length=40, core=True)
+    compile_options = models.CharField(max_length=100)
     def __str__(self):
         return "%s v.%s" % (self.program_name, self.version)
     def get_absolute_url(self):
@@ -26,7 +29,7 @@ class Note(models.Model):
         pass
 
 class Label(models.Model):
-    label = models.CharField(maxlength=50, core=True)
+    label = models.CharField(max_length=50, core=True)
     example = models.TextField(core=True)
     def __str__(self):
         return self.label
@@ -39,7 +42,7 @@ def first_labels(n, ls):
 
 class Function(models.Model):
     cil_id = models.IntegerField(core=True, db_index=True)
-    name = models.CharField(maxlength=50, core=True)
+    name = models.CharField(max_length=50, core=True)
     labels = models.ManyToManyField(Label, filter_interface=models.VERTICAL)
     program = models.ForeignKey(Code_base, limit_choices_to={})
     def __str__(self):
@@ -50,7 +53,7 @@ class Function(models.Model):
         list_display = ('cil_id', 'name', 'program', 'first_labels')
 
 class Program_point(models.Model):
-    file_name = models.CharField(maxlength=100, core=True)
+    file_name = models.CharField(max_length=100, core=True)
     line_num = models.IntegerField(core=True, db_index=True)
     parent_function = models.ForeignKey(Function,
                                         null=True, limit_choices_to={})
@@ -62,7 +65,7 @@ class Program_point(models.Model):
     
 class Lval(models.Model):
     var_id = models.IntegerField(null=True, db_index=True)
-    printed = models.CharField(maxlength=100, core=True)
+    printed = models.CharField(max_length=100, core=True)
     rep_size = models.IntegerField(null=True)
     declared_at = models.ForeignKey(Program_point, null=True)
     is_global = models.BooleanField()
@@ -84,12 +87,14 @@ class Call_path(models.Model):
     empty_ls = models.ForeignKey(Program_point,
                                  related_name="empty_ls", null=True,
                                  limit_choices_to={})
+    # not including the edges right now...
     def __str__(self):
         return self.root_function.__str__() + " -> ..."
     def program(self):
         return str(self.root_function.program)
     class Admin:
         list_display = ('program', 'root_function', 'spawn_site')
+
 
 class Call_edge(models.Model):
     path = models.ForeignKey(Call_path, limit_choices_to={})
@@ -150,6 +155,7 @@ class Race(models.Model):
 class Race_cluster(models.Model):
     races = models.ManyToManyField(Race, filter_interface=models.VERTICAL)
     run = models.ForeignKey(Run)
+    cluster_id = models.IntegerField(null=True, core=True)
     def program(self):
         return str(self.run.code)
     def first_race(self):
@@ -183,6 +189,7 @@ def findFunc(c_id, prog):
         f = Function.objects.get(cil_id=c_id, program=prog)
         return f
     except:
+        warn('Function not found %d\n' % c_id)
         return None
 
 def getPP(f, line, parent):
@@ -243,14 +250,11 @@ def getCallpath(root, spawn, empty_at, edges):
             Call_edge.objects.create(path=found, caller=f1, callee=f2)
     return found
 
+#-------- Access factories
 
-def getAccess(lv, cp, pp, locks):
+def matchLocksAccesses (accessMatches, locks):
     found = None
-    # make sure lists are in sorted order before comparing
-    locks.sort()
-    matches = Access.objects.select_related().filter(lval=lv, accessed_through=cp, occurs_at=pp)
-    # see which of the old accesses have the same set of locks
-    for old in matches:
+    for old in accessMatches:
         db_l = list(old.locks.all())
         if (db_l == locks) :
             found = old
@@ -258,31 +262,47 @@ def getAccess(lv, cp, pp, locks):
     if (not found) :
         found = Access.objects.create(lval=lv,accessed_through=cp,occurs_at=pp)
         found.locks = locks
+        found.save()
     return found
+
+
+def getAccess(lv, cp, pp, locks):
+    # make sure lists are in sorted order before comparing
+    locks.sort()
+    matches = Access.objects.select_related().filter(lval=lv, accessed_through=cp, occurs_at=pp)
+    # see which of the old accesses have the same set of locks
+    found = matchLocksAccesses (matches, locks)
+    return found
+
+
+def createAccess(lv, cp, pp, locks):
+    acc = Access.objects.create(lval=lv, accessed_through=cp, occurs_at=pp)
+    acc.locks = locks
+    acc.save()
+    return acc
+
 
 def getAccesses(lv, cp, pps, locks):
     res = []
     locks.sort()
     outer_matches = Access.objects.filter(lval=lv, accessed_through=cp)
     for pp in pps:
-        found = None
         matches = outer_matches.select_related().filter(occurs_at=pp)
         # see which of the old accesses have the same set of locks
-        for old in matches:
-            db_l = list(old.locks.all())
-            if (db_l == locks) :
-                found = old
-                break
-        if (not found) :
-            found = Access.objects.create(lval=lv,
-                                          accessed_through=cp, occurs_at=pp)
-            found.locks = locks
+        found = matchLocksAccesses (matches, locks)
         res.append(found)
     return res
+
+#----------
 
 def getRace(acc1, acc2):
     new, created = Race.objects.get_or_create(access1=acc1, access2=acc2)
     return new    
+
+def createRace(acc1, acc2):
+    race = Race(access1=acc1, access2=acc2)
+    race.save()
+    return race
 
 # Not useful -- use createRaceCluster instead
 def getRaceCluster(races, _run):
@@ -297,12 +317,20 @@ def getRaceCluster(races, _run):
     if (not found):
         found = Race_cluster.objects.create(run = _run)
         found.races = races
+        found.save()
     return found
 
-# Guaranteed to need a new cluster so don't try to get_or_create
-def createRaceCluster(races, run):
+# Just create a new cluster and allow duplicates (won't happen, unless)
+# you try to re-use an old "run"
+def createRaceCluster(cid, races, run):
+    # None != NULL in the Django mapping sucks...
     r = Race_cluster.objects.create(run = run)
     r.races = races
+    if (cid != None):
+        r.cluster_id = int(cid)
+    else:
+        print "Didn't have cluster_id"
+    r.save()
     return r
 
 

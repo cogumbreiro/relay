@@ -44,16 +44,22 @@ module FC = Filecache
 (***** Place to look for global instances of file caches *****)
 
 (* Cache of parsed ast files *)
-let astFCache = ref (new FC.fcache FC.cilLoader "" 127)
+let astFCache = ref (new FC.fcache FC.cilLoader "" 79)
 
 let setASTFCache fc = 
   astFCache := fc
 
 (* Cache of varinfo files *)
-let viFCache = ref (new FC.fcache FC.viLoader "" 43)
+let viFCache = ref (new FC.fcache FC.viLoader "" 29)
 
 let setViFCache fc =
   viFCache := fc
+
+(* Cache of compinfo files *)
+let ciFCache = ref (new FC.fcache FC.ciLoader "" 29)
+
+let setCiFCache fc =
+  ciFCache := fc
 
 
 (* REMOVED this... cause circular dependencies...
@@ -70,8 +76,11 @@ let makeRCaches localScratch localSrc =
 *)
 
 (* Local-file based caches *)
-let makeLCaches localSrc = 
-  let astFCache = new FC.fcache FC.cilLoader localSrc 127 in
-  let viFCache = new FC.fcache FC.viLoader localSrc 43 in
+let makeLCaches localSrc = begin
+  let astFCache = new FC.fcache FC.cilLoader localSrc 20 in
+  let viFCache = new FC.fcache FC.viLoader localSrc 29 in
+  let ciFCache = new FC.fcache FC.ciLoader localSrc 29 in
   setASTFCache astFCache;
-  setViFCache viFCache
+  setViFCache viFCache;
+  setCiFCache ciFCache;
+end

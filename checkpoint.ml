@@ -39,6 +39,7 @@
 (** Module to track the current unit of work (which analysis and which scc) *)
 
 
+open Scc_cg
 open Scc
 open Stdutil
 

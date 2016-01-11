@@ -34,6 +34,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 *)
+
 (** Support for indexing Cil varinfo / compinfos *)
 
 open Cil
@@ -43,7 +44,7 @@ open Intrange
 module IH = Inthash
 module FC = Filecache
 module DC = Default_cache
-
+module L = Logging
 
 (********** Cil varinfos ***********)
 
@@ -61,64 +62,89 @@ module IDC = Cache.Make (
   end
 )
 
-let minIDCacheSize = 120001
+let minIDCacheSize = 1024
+let minCKCacheSize = 1024
 
 let (vidToVar : varinfo IDC.t) = IDC.create minIDCacheSize
+let (ckeyToCinfo : compinfo IDC.t) = IDC.create minCKCacheSize
+
+let rangesLoaded = ref false
+let cilIDsSet = ref false
 
 
 (** Find the largest IDs from files that may be loaded, and set the
     CIL IDs out of that range *)
 let initCilIDs () =
-  let maxVID = RangeMap.fold
-    (fun {r_upper = u;} _ curMax ->
-       if (u > curMax) then
-         u
-       else
-         curMax
-    ) !vidToFile (-1) in
-  let maxCKey = RangeMap.fold
-    (fun {r_upper = u;} _ curMax ->
-       if (u > curMax) then
-         u
-       else
-         curMax
-    ) !ckeyToFile (-1) in
-  Cil.setNextVID (maxVID + 1);
-  Cil.setNextCKey (maxCKey + 1)
+  if not !cilIDsSet then begin
+    L.logStatus "Setting Cil Varinfo ID ranges";
+    if not !rangesLoaded then 
+      failwith "Need to load VID ranges first!"
+    ;
+    let maxVID = RangeMap.fold
+      (fun {r_upper = u;} _ curMax ->
+         max curMax u
+      ) !vidToFile (-1) in
+    let maxCKey = RangeMap.fold
+      (fun {r_upper = u;} _ curMax ->
+         max curMax u
+      ) !ckeyToFile (-1) in
+    Cil.setNextVID (maxVID + 1);
+    Cil.setNextCKey (maxCKey + 1);
+    cilIDsSet := true
+  end
 
-
-(** Initialize the size of the VID cache based on the max range of ids
-    for a file *)
-let initVidCache () =
+let initCache cache ranges minSize =
   (* look at the var ranges for each file, and allow the cache to be 
      at least that big to avoid thrashing! TODO: also compare to largest 
      points-to-set size *)
   let maxRange = RangeMap.fold
     (fun {r_lower = l; r_upper = u;} _ curMax ->
        let range = u - l in
-       if (range > curMax) then
-         range
-       else
-         curMax
-    ) !vidToFile (-1) in
-  if (maxRange <= minIDCacheSize) then
-    ()
-  else
-    IDC.resize vidToVar (maxRange * 2)
+       max curMax range
+    ) !ranges (-1) in
+  if (maxRange <= minSize) then ()
+  else begin
+    let newSize = maxRange * 2 in
+    L.logStatusF "Resizing VID/CKEY cache to: %d\n" newSize;
+    IDC.resize cache newSize
+  end
+  
+
+(** Initialize the size of the VID cache based on the max range of ids
+    for a file *)
+let initVidCache () =
+  initCache vidToVar vidToFile minIDCacheSize
+
+let initCKeyCache () =
+  initCache ckeyToCinfo ckeyToFile minCKCacheSize
+
+exception NoCilinfo of int
+
+let getInfo id cache distiller ranges fnameCache =
+  try
+    IDC.find cache id
+  with Not_found ->
+    try
+      let filename = RangeMap.find { r_lower = id;
+                                     r_upper = id; } !ranges in
+      let index = !fnameCache#getFile filename in
+      let info = IH.find index id in
+      distiller info;
+      IDC.add cache id info;
+      info
+    with Not_found -> (* Translate exception just in case... *)
+      raise (NoCilinfo id)
 
 
 (** get the varinfo matching the given vid *)
 let getVarinfo (id:int) : varinfo =
-  try
-    IDC.find vidToVar id
-  with Not_found ->
-    let filename = RangeMap.find { r_lower = id;
-                                   r_upper = id; } !vidToFile in
-    let index = !DC.viFCache#getFile filename in
-    let vi = IH.find index id in
-    Cil_lvals.distillVar vi;
-    IDC.add vidToVar id vi;
-    vi
+  getInfo id vidToVar Cil_lvals.distillVar vidToFile DC.viFCache
+
+let getCinfo (id:int) : compinfo =
+  getInfo id ckeyToCinfo Cil_lvals.distillCompinfo ckeyToFile DC.ciFCache
+  
+let getFundec fid =
+  failwith "Fundecs not indexed..."
 
 (** look for a global w/ the given name *)
 let varinfo_of_name (n:string) : varinfo option =
@@ -138,15 +164,20 @@ let varinfo_of_name (n:string) : varinfo option =
            with 
            | FC.File_not_found f 
            | Failure f -> result (* file probably had 0 vars *)
-    ) !vidToFile None
-    
+    ) !vidToFile None    
 
-let reloadRanges fname =
+
+(** Load the mapping between VID/Compinfo key ranges and source file *)
+let reloadRanges fname = begin
+  L.logStatus "Loading Cil Varinfo ID ranges for lookup tables";
   let ids, cks = Id_fixer.loadRanges fname in
   vidToFile := ids;
   ckeyToFile := cks;
+  rangesLoaded := true;
   initCilIDs ();
-  initVidCache ()
+  initVidCache ();
+  initCKeyCache ();
+end
 
 
 
@@ -172,11 +203,12 @@ let getFundec fkey file : Cil.fundec option =
 let getCFG fkey file : Cil.fundec option =
   match getFundec fkey file with
     Some f ->
-      (* TODO figure out if the CFG info is cached also? *)
-      Cil.prepareCFG f;
-      Cil.computeCFGInfo f true;
+      (* already in CFG form
+         Cil.prepareCFG f;
+       Cil.computeCFGInfo f false;
+      *)
       Some f
-  | None -> 
+  | None ->
       None
 
 

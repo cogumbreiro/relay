@@ -1,0 +1,2107 @@
+Sun Aug 10 21:12:50 PDT 2008
+incrementing generation number
+incrementing value in gen_num.txt
+
+running server on /home/jan/research/relay/racetests/plip/ciltrees
+Registered summary type: rs
+Server ip is: 127.0.0.1
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: SERVER
+Done reading config file
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Entry points use roots: false
+trying to clear logs
+Callgraph, etc.
+-----
+Reached end of /home/jan/research/relay/racetests/plip/ciltrees/calls.cil call graph file
+Num funcs: 108
+Scc_cg: Pruned 29 funcs w/out bodies for scc DAG
+Starting server
+-----
+>>> PROGRESS 1/79 SCCs DONE!
+
+>>> PROGRESS 2/79 SCCs DONE!
+
+>>> PROGRESS 3/79 SCCs DONE!
+
+>>> PROGRESS 4/79 SCCs DONE!
+
+>>> PROGRESS 5/79 SCCs DONE!
+
+>>> PROGRESS 6/79 SCCs DONE!
+
+>>> PROGRESS 7/79 SCCs DONE!
+
+>>> PROGRESS 8/79 SCCs DONE!
+
+>>> PROGRESS 9/79 SCCs DONE!
+
+>>> PROGRESS 10/79 SCCs DONE!
+
+>>> PROGRESS 11/79 SCCs DONE!
+
+>>> PROGRESS 12/79 SCCs DONE!
+
+>>> PROGRESS 13/79 SCCs DONE!
+
+>>> PROGRESS 14/79 SCCs DONE!
+
+>>> PROGRESS 15/79 SCCs DONE!
+
+>>> PROGRESS 16/79 SCCs DONE!
+
+>>> PROGRESS 17/79 SCCs DONE!
+
+>>> PROGRESS 18/79 SCCs DONE!
+
+>>> PROGRESS 19/79 SCCs DONE!
+
+>>> PROGRESS 20/79 SCCs DONE!
+
+>>> PROGRESS 21/79 SCCs DONE!
+
+>>> PROGRESS 22/79 SCCs DONE!
+
+>>> PROGRESS 23/79 SCCs DONE!
+
+>>> PROGRESS 24/79 SCCs DONE!
+
+>>> PROGRESS 25/79 SCCs DONE!
+
+>>> PROGRESS 26/79 SCCs DONE!
+
+>>> PROGRESS 27/79 SCCs DONE!
+
+>>> PROGRESS 28/79 SCCs DONE!
+
+>>> PROGRESS 29/79 SCCs DONE!
+
+>>> PROGRESS 30/79 SCCs DONE!
+
+>>> PROGRESS 31/79 SCCs DONE!
+
+>>> PROGRESS 32/79 SCCs DONE!
+
+>>> PROGRESS 33/79 SCCs DONE!
+
+>>> PROGRESS 34/79 SCCs DONE!
+
+>>> PROGRESS 35/79 SCCs DONE!
+
+>>> PROGRESS 36/79 SCCs DONE!
+
+>>> PROGRESS 37/79 SCCs DONE!
+
+>>> PROGRESS 38/79 SCCs DONE!
+
+>>> PROGRESS 39/79 SCCs DONE!
+
+>>> PROGRESS 40/79 SCCs DONE!
+
+>>> PROGRESS 41/79 SCCs DONE!
+
+>>> PROGRESS 42/79 SCCs DONE!
+
+>>> PROGRESS 43/79 SCCs DONE!
+
+>>> PROGRESS 44/79 SCCs DONE!
+
+>>> PROGRESS 45/79 SCCs DONE!
+
+>>> PROGRESS 46/79 SCCs DONE!
+
+>>> PROGRESS 47/79 SCCs DONE!
+
+>>> PROGRESS 48/79 SCCs DONE!
+
+>>> PROGRESS 49/79 SCCs DONE!
+
+>>> PROGRESS 50/79 SCCs DONE!
+
+>>> PROGRESS 51/79 SCCs DONE!
+
+>>> PROGRESS 52/79 SCCs DONE!
+
+>>> PROGRESS 53/79 SCCs DONE!
+
+>>> PROGRESS 54/79 SCCs DONE!
+
+>>> PROGRESS 55/79 SCCs DONE!
+
+>>> PROGRESS 56/79 SCCs DONE!
+
+>>> PROGRESS 57/79 SCCs DONE!
+
+>>> PROGRESS 58/79 SCCs DONE!
+
+>>> PROGRESS 59/79 SCCs DONE!
+
+>>> PROGRESS 60/79 SCCs DONE!
+
+>>> PROGRESS 61/79 SCCs DONE!
+
+>>> PROGRESS 62/79 SCCs DONE!
+
+>>> PROGRESS 63/79 SCCs DONE!
+
+>>> PROGRESS 64/79 SCCs DONE!
+
+>>> PROGRESS 65/79 SCCs DONE!
+
+>>> PROGRESS 66/79 SCCs DONE!
+
+>>> PROGRESS 67/79 SCCs DONE!
+
+>>> PROGRESS 68/79 SCCs DONE!
+
+>>> PROGRESS 69/79 SCCs DONE!
+
+>>> PROGRESS 70/79 SCCs DONE!
+
+>>> PROGRESS 71/79 SCCs DONE!
+
+>>> PROGRESS 72/79 SCCs DONE!
+
+>>> PROGRESS 73/79 SCCs DONE!
+
+>>> PROGRESS 74/79 SCCs DONE!
+
+>>> PROGRESS 75/79 SCCs DONE!
+
+>>> PROGRESS 76/79 SCCs DONE!
+
+>>> PROGRESS 77/79 SCCs DONE!
+
+>>> PROGRESS 78/79 SCCs DONE!
+
+>>> PROGRESS 79/79 SCCs DONE!
+
+Finished all SCCs
+Received warnings from worker. Status: 1/1
+****
+Possible race between access to:
+dummydev.trans_start @ plip.ko_merged.c:19035 and
+dummydev.trans_start @ plip.ko_merged.c:19035
+	Cluster ID: 29
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18314] and
+	[plip.ko_merged.c:18314]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+dummydev.last_rx @ plip.ko_merged.c:19035 and
+dummydev.last_rx @ plip.ko_merged.c:19035
+	Cluster ID: 30
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17977] and
+	[plip.ko_merged.c:17977]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1] and
+(*([REP: 1].ifa_local))
+	Cluster ID: 31
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:7790, plip.ko_merged.c:7793, plip.ko_merged.c:7796, plip.ko_merged.c:7799, plip.ko_merged.c:7800, plip.ko_merged.c:7803, plip.ko_merged.c:7804, plip.ko_merged.c:7807, plip.ko_merged.c:7808, plip.ko_merged.c:7811, plip.ko_merged.c:7812]
+
+	Confidence: used PTA nodes ptSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	lval 1: (*([REP: 1].ifa_local))
+LS for 2nd access:
+L+ = empty;
+	lval 2: [REP: 1]
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	lval 1: (*([REP: 1].ifa_local))
+LS for 2nd access:
+L+ = empty;
+	lval 2: [REP: 1]
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 33].output_queue and
+[REP: 33].output_queue
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:16348] and
+	[plip.ko_merged.c:16348]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 33].output_queue and
+[REP: 33].output_queue
+	Cluster ID: 43
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:16348] and
+	[plip.ko_merged.c:16347]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(1)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].connection and
+[REP: 1].connection
+	Cluster ID: 25
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18268] and
+	[plip.ko_merged.c:18268]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.rx_dropped and
+[REP: 1].enet_stats.rx_dropped
+	Cluster ID: 19
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17741] and
+	[plip.ko_merged.c:17741]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.tx_aborted_errors and
+[REP: 1].enet_stats.tx_aborted_errors
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17725] and
+	[plip.ko_merged.c:17725]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.tx_errors and
+[REP: 1].enet_stats.tx_errors
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17724] and
+	[plip.ko_merged.c:17724]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].length.h and
+[REP: 1].length.h
+	Cluster ID: 37
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18316] and
+	[plip.ko_merged.c:17920, plip.ko_merged.c:17921, plip.ko_merged.c:17924, plip.ko_merged.c:17925, plip.ko_merged.c:17929, plip.ko_merged.c:17936, plip.ko_merged.c:17949, plip.ko_merged.c:17978, plip.ko_merged.c:18151]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].length.h and
+[REP: 1].length.h
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18316] and
+	[plip.ko_merged.c:18316]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {dummydev.xmit_lock#g:404, [REP: 1].lock#g} (2)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].state and
+[REP: 1].state
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18267] and
+	[plip.ko_merged.c:18267]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].timeout_count and
+[REP: 1].timeout_count
+	Cluster ID: 33
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17704, plip.ko_merged.c:17706, plip.ko_merged.c:17714, plip.ko_merged.c:17733, plip.ko_merged.c:17734] and
+	[plip.ko_merged.c:18269, plip.ko_merged.c:18320, plip.ko_merged.c:18120, plip.ko_merged.c:17704, plip.ko_merged.c:17733]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].timeout_count and
+[REP: 1].timeout_count
+	Cluster ID: 1
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18269] and
+	[plip.ko_merged.c:18269]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(3)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1] and
+[REP: 1]
+	Cluster ID: 28
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: [REP: 1].length.b.msb
+	lval 2: [REP: 1].length.b.msb
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	lval 1: [REP: 1].length.b.lsb
+	lval 2: [REP: 1].length.b.lsb
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(2)
+	lval 1: [REP: 1].data
+	lval 2: [REP: 1].data
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1] and
+[REP: 1]
+	Cluster ID: 39
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:17955, plip.ko_merged.c:18146, plip.ko_merged.c:18157, plip.ko_merged.c:17821, plip.ko_merged.c:17859]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].byte and
+[REP: 1].byte
+	Cluster ID: 27
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17939, plip.ko_merged.c:17948, plip.ko_merged.c:17954, plip.ko_merged.c:18142, plip.ko_merged.c:18150, plip.ko_merged.c:18156] and
+	[plip.ko_merged.c:17939, plip.ko_merged.c:17948, plip.ko_merged.c:17954, plip.ko_merged.c:18142, plip.ko_merged.c:18150, plip.ko_merged.c:18156]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].byte and
+[REP: 1].byte
+	Cluster ID: 40
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17939, plip.ko_merged.c:17948, plip.ko_merged.c:17954, plip.ko_merged.c:18142, plip.ko_merged.c:18150, plip.ko_merged.c:18156] and
+	[plip.ko_merged.c:17944, plip.ko_merged.c:17948, plip.ko_merged.c:17949, plip.ko_merged.c:17954, plip.ko_merged.c:17956, plip.ko_merged.c:18150, plip.ko_merged.c:18151, plip.ko_merged.c:18156, plip.ko_merged.c:18158]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].checksum and
+[REP: 1].checksum
+	Cluster ID: 26
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17940, plip.ko_merged.c:17955, plip.ko_merged.c:18143, plip.ko_merged.c:18157] and
+	[plip.ko_merged.c:17940, plip.ko_merged.c:17955, plip.ko_merged.c:18143, plip.ko_merged.c:18157]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].checksum and
+[REP: 1].checksum
+	Cluster ID: 45
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17940, plip.ko_merged.c:17955, plip.ko_merged.c:18143, plip.ko_merged.c:18157] and
+	[plip.ko_merged.c:17955, plip.ko_merged.c:17966, plip.ko_merged.c:18157, plip.ko_merged.c:18164]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].connection and
+[REP: 1].connection
+	Cluster ID: 50
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18268, plip.ko_merged.c:18319, plip.ko_merged.c:18406, plip.ko_merged.c:18442, plip.ko_merged.c:17900, plip.ko_merged.c:17987, plip.ko_merged.c:17996, plip.ko_merged.c:18178, plip.ko_merged.c:18197, plip.ko_merged.c:18219, plip.ko_merged.c:17763] and
+	[plip.ko_merged.c:18263, plip.ko_merged.c:18265, plip.ko_merged.c:18266, plip.ko_merged.c:18272, plip.ko_merged.c:18274, plip.ko_merged.c:18318, plip.ko_merged.c:18095, plip.ko_merged.c:18107, plip.ko_merged.c:18196, plip.ko_merged.c:17702, plip.ko_merged.c:17727]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(1)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].data and
+[REP: 1].data
+	Cluster ID: 44
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:17966, plip.ko_merged.c:17821]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].data and
+[REP: 1].data
+	Cluster ID: 24
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:15528, plip.ko_merged.c:15643] and
+	[plip.ko_merged.c:15528, plip.ko_merged.c:15529, plip.ko_merged.c:15643, plip.ko_merged.c:17942, plip.ko_merged.c:18076, plip.ko_merged.c:17842, plip.ko_merged.c:17858]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].dev and
+[REP: 1].dev
+	Cluster ID: 23
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17937] and
+	[plip.ko_merged.c:17937]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.collisions and
+[REP: 1].enet_stats.collisions
+	Cluster ID: 22
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18097, plip.ko_merged.c:18111] and
+	[plip.ko_merged.c:18097, plip.ko_merged.c:18111]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.rx_bytes and
+[REP: 1].enet_stats.rx_bytes
+	Cluster ID: 21
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17978] and
+	[plip.ko_merged.c:17978]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.rx_crc_errors and
+[REP: 1].enet_stats.rx_crc_errors
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17967] and
+	[plip.ko_merged.c:17967]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.rx_packets and
+[REP: 1].enet_stats.rx_packets
+	Cluster ID: 18
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17979] and
+	[plip.ko_merged.c:17979]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.tx_bytes and
+[REP: 1].enet_stats.tx_bytes
+	Cluster ID: 16
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18168] and
+	[plip.ko_merged.c:18168]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].enet_stats.tx_packets and
+[REP: 1].enet_stats.tx_packets
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18170] and
+	[plip.ko_merged.c:18170]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].is_deferred and
+[REP: 1].is_deferred
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17667, plip.ko_merged.c:17673, plip.ko_merged.c:18407, plip.ko_merged.c:18441, plip.ko_merged.c:17899, plip.ko_merged.c:18179, plip.ko_merged.c:18228] and
+	[plip.ko_merged.c:17667, plip.ko_merged.c:17673, plip.ko_merged.c:18407, plip.ko_merged.c:18441, plip.ko_merged.c:17899, plip.ko_merged.c:18179, plip.ko_merged.c:18228]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].kill_timer.counter and
+[REP: 1].kill_timer.counter
+	Cluster ID: 32
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18399, plip.ko_merged.c:18438] and
+	[plip.ko_merged.c:17687]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].len and
+[REP: 1].len
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:15475, plip.ko_merged.c:15517] and
+	[plip.ko_merged.c:15475, plip.ko_merged.c:15517, plip.ko_merged.c:15519, plip.ko_merged.c:15540, plip.ko_merged.c:18168]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].length.b.lsb and
+[REP: 1].length.b.lsb
+	Cluster ID: 42
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:18131, plip.ko_merged.c:17821]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].length.b.msb and
+[REP: 1].length.b.msb
+	Cluster ID: 36
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17802, plip.ko_merged.c:17821] and
+	[plip.ko_merged.c:18137, plip.ko_merged.c:17821]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].mac.raw and
+[REP: 1].mac.raw
+	Cluster ID: 49
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17842] and
+	[plip.ko_merged.c:16056]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].mac.raw and
+[REP: 1].mac.raw
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17842] and
+	[plip.ko_merged.c:17842]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].nibble and
+[REP: 1].nibble
+	Cluster ID: 51
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18544] and
+	[plip.ko_merged.c:18536, plip.ko_merged.c:17881, plip.ko_merged.c:18069]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].nibble and
+[REP: 1].nibble
+	Cluster ID: 38
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17893, plip.ko_merged.c:18119, plip.ko_merged.c:17804, plip.ko_merged.c:17823, plip.ko_merged.c:18019, plip.ko_merged.c:18035, plip.ko_merged.c:18050] and
+	[plip.ko_merged.c:17786, plip.ko_merged.c:17805, plip.ko_merged.c:17824, plip.ko_merged.c:18017, plip.ko_merged.c:18020, plip.ko_merged.c:18036]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].nibble and
+[REP: 1].nibble
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17893, plip.ko_merged.c:18119, plip.ko_merged.c:17804, plip.ko_merged.c:17823, plip.ko_merged.c:18019, plip.ko_merged.c:18035, plip.ko_merged.c:18050] and
+	[plip.ko_merged.c:17893, plip.ko_merged.c:18119, plip.ko_merged.c:17804, plip.ko_merged.c:17823, plip.ko_merged.c:18019, plip.ko_merged.c:18035, plip.ko_merged.c:18050]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].pkt_type and
+[REP: 1].pkt_type
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17849, plip.ko_merged.c:17851] and
+	[plip.ko_merged.c:17849, plip.ko_merged.c:17851]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].port_owner and
+[REP: 1].port_owner
+	Cluster ID: 48
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18302, plip.ko_merged.c:18393, plip.ko_merged.c:18445, plip.ko_merged.c:18202] and
+	[plip.ko_merged.c:18297, plip.ko_merged.c:18388, plip.ko_merged.c:18443, plip.ko_merged.c:18203]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].port_owner and
+[REP: 1].port_owner
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18302, plip.ko_merged.c:18393, plip.ko_merged.c:18445, plip.ko_merged.c:18202] and
+	[plip.ko_merged.c:18302, plip.ko_merged.c:18393, plip.ko_merged.c:18445, plip.ko_merged.c:18202]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].protocol and
+[REP: 1].protocol
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17975] and
+	[plip.ko_merged.c:17975]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].should_relinquish and
+[REP: 1].should_relinquish
+	Cluster ID: 47
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18395, plip.ko_merged.c:18203, plip.ko_merged.c:18220] and
+	[plip.ko_merged.c:18201]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].should_relinquish and
+[REP: 1].should_relinquish
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18395, plip.ko_merged.c:18203, plip.ko_merged.c:18220] and
+	[plip.ko_merged.c:18395, plip.ko_merged.c:18203, plip.ko_merged.c:18220]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].skb and
+[REP: 1].skb
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18315, plip.ko_merged.c:18450, plip.ko_merged.c:18455, plip.ko_merged.c:17929, plip.ko_merged.c:17980, plip.ko_merged.c:18073, plip.ko_merged.c:18080, plip.ko_merged.c:18174, plip.ko_merged.c:17747, plip.ko_merged.c:17752] and
+	[plip.ko_merged.c:18315, plip.ko_merged.c:18450, plip.ko_merged.c:18455, plip.ko_merged.c:17929, plip.ko_merged.c:17980, plip.ko_merged.c:18073, plip.ko_merged.c:18080, plip.ko_merged.c:18174, plip.ko_merged.c:17747, plip.ko_merged.c:17752]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].skb and
+[REP: 1].skb
+	Cluster ID: 35
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18315, plip.ko_merged.c:18450, plip.ko_merged.c:18455, plip.ko_merged.c:17929, plip.ko_merged.c:17980, plip.ko_merged.c:18073, plip.ko_merged.c:18080, plip.ko_merged.c:18174, plip.ko_merged.c:17747, plip.ko_merged.c:17752] and
+	[plip.ko_merged.c:18448, plip.ko_merged.c:18449, plip.ko_merged.c:18453, plip.ko_merged.c:18454, plip.ko_merged.c:17931, plip.ko_merged.c:17935, plip.ko_merged.c:17936, plip.ko_merged.c:17975, plip.ko_merged.c:17976, plip.ko_merged.c:18070, plip.ko_merged.c:18169, plip.ko_merged.c:17745, plip.ko_merged.c:17746, plip.ko_merged.c:17750, plip.ko_merged.c:17751]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].state and
+[REP: 1].state
+	Cluster ID: 34
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:17883, plip.ko_merged.c:17894, plip.ko_merged.c:17895, plip.ko_merged.c:17915, plip.ko_merged.c:17941, plip.ko_merged.c:17961, plip.ko_merged.c:17974, plip.ko_merged.c:17986, plip.ko_merged.c:18085, plip.ko_merged.c:18130, plip.ko_merged.c:18136, plip.ko_merged.c:18144, plip.ko_merged.c:18163, plip.ko_merged.c:18172, plip.ko_merged.c:17720, plip.ko_merged.c:17728, plip.ko_merged.c:17739] and
+	[plip.ko_merged.c:18267, plip.ko_merged.c:18317, plip.ko_merged.c:18447, plip.ko_merged.c:18452, plip.ko_merged.c:17892, plip.ko_merged.c:17898, plip.ko_merged.c:17914, plip.ko_merged.c:17938, plip.ko_merged.c:17960, plip.ko_merged.c:17973, plip.ko_merged.c:18072, plip.ko_merged.c:18079, plip.ko_merged.c:18118, plip.ko_merged.c:18135, plip.ko_merged.c:18141, plip.ko_merged.c:18162, plip.ko_merged.c:18171, plip.ko_merged.c:17744, plip.ko_merged.c:17749]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+LS for 2nd access:
+L+ = {[REP: 1].lock#g} (1)
+	(rep. lock)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19145 601662 w/ func: dummy_interrupt
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].tail and
+[REP: 1].tail
+	Cluster ID: 41
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:15474, plip.ko_merged.c:15644] and
+	[plip.ko_merged.c:15458, plip.ko_merged.c:15474, plip.ko_merged.c:15476, plip.ko_merged.c:15644]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].tail and
+[REP: 1].tail
+	Cluster ID: 2
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:15474, plip.ko_merged.c:15644] and
+	[plip.ko_merged.c:15474, plip.ko_merged.c:15644]
+
+	Confidence: used PTA retry failed with Server_socket.Serv_done ... 2 tries left
+
+retry failed with Unix.Unix_error(12, "bind", "") ... 1 tries left
+
+Tried to serv several times -- failed
+nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+****
+Possible race between access to:
+[REP: 1].trigger and
+[REP: 1].trigger
+	Cluster ID: 46
+	Escapes? true / true 
+	Accessed at locs:
+	[plip.ko_merged.c:18543] and
+	[plip.ko_merged.c:18535, plip.ko_merged.c:17896, plip.ko_merged.c:18091]
+
+	Confidence: used PTA nodes lblSet(13, 13)
+
+LS for 1st access:
+L+ = {openlock#g:405} (1)
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19144 601603 w/ func: module_activity
+(2)
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = {openlock#g:405} (1)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+(3)
+	Th. 1 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+	Th. 2 spawned: plip.ko_merged.c:19146 601721 w/ func: module_activity
+
+
+$$$$$$
+Total Warnings: 52
+Elapsed time (secs): 0.132008
+Top heap size (words): 1133568
+Current heap size (words): 1133568
+Lifetime allocated bytes: 8579480.
+Collections -- minor: 20 major: 4 compactions: 0
+Sun Aug 10 21:12:54 PDT 2008

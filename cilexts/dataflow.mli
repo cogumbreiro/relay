@@ -1,3 +1,5 @@
+open Cil
+
 (** A framework for data flow analysis for CIL code.  Before using 
     this framework, you must initialize the Control-flow Graph for your
     program, e.g using {!Cfg.computeFileCFG} *)
@@ -27,8 +29,6 @@ type 't guardaction =
  **********         FORWARDS 
  **********
  ********************************************************************)
-
-module InstrHash : Hashtbl.S with type key = Cil.instr
 
 
 module type ForwardsTransfer = sig
@@ -87,14 +87,30 @@ end
 
 module ForwardsDataFlow (T : ForwardsTransfer) : sig
 
-  val instrStateCache : T.t InstrHash.t
-  
   val compute: Cil.stmt list -> unit
   (** Fill in the T.stmtStartData, given a number of initial statements to 
    * start from. All of the initial statements must have some entry in 
    * T.stmtStartData (i.e., the initial data should not be bottom) *)
 
-  val getStateAtInstr: Cil.stmt -> Cil.instr -> T.t
+  val getDataBefore: prog_point -> T.t
+  (** Look up the data before a particular program point *)
+
+
+  val getDataAfter: prog_point -> T.t
+    (** Look up the data after a particular program point.
+        Currently only valid for instruction-based pps.
+        What it means to be after a stmt is unclear when
+        considering all the different kinds of stmts 
+        (e.g., what's after a Return stmt?)... *)
+  
+
+  val setDataBefore: prog_point -> T.t -> unit
+    (** Replace the data available before a particular program point *)
+    
+  val setDataAfter: prog_point -> T.t -> unit
+    (** Replace the data available after a particular program point.
+        Currently only valid for instruction-based pps *)
+
 
 end
 

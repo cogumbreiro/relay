@@ -66,13 +66,22 @@ val typeOffsetUnsafe : Cil.typ -> Cil.offset -> Cil.typ
 val typeAfterDeref : Cil.exp -> Cil.typ
 
 
-exception OffsetMismatch
+
+val typeAfterDerefNoUnroll : Cil.exp -> Cil.typ
+
+val typeOfNoUnroll : Cil.exp -> Cil.typ
+
+
+
+exception OffsetMismatch of (Cil.fieldinfo * Cil.typ) option
+
+val string_of_offsetMiss : (Cil.fieldinfo * Cil.typ) option -> string
+
+val canAttachOffset : Cil.typ -> Cil.offset -> bool * (Cil.fieldinfo * Cil.typ) option
 
 val attachOffset : Cil.lhost -> Cil.offset -> Cil.lval
 
 val mkMemChecked : Cil.exp -> Cil.offset -> Cil.lval
-
-val addOffsetChecked : Cil.offset -> Cil.offset -> Cil.offset
 
 val locIsUnknown : Cil.location -> bool
 
@@ -81,11 +90,18 @@ val locIsUnknown : Cil.location -> bool
  * Distillation and hash-consing
  *****************************************************)
 
+module HashedLval : Hashtbl.HashedType with type t  = Cil.lval
+
+module HashedExp : Hashtbl.HashedType with type t = Cil.exp
+
+
 val distillOff : Cil.offset -> Cil.offset
 
 val distillLoc : Cil.location -> Cil.location
 
 val distillEnuminfo : Cil.enuminfo -> unit
+
+val distillCompinfo : Cil.compinfo -> unit
 
 val distillVar : Cil.varinfo -> unit
 
@@ -94,3 +110,6 @@ val distillExp : Cil.exp -> Cil.exp
 val mergeLv : Cil.lval -> Cil.lval
 
 val mergeType : Cil.typ -> Cil.typ
+
+
+val printHashStats : unit -> unit 

@@ -38,8 +38,8 @@
 (** Representation and operations on relative Locksets *)
 
 open Cil
-open Scope
 open Cilinfos
+open Pretty
 
 module D = Cildump
 module L = Logging
@@ -55,13 +55,6 @@ module CLv = Cil_lvals
 type lockProt = 
     LPWrite
   | LPRead
-
-(*
-  type lock = {
-    mutable lockScope : scope;
-    lockProt : lockProt;
-  }
-*)
 
 (* Not using the "prot" and scope (scope is embedded in the var) 
    fields right now. *)
@@ -93,24 +86,32 @@ end
 module LS = Relative_set.Make(RelLock)
 
 type fullLS = LS.relSet
+ 
 
+(************ Scope-based filtering ************)
 
-(************ Scoping ************)
+(* TODO: provide a general mechanism for filtering "sets" 
+   that have lvals as a component *)
 
+open Scope
 
 (** Annotate the lock [lv] w/ its scope, wrt to the given [curFun],
     and update the [curSet] of locks (prune locks that are out of scope) *)
-let scopeLock (curFun:Cil.fundec) lv (_) (curSet: LS.value LS.S.t) =
+let scopeLock curFun lv (_) (curSet: LS.value LS.S.t) =
   try
-    match Scope.annotScope curFun lv with
+    match Lv.getScopeParanoid curFun lv with
       STBD 
-    | SFunc -> LS.S.remove lv curSet
+    | SFunc ->
+        L.logError ("Lock is local to " ^ curFun.svar.vname ^ 
+                      ", pruning: " ^ (Lv.string_of_lval lv));
+        LS.S.remove lv curSet
     | _ -> curSet
   with
-    Scope.BadScope ->
+    BadScope ->
       (* Not a valid lval? *)
-      LS.S.remove lv curSet
-
+      L.logError ("Lock has bad scope: " ^ (Lv.string_of_lval lv));
+      raise BadScope
+        
 
 (** Annotate all locks in the set [ls]  w/ its scope, wrt to 
     the given function [f]. Also prune locks that are out of scope *)
@@ -124,16 +125,33 @@ let scopeLockset (f:Cil.fundec) (ls:LS.relSet) : LS.relSet =
     oldUnlocked oldUnlocked in
   LS.composeNew newLocked newUnlocked
 
-    
-(** Print the lock lval along with its scope and lock type *)
-let string_of_lock lv lockInfo =
-  let scope = Scope.getScope lv in
-  (Lv.string_of_lval lv) ^ (Scope.string_of_scope scope)
+  
 
+(*********** Operations for race checking **********************)
+
+
+(** @return true if the lockset uses a summary lock to ensure race-freedom *)
+let hasSummaryLock ls =
+  LS.S.exists
+    (fun lv _ -> match lv with 
+       Lv.AbsHost _, _ -> true
+     | _ -> false
+    ) (LS.getPlus ls)
+    (* should check the size of the rep node too (if it's 1, no problem?)... *)
+
+
+(** @return true if the intersection holds no locks *)
+let inter_isEmpty ls1 ls2 =
+  let ls1' = LS.ditchMinus ls1 in
+  let ls2' = LS.ditchMinus ls2 in
+  LS.emptyPlus (LS.inter ls1' ls2')
 
 (*************** Print to XML *****************)
 
-open Pretty
+   
+(** Print the lock lval along with its scope and lock type *)
+let string_of_lock lv lockInfo =
+  Lv.string_of_lvscope lv
 
 
 class locksXMLPrinter = object (self) 
@@ -141,7 +159,8 @@ class locksXMLPrinter = object (self)
     (* Inherit the ability to XML'ize lvals *)
 
   method pLocks () locks : doc =
-    text "<locks>" ++ line ++
+    let sumLock = hasSummaryLock locks in
+    dprintf "<locks rep=\"%B\">" sumLock ++ line ++
       LS.S.fold (fun lv _ doc -> 
                    doc ++ self#pALval (lv, None)) (LS.getPlus locks) nil ++
       text "</locks>" ++ line
@@ -165,29 +184,110 @@ let makeSimpleLock (name:string) scope prot =
   let t = TVoid [] in
   (* Assume globals don't require deref, while formals do... *)
   let lv = match scope with
-      SFormal _ ->  
-        (* TODO: search for the function's actual formal 
-           (so as to match var ids) *)
-        let baseVar = makeVarinfo false name t in
-        Scope.setScope scope baseVar;
-        (Lv.CMem
-           (Lv.CLval
-              (Lv.CVar baseVar, NoOffset)), NoOffset)
+      SFormal index ->  
+        let baseHost, baseOffset = Lv.makeFormalWithName name index in
+        (Lv.mkMem
+           (Lv.mkLval baseHost baseOffset) NoOffset)
     | SGlobal ->
         (try Hashtbl.find globalLocks name with Not_found ->
            (* Search for the global's varinfo *)
            let baseVar = match varinfo_of_name name with
                None ->
-                 L.logError "makeSimpleLock: Couldn't find global varinfo";
-                 makeVarinfo true name t  
+                 L.logError
+                   ("makeSimpleLock: Couldn't find global " ^ name);
+                 Lv.mkVarinfo true name t
              | Some vi ->
                  vi
            in
-           Scope.setScope scope baseVar;
-           let lv = (Lv.CVar baseVar, NoOffset) in
+           (* Make sure variable already had a global scope annotation *)
+           let oldScope = Scope.decipherScope baseVar in
+           assert (oldScope = scope);
+           let lv = (Lv.hostOfVar baseVar, NoOffset) in
            Hashtbl.add globalLocks name lv;
            lv)
     | _ ->
         failwith "Can't make lock w/ unknown scope"
   in
   (lv, () )
+
+(************ Ugly Printing / Pretty printing *****************) 
+
+(** Convert a (single) lockset into a string buffer *)
+let set_to_buf buff s = 
+  if (LS.S.is_empty s) then
+    Buffer.add_string buff "empty\n"
+  else begin
+    Buffer.add_string buff "{";
+    L.map_to_buf LS.S.iter string_of_lock s buff;
+    Buffer.add_string buff ("} (" ^ (string_of_int 
+                                       (LS.S.cardinal s))  ^  ")\n");
+  end
+
+(** Make a Pretty.doc out of a (single) lockset **)
+let d_lockset () s =
+  if (LS.S.is_empty s) then
+    text "empty" ++ line
+  else begin
+    let header = text "{" in
+    (L.map_to_doc 
+       (text ", ") 
+       LS.S.iter 
+       (fun lv lockinfo -> text (string_of_lock lv lockinfo))
+       (* TODO: have an actual doc convert, instead of "text"ing it *)
+       s 
+       header) ++ 
+      text "} ("  ++ num (LS.S.cardinal s) ++ text ")" ++ line
+  end
+    
+let d_fullLS () ls =
+  text "L+ = " ++ d_lockset () (LS.getPlus ls) ++ 
+    text "L- = " ++ d_lockset () (LS.getMinus ls) 
+    
+
+
+
+(*** Bin Ops for Locksets ***)
+
+
+(* Hash for non-commuting binary ops on LSes 
+   (assuming the inputs are have been hash-consed) *)
+module HashedLSPointerPair =
+struct
+  type t = fullLS * fullLS
+  let equal (f1,s1) (f2,s2) =
+    (* assume all given locksets are the main copy *)
+    (f1 == f2 && s1 == s2)
+  let hash (f, s) = 
+    (LS.hash f) lxor ((LS.hash s) lsl 1)
+end
+
+(* Commuting hash *)
+module HashedLSPointerPairCommutable =
+struct
+  type t = fullLS * fullLS
+  let equal (f1,s1) (f2,s2) =
+    (* assume all given locksets are the main copy *)
+    (f1 == f2 && s1 == s2) ||
+      (f1 == s2 && s1 == f2)
+  let hash (f, s) = (LS.hash f) lxor (LS.hash s)
+end
+
+module LSPH = Hashtbl.Make (HashedLSPointerPair)
+ 
+module LSPHC = Hashtbl.Make (HashedLSPointerPairCommutable)
+
+let combineLCache = LSPHC.create 17
+
+let combineLS (a:fullLS) (b:fullLS) : fullLS =
+  try 
+    LSPHC.find combineLCache (a, b)
+  with Not_found ->
+    let result = LS.unique (LS.inter a b) in
+    LSPHC.add combineLCache (a, b) result;
+    result
+
+
+let clearCache () = begin
+  LSPHC.clear combineLCache; (* Hmm... not a big deal if this is not cleared? *)
+  LS.clearCache (); (* so that the weak arrays don't get absurdly long? *)
+end

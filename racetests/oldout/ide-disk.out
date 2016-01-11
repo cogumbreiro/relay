@@ -1,0 +1,2224 @@
+Sun Aug 10 21:12:44 PDT 2008
+reserved status file: /tmp/temp.7aYrIn
+running analysis on /home/jan/research/relay/racetests/ide-disk/ciltrees
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rss
+Registered summary type: mods
+Checking for data races
+-----
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.0.1
+using /tmp/relay_scratch to store acquired files
+using: /tmp/temp.7aYrIn to track status
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Reached end of /home/jan/research/relay/racetests/ide-disk/ciltrees/calls.cil call graph file
+Num funcs: 97
+summary database will use:
+	/home/jan/research/relay/racetests/ide-disk/ciltrees/relay_sums
+Initializing summary mods
+Checking left-over state in mods
+Initializing summary rss
+Checking left-over state in rss
+Initializing summary ss
+Checking left-over state in ss
+Initializing summary rs
+Checking left-over state in rs
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: false
+file server will use: 14440
+trying to clear old summaries / local srcs, etc.
+Scc_cg: Pruned 45 funcs w/out bodies for scc DAG
+Starting bottomup analysis
+-----
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: idedisk_media_changed : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	349	0	0	1	4	
+
+TIMES : SCC:0 : 0.00202298164368
+TIMES : FUN:349 : 0.00201487541199
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 349
+=======
+
+SUMS (fk, lo, un, wr, re):	349	0	0	1	4	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 349 : 79238
+>>> PROGRESS 1/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #50
+=================================
+Summarizing function: __constant_c_and_count_memset : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	13	0	0	1	0	
+
+TIMES : FUN:13 : 0.000787973403931
+TIMES : SCC:50 : 0.00079607963562
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 13
+=======
+
+SUMS (fk, lo, un, wr, re):	13	0	0	1	0	
+
+SS Sum:
+ -> 
+Extptr (5):
+  lval = (*s)
+
+SIZES: 13 : 156
+>>> PROGRESS 2/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #27
+=================================
+Summarizing function: smart_enable : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	173	0	0	0	0	
+
+TIMES : SCC:27 : 0.000877141952515
+TIMES : FUN:173 : 0.000871896743774
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 173
+=======
+
+SUMS (fk, lo, un, wr, re):	173	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 173 : 34
+>>> PROGRESS 3/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #23
+=================================
+Summarizing function: get_smart_thresholds : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	182	0	0	0	0	
+
+TIMES : SCC:23 : 0.00116801261902
+TIMES : FUN:182 : 0.00116300582886
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 182
+=======
+
+SUMS (fk, lo, un, wr, re):	182	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 182 : 34
+>>> PROGRESS 4/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: proc_idedisk_read_smart_thresholds : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	207	0	0	2	1	
+
+TIMES : SCC:1 : 0.00153398513794
+TIMES : FUN:207 : 0.00152683258057
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 207
+=======
+
+SUMS (fk, lo, un, wr, re):	207	0	0	2	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 207 : 176
+>>> PROGRESS 5/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: set_acoustic : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	275	0	0	1	0	
+
+TIMES : FUN:275 : 0.000767230987549
+TIMES : SCC:2 : 0.000772953033447
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 275
+=======
+
+SUMS (fk, lo, un, wr, re):	275	0	0	1	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 275 : 78103
+>>> PROGRESS 6/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #3
+=================================
+Summarizing function: idedisk_end_flush : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	238	0	0	0	9	
+
+TIMES : SCC:3 : 0.00495004653931
+TIMES : FUN:238 : 0.00494289398193
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 238
+=======
+
+SUMS (fk, lo, un, wr, re):	238	0	0	0	9	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 238 : 78461
+>>> PROGRESS 7/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #4
+=================================
+Summarizing function: main : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 5	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	376	0	0	0	0	
+
+TIMES : SCC:4 : 0.0003981590271
+TIMES : FUN:376 : 0.000391006469727
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 376
+=======
+
+SUMS (fk, lo, un, wr, re):	376	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 376 : 34
+>>> PROGRESS 8/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #15
+=================================
+Summarizing function: ide_disk_put : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	88	0	1	0	0	
+
+TIMES : SCC:15 : 0.000748872756958
+TIMES : FUN:88 : 0.00074315071106
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 88
+=======
+
+SUMS (fk, lo, un, wr, re):	88	0	1	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 88 : 45
+>>> PROGRESS 9/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #30
+=================================
+Summarizing function: do_idedisk_flushcache : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	271	0	0	0	1	
+
+TIMES : SCC:30 : 0.000944137573242
+TIMES : FUN:271 : 0.000937938690186
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 271
+=======
+
+SUMS (fk, lo, un, wr, re):	271	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 271 : 77993
+>>> PROGRESS 10/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #29
+=================================
+Summarizing function: ide_cacheflush_p : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	302	0	0	0	2	
+
+TIMES : SCC:29 : 0.00513291358948
+TIMES : FUN:302 : 0.00512504577637
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 302
+=======
+
+SUMS (fk, lo, un, wr, re):	302	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 302 : 78056
+>>> PROGRESS 11/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #5
+=================================
+Summarizing function: ide_disk_remove : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	305	0	1	0	4	
+
+TIMES : FUN:305 : 0.0025680065155
+TIMES : SCC:5 : 0.00257515907288
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 305
+=======
+
+SUMS (fk, lo, un, wr, re):	305	0	1	0	4	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 305 : 79178
+>>> PROGRESS 12/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #6
+=================================
+Summarizing function: idedisk_ioctl : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	340	0	0	0	3	
+
+TIMES : FUN:340 : 0.00399994850159
+TIMES : SCC:6 : 0.00400805473328
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 340
+=======
+
+SUMS (fk, lo, un, wr, re):	340	0	0	0	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 340 : 79059
+>>> PROGRESS 13/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #7
+=================================
+Summarizing function: kmalloc : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	24	0	0	0	2	
+
+TIMES : SCC:7 : 0.00120091438293
+TIMES : FUN:24 : 0.00119495391846
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 24
+=======
+
+SUMS (fk, lo, un, wr, re):	24	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 24 : 313
+>>> PROGRESS 14/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #10
+=================================
+Summarizing function: idedisk_init : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	370	0	0	0	0	
+
+TIMES : FUN:370 : 0.000524044036865
+TIMES : SCC:10 : 0.000530004501343
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 370
+=======
+
+SUMS (fk, lo, un, wr, re):	370	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 370 : 34
+>>> PROGRESS 15/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #11
+=================================
+Summarizing function: idedisk_exit : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	369	0	0	0	0	
+
+TIMES : SCC:11 : 0.000335931777954
+TIMES : FUN:369 : 0.000332117080688
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 369
+=======
+
+SUMS (fk, lo, un, wr, re):	369	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 369 : 34
+>>> PROGRESS 16/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #33
+=================================
+Summarizing function: set_capacity : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	42	0	0	1	0	
+
+TIMES : FUN:42 : 0.000237941741943
+TIMES : SCC:33 : 0.000245094299316
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 42
+=======
+
+SUMS (fk, lo, un, wr, re):	42	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 42 : 58652
+>>> PROGRESS 17/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #34
+=================================
+Summarizing function: strcpy : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	6	0	0	0	0	
+
+TIMES : SCC:34 : 0.000193119049072
+TIMES : FUN:6 : 0.000188112258911
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 6
+=======
+
+SUMS (fk, lo, un, wr, re):	6	0	0	0	0	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*dest)
+
+SIZES: 6 : 34
+>>> PROGRESS 18/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #36
+=================================
+Summarizing function: write_cache : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	266	0	0	1	1	
+
+TIMES : SCC:36 : 0.0011088848114
+TIMES : FUN:266 : 0.00110411643982
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 266
+=======
+
+SUMS (fk, lo, un, wr, re):	266	0	0	1	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 266 : 77982
+>>> PROGRESS 19/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #37
+=================================
+Summarizing function: idedisk_capacity : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	171	0	0	0	2	
+
+TIMES : FUN:171 : 0.000298976898193
+TIMES : SCC:37 : 0.00030779838562
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 171
+=======
+
+SUMS (fk, lo, un, wr, re):	171	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 171 : 77956
+>>> PROGRESS 20/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #39
+=================================
+Summarizing function: lba_capacity_is_ok : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	90	0	0	1	5	
+
+TIMES : SCC:39 : 0.000489950180054
+TIMES : FUN:90 : 0.000484943389893
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 90
+=======
+
+SUMS (fk, lo, un, wr, re):	90	0	0	1	5	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 90 : 3021
+>>> PROGRESS 21/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #41
+=================================
+Summarizing function: idedisk_set_max_address : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	131	0	0	0	0	
+
+TIMES : SCC:41 : 0.000700950622559
+TIMES : FUN:131 : 0.000696182250977
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 131
+=======
+
+SUMS (fk, lo, un, wr, re):	131	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 131 : 34
+>>> PROGRESS 22/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #42
+=================================
+Summarizing function: idedisk_set_max_address_ext : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	136	0	0	0	1	
+
+TIMES : SCC:42 : 0.000847816467285
+TIMES : FUN:136 : 0.000842094421387
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 136
+=======
+
+SUMS (fk, lo, un, wr, re):	136	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 136 : 77875
+>>> PROGRESS 23/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #43
+=================================
+Summarizing function: sectors_to_MB : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	143	0	0	0	0	
+
+TIMES : FUN:143 : 0.0002601146698
+TIMES : SCC:43 : 0.000265836715698
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 143
+=======
+
+SUMS (fk, lo, un, wr, re):	143	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: n << 9
+SIZES: 143 : 34
+>>> PROGRESS 24/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #44
+=================================
+Summarizing function: idedisk_read_native_max_address : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	121	0	0	0	0	
+
+TIMES : FUN:121 : 0.000638961791992
+TIMES : SCC:44 : 0.00064492225647
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 121
+=======
+
+SUMS (fk, lo, un, wr, re):	121	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 121 : 34
+>>> PROGRESS 25/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #45
+=================================
+Summarizing function: idedisk_read_native_max_address_ext : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	125	0	0	0	0	
+
+TIMES : SCC:45 : 0.000773906707764
+TIMES : FUN:125 : 0.000768184661865
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 125
+=======
+
+SUMS (fk, lo, un, wr, re):	125	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 125 : 34
+>>> PROGRESS 26/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #48
+=================================
+Summarizing function: idedisk_supports_lba48 : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	153	0	0	0	3	
+
+TIMES : FUN:153 : 0.0107131004333
+TIMES : SCC:48 : 0.0107271671295
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 153
+=======
+
+SUMS (fk, lo, un, wr, re):	153	0	0	0	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 153 : 2825
+>>> PROGRESS 27/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #40
+=================================
+Summarizing function: idedisk_check_hpa : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	156	0	0	1	6	
+
+TIMES : SCC:40 : 0.0250689983368
+TIMES : FUN:156 : 0.0250589847565
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 156
+=======
+
+SUMS (fk, lo, un, wr, re):	156	0	0	1	6	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 156 : 78073
+>>> PROGRESS 28/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #46
+=================================
+Summarizing function: idedisk_supports_hpa : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 11	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	150	0	0	0	2	
+
+TIMES : SCC:46 : 0.000308990478516
+TIMES : FUN:150 : 0.000302076339722
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 150
+=======
+
+SUMS (fk, lo, un, wr, re):	150	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 150 : 2756
+>>> PROGRESS 29/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #38
+=================================
+Summarizing function: init_idedisk_capacity : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	164	0	0	3	17	
+
+TIMES : SCC:38 : 0.00615882873535
+TIMES : FUN:164 : 0.00615096092224
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 164
+=======
+
+SUMS (fk, lo, un, wr, re):	164	0	0	3	17	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 164 : 78651
+>>> PROGRESS 30/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #47
+=================================
+Summarizing function: set_lba_addressing : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 28	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	279	0	0	1	5	
+
+TIMES : FUN:279 : 0.00328683853149
+TIMES : SCC:47 : 0.0032970905304
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 279
+=======
+
+SUMS (fk, lo, un, wr, re):	279	0	0	1	5	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 279 : 77915
+>>> PROGRESS 31/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #49
+=================================
+Summarizing function: idedisk_add_settings : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	283	0	0	0	2	
+
+TIMES : SCC:49 : 0.000617980957031
+TIMES : FUN:283 : 0.000612020492554
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 283
+=======
+
+SUMS (fk, lo, un, wr, re):	283	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 283 : 77727
+>>> PROGRESS 32/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #35
+=================================
+Summarizing function: idedisk_setup : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 10	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	288	0	0	12	38	
+
+TIMES : SCC:35 : 0.0599229335785
+TIMES : FUN:288 : 0.0599141120911
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 288
+=======
+
+SUMS (fk, lo, un, wr, re):	288	0	0	12	38	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 288 : 80236
+>>> PROGRESS 33/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #51
+=================================
+Summarizing function: hwif_to_node : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 53	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	78	0	0	0	1	
+
+TIMES : FUN:78 : 0.000571012496948
+TIMES : SCC:51 : 0.000579118728638
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 78
+=======
+
+SUMS (fk, lo, un, wr, re):	78	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: -1
+SIZES: 78 : 77510
+>>> PROGRESS 34/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #32
+=================================
+Summarizing function: ide_disk_probe : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	316	0	0	15	27	
+
+TIMES : FUN:316 : 0.0179500579834
+TIMES : SCC:32 : 0.0179588794708
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 316
+=======
+
+SUMS (fk, lo, un, wr, re):	316	0	0	15	27	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 316 : 80592
+>>> PROGRESS 35/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #8
+=================================
+Summarizing function: f : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 67	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	373	0	0	14	21	
+
+TIMES : FUN:373 : 0.00263285636902
+TIMES : SCC:8 : 0.00264000892639
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 373
+=======
+
+SUMS (fk, lo, un, wr, re):	373	0	0	14	21	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 373 : 80282
+>>> PROGRESS 36/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #9
+=================================
+Summarizing function: proc_idedisk_read_capacity : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 43	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	197	0	0	2	2	
+
+TIMES : FUN:197 : 0.0025360584259
+TIMES : SCC:9 : 0.0025429725647
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 197
+=======
+
+SUMS (fk, lo, un, wr, re):	197	0	0	2	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 197 : 77604
+>>> PROGRESS 37/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #12
+=================================
+Summarizing function: ide_disk_release : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	87	0	0	3	2	
+
+TIMES : SCC:12 : 0.00105977058411
+TIMES : FUN:87 : 0.00105404853821
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 87
+=======
+
+SUMS (fk, lo, un, wr, re):	87	0	0	3	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 87 : 78675
+>>> PROGRESS 38/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #13
+=================================
+Summarizing function: set_nowerr : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	262	0	1	2	0	
+
+TIMES : SCC:13 : 0.00114607810974
+TIMES : FUN:262 : 0.00113797187805
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 262
+=======
+
+SUMS (fk, lo, un, wr, re):	262	0	1	2	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 262 : 77498
+>>> PROGRESS 39/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #14
+=================================
+Summarizing function: idedisk_release : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	331	0	1	2	8	
+
+TIMES : SCC:14 : 0.00345301628113
+TIMES : FUN:331 : 0.00344514846802
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 331
+=======
+
+SUMS (fk, lo, un, wr, re):	331	0	1	2	8	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 331 : 78906
+>>> PROGRESS 40/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #16
+=================================
+Summarizing function: proc_idedisk_read_cache : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	187	0	0	2	2	
+
+TIMES : SCC:16 : 0.00108504295349
+TIMES : FUN:187 : 0.0010781288147
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 187
+=======
+
+SUMS (fk, lo, un, wr, re):	187	0	0	2	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 187 : 77567
+>>> PROGRESS 41/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #26
+=================================
+Summarizing function: get_smart_values : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	177	0	0	0	0	
+
+TIMES : FUN:177 : 0.000982046127319
+TIMES : SCC:26 : 0.000988006591797
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 177
+=======
+
+SUMS (fk, lo, un, wr, re):	177	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 177 : 34
+>>> PROGRESS 42/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #17
+=================================
+Summarizing function: proc_idedisk_read_smart_values : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	222	0	0	2	1	
+
+TIMES : SCC:17 : 0.00171685218811
+TIMES : FUN:222 : 0.00171113014221
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 222
+=======
+
+SUMS (fk, lo, un, wr, re):	222	0	0	2	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 222 : 176
+>>> PROGRESS 43/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #18
+=================================
+Summarizing function: set_multcount : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	257	0	0	2	2	
+
+TIMES : FUN:257 : 0.000752925872803
+TIMES : SCC:18 : 0.00075888633728
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 257
+=======
+
+SUMS (fk, lo, un, wr, re):	257	0	0	2	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 257 : 77498
+>>> PROGRESS 44/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #20
+=================================
+Summarizing function: __ide_do_rw_disk : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	96	0	0	1	14	
+
+TIMES : FUN:96 : 0.0719630718231
+TIMES : SCC:20 : 0.0719730854034
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 96
+=======
+
+SUMS (fk, lo, un, wr, re):	96	0	0	1	14	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 96 : 78471
+>>> PROGRESS 45/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #19
+=================================
+Summarizing function: ide_do_rw_disk : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	113	0	0	1	16	
+
+TIMES : FUN:113 : 0.00381398200989
+TIMES : SCC:19 : 0.00382304191589
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 113
+=======
+
+SUMS (fk, lo, un, wr, re):	113	0	0	1	16	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 113 : 78568
+>>> PROGRESS 46/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #22
+=================================
+Summarizing function: ide_disk_get : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 17	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	83	0	1	0	1	
+
+TIMES : FUN:83 : 0.00100302696228
+TIMES : SCC:22 : 0.00101208686829
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 83
+=======
+
+SUMS (fk, lo, un, wr, re):	83	0	1	0	1	
+
+SS Sum:
+ -> 
+Extptr (2):
+  lval = (*(disk->private_data))
+
+SIZES: 83 : 58605
+>>> PROGRESS 47/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #21
+=================================
+Summarizing function: idedisk_open : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	323	0	1	2	7	
+
+TIMES : FUN:323 : 0.00327014923096
+TIMES : SCC:21 : 0.00327682495117
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 323
+=======
+
+SUMS (fk, lo, un, wr, re):	323	0	1	2	7	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 323 : 137152
+>>> PROGRESS 48/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #31
+=================================
+Summarizing function: idedisk_prepare_flush : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	246	0	0	4	5	
+
+TIMES : SCC:31 : 0.000782012939453
+TIMES : FUN:246 : 0.000775098800659
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 246
+=======
+
+SUMS (fk, lo, un, wr, re):	246	0	0	4	5	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 246 : 77705
+>>> PROGRESS 49/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #24
+=================================
+Summarizing function: idedisk_issue_flush : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	250	0	0	5	5	
+
+TIMES : SCC:24 : 0.00366806983948
+TIMES : FUN:250 : 0.00365996360779
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 250
+=======
+
+SUMS (fk, lo, un, wr, re):	250	0	0	5	5	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 250 : 77777
+>>> PROGRESS 50/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #25
+=================================
+Summarizing function: idedisk_revalidate_disk : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 12	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	354	0	0	1	4	
+
+TIMES : SCC:25 : 0.00289392471313
+TIMES : FUN:354 : 0.00288581848145
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 354
+=======
+
+SUMS (fk, lo, un, wr, re):	354	0	0	1	4	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 354 : 214829
+>>> PROGRESS 51/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #28
+=================================
+Summarizing function: ide_device_shutdown : ide-disk_comb.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	317	0	0	0	2	
+
+TIMES : SCC:28 : 0.0190281867981
+TIMES : FUN:317 : 0.0190160274506
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 317
+=======
+
+SUMS (fk, lo, un, wr, re):	317	0	0	0	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 317 : 78081
+>>> PROGRESS 52/52 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+
+
+
+Beginning Thread Analysis:
+-----
+Expected # thread-creation site pairs: 1
+checking a thread-creation pair
+Prev ldiffCache hits: 3	misses: 1
+
+doing symstate
+Prev ldiffCache hits: 69	misses: 1
+
+doing symstate
+now checking thread roots: f, f
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+now checking thread roots: f, f
+now checking thread roots: f, f
+now checking thread roots: f, f
+done with pair, sending notification
+completed all thread pairs
+****
+Possible race between access to:
+_a1218_568719_ide_1 @ drivers/ide/ide-disk.c:1204 and
+_a1218_568719_ide_1 @ drivers/ide/ide-disk.c:1204
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[include/asm/string.h:425, include/asm/string.h:428, include/asm/string.h:431, include/asm/string.h:432, include/asm/string.h:435] and
+	[include/asm/string.h:425, include/asm/string.h:428, include/asm/string.h:431, include/asm/string.h:432, include/asm/string.h:435]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+_a1218_568719_ide_1.disk @ drivers/ide/ide-disk.c:1204 and
+_a1218_568719_ide_1.disk @ drivers/ide/ide-disk.c:1204
+	Cluster ID: 1
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1237] and
+	[drivers/ide/ide-disk.c:1237]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+_a1218_568719_ide_1.drive @ drivers/ide/ide-disk.c:1204 and
+_a1218_568719_ide_1.drive @ drivers/ide/ide-disk.c:1204
+	Cluster ID: 2
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1235] and
+	[drivers/ide/ide-disk.c:1235]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+_a1218_568719_ide_1.driver @ drivers/ide/ide-disk.c:1204 and
+_a1218_568719_ide_1.driver @ drivers/ide/ide-disk.c:1204
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1236] and
+	[drivers/ide/ide-disk.c:1236]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+dev.driver_data @ drivers/ide/ide-disk.c:1280 and
+dev.driver_data @ drivers/ide/ide-disk.c:1280
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1241] and
+	[drivers/ide/ide-disk.c:1241]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].capacity and
+[REP: 12].capacity
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[include/linux/genhd.h:250] and
+	[include/linux/genhd.h:250]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].driverfs_dev and
+[REP: 12].driverfs_dev
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1253] and
+	[drivers/ide/ide-disk.c:1253]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].end_flush_fn and
+[REP: 12].end_flush_fn
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1017] and
+	[drivers/ide/ide-disk.c:1017]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].flags and
+[REP: 12].flags
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1254] and
+	[drivers/ide/ide-disk.c:1254]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].fops and
+[REP: 12].fops
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1256] and
+	[drivers/ide/ide-disk.c:1256]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].lba_capacity and
+[REP: 12].lba_capacity
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:151] and
+	[drivers/ide/ide-disk.c:132, drivers/ide/ide-disk.c:139, drivers/ide/ide-disk.c:544]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(3)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].lba_capacity and
+[REP: 12].lba_capacity
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:151] and
+	[drivers/ide/ide-disk.c:151]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].minors and
+[REP: 12].minors
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1251] and
+	[drivers/ide/ide-disk.c:1251]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].prepare_flush_fn and
+[REP: 12].prepare_flush_fn
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1016] and
+	[drivers/ide/ide-disk.c:1016]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+****
+Possible race between access to:
+[REP: 12].private_data and
+[REP: 12].private_data
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[drivers/ide/ide-disk.c:1239] and
+	[drivers/ide/ide-disk.c:1239]
+
+	Confidence: used PTA nodes lblSet(39, 39)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+(1)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1296 571215 w/ func: f
+(2)
+	Th. 1 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+	Th. 2 spawned: drivers/ide/ide-disk.c:1297 571260 w/ func: f
+
+
+$$$$$$
+Total Warnings: 15
+
+
+Printing Alias assumptions used by warnings
+-----
+nc	5	[REP: 12].capacity#g/[REP: 12].capacity#g	39	39
+nc	6	[REP: 12].driverfs_dev#g/[REP: 12].driverfs_dev#g	39	39
+nc	7	[REP: 12].end_flush_fn#g/[REP: 12].end_flush_fn#g	39	39
+nc	8	[REP: 12].flags#g/[REP: 12].flags#g	39	39
+nc	9	[REP: 12].fops#g/[REP: 12].fops#g	39	39
+nc	14	[REP: 12].lba_capacity#g/[REP: 12].lba_capacity#g	39	39
+nc	10	[REP: 12].lba_capacity#g/[REP: 12].lba_capacity#g	39	39
+nc	11	[REP: 12].minors#g/[REP: 12].minors#g	39	39
+nc	12	[REP: 12].prepare_flush_fn#g/[REP: 12].prepare_flush_fn#g	39	39
+nc	13	[REP: 12].private_data#g/[REP: 12].private_data#g	39	39
+writeState: Not needed for CIL PTA
+writeState: Not needed for Steens PTA
+Golden lvals hash stats (len, ents, sum/min/median/max bucket)
+	262	14	783	0	3	6	
+Golden lvals hash stats (len, ents, sum/min/median/max bucket)
+	173	0	0	0	0	0	
+Golden types hash stats (len, ents, sum/min/median/max bucket)
+	173	90	210	0	0	9	
+Golden compInfos hash stats (len, ents, sum/min/median/max bucket)
+	173	0	0	0	0	0	
+Elapsed time (secs): 0.376023
+Top heap size (words): 1738752
+Current heap size (words): 1308672
+Lifetime allocated bytes: 40840900.
+Collections -- minor: 26 major: 7 compactions: 1
+return value is 0
+ran 1 times
+cleared status file: /tmp/temp.7aYrIn
+Sun Aug 10 21:12:45 PDT 2008

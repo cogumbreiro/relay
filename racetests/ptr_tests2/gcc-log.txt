@@ -1,0 +1,3 @@
+duppy -c ptrtest2.c -o ptrtest2.o
+duppy -c lock.c -o lock.o
+duppy ptrtest2.o lock.o

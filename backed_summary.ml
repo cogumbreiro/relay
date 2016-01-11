@@ -69,10 +69,10 @@ let token_of_string = int_of_string
 (*************** Map entry for tracking presence of summaries ***************)
 
 type 'a sumStub = (* parameter is summary type *)
-    InMemSumm of (dbToken option * 'a) 
-      (** Summary (of type 'a) is in memory. Also tracks the
-          old storage location if any. TODO: add a "dirty" bit 
-          to skip writing in some cases *)
+    InMemSumm of (bool * dbToken option * 'a)
+      (** dirty bit, 
+          old storage location on disk if any, 
+          Summary (of type 'a) *)
 
   | OnDiskSumm of dbToken
       (** Summary is on disk, stored at the path represented by dbToken *)
@@ -103,63 +103,6 @@ let makeSumType strRep : sumType =
 (** Convert sumType to a printable string *)
 let string_of_sumType typ = 
   typ
-
-
-(************************************************************
-      Initialization and parsing of the config file
- ************************************************************)
-
-(* Top level split, between the field name and data *)
-let ws = "[ \r\n\t]*"
-
-let pathSeparator = Str.split_delim (Str.regexp (ws ^ "[;]" ^ ws))
-
-let pathFieldName = "PATHS"
-
-
-(** Choose the given list of summary storage paths for use *)
-let setPaths paths =
-  List.iter (fun s ->
-               Filetools.ensurePath s) paths;
-  L.logStatus "summary database will use:";
-  List.iter (fun p -> 
-               L.logStatus ("\t" ^ p)) paths;
-  summPaths := paths
-    
-(** Make up a location for storing summaries, specific to a given 
-    input program (by using its call graph directory) *)
-let makePaths cgDir =
-  [Filename.concat cgDir "relay_sums"]
-
-
-(** Initialize summary manager based on parsed config file [settings] *)
-let init settings cgDir =
-  let _ = Unix.umask 0o000 in
-  let bsSettings = Config.getGroup settings "SUMMARY_DB" in
-  let usePath = ref false in
-  let paths = ref [] in
-  Config.iter
-    (fun fieldName values ->
-       let informError () = 
-         L.logError ~prior:0 "Corrupt value in backing store config:";
-         L.logError values;
-       in
-       try 
-         (match fieldName with
-            "PATHS" -> paths := pathSeparator values
-          | "CENTRAL" -> usePath := bool_of_string values
-          | _ -> informError ()
-         )
-       with e -> 
-         L.logError ("init BS settings: " ^ (Printexc.to_string e));
-         informError ();
-         raise e
-    ) bsSettings;
-  if (!usePath && (!paths <> [])) then
-    setPaths !paths
-  else
-    setPaths (makePaths cgDir)
-
 
 
 (************************************************************
@@ -323,6 +266,13 @@ let getDBFile (fid: fKey) (summType:string) (token: dbToken) : string =
   let path = pathFromToken token in
   getFName fid summType path
 
+(** Check size of summary file *)
+let size_token fid summType token =
+  let fname = getDBFile fid summType token in
+  let ic = open_in fname in
+  let numKB = in_channel_length ic in
+  close_in ic;
+  numKB
 
 (** Get a previously serialized summary for a function *) 
 let deserializeFromToken (fkey:fKey) (summType:string) (tok: dbToken) : 'a =
@@ -400,7 +350,7 @@ let clearState gen_num =
 
 
 (************************************************************
-     Generic serialization / flushing ops for summaries
+   Generate summary db to manage serialization, search, etc.
  ************************************************************)
 
 (** Input module for generating a module that will manage 
@@ -413,9 +363,6 @@ module type Summarizeable = sig
   (** Type of a simplified summary *)
   type simpleSum 
 
-  (** Unique identifier / dynamic type of the summary *) 
-  val id : sumType
-
   (** Function for simplifying the summary before writing to disk *)
   val simplify : t -> simpleSum
 
@@ -425,14 +372,60 @@ module type Summarizeable = sig
   (** value to use for initialization when summary isn't found the first time *)
   val initVal : t
 
+  (** default value for external functions *)
+  val unknownSummary : t
+
 end
 
-  
-(** Interface to summary database *)
-class type ['sum] base = object
-  
+(** Interface to summary database for maintainence, inspection, etc. 
+    Things does not depend on the actual summaries *)
+class type dbManagement = object
+
+  val mutable initialized : bool
+
+  (** Bit of reflection to identify the kind of summary tracked *)
+  method sumTyp : sumType
+
   (** Handles any cleanup of partially read/written summaries on reboot *)
   method cleanup : unit -> unit
+
+  (** Save all (in-memory) summaries to disk, and allow garbage collection *)
+  method serializeAndFlush : unit
+    
+  (** evict all in-memory summaries which have already been written to disk *)
+  method evictSummaries : unit
+
+  (** Given a list of functions and storage locations, assume 
+      the summaries for those functions can be found at 
+      the corresponding locations *)
+  method assumeComplete : ((fKey * dbToken) list) -> unit 
+
+  (** Write the summary for the given function to disk *)
+  method flushOne : fKey -> unit
+    
+  method evictOne : fKey -> unit
+
+  (** Given a list of functions, find the storage locations of each
+      function's summary. May be omitted in the resulting list if
+      there is no such summary. 
+      TODO: maybe raise an exception instead. Not sure if it's worth
+      the trouble to have some kinds of summaries NOT written to disk 
+      (e.g., the initial/bottom summaries) *)
+  method locate : fKey list -> (fKey * dbToken) list
+    
+  method sizeInMem : unit -> int
+
+  method sizesOf : fKey list -> (fKey * int) list
+
+  (** Initialize the summaries for special functions / external funcs *)
+  method initSummaries : Config.settings -> Callg.simpleCallG -> unit
+
+
+end
+  
+(** "Full" Interface to summary database *)
+class type ['sum] base = object
+  inherit dbManagement
     
   (** Find and return the summary for the given function. If "Not_found",
       return a specified initial value instead of raising the exception *)
@@ -440,21 +433,10 @@ class type ['sum] base = object
     
   (** Replace an old summary (if any) for the given function w/ a new one *)
   method addReplace : fKey -> 'sum -> unit
-    
-  (** Save all (in-memory) summaries to disk, and allow garbage collection *)
-  method serializeAndFlush : unit
-    
-  (** evict all in-memory summaries which have already been written to disk *)
-  method evictSummaries : unit
-    
+        
   (** Load the summary from the given file *)
   method getFromFile : string -> 'sum
-    
-  (** Given a list of functions and storage locations, assume 
-      the summaries for those functions can be found at 
-      the corresponding locations *)
-  method assumeComplete : ((fKey * dbToken) list) -> unit 
-    
+        
   (** Low-level serialization. Avoid using, but feel free to extend *)
   method private serialize : fKey -> 'sum -> dbToken
     
@@ -464,20 +446,8 @@ class type ['sum] base = object
   (** Log an error, given the body of the message *)
   method err : string-> unit
     
-  (** Write the summary for the given function to disk *)
-  method flushOne : fKey -> unit
-    
-  (** Given a list of functions, find the storage locations of each
-      function's summary. May be omitted in the resulting list if
-      there is no such summary. 
-      TODO: maybe raise an exception instead. Not sure if it's worth
-      the trouble to have some kinds of summaries NOT written to disk 
-      (e.g., the initial/bottom summaries) *)
-  method locate : fKey list -> (fKey * dbToken) list
-    
-  (** Bit of reflection to identify the kind of summary tracked *)
-  method typ : sumType
-    
+  method fold : 'a. ('sum -> 'a -> 'a) -> 'a -> 'a
+
 end
 
 
@@ -488,22 +458,22 @@ module type S  = sig
   type sum
 
   (** Implementation for the database interface *)
-  class data : [sum] base
+  class data : sumType -> [sum] base
 
 end
 
+
+exception SumNotInitialized
 
 module Make (I:Summarizeable) = struct
   
   type sum = I.t
 
-  let sumStr = string_of_sumType I.id
-
   (** Implementation of the interface *)
-  class data : [sum] base = object (self)
+  class data sumID : [sum] base  = object (self)
     
-    (* TODO: Should allow only a single instance to be registered *)
-        
+    val sumStr = string_of_sumType sumID
+
 
     (* The summary map. TODO: Is it better to consolidate
        all the summaries for each function into one file per function? 
@@ -511,9 +481,11 @@ module Make (I:Summarizeable) = struct
        nodes, but will have the same number of leaves)? *)
     val mutable summs = FMap.empty
 
+    val mutable initialized = false
+
     (** Bit of reflection to identify the kind of summary tracked *)
-    method typ : sumType =
-      I.id
+    method sumTyp : sumType =
+      sumID
 
     (** Post-reboot cleanup *)
     method cleanup () = L.logStatus "BS: Not doing any cleanup"
@@ -525,7 +497,7 @@ module Make (I:Summarizeable) = struct
     (** Serialize the summary (given the associated function ID).
         Return the chosen storage location. *)
     method private serialize (fkey:fKey) (v:sum) : dbToken =
-      try serializeSummary fkey I.id (I.simplify v);
+      try serializeSummary fkey sumID (I.simplify v);
       with e -> self#err ("serialization failed: " ^  
                             (string_of_fkey fkey) ^ " " ^
                             (Printexc.to_string e));  
@@ -536,22 +508,20 @@ module Make (I:Summarizeable) = struct
         if the summary was moved. *)
     method private deserialize (fkey:fKey) (token:dbToken) : sum * dbToken =
       try
-        (I.desimplify (deserializeFromToken fkey I.id token), token)
+        (I.desimplify (deserializeFromToken fkey sumID token), token)
       with e -> self#err ("deserialization failed for: " ^ 
                             (string_of_fkey fkey));
         raise e
 
     (** Deserialize a summary, given the filename (w/ extension stripped) *)
     method getFromFile (path:string) : sum =
-      try deserializeFromFile path I.id
-      with e -> self#err ("deserialization failed for : " ^ path);
+      try deserializeFromFile path sumID
+      with e -> self#err ("deserializeFromFile failed for : " ^ path);
         raise e
 
-    (** Replace the summary given the (optional) storage location (tokOpt) 
-        in which the summary should use for storage in the future *)
-    method private addReplace2 (k:fKey) 
-      ((tokOpt, newVal):dbToken option * sum) : unit =
-      summs <- FMap.add k (InMemSumm (tokOpt, newVal)) summs
+    (** Replace the summary stub directly *)
+    method private addReplaceBase (k:fKey) stub : unit =
+      summs <- FMap.add k stub summs
 
 
     (** Replace the old value in the summary w/ this one *)          
@@ -561,61 +531,85 @@ module Make (I:Summarizeable) = struct
           let stub = FMap.find k summs in
           match stub with
             OnDiskSumm t -> Some t
-          | InMemSumm (t, _) -> t
+          | InMemSumm (_, tOpt, _) -> tOpt
         with Not_found -> None
       in
-      summs <- FMap.add k (InMemSumm (tok, newVal)) summs
+      self#addReplaceBase k (InMemSumm (true, tok, newVal))
 
     (** Find the summary for function with fkey k. 
         Returns I.initVal if it isn't found, and uses that in the future *)
     method find (k:fKey) : sum =
-      try
+      if not initialized then begin
+        self#err "Not initialized!"; raise SumNotInitialized
+      end else try
         let stub = FMap.find k summs in
         match stub with
           OnDiskSumm t ->
             let v, tok = self#deserialize k t in
-            self#addReplace2 k (Some tok, v);
+            self#addReplaceBase k (InMemSumm (false, Some tok, v));
             v
-        | InMemSumm (_, v) -> 
+        | InMemSumm (_, _, v) -> 
             v
       with Not_found ->
-        self#addReplace2 k (None, I.initVal);
+        self#addReplaceBase k (InMemSumm (true, None, I.initVal));
         I.initVal
+
+    method private doFlush fkey stub =
+      match stub with
+        OnDiskSumm _ -> stub
+      | InMemSumm (dirty, Some (oldTok), v) ->
+          let newTok = if dirty then
+            self#serialize fkey v
+          else oldTok in
+          (OnDiskSumm newTok)
+      | InMemSumm (dirty, None, v) ->
+          if not dirty then
+            self#err "doFlush: Not dirty and not already on disk"
+          ;
+          let newTok = self#serialize fkey v in
+          (OnDiskSumm newTok)            
 
     (** Serialize and flush one function summary from memory *)
     method flushOne fkey =
       try 
-        match FMap.find fkey summs with
-        OnDiskSumm _ -> ()
-        | InMemSumm (_,v) ->
-            let newTok = self#serialize fkey v in
-            summs <- FMap.add fkey (OnDiskSumm newTok) summs
+        let newStub = self#doFlush fkey (FMap.find fkey summs) in
+        summs <- FMap.add fkey newStub summs
       with Not_found ->
         ()
           
     (** serialize all the summaries and clear from memory *)
     method serializeAndFlush =
-      summs <- FMap.mapi
-        (fun fkey summStub ->
-           match summStub with
-             InMemSumm (_,v) ->
-               let newTok = self#serialize fkey v in
-               (OnDiskSumm newTok)
-           | OnDiskSumm _ ->
-               summStub
-        ) summs
-    
+      summs <- FMap.mapi self#doFlush summs
+
+
+    method private doEvict fkey stub = 
+      match stub with
+        InMemSumm (false, Some(t), s) ->
+          OnDiskSumm (t)
+      | OnDiskSumm t ->
+          stub
+      | InMemSumm (true, _, s) ->
+          (* write it out anyway *)
+          self#err ("evictSummaries: dirty summs " ^ string_of_fkey fkey);
+          self#doFlush fkey stub
+      | InMemSumm (_, None, _) ->
+          (* write it out anyway *)
+          self#err ("evictSummaries: not already on disk " ^ 
+                      string_of_fkey fkey);
+          self#doFlush fkey stub
+
+    method evictOne fkey =
+      try
+        let newStub = self#doEvict fkey (FMap.find fkey summs) in
+        summs <- FMap.add fkey newStub summs
+      with Not_found ->
+        ()
+
     (** Clear all in-memory summaries that have already been written out *)
     method evictSummaries =
       summs <- FMap.mapi
         (fun fkey summStub ->
-           match summStub with
-             InMemSumm (Some(t), s) ->
-               OnDiskSumm (t)
-           | OnDiskSumm t ->
-               summStub
-           | InMemSumm (None, s) ->
-               summStub
+           self#doEvict fkey summStub
         ) summs
 
 
@@ -632,14 +626,65 @@ module Make (I:Summarizeable) = struct
       List.fold_left
         (fun res fk -> 
            try match FMap.find fk summs with
-             InMemSumm (Some(t), _)
+             InMemSumm (_, Some(t), _)
            | OnDiskSumm (t) ->
                (fk, t) :: res
            | _ -> res
            with Not_found -> res
         ) [] fkeys
-        
-        
+
+    method fold : 'a. (sum -> 'a -> 'a) -> 'a -> 'a =
+      fun foo accum ->
+        FMap.fold 
+          (fun fkey summStub accum ->
+             match summStub with
+               InMemSumm (_, _, v) -> 
+                 foo v accum
+             | OnDiskSumm t ->
+                 let v, newTok = self#deserialize fkey t in
+                 self#addReplaceBase fkey (OnDiskSumm newTok);
+                 foo v accum
+          ) summs accum
+
+
+    method sizesOf (fkeys : fKey list) : (fKey * int) list =
+      List.map 
+        (fun fk ->
+           try match FMap.find fk summs with
+             InMemSumm (_, Some(t), _) 
+           | OnDiskSumm (t) ->
+               (fk, size_token fk sumID t)
+           | InMemSumm (_, _, v) ->
+               self#err ("sizesOf not already on disk: " ^ string_of_fkey fk);
+               (fk, Osize.size_w v)
+           with Not_found ->
+             self#err ("sizesOf can't find: " ^ string_of_fkey fk);
+             (fk, 0)
+        ) fkeys
+
+          
+    method sizeInMem () =
+      Osize.size_kb summs
+
+
+    (** Initialize the summaries for special functions / external funcs *)
+    method initSummaries (settings:Config.settings) cg =
+      self#initSumBodyless cg;
+      initialized <- true
+
+    method private initSumBodyless cg =
+      FMap.iter 
+        (fun k n ->
+           if (n.Callg.hasBody) then () (* leave a missing entry *)
+           else begin
+             (* no def/body for the func *)
+             if not (isFinal k (self#sumTyp)) then begin
+               self#addReplace k I.unknownSummary;
+               setFinal k (self#sumTyp);
+             end
+           end
+        ) cg
+
   end (* end of class *)
   
 end
@@ -649,28 +694,126 @@ end
   (and therefore can be placed in collections (like lists)
  ************************************************************)
 
-type sumDescriptor = {
-  sumTyp : sumType;
-  sumCompletor : (fKey * dbToken) list -> unit;
-  (* locator, etc ? *)
-  (* make a link between the sumType and the analysis type/id? *)
-}
-
 
 (** List of all known sumDescriptors *)
-let (allTypes : sumDescriptor list ref) = ref []
+let (allSumDBs : dbManagement list ref) = ref []
+
+(** Get the sumDescriptors for just the requested types *)
+let getDescriptors (types : sumType list) =
+  List.filter (fun x -> List.mem x#sumTyp types) !allSumDBs
 
 (** Add another sumType to the list of known types. 
     Whenever a database instance is created, it MUST be registered! *)
-let registerType (db : ('a) base) : unit =
-  (* register a descriptor with the system *)
-  let myDescriptor = 
-    { sumTyp = db#typ;
-      sumCompletor = db#assumeComplete; } in
-  if List.exists (fun x -> myDescriptor.sumTyp = x.sumTyp) !allTypes then ()
-  else allTypes := myDescriptor :: !allTypes
+let registerType (db : 'a base) : unit =
+  let db = (db :> dbManagement) in
+  if List.exists (fun x -> db#sumTyp = x#sumTyp) !allSumDBs then
+    L.logError ("BS: Attempting to register " ^ 
+                  (string_of_sumType db#sumTyp) ^ " twice -- ignored\n")
+  else begin
+    L.logStatus ("Registered summary type: " ^ (string_of_sumType db#sumTyp));
+    allSumDBs := db :: !allSumDBs
+  end
 
 (** Get a list of summary filenames for given function ID.
     TODO: remove this and use newer interface *)
 let possibleNames fid =
-  List.map (fun sumDescr -> getBasename fid sumDescr.sumTyp) !allTypes
+  List.map (fun db -> getBasename fid db#sumTyp) !allSumDBs
+
+let flushAll () =
+  List.iter (fun db -> db#serializeAndFlush) !allSumDBs
+
+let sizeOfAll () =
+  List.fold_left (fun tot db -> tot + db#sizeInMem ()) 0 !allSumDBs
+
+
+let printSizeOfAll caption =
+  (* TODO: don't print when sizes aren't supposed to be checked? *)
+  let sizeStr = List.fold_left 
+    (fun acc db ->
+       acc ^ " [" ^ string_of_sumType db#sumTyp ^ ":" ^
+         string_of_int (db#sizeInMem ()) ^ "]") "" !allSumDBs in
+  L.logStatus (caption ^ sizeStr)
+
+
+(************************************************************
+      Initialization and parsing of the config file
+ ************************************************************)
+
+(* Top level split, between the field name and data *)
+let ws = "[ \r\n\t]*"
+
+let pathSeparator = Str.split_delim (Str.regexp (ws ^ "[;]" ^ ws))
+
+let pathFieldName = "PATHS"
+
+
+(** Choose the given list of summary storage paths for use *)
+let setPaths paths =
+  List.iter Filetools.ensurePath paths;
+  L.logStatus "summary database will use:";
+  List.iter (fun p -> L.logStatus ("\t" ^ p)) paths;
+  summPaths := paths
+
+
+(** Make up a location for storing summaries, specific to a given 
+    input program (by using its call graph directory) *)
+let makePaths cgDir =
+  [Filename.concat cgDir "relay_sums"]
+
+let sanitizePaths paths =
+  List.filter 
+    (fun path -> 
+       let p = Strutil.strip path in
+       if p = "" then begin
+         L.logError "empty path (cwd) given to backed_summaries? pruning";
+         false
+       end
+       else true) paths
+    
+(** Determine where summaries are (to be) stored *)
+let setPathSettings settings cgDir = 
+  let _ = Unix.umask 0o000 in
+  let bsSettings = Config.getGroup settings "SUMMARY_DB" in
+  let usePath = ref false in
+  let paths = ref [] in
+  Config.iter
+    (fun fieldName values ->
+       let informError () = 
+         L.logError ~prior:0 "Corrupt value in backing store config:";
+         L.logError values;
+       in
+       try 
+         (match fieldName with
+            "PATHS" -> paths := pathSeparator values
+          | "CENTRAL" -> usePath := bool_of_string values
+          | _ -> informError ()
+         )
+       with e -> 
+         L.logError ("init BS settings: " ^ (Printexc.to_string e));
+         informError ();
+         raise e
+    ) bsSettings;
+  if (!usePath) then begin
+    paths :=  sanitizePaths !paths;
+    if (!paths <> []) then
+      setPaths !paths
+    else failwith "Backed_summaries: invalid paths"
+  end 
+  else
+    setPaths (makePaths cgDir)
+
+let initASummary settings cg sum =
+  L.logStatus ("Initializing summary " ^ (string_of_sumType sum#sumTyp));
+  L.flushStatus ();
+  sum#cleanup ();
+  sum#initSummaries settings cg
+
+let initAllSummaries settings cg =
+  List.iter (initASummary settings cg) !allSumDBs
+    (* not super efficient because of multiple cg traversals, but oh well *)
+
+(** Initialize summary manager based on parsed config file [settings] *)
+let init settings cgDir cg = begin
+  setPathSettings settings cgDir;
+  initAllSummaries settings cg
+end

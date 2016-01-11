@@ -1,13 +1,12 @@
-Notes on RELAY 0.7.07
----------------------
+Notes on RELAY
+--------------
 
 What is RELAY?
 --------------
 
-RELAY is a static data race detector for C programs.
-Version 0.7.07 means this is the July 2007 release 
-(the "0." prefix is there to make sure this doesn't 
-sound too advanced and bug-free =P)
+RELAY is a static data race detector for C programs. Data race warnings
+can be imported into a database and then filtered (currently requires
+installation of additional components: Django + (MySQL or Postgres))
 
 
 Installation:
@@ -16,60 +15,99 @@ Installation:
 see the included INSTALL text file for instructions
 
 
-
 Running RELAY:
 --------------
 
 Pick your favorite C program, or try one of the ones included in the test
-directory. Let's call that program "PUT" (the program under test).
+directory. Let's call that program "PROG", and let's call the directory
+where you've installed relay "RELAY_DIR"
 
 
 1) Pick the files to analyze: We first need a list of the source 
    files that should be analyzed. The desired files should
-   be listed in a file called "gcc-log.txt" in PUT's directory. 
-   This "gcc-log.txt" file can be written manually, or it filled-in 
-   by a script that intercepts gcc calls from a Makefile. 
-   If PUT has Makefile, run:
+   be listed in a file called "gcc-log.txt" in PROG's directory. 
+   This "gcc-log.txt" file can be written manually, or it can be filled-in 
+   by a script that intercepts gcc calls from a Makefile. If PROG has a 
+   Makefile, use the interceptor to generate "gcc-log.txt" by running
 
    $RELAY_DIR/scripts/intercept.sh make -e
 
-   from the PUT directory.
+   from the PROG directory.
+
+   (Make sure you modify the $RELAY_DIR/scripts/intercept.sh script to point 
+   to the correct $RELAY_DIR)
 
 
 2) Pre-process the source files: We now need to pre-process and generate
    additional linking information for the source files. First edit
    the $RELAYROOT value in the script "$RELAY_DIR/scripts/dump-calls.sh" 
-   to point to the location of your RELAY installation. Next, from the PUT 
+   to point to the location of your RELAY installation. Next, from the PROG 
    directory, run:
 
    $RELAY_DIR/scripts/dump-calls.sh
 
    After this completes, there should be a "ciltrees" directory within
-   the PUT directory. Within ciltrees, there should be a "calls.XYZ"
+   the PROG directory. Within ciltrees, there should be a "calls.XYZ"
    file containing a text representation of the program's callgraph,
    among other files.
 
+3) Optional -- specify entry points for the program in a file 
+     (e.g. "roots.txt"). Here is an example:
 
-3) Now let's run the actual analysis. Change directories to the $RELAY_DIR.
+    name : start_kernel
+    name : decompress_kernel
+    name : sys_.*
+    type : irqreturn_t
+
+   Which names 2 entry functions explictly and names a set using a regex.
+   It also identifies all functions that return things of type "irqreturn_t"
+   as an entry function (more support to be added later).
+
+   Place this "roots.txt" file in the "ciltrees" directory. To use it
+   edit the "client.cfg" config file in $RELAY_DIR to have "USE_ROOTS : true".
+   If the file is omitted or the flag is set to false, only functions found
+   to be used for spawning threads in the code (e.g., the third parameter 
+   to any pthread_create call) will be treated as an thread root.
+
+
+4) Now let's run the actual analysis. Change directories to the $RELAY_DIR.
    We need to run a server process and a worker process. In one terminal, run
 
-   ./server.sh $PUT_DIR/ciltrees
+   ./server.sh $PROG_DIR/ciltrees
 
    In another terminal, run:
 
-   ./relay.sh $PUT_DIR/ciltrees
+   ./relay.sh $PROG_DIR/ciltrees
 
-   (sorry, in the future there will be convenience script that runs both)
+   (you can write a convenience script that runs both...)
 
    The analysis will write a bunch of status messages along with the
    data race warnings to stdout. Additionally, the warning data will
-   be written to $PUT_DIR/ciltrees/warnings.xml. The data can then be
-   loaded into a database. 
+   be written to $PROG_DIR/ciltrees/warnings2.xml. The data can then be
+   loaded into a database. (there's also a warnings.xml, but there may
+   be a bug with "IDs" in that one)
 
-   Scripts in $RELAY_DIR/ui/relay/warnings are available for parsing 
-   the XML and loading it into a database. Additionally, scripts for 
-   filtering-out unlikely race warnings is available. At the moment, however, 
-   this optional component depends on the Django web framework.
+5) Filtering warnings: At the moment, this requires installing Django
+   web framework (sorry, there's no real reason except that I was curious
+   and ended up writing stuff with it). See the Django website for 
+   installation instructions, etc. Make sure edit the settings.py, etc.
 
+   Files for loading and filtering are in $RELAY_DIR/ui/relay/warnings
+
+   - loading.py : handles loading. First add an "info.txt" file in 
+     $PROG_DIR/ciltrees/ describing the version of the test program. The
+     contents should look like:
+  
+     name: Linux
+     version: 2.6.15
+     options: make allyesconfig, no dynamic module loading
+  
+   - filters.py : defines the filters
    
+   - to run both, run the do_filter.py script in $RELAY_DIR/ui/relay/
+     You may want to edit it to add more calls to the filters in filters.py
+     This will generate a files w/ lists of the warning IDs that were
+     removed (and a file w/ those that remain).
+
+   - viewing results in web page: not currently supported...
 

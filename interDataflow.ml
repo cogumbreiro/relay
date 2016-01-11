@@ -43,7 +43,7 @@
 *)
 
 open Fstructs
-open Scc
+open Scc_cg
 open Callg
 open Messages
 
@@ -96,14 +96,33 @@ module type S = sig
 end
 
 
-module BottomUpDataflow = 
-  functor (T : ProcTransfer) -> 
-struct
+(* Time individual functions and the scc *)
+module FunIndex = struct
+  
+  type t = string
+      
+  let hash (s:t) = Hashtbl.hash s
+    
+  let equal (s1:t) (s2:t) = 
+    s1 = s2
+
+  let to_string (s:t) = s
+    
+  let getTime () = Stat.getWCTime ()
+
+  let prefix = "TIMES : "
+
+end
+
+
+
+module BottomUpDataflow = functor (T : ProcTransfer) -> struct
 
   
   (* Module for worklist of functions *)
   module FQ = Queueset.Make(OrderedFKeys)
 
+  module FunTime = Stat.IndexedTimer(FunIndex)
 
   (** Worklist of functions to process (from current SCC) *)
   let funWork = FQ.create ()
@@ -134,9 +153,15 @@ struct
       (* Do one iteration *)
       let curKey = FQ.pop funWork in 
       begin
-        try 
-          let curNode = FMap.find curKey !theCG in
-          match (T.doFunc curKey curNode) with
+        let curNode =
+          try FMap.find curKey !theCG
+          with Not_found ->
+            (L.logError ("Function not in callgraph: " ^ 
+                          (string_of_fkey curKey));
+             raise Not_found)  
+        in
+        let funLabel = "FUN:" ^ string_of_fkey curKey in
+        match (FunTime.time funLabel (T.doFunc curKey) curNode) with
             NoChange -> ()
           | NewOutput (i,o) -> 
               let mayNotify = curNode.callers in
@@ -145,19 +170,17 @@ struct
                    FSet.mem nk curSCC.scc_nodes
                 ) mayNotify in
               List.iter (propagateOut o) toNotify
-        with Not_found ->
-          L.logError ("Function not in callgraph: " ^ 
-                        (string_of_fkey curKey))  
       end;
       Stat.print stdout "STATS:\n";
     done
+
 
   (** Complete the work related to an SCC *)
   let doSCC curSCC =
     Checkp.record curSCC "Race";
     (* Add functions to work queue *)
     FSet.iter (fun k -> FQ.addOnce k funWork) curSCC.scc_nodes;
-    
+
     Stat.time "sccStart" T.sccStart curSCC;
 
     let sccSize = (string_of_int (FQ.length funWork)) in
@@ -166,14 +189,19 @@ struct
                    (string_of_int curSCC.scc_num));
     L.logStatus ("=================================");          
     L.flushStatus ();
-        
+
+    FunTime.reset ();
+
+    let sccLabel = "SCC:" ^ string_of_int curSCC.scc_num in
     (try
-       fixedPoint curSCC;
+       FunTime.time sccLabel fixedPoint curSCC;
      with e ->
        L.logError "InterDF: fixed-pointing died?";
        raise e
     );
-    
+
+    FunTime.printTimes ();
+
     L.logStatus ("=================================");
     L.logStatus ("Finished an SCC (" ^ sccSize ^ ")");
     L.logStatus ("=================================");

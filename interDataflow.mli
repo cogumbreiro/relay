@@ -1,6 +1,6 @@
 open Callg
 open Fstructs
-open Scc
+open Scc_cg
 
 (** A framework for inter-procedural data flow analysis built on
  *  the CIL intra-procedural framework *)

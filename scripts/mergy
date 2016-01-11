@@ -6,16 +6,18 @@ import os
 import sys
 import re
 
-cillyroot = os.environ['CILLYROOT'];
+cillyroot = os.environ['CILLYROOT']
+cilly_bin = os.path.join(cillyroot,'cilly') 
+
 
 #set CUR_CIL_FILE env variable to tell the cilly routine which file
 #is currently being processed
-matched = False;
+matched = False
 
 #assume file separator char is '/'
-valid_path_chars = "[_a-zA-Z0-9/.-]*?"; #path not required?
-valid_fname_chars = "[_a-zA-Z0-9-]+?";  #excluding the extension
-valid_prefix = valid_path_chars + valid_fname_chars;
+valid_path_chars = "[_a-zA-Z0-9/.-]*?" #path not required?
+valid_fname_chars = "[_a-zA-Z0-9-]+?"  #excluding the extension
+valid_prefix = valid_path_chars + valid_fname_chars
 
 #watch out for the order...
 #don't need .h files? inlining already done? src msg wrong though?
@@ -23,20 +25,26 @@ reg = re.compile(valid_prefix + "\.cil\.c|" +
                  valid_prefix + "\.cpp|" +
                  valid_prefix + "\.C|" +
                  valid_prefix + "\.cc|" +
-                 valid_prefix +"\.c");
+                 valid_prefix +"\.c")
 
 for a in sys.argv[1:]:
-    mat = reg.search(a);
+    mat = reg.search(a)
     if mat <> None:
         if matched:
-            print "matched too many sources";
+            print >> sys.stderr, "matched too many sources"
         else:
-            matched = True;
-            os.environ['CUR_CIL_FILE'] = mat.group(0);
+            matched = True
+            curFile = mat.group(0)
             
 if (not matched) :
-    print "didn't match any sources";
+    print >> sys.stderr, "didn't match any sources"
+else :
+    os.environ['CUR_CIL_FILE'] = curFile
+    print >> sys.stderr, "duppy'ing %s to %s" % (os.environ['CUR_CIL_FILE'],
+                                                 os.environ['DUMPROOT'])
 
-cillyargs = ['cilly', '--dotrans_alloc', '--merge', '--keepmerged'] + sys.argv[1:];
 
-os.execv(cillyroot + '/cilly', cillyargs);
+
+cillyargs = ['cilly', '--keepstatic', '--merge', '--keepmerged'] + sys.argv[1:]
+
+os.execv(cilly_bin, cillyargs)

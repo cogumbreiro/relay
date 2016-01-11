@@ -1,0 +1,216 @@
+Sun Aug 10 21:12:35 PDT 2008
+incrementing generation number
+incrementing value in gen_num.txt
+
+running server on /home/jan/research/relay/racetests/ptr_tests2/ciltrees
+Registered summary type: rs
+Server ip is: 127.0.0.1
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: SERVER
+Done reading config file
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Entry points use roots: false
+trying to clear logs
+Callgraph, etc.
+-----
+Reached end of /home/jan/research/relay/racetests/ptr_tests2/ciltrees/calls.cil call graph file
+Num funcs: 120
+Scc_cg: Pruned 34 funcs w/out bodies for scc DAG
+Starting server
+-----
+>>> PROGRESS 1/84 SCCs DONE!
+
+>>> PROGRESS 2/84 SCCs DONE!
+
+>>> PROGRESS 3/84 SCCs DONE!
+
+>>> PROGRESS 4/84 SCCs DONE!
+
+>>> PROGRESS 5/84 SCCs DONE!
+
+>>> PROGRESS 6/84 SCCs DONE!
+
+>>> PROGRESS 7/84 SCCs DONE!
+
+>>> PROGRESS 8/84 SCCs DONE!
+
+>>> PROGRESS 9/84 SCCs DONE!
+
+>>> PROGRESS 10/84 SCCs DONE!
+
+>>> PROGRESS 11/84 SCCs DONE!
+
+>>> PROGRESS 12/84 SCCs DONE!
+
+>>> PROGRESS 13/84 SCCs DONE!
+
+>>> PROGRESS 14/84 SCCs DONE!
+
+>>> PROGRESS 15/84 SCCs DONE!
+
+>>> PROGRESS 16/84 SCCs DONE!
+
+>>> PROGRESS 17/84 SCCs DONE!
+
+>>> PROGRESS 18/84 SCCs DONE!
+
+>>> PROGRESS 19/84 SCCs DONE!
+
+>>> PROGRESS 20/84 SCCs DONE!
+
+>>> PROGRESS 21/84 SCCs DONE!
+
+>>> PROGRESS 22/84 SCCs DONE!
+
+>>> PROGRESS 23/84 SCCs DONE!
+
+>>> PROGRESS 24/84 SCCs DONE!
+
+>>> PROGRESS 25/84 SCCs DONE!
+
+>>> PROGRESS 26/84 SCCs DONE!
+
+>>> PROGRESS 27/84 SCCs DONE!
+
+>>> PROGRESS 28/84 SCCs DONE!
+
+>>> PROGRESS 29/84 SCCs DONE!
+
+>>> PROGRESS 30/84 SCCs DONE!
+
+>>> PROGRESS 31/84 SCCs DONE!
+
+>>> PROGRESS 32/84 SCCs DONE!
+
+>>> PROGRESS 33/84 SCCs DONE!
+
+>>> PROGRESS 34/84 SCCs DONE!
+
+>>> PROGRESS 35/84 SCCs DONE!
+
+>>> PROGRESS 36/84 SCCs DONE!
+
+>>> PROGRESS 37/84 SCCs DONE!
+
+>>> PROGRESS 38/84 SCCs DONE!
+
+>>> PROGRESS 39/84 SCCs DONE!
+
+>>> PROGRESS 40/84 SCCs DONE!
+
+>>> PROGRESS 41/84 SCCs DONE!
+
+>>> PROGRESS 42/84 SCCs DONE!
+
+>>> PROGRESS 43/84 SCCs DONE!
+
+>>> PROGRESS 44/84 SCCs DONE!
+
+>>> PROGRESS 45/84 SCCs DONE!
+
+>>> PROGRESS 46/84 SCCs DONE!
+
+>>> PROGRESS 47/84 SCCs DONE!
+
+>>> PROGRESS 48/84 SCCs DONE!
+
+>>> PROGRESS 49/84 SCCs DONE!
+
+>>> PROGRESS 50/84 SCCs DONE!
+
+>>> PROGRESS 51/84 SCCs DONE!
+
+>>> PROGRESS 52/84 SCCs DONE!
+
+>>> PROGRESS 53/84 SCCs DONE!
+
+>>> PROGRESS 54/84 SCCs DONE!
+
+>>> PROGRESS 55/84 SCCs DONE!
+
+>>> PROGRESS 56/84 SCCs DONE!
+
+>>> PROGRESS 57/84 SCCs DONE!
+
+>>> PROGRESS 58/84 SCCs DONE!
+
+>>> PROGRESS 59/84 SCCs DONE!
+
+>>> PROGRESS 60/84 SCCs DONE!
+
+>>> PROGRESS 61/84 SCCs DONE!
+
+>>> PROGRESS 62/84 SCCs DONE!
+
+>>> PROGRESS 63/84 SCCs DONE!
+
+>>> PROGRESS 64/84 SCCs DONE!
+
+>>> PROGRESS 65/84 SCCs DONE!
+
+>>> PROGRESS 66/84 SCCs DONE!
+
+>>> PROGRESS 67/84 SCCs DONE!
+
+>>> PROGRESS 68/84 SCCs DONE!
+
+>>> PROGRESS 69/84 SCCs DONE!
+
+>>> PROGRESS 70/84 SCCs DONE!
+
+>>> PROGRESS 71/84 SCCs DONE!
+
+>>> PROGRESS 72/84 SCCs DONE!
+
+>>> PROGRESS 73/84 SCCs DONE!
+
+>>> PROGRESS 74/84 SCCs DONE!
+
+>>> PROGRESS 75/84 SCCs DONE!
+
+>>> PROGRESS 76/84 SCCs DONE!
+
+>>> PROGRESS 77/84 SCCs DONE!
+
+>>> PROGRESS 78/84 SCCs DONE!
+
+>>> PROGRESS 79/84 SCCs DONE!
+
+>>> PROGRESS 80/84 SCCs DONE!
+
+>>> PROGRESS 81/84 SCCs DONE!
+
+>>> PROGRESS 82/84 SCCs DONE!
+
+>>> PROGRESS 83/84 SCCs DONE!
+
+>>> PROGRESS 84/84 SCCs DONE!
+
+Finished all SCCs
+Received warnings from worker. Status: 1/1
+
+
+$$$$$$
+Total Warnings: 0
+Elapsed time (secs): 0.044002
+Top heap size (words): 184320
+Current heap size (words): 184320
+Lifetime allocated bytes: 1685528.
+Collections -- minor: 16 major: 3 compactions: 0
+Sun Aug 10 21:12:37 PDT 2008

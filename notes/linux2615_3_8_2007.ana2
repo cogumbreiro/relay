@@ -1,0 +1,1083 @@
+TODO: when recording the location that LS was made empty, also record the locks
+that it had before becoming empty??? 
+accumulate a set of these locations + locks?
+map these LSs across function calls also
+
+
+
+a few from the 302 likely ones w/ no locks
+
+---
+
+Race Warning id: 28516
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	none_stat_decompr_blocks 	182 in fs/jffs2/compr.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	747 in fs/jffs2/gc.c
+2 	none_stat_decompr_blocks 	182 in fs/jffs2/compr.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	747 in fs/jffs2/gc.c
+
+
+182 in jffs2_decompress (no locks)
+called by:
+    <- jffs2_read_dnode (no locks)
+        <- jffs2_garbage_collect_metadata (no locks)
+            <- jffs2_garbage_collect_live (w/ f->sem)
+                <- jffs2_garbage_collect_pass 
+                    (not sure if f is mapped to args... getter uses ptr arith)
+                    <- the thread func
+
+should only be one of these threads running at once though
+
+"/* This must only ever be called when no GC thread is currently running */"
+
+REASON: not in parallel (one thread at a time)
+
+---
+
+Race Warning id: 37770
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	none_stat_compr_blocks 	157 in fs/jffs2/compr.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	1267 in fs/jffs2/gc.c
+2 	none_stat_compr_blocks 	157 in fs/jffs2/compr.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	1267 in fs/jffs2/gc.c
+
+same as above... only one gc thread
+
+REASON: not in parallel (one thread at a time)
+
+---
+
+Race Warning id: 28489
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	host->h_reclaiming 	245 in fs/lockd/clntlock.c 	[] 	reclaimer (391223) -> ... 	None
+2 	host->h_reclaiming 	245 in fs/lockd/clntlock.c 	[] 	reclaimer (391223) -> ... 	None
+
+
+not global
+
+REASON: lock_kernel() -- reentrant locking -- dupe from 2_27_2007
+
+---
+
+Race Warning id: 33308
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	con_start 	447 in kernel/printk.c 	[] 	do_linuxrc (442927) -> ... 	586 in kernel/printk.c
+1 		762 in kernel/printk.c 	[] 		
+2 	con_start 	446 in kernel/printk.c 	[] 	____call_usermodehelper (435766) -> ... 	586 in kernel/printk.c
+2 		758 in kernel/printk.c 	[] 		
+2 		760 in kernel/printk.c 	[]
+
+447 in emit_log_char (no locks)
+    <- 586 - 602 in vprintk (w/ logbuf_lock)
+
+762 in release_console_sem (w/ logbuf_lock)
+
+that re-entrant use of the 
+
+REASON: lost lock (from re-entrant use of logbuf_lock -> deadlock?)
+
+---
+
+
+Race Warning id: 33310
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	softcursor_original 	520 in drivers/char/vt.c 	[] 	stopmachine (432041) -> ... 	848 in kernel/audit.c
+1 		524 in drivers/char/vt.c 	[] 		
+1 		533 in drivers/char/vt.c 	[] 		
+1 		534 in drivers/char/vt.c 	[] 		
+1 		536 in drivers/char/vt.c 	[] 		
+2 	softcursor_original 	521 in drivers/char/vt.c 	[] 	pccardd (165467) -> ... 	848 in kernel/audit.c
+2 		538 in drivers/char/vt.c 	[] 
+
+520, 524 in add_softcursor (no locks)
+    <- only reachable through panic()
+
+533, 534, 536, 538 in hide_softcursor (no locks)
+    <- hide_cursor (no locks)
+        <- set_cursor 
+        <- redraw_screen (may have a race)
+
+loses lock at 848 in audit_log_d_path 
+    calls d_path(xxx)
+    probably just an incidental lock
+
+REASON: RACE (in vt.c -- during panic())
+
+
+---
+
+Race Warning id: 33273
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	inodes_stat.nr_inodes 	562 in fs/inode.c 	[] 	cifs_demultiplex_thread (414616) -> ... 	110 in fs/dcache.c
+1 		1034 in fs/inode.c 	[] 		
+1 		1086 in fs/inode.c 	[] 		
+2 	inodes_stat.nr_inodes 	562 in fs/inode.c 	[] 	poll_thread (169515) -> ... 	110 in fs/dcache.c
+2 		1034 in fs/inode.c 	[] 		
+2 		1086 in fs/inode.c 	[] 		
+
+
+562 in new_inode (w/ inode_lock)
+
+1034 in generic_delete_inode (called w/ inode_lock?)
+    <- generic_drop_inode (no locks)
+        <- iput_final (no locks)
+            <- iput (uses atomic_dec_and_lock)
+
+1086 in generic_forget_inode (w/ lock)
+
+REASON: trylock modeled conservatively (atomic_dec_and_lock)
+
+---
+
+Race Warning id: 34664
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	inodes_stat.nr_unused 	1070 in fs/inode.c 	[] 	do_linuxrc (442927) -> ... 	1080 in fs/inode.c
+1 		1080 in fs/inode.c 	[] 		
+2 	inodes_stat.nr_unused 	1070 in fs/inode.c 	[] 	____call_usermodehelper (435766) -> ... 	1080 in fs/inode.c
+2 		1080 in fs/inode.c 	[] 
+
+1070, 1080 in generic_forget_inode (called w/ lock)
+    <- generic_drop_inode (no locks) see above
+
+REASON: trylock modeled conservatively (atomic_dec_and_lock)
+
+---
+
+Race Warning id: 37408
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	inodes_stat.nr_unused 	235 in fs/inode.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	1080 in fs/inode.c
+1 		1070 in fs/inode.c 	[] 		
+1 		1080 in fs/inode.c 	[] 		
+2 	inodes_stat.nr_unused 	1070 in fs/inode.c 	[] 	airo_thread (184445) -> ... 	1080 in fs/inode.c
+2 		1080 in fs/inode.c 	[] 	
+
+235 in __iget (expects caller to have inode_lock)
+    <- prune_icache (w/ lock)
+    <- get_new_inode (w/ lock)
+    <- igrab (w/ lock)
+    <- ifind (w/ lock)
+    <- ifind_fast (w/ lock)
+    <- inotify_unmount_inodes (called w/ lock)
+        <- invalidate_inodes (has lock)
+    <- sync_sb_inodes (called w/ lock)
+        <- writeback_inodes (has lock)
+        <- sync_inodes_sb (has lock)
+
+1070, 1080 same as above
+
+REASON: trylock modeled conservatively (atomic_dec_and_lock)
+
+---
+
+Race Warning id: 33367
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	oops_in_progress 	42 in arch/i386/mm/fault.c 	[] 	do_linuxrc (442927) -> ... 	143 in fs/file_table.c
+1 		48 in arch/i386/mm/fault.c 	[] 		
+2 	oops_in_progress 	394 in drivers/char/vt.c 	[] 	____call_usermodehelper (435766) -> ... 	548 in kernel/printk.c
+2 		441 in drivers/char/vt.c 	[] 		
+2 		538 in kernel/printk.c 	[] 		
+2 		567 in drivers/char/vt.c 	[] 		
+2 		580 in drivers/char/vt.c 	[] 		
+2 		605 in drivers/char/vt.c 	[] 		
+2 		771 in kernel/printk.c 	[] 		
+2 		2854 in drivers/char/vt.c 	[] 		
+2 		2857 in drivers/char/vt.c 	[] 		
+2 		2947 in drivers/char/vt.c 	[] 		
+2 		5658 in kernel/sched.c 	[] 
+
+
+REASON: RACE -- dupe from 2_27_2007  (only during panic)
+
+---
+
+Race Warning id: 33396
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	printk_cpu 	545 in kernel/printk.c 	[] 	do_linuxrc (442927) -> ... 	614 in kernel/printk.c
+1 		614 in kernel/printk.c 	[] 		
+1 		624 in kernel/printk.c 	[] 		
+1 		634 in kernel/printk.c 	[] 		
+2 	printk_cpu 	545 in kernel/printk.c 	[] 	____call_usermodehelper (435766) -> ... 	614 in kernel/printk.c
+2 		614 in kernel/printk.c 	[] 		
+2 		624 in kernel/printk.c 	[] 		
+2 		634 in kernel/printk.c 	[]
+
+545 in vprintk (w/ logbuf_lock)
+614, 624, 634 in vprintk (w/ logbuf_lock, but after recursive call)
+
+
+REASON: lost lock (re-entrant use in vprintk -- possible deadlock?)
+
+---
+
+Race Warning id: 28555
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(audit_freelist.next)->gfp_mask 	591 in kernel/audit.c 	[] 	do_linuxrc (442927) -> ... 	110 in fs/dcache.c
+2 	(audit_freelist.next)->gfp_mask 	591 in kernel/audit.c 	[] 	____call_usermodehelper (435766) -> ... 	110 in fs/dcache.c
+
+just removed from audit_freelist (nodes should be fresh)
+
+REASON: init re-used memory (should be "fresh")
+
+---
+
+Race Warning id: 33400
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	mem_map->mapping 	129 in mm/page_alloc.c. 	[] 	do_linuxrc (442927) -> ... 	2735 in mm/slab.c
+1 		339 in mm/page_alloc.c 	[] 		
+1 		554 in include/linux/mm.h 	[] 		
+1 		565 in include/linux/mm.h 	[] 		
+1 		628 in mm/memory.c 	[] 		
+1 		848 in fs/buffer.c 	[] 		
+1 		864 in fs/buffer.c 	[] 		
+2 	mem_map->mapping 	117 in mm/memory.c 	[] 	nodemgr_host_thread (276718) -> ... 	2735 in mm/slab.c
+2 		146 in mm/page_alloc.c 	[] 		
+2 		689 in mm/page_alloc.c 	[] 
+
+page_alloc.c
+------------
+
+129, 146 in bad_page (no lock... used for print / reset)
+    <- 
+
+339 in free_pages_check (no lock... calls bad_page also)
+    <- __free_pages_ok
+        <- __free_pages
+            <- free_pages
+            <- pte_free
+            <- __vunmap
+
+689 in free_hot_cold_page (no lock)
+    <- free_hot_page
+        <- __free_pages (see above)
+        <- __page_cache_release
+    <- __pagevec_free
+        <- pagevec_free
+        <- release_page
+
+mm.h
+----
+
+554 in page_mapping (no locks)
+    <- 8 callers...
+
+565 in PageAnon (no locks)
+    <- 8 callers...
+
+memory.c
+--------
+
+117 in free_pte_range (call to pte_lock_deinit -- sets to NULL) (no locks)
+    <- free_pmd_range (no locks)
+        <- free_pud_range (no locks)
+            <- free_pgd_range (no locks)
+                <- free_pgtables (no locks)
+                    <- unmap_region (
+                    <- exit_mmap (
+
+628 in zap_pte_range (takes lock w/ pte_offset_map_lock, page->u.ptl)
+    <- zap_pmd_range (no locks)
+        <- zap_pud_range (no locks)
+            <- unmap_page_range (no locks)
+                <- unmap_vmas (no locks)
+                    <- zap_page_range
+                    <- 
+
+
+buffer.c
+--------
+
+848 in __set_page_dirty_buffers (no mapping->private_lock, tree_lock for sure)
+864 in __set_page_dirty_buffers (w/ mapping->tree_lock)
+    <- set_page_dirty
+
+comment says "/* Race with truncate? */"
+
+ugh... too many callers right now
+
+slab.c
+------
+
+loses lock at 2735 end of cache_flusharray ?!
+
+
+REASON: RACE comment says it can, but I'm not sure myself (too many paths)
+ 
+
+---
+
+
+Race Warning id: 28579
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(c->summary)->sum_num 	74 in fs/jffs2/summary.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	254 in fs/jffs2/nodemgmt.c
+1 		80 in fs/jffs2/summary.c 	[] 		
+1 		160 in fs/jffs2/summary.c 	[] 		
+1 		629 in fs/jffs2/summary.c 	[] 		
+2 	(c->summary)->sum_num 	74 in fs/jffs2/summary.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	254 in fs/jffs2/nodemgmt.c
+2 		80 in fs/jffs2/summary.c 	[] 		
+2 		160 in fs/jffs2/summary.c 	[] 		
+2 		629 in fs/jffs2/summary.c 	[]
+
+probably not global, but may be race
+
+
+---
+
+Race Warning id: 28585
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	console_sem.wait.task_list.next 	84 in include/linux/wait.h 	[] 	do_linuxrc (442927) -> ... 	548 in kernel/printk.c
+2 	console_sem.wait.task_list.next 	84 in include/linux/wait.h 	[] 	____call_usermodehelper (435766) -> ... 	548 in kernel/printk.c 
+
+uh... this is a synchronization variable?
+
+84 in init_waitqueue_head (no locks... just initialized the queue lock)
+
+loses lock at 548, which is in vprintk, after zap_locks
+
+what if someone takes console_sem while printk is zaping it?
+
+well, the list of waiters will be empty, but the count will be 1?
+
+zap
+set 1
+             -> wait
+                take lock (now 0)
+             <-
+clear queue
+(cleared 
+anyway?)
+
+zap didn't end up doing its job (when they print later it will still block? or is everyone frozen)
+
+
+
+REASON: race or not in parallel?
+---
+
+Race Warning id: 23862
+
+Acc#	Lval	Occurs at	Locks held 	Access path
+1 	socket->socket 	649 in drivers/pcmcia/cs.c 	[] 	pccardd (165467) -> ...
+2 	socket->socket 	649 in drivers/pcmcia/cs.c 	[] 	pccardd (165467) -> ...
+2 		324 in drivers/pcmcia/cs.c 	[] 	
+1 	socket->socket 	324 in drivers/pcmcia/cs.c 	[] 	pccardd (165467) -> ...
+
+made empty at: drivers/pcmcia/cs.c:679
+
+324:
+
+static void shutdown_socket(struct pcmcia_socket *s)
+{
+	cs_dbg(s, 1, "shutdown_socket\n");
+
+	/* Blank out the socket state */
+	s->socket = dead_socket;            //HERE
+    //... other shutdown stuff
+}
+
+649:
+
+static int pccardd(void *__skt)
+{
+	struct pcmcia_socket *skt = __skt;
+	DECLARE_WAITQUEUE(wait, current);
+	int ret;
+
+	daemonize("pccardd");
+
+	skt->thread = current;
+	skt->socket = dead_socket;          //HERE
+    //...
+}
+	
+both set to the same value? also the thread root...
+
+REASON: RACE (benign, idempotent)
+
+---
+
+Race Warning id: 24619
+
+Acc#	Lval	Occurs at	Locks held 	Access path
+1 	((irda_rq_queue.request_list.next)->data)->fsm.state 	413 in drivers/net/irda/sir_kthread.c 	[] 	irda_thread (204364) -> ...
+2 	((irda_rq_queue.request_list.next)->data)->fsm.state 	254 in drivers/net/irda/sir_kthread.c 	[] 	irda_thread (204364) -> ...
+2 		257 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		262 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		294 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		311 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		318 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		323 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		343 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		363 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		378 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		386 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		397 in drivers/net/irda/sir_kthread.c 	[] 	
+2 		407 in drivers/net/irda/sir_kthread.c 	[]
+
+(access to a different field from the 2_27_2007 warning)
+
+254, 257... 407, 413 in irda_config_fsm (expects caller to have fsm->sem)
+    <- run_irda_queue (through funptr)
+
+fsm->sem is taken in another function (sirdev_schedule_request, where it
+sets the funptr)
+
+also, like the 2_27_2007 warning, the fsm is already removed from the 
+irda_rq_queue.request_list
+
+hmm, if we can model this, then we can model fork-join (each thread given
+a unique sem initialized to 0 that is down'ed by join and up'ed by exit)?
+
+REASON: unique / join-like sync? semaphore taken by other function
+
+---
+
+Race Warning id: 37874
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	((irda_rq_queue.request_list.next)->data)->fsm.param 	290 in drivers/net/irda/sir_kthread.c 	[] 	irda_thread (204364) -> ... 	None
+2 	((irda_rq_queue.request_list.next)->data)->fsm.param 	290 in drivers/net/irda/sir_kthread.c 	[] 	irda_thread (204364) -> ... 	None
+
+same as above
+
+REASON: unique / join-like sync? semaphore taken by other function
+
+---
+
+Race Warning id: 34128
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	((irda_rq_queue.request_list.next)->data)->fsm.substate 	227 in drivers/net/irda/sir_kthread.c 	[] 	irda_thread (204364) -> ... 	None
+1 		287 in drivers/net/irda/sir_kthread.c 	[] 		
+1 		319 in drivers/net/irda/sir_kthread.c 	[] 		
+1 		334 in drivers/net/irda/sir_kthread.c 	[] 		
+1 		358 in drivers/net/irda/sir_kthread.c 	[] 		
+2 	((irda_rq_queue.request_list.next)->data)->fsm.substate 	182 in drivers/net/irda/sir_kthread.c 	[] 	irda_thread (204364) -> ... 	None
+2 		187 in drivers/net/irda/sir_kthread.c 	[] 		
+2 		213 in drivers/net/irda/sir_kthread.c 	[] 		
+2 		220 in drivers/net/irda/sir_kthread.c 	[] 		
+2 		254 in drivers/net/irda/sir_kthread.c 	[]
+
+
+182, 187, 213, 220, 227: in irda_tx_complete_fsm
+    <- irda_config_fsm
+
+287... 358: in irda_config_fsm
+
+REASON: unique / join-like sync? semaphore taken by other function
+
+---
+
+Race Warning id: 34180
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	((irda_rq_queue.request_list.next)->data)->dongle_drv 	105 in drivers/net/irda/sir_dongle.c 	[] 	irda_thread (204364) -> ... 	273 in drivers/net/irda/sir_kthread.c
+1 		114 in drivers/net/irda/sir_dongle.c 	[] 		
+1 		129 in drivers/net/irda/sir_dongle.c 	[] 		
+2 	((irda_rq_queue.request_list.next)->data)->dongle_drv 	72 in drivers/net/irda/sir_dongle.c 	[] 	irda_thread (204364) -> ... 	None
+2 		123 in drivers/net/irda/sir_dongle.c 	[] 		
+2 		263 in drivers/net/irda/sir_kthread.c 	[] 		
+2 		296 in drivers/net/irda/sir_kthread.c 	[] 		
+2 		333 in drivers/net/irda/sir_kthread.c 	[]
+
+sir_dongle.c
+------------
+
+105, 114 in sirdev_get_dongle (has dongle_list_lock, but that probably only protects the dongle_list)
+    <- irda_config_fsm
+
+129 in sirdev_put_dongle (no locks)
+    <- irda_config_fsm
+
+sir_kthread.c
+-------------
+
+263... 333 in irda_config_fsm (w/ fsm->sem... taken by other non-caller)
+
+273 is a call to sirdev_get_dongle
+
+hmm... are there any other accesses to dev->dongle_drv (maybe by another name)
+
+REASON: unique / join-like sync? semaphore taken by other function
+
+---
+
+Race Warning id: 27661
+
+Acc#	Lval	Occurs at	Locks held 	Access path
+1 	log_level_unknown 	598 in kernel/printk.c 	[] 	do_linuxrc (442927) -> ...
+2 	log_level_unknown 	598 in kernel/printk.c 	[] 	____call_usermodehelper (435766) -> ...
+2 		604 in kernel/printk.c 	[] 	
+1 	log_level_unknown 	604 in kernel/printk.c 	[] 	do_linuxrc (442927) -> ...
+
+
+REASON: lost lock - re-entrant deadlock -- dupe from 2_27_2007 (re-entrant use of logbuf_lock)
+
+---
+
+Race Warning id: 33388
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	swap_info[0].highest_bit 	260 in mm/swapfile.c 	[] 	do_linuxrc (442927) -> ... 	830 in mm/memory.c
+2 	swap_info[0].highest_bit 	261 in mm/swapfile.c 	[] 	nodemgr_host_thread (276718) -> ... 	830 in mm/memory.c
+
+similar to swap_info[0].lowest_bit warning (from 2_27_2007)
+
+REASON: conditional lock (depends on return value)
+
+---
+
+Race Warning id: 28014
+
+Acc#	Lval	Occurs at	Locks held 	Access path
+1 	stop_backup_sync 	739 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ...
+1 	 	742 in net/ipv4/ipvs/ip_vs_sync.c 	
+2 	stop_backup_sync 	739 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ...
+2 		742 in net/ipv4/ipvs/ip_vs_sync.c 	[] 
+
+739, 742 in set_stop_sync (no locks)
+    <- sync_thread (no locks)
+    <- stop_sync_thread (no locks)
+        <- do_ip_vs_set_ctl (w/ __ip_vs_mutex)
+
+
+REASON: RACE but value doesn't matter unless there's multiple threads
+
+---
+
+Race Warning id: 37939
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	stop_backup_sync 	739 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ... 	None
+1 		742 in net/ipv4/ipvs/ip_vs_sync.c 	[] 		
+2 	stop_backup_sync 	712 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ... 	None
+
+dupe from 2_5_2007
+
+712 is in the thread
+
+742 can be reached from outside the thread (but also within the thread)
+
+REASON: RACE but value doesn't matter unless there's multiple threads
+
+---
+
+Race Warning id: 28586
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(((tr->blkcore_priv)->rq)->flush_rq)->hard_nr_sectors 	2983 in block/ll_rw_blk.c 	[] 	mtd_blktrans_thread (211139) -> ... 	None
+2 	(((tr->blkcore_priv)->rq)->flush_rq)->hard_nr_sectors 	2983 in block/ll_rw_blk.c 	[] 	mtd_blktrans_thread (211139) -> ... 	None 
+
+2983 in blk_recalc_rq_sectors (no locks)
+    <- __end_that_request_first (no locks)
+        <- end_that_request_first (no locks)
+            <- end_request (no locks)
+                <- mtd_blktrans_thread (w/ rq->queue_lock)
+        <- end_that_request_chunk (no locks)
+            <- elv_next_request (no locks)
+                <- mtd_blktrans_thread (w/ rq->queue_lock)
+
+should be fine w/ the rq->queue_lock, but elv_next_request and end_request can lead to generic_unplug_device (which locks and unlocks the queue_lock)
+
+REASON: lost lock -- re-entrant use of queue_lock (under some conditions)
+
+---
+
+Race Warning id: 28598
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	swap_cache_info.exist_race 	110 in mm/swap_state.c 	[] 	____call_usermodehelper (435766) -> ... 	None
+1 		178 in mm/swap_state.c 	[] 		
+2 	swap_cache_info.exist_race 	110 in mm/swap_state.c 	[] 	kafsasyncd (419108) -> ... 	None
+2 		178 in mm/swap_state.c 	[] 
+
+110 in add_to_swap_cache (no locks)
+    detects a race an incrs count of races found...
+
+178 in add_to_swap (no locks)
+    detects a race an incrs count of races found...
+    
+REASON: RACE (stat counter -- actually counts races found at runtime)
+
+---
+
+Race Warning id: 28602
+
+Acc#	Lval	Occurs at	Locks held  	Access path	Loses lock at
+1 	log_end 	443 in kernel/printk.c 	[] 	do_linuxrc (442927) -> ... 	586 in kernel/printk.c
+2 	log_end 	443 in kernel/printk.c 	[] 	____call_usermodehelper (435766) -> ... 	586 in kernel/printk.c
+2 		444 in kernel/printk.c 	[] 		
+2 		445 in kernel/printk.c 	[] 		
+2 		446 in kernel/printk.c 	[] 		
+2 		447 in kernel/printk.c 	[] 		
+2 		757 in kernel/printk.c 	[] 		
+2 		758 in kernel/printk.c 	[] 		
+2 		761 in kernel/printk.c 	[] 		
+2 		762 in kernel/printk.c 	[]
+
+
+443 ... 447 in emit_log_char (no locks)
+    <- vprintk (w/ logbuf_lock)
+
+757 ... 762 in release_console_sem (w/ logbuf_lock)
+
+but vprintk loses a lock from a nested use of the logbuf_lock
+
+REASON: lost lock -- re-entrant use of logbuf_lock -- possible deadlock
+
+---
+
+Race Warning id: 33089
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	audit_backlog_wait_time 	695 in kernel/audit.c 	[] 	do_linuxrc (442927) -> ... 	110 in fs/dcache.c
+2 	audit_backlog_wait_time 	695 in kernel/audit.c 	[] 	____call_usermodehelper (435766) -> ... 	110 in fs/dcache.c
+
+
+695 in audit_log_start (no locks)
+    <- audit_log_exit (no locks)
+        <- audit_free (no locks)
+            <- __put_task_struct (no locks)
+                <- itimer_delete
+                <- posix_cpu_timer_del
+                <- release_posix_timer
+                <- release task
+
+hmm... audit_backlog_wait_time only set here, and it's set to audit_backlog_wait_overflow, which is init to 0 and never changed?!
+
+
+update: reads here
+
+1  	 audit_backlog_wait_time  	673 in kernel/audit.c  	 []  	 stopmachine (432041) -> ...  	 110 in fs/dcache.c
+1 		682 in kernel/audit.c 	[]
+
+
+
+REASON: RACE (does variable ever get set to anything else?)
+
+
+
+---
+
+Race Warning id: 37156
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	audit_backlog_wait_time 	673 in kernel/audit.c 	[] 	stopmachine (432041) -> ... 	110 in fs/dcache.c
+1 		682 in kernel/audit.c 	[] 		
+2 	audit_backlog_wait_time 	695 in kernel/audit.c 	[] 	fork_sync_thread (59077) -> ... 	110 in fs/dcache.c
+
+same as above
+
+REASON: RACE (variable seems to be constantly 0?)
+
+---
+
+Race Warning id: 36784
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	sync_recv_mesg_maxlen 	422 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ... 	None
+2 	sync_recv_mesg_maxlen 	424 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ... 	None
+2 		699 in net/ipv4/ipvs/ip_vs_sync.c 	[]
+
+REASON: join-like synchronization / not in parallel -- dupe from 1_30_2007
+
+---
+
+Race Warning id: 36769
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	sync_send_mesg_maxlen 	414 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ... 	None
+2 	sync_send_mesg_maxlen 	414 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ... 	None
+
+similar to above
+
+REASON: join-like synchronization / not in parallel 
+
+---
+
+Race Warning id: 37906
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	console_printk[0] 	54 in arch/i386/mm/fault.c 	[] 	do_linuxrc (442927) -> ... 	143 in fs/file_table.c
+1 		56 in arch/i386/mm/fault.c 	[] 		
+2 	console_printk[0] 	39 in arch/i386/mm/fault.c 	[] 	____call_usermodehelper (435766) -> ... 	627 in kernel/printk.c
+2 		378 in kernel/printk.c 	[] 		
+2 		428 in kernel/printk.c 	[] 		
+2 		574 in kernel/printk.c 	[] 		
+2 		592 in kernel/printk.c 	[]
+
+39, 54, 56 in bust_spinlocks (no locks) when it's unbusting
+    <- panic (well... it's during panic)
+
+378 in _call_console_drivers (no locks)
+    <- call_console_drivers (see below)
+
+428 in call_console_drivers (assumes console_sem held)
+    <- release_console_sem (w/out logbuf_lock, assumes console_sem held)
+        <- vprintk (assumes console_sem held)
+
+574, 592 in vprintk (w/ logbuf_lock)
+    <- ...
+
+loese loc at 143 in __fput during call to locks_remove_flock
+
+loses lock at 627 in vprintk at call to release_console_sem (w/out logbuf_lock)
+
+if it's protected, it would be protected by the console_sem
+
+REASON: RACE (one access is during panic())
+
+---
+
+Race Warning id: 37868
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	shift_down[0] 	384 in drivers/char/keyboard.c 	[] 	do_linuxrc (442927) -> ... 	143 in fs/file_table.c
+2 	shift_down[0] 	384 in drivers/char/keyboard.c 	[] 	____call_usermodehelper (435766) -> ... 	848 in kernel/audit.c
+
+similar to 1_30_2007 race on shift_state
+
+384 in compute_shiftstate (no locks)
+    <- redraw_screen
+        <- ...
+            <- panic
+                <- ...
+
+143 in __fput during call to locks_remove_flock
+
+848 in audit_log_d_path during call to d_path
+
+only reachable through panic
+
+REASON: RACE (during panic())
+
+---
+
+Race Warning id: 33521
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	panic_blink 	99 in kernel/panic.c 	[] 	stopmachine (432041) -> ... 	848 in kernel/audit.c
+2 	panic_blink 	100 in kernel/panic.c 	[] 	fork_sync_thread (59077) -> ... 	976 in mm/page_alloc.c
+
+99, 100 in panic
+
+848 in audit_log_d_path during call to d_path
+
+976 in __alloc_pages during call to out_of_memory
+
+REASON: RACE (during panic())
+
+---
+
+Race Warning id: 33511
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	logged_chars 	449 in kernel/printk.c 	[] 	do_linuxrc (442927) -> ... 	586 in kernel/printk.c
+2 	logged_chars 	449 in kernel/printk.c 	[] 	____call_usermodehelper (435766) -> ... 	586 in kernel/printk.c
+
+REASON: lost lock -- re-entrant lock (logbuf_lock) -- dupe from 2_27_2007
+
+---
+
+Race Warning id: 35026
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	last_warning 	1665 in fs/jbd/journal.c 	[] 	kjournald (395072) -> ... 	None
+2 	last_warning 	1665 in fs/jbd/journal.c 	[] 	kjournald (395072) -> ... 	None
+
+
+
+----
+
+Race Warning id: 35166
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	old_offset 	450 in drivers/char/vt.c 	[] 	do_linuxrc (442927) -> ... 	143 in fs/file_table.c
+2 	old_offset 	443 in drivers/char/vt.c 	[] 	____call_usermodehelper (435766) -> ... 	848 in kernel/audit.c
+2 		445 in drivers/char/vt.c 	[] 
+
+REASON: RACE (expected in vt.c) -- dupe from 2_27_2007
+
+---
+
+Race Warning id: 35242
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	swap_token_check 	68 in mm/thrash.c 	[] 	____call_usermodehelper (435766) -> ... 	68 in mm/thrash.c
+1 		79 in mm/thrash.c 	[] 		
+1 		103 in mm/thrash.c 	[] 		
+2 	swap_token_check 	65 in mm/thrash.c 	[] 	kafsasyncd (419108) -> ... 	None
+
+the access at 68 should only happen if there's no swap_token_default_timeout,
+which is only changeable from sysctl? not sure how this works, so I can't
+tell if it's dangerous (but it seems like designer knew it would be a race)
+
+REASON: RACE (benign) -- similar to one in 3_8_2007
+
+---
+
+Race Warning id: 33611
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(softirq_ctx[0])->tinfo.previous_esp 	182 in arch/i386/kernel/irq.c 	[] 	sync_thread (59060) -> ... 	709 in net/ipv4/ipvs/ip_vs_sync.c
+2 	(softirq_ctx[0])->tinfo.previous_esp 	182 in arch/i386/kernel/irq.c 	[] 	sync_thread (59060) -> ... 	709 in net/ipv4/ipvs/ip_vs_sync.c
+
+---
+
+Race Warning id: 34030
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	sel_start 	68 in drivers/char/selection.c 	[] 	stopmachine (432041) -> ... 	848 in kernel/audit.c
+1 		69 in drivers/char/selection.c 	[] 		
+2 	sel_start 	70 in drivers/char/selection.c 	[] 	pccardd (165467) -> ... 	848 in kernel/audit.c
+
+REASON: RACE if reached from update_region -- dupe from 1_30_2007
+
+---
+
+Race Warning id: 34149
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	nr_swap_pages 	264 in mm/swapfile.c 	[] 	do_linuxrc (442927) -> ... 	830 in mm/memory.c
+2 	nr_swap_pages 	38 in arch/i386/mm/pgtable.c 	[] 	____call_usermodehelper (435766) -> ... 	179 in mm/swap_state.c
+2 		61 in mm/swap_state.c 	[] 		
+2 		181 in mm/swapfile.c 	[] 		
+2 		183 in mm/swapfile.c 	[] 		
+2 		208 in mm/swapfile.c 	[] 		
+2 		264 in mm/swapfile.c 	[] 		
+2 		389 in mm/swapfile.c 	[] 		
+2 		1901 in mm/memory.c 	[] 
+
+swapfile.c
+
+264 (w) in swap_entry_free (no locks)
+    <- free_swap_and_cache (called w/ swap_lock see below)
+    <- swap_free (called w/ swap_lock)
+        <- delete_from_swap_cache
+            <- free_swap_and_cache (calls w/out lock)
+        <- remove_exclusive_swap_page
+        <- add_to_swap (see below)
+            <- shrink_list
+        <- shrink_list
+
+181, 183 (w), 208 (w) in get_swap_page (w/ swap_lock)
+
+389 in free_swap_and_cache 
+    (assumes swap_lock held - swap_lock lost before acc) checks if vm_swap_full
+    <- zap_pte_range (no locks)
+        <- zap_pmd_range (no locks)
+            <- zap_pud_range (no locks)
+                <- unmap_page_range (no locks)
+                    <- unmap_vmas (see below) 
+
+pgtable.c
+
+38 in show_mem (no locks -- for a print)
+    <- out_of_memory
+        <- __alloc_pages (see below)
+    <- __alloc_pages
+        <- alloc_pages_node
+
+swap_state.c
+
+61 in show_swap_cache_info (no locks -- for a print)
+    <-
+
+loses lock at 179 in add_to_swap (no locks, call to swap_free)
+    <-
+
+memory.c
+
+loses lock at 830 in unmap_vmas (no locks -- call to tlb_finish_mmu())
+    <-
+
+1901 in do_swap_page 
+    (assumes mmap_sem held -- checks if vm_swap_full(), 
+     then calls remove_exclusive_swap_page())
+    <- handle_pte_fault
+
+well the count won't become inaccurate (both updates are protected), but
+it may optimistically free pages ?
+
+REASON: RACE (read w/out lock could cause more pages to be freed?)
+
+---
+
+Race Warning id: 34126
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	waiting_for_crash_ipi.counter 	174 in arch/i386/kernel/crash.c 	[] 	do_linuxrc (442927) -> ... 	143 in fs/file_table.c
+2 	waiting_for_crash_ipi.counter 	174 in arch/i386/kernel/crash.c 	[] 	____call_usermodehelper (435766) -> ... 	848 in kernel/audit.c
+
+174 in nmi_shootdown_cpus (no locks)
+    <- machine_crash_shutdown (no locks)
+        <- ...
+
+does an atomic_set(&waiting_for_crash_ipi, num_online_cpus() - 1)
+
+but num_online_cpus loops through a bitvector and counts bits?
+
+doesn't really need an accurate count (loop will terminate after several msecs)
+
+184         msecs = 1000; /* Wait at most a second for the other cpus to stop */
+185         while ((atomic_read(&waiting_for_crash_ipi) > 0) && msecs) {
+186                 mdelay(1);
+187                 msecs--;
+188         }
+
+
+
+REASON: RACE (but won't get stuck or anything)
+
+---
+
+Race Warning id: 34308
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	dentry_stat.nr_dentry 	197 in fs/dcache.c 	[] 	____call_usermodehelper (435766) -> ... 	684 in kernel/auditsc.c
+1 		371 in fs/dcache.c 	[] 		
+2 	dentry_stat.nr_dentry 	197 in fs/dcache.c 	[] 	kafsasyncd (419108) -> ... 	684 in kernel/auditsc.c
+2 		371 in fs/dcache.c 	[] 		
+
+---
+
+Race Warning id: 34685
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	old 	457 in drivers/char/vt.c 	[] 	do_linuxrc (442927) -> ... 	143 in fs/file_table.c
+2 	old 	445 in drivers/char/vt.c 	[] 	____call_usermodehelper (435766) -> ... 	848 in kernel/audit.c
+2 		447 in drivers/char/vt.c 	[] 		
+2 		458 in drivers/char/vt.c 	[]
+
+---
+
+Race Warning id: 35841
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	input_timer_state.last_time 	600 in drivers/char/random.c 	[] 	hidp_session (76425) -> ... 	None
+2 	input_timer_state.last_time 	599 in drivers/char/random.c 	[] 	hidp_session (76425) -> ... 	None
+
+similar to input_timer_state.last_delta2 warning from 2_27_2007
+
+REASON: RACE -- (uses preempt_disable(), but state can be shared across procs? modding a randomizer though, so benign?)
+
+---
+
+Race Warning id: 36811
+From program
+
+Linux v.2.6.15
+Races (grouped by access 1's line number)
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	input_timer_state.last_delta 	603 in drivers/char/random.c 	[] 	hidp_session (76425) -> ... 	None
+2 	input_timer_state.last_delta 	602 in drivers/char/random.c 	[] 	hidp_session (76425) -> ... 	None
+
+similar to input_timer_state.last_delta2 warning from 2_27_2007
+
+REASON: RACE -- (uses preempt_disable(), but state can be shared across procs? modding a randomizer though, so benign?)
+
+---
+
+Race Warning id: 35999
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(kafsasyncd_async_attnq.next)->call 	182 in fs/afs/kafsasyncd.c 	[] 	kafsasyncd (419108) -> ... 	None
+2 	(kafsasyncd_async_attnq.next)->call 	182 in fs/afs/kafsasyncd.c 	[] 	kafsasyncd (419108) -> ... 	None
+
+---
+
+Race Warning id: 35979
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	swap_cache_info.noent_race 	100 in mm/swap_state.c 	[] 	____call_usermodehelper (435766) -> ... 	None
+2 	swap_cache_info.noent_race 	57 in mm/swap_state.c 	[] 	kafsasyncd (419108) -> ... 	None
+2 		100 in mm/swap_state.c 	[] 		
+
+---
+
+Race Warning id: 36129
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	console_sem.count.counter 	72 in include/asm/semaphore.h 	[] 	do_linuxrc (442927) -> ... 	548 in kernel/printk.c
+2 	console_sem.count.counter 	72 in include/asm/semaphore.h 	[] 	____call_usermodehelper (435766) -> ... 	548 in kernel/printk.c
+
+
+---
+
+Race Warning id: 37638
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	warn 	280 in lib/vsprintf.c 	[] 	do_linuxrc (442927) -> ... 	280 in lib/vsprintf.c
+2 	warn 	279 in lib/vsprintf.c 	[] 	____call_usermodehelper (435766) -> ... 	279 in lib/vsprintf.c
+
+---
+
+Race Warning id: 37391
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(vc_cons[0].d)->vc_attr 	385 in drivers/char/vt.c 	[] 	do_linuxrc (442927) -> ... 	143 in fs/file_table.c
+2 	(vc_cons[0].d)->vc_attr 	385 in drivers/char/vt.c 	[] 	____call_usermodehelper (435766) -> ... 	848 in kernel/audit.c 
+
+---
+
+Race Warning id: 37392
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	lock_cpu_hotplug_owner 	43 in kernel/cpu.c 	[] 	____call_usermodehelper (435766) -> ... 	297 in mm/oom_kill.c
+1 		58 in kernel/cpu.c 	[] 		
+2 	lock_cpu_hotplug_owner 	43 in kernel/cpu.c 	[] 	kafsasyncd (419108) -> ... 	297 in mm/oom_kill.c
+2 		58 in kernel/cpu.c 	[] 
+
+---
+
+Race Warning id: 37460
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	stop_master_sync 	737 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ... 	None
+1 		741 in net/ipv4/ipvs/ip_vs_sync.c 	[] 		
+2 	stop_master_sync 	655 in net/ipv4/ipvs/ip_vs_sync.c 	[] 	sync_thread (59060) -> ... 	None
+
+---
+
+Race Warning id: 37510
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(pciehp_ctrl_list->slot)->task_event.data 	701 in drivers/pci/hotplug/pciehp_ctrl.c 	[] 	event_thread (169248) -> ... 	None
+2 	(pciehp_ctrl_list->slot)->task_event.data 	701 in drivers/pci/hotplug/pciehp_ctrl.c 	[] 	event_thread (169248) -> ... 	None
+
+---

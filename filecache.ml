@@ -82,12 +82,20 @@ class ['a] fcache (ld : string -> 'a) (rt:string) (sz:int) = object (self)
       C.find cache fname
     with Not_found ->
       let fullName = (Filename.concat root fname) in
-      if (not (Sys.file_exists fullName)) then
+      try
+        match Sys.file_exists fullName with
+          | true -> begin
+              let newF = loader fullName in
+              self#addFile fname newF;
+              newF
+            end
+          | false ->
+              raise (File_not_found fullName)
+      (* rkc: trying to manually handle another kind of lookup error *)
+      with Sys_error e -> begin
+        Logging.logStatusF "getFile: Sys_error %s getFile %s\n" e fullName;
         raise (File_not_found fullName)
-      else
-        let newF = loader fullName in
-        self#addFile fname newF;
-        newF
+        end
 
   method clear () =
     C.clear cache

@@ -39,9 +39,7 @@
     (only wrt to the current function or the function summary examined!) *)
 
 open Cil
-open Lvals
 module CLv = Cil_lvals
-
 module L = Logging
 
 (***************************************************
@@ -53,13 +51,6 @@ type scope =
   | SGlobal        (* expression is derived from a global *)
   | SFunc          (* expression is a function *)
   | STBD           (* scope of expression needs to be determined *)
-
-
-let string_of_scope = function
-    SGlobal -> "#g"
-  | SFormal n -> ("#f" ^ (string_of_int n))
-  | SFunc -> "#func"
-  | STBD -> "#tbd"
 
 
 (*********************************************************
@@ -82,6 +73,13 @@ let funcNum = -3
 exception BadScope
 
 type 'a scopeOp  = 'a -> unit
+
+
+let string_of_scope = function
+    SGlobal -> "#g"
+  | SFormal n -> ("#f" ^ (string_of_int n))
+  | SFunc -> "#func"
+  | STBD -> "#tbd"
 
 (********** Operations on scope attr of vars **************)
 
@@ -107,26 +105,17 @@ let setScope scope vi =
 (** Get the actual scope (skip annotation) *)
 let decideScopeVar curFunc vi : scope =
   if (vi.vglob) then begin
-    if (Cil.isFunctionType vi.vtype) then
-      SFunc
-    else
-      SGlobal
+    if (Cil.isFunctionType vi.vtype) then SFunc
+    else SGlobal
   end
   else match CLv.getIndex curFunc.sformals vi with
-    Some (i) ->
-      SFormal i
-  | None ->
-      STBD
+    Some (i) -> SFormal i
+  | None -> STBD
 
 
-(** Annotate variable w/ scope. This is needed to remember the variable's
-    scope AFTER the curFunc is analyzed and we've already moved on to
-    the next function! *)
-let addScope (curFunc:Cil.fundec) ret vi =
-  let scope = decideScopeVar curFunc vi in
-  setScope scope vi;
-  ret := scope
-
+let badScopeDebug vi =
+  L.logError ("BadScope: " ^ vi.vname ^ ":" ^ string_of_int vi.vid ^ 
+                "   loc: " ^ (Cildump.string_of_loc !currentLoc)) 
     
 (** Decipher the scope annotation that is attached to the var.
     Be careful about alias analysis representative nodes, 
@@ -139,15 +128,20 @@ let decipherScope vi : scope =
            attName = scopeString) vi.vattr in
     match attArgs with
       [Cil.AInt i] ->
-        if (i == globalNum) then SGlobal
+        if i == globalNum then SGlobal
+        else if i == funcNum then SFunc
+        else if i == localNum then STBD
         else if (i >= 0) then SFormal i
-        else STBD
+        else failwith ("unexpected scope attr: " ^ (string_of_int i))
     | _ ->
         L.logError "attArgs not a [Cil.AInt]";
+(*        badScopeDebug vi; *)
         raise BadScope
+(*        STBD *)
   with Not_found ->
-    L.logError ("decipherScope vi=" ^ vi.vname ^ ": Not_found");
+(*    badScopeDebug vi; *)
     raise BadScope
+(*    STBD *)
 
 
 (** Read the scope from the variable and store the result in ret *)
@@ -155,83 +149,68 @@ let readScope ret vi =
   ret := decipherScope vi
 
 
+(* Warn about scope different... may be different for the 
+   locking functions because we don't search for the fundec of
+   the locking function when we read in the user-supplied list
+   and get the actual formal. We only make up a similar formal *)
+let warnScope vi decided =
+  badScopeDebug vi;
+  L.logError ("Decided: " ^ string_of_scope decided)
+  
+let paranoidReadScope curFun ret vi =
+  let read = decipherScope vi in
+  let decided = decideScopeVar curFun vi in
+  if read <> decided then
+    warnScope vi decided
+  ;
+  ret := read
 
-(**************** Search and apply op **************)
+(**************** Prepass to annotate scope ********)
 
-(** raised when scoping is applied to an lval with an abstract host *)
-exception IsAbstract
+(** Must run before the varinfo indexer runs (@see id_fixer.ml) *)
 
-(** Scoping for abstract lvals *)
-module AL = 
-struct
+(** A visitor that annotates each varinfo with a scope 
+    (if declared in a function, relative to that function). *)
+class scopeVisitor = object (self)
+  inherit nopCilVisitor 
 
-  let scopeVar op vi =
-    op vi
+  val mutable curFunc = Cil.dummyFunDec
 
-  let rec scopeExp op e =
-    match e with
-      CLval (h,_) 
-    | CAddrOf (h,_)
-    | CStartOf (h,_) ->
-        scopeHost op h
-    | CSizeOfE e1
-    | CAlignOfE e1
-    | CUnOp (_,e1,_) 
-    | CCastE (_,e1) -> 
-        scopeExp op e1
-          
-    | CBinOp (_, e1, e2, _) ->
-        scopeExp op e2;
-        scopeExp op e1
-          (* Do e1 last, so that readScope will use the left-most variable  *)
+  method vfunc finfo =
+    L.logStatusF "Scoping function: %s\n" finfo.svar.vname;
+    L.flushStatus ();
+    curFunc <- finfo;
+    DoChildren
 
-    | CConst _
-    | CSizeOf _
-    | CSizeOfStr _
-    | CAlignOf _ -> ()
-        
-  and scopeLval op ((h,_):aLval) =
-    scopeHost op h
-      
-  and scopeHost op h =
-    match h with
-      CVar(vi) ->
-        scopeVar op vi
-    | CMem(ptrExp) ->
-        scopeExp op ptrExp
-          
-    | AbsHost _ ->
-        raise IsAbstract
+  method handleVI (vi:varinfo) =
+    try
+      let oldScope = decipherScope vi in
+      let newScope = decideScopeVar curFunc vi in
+      assert (oldScope = newScope)  
+    with BadScope ->
+      let newScope = decideScopeVar curFunc vi in
+      setScope newScope vi
+    
+  method vvdec (vi:varinfo) =
+    self#handleVI vi;
+    DoChildren
 
-end
-
-(** Find & decipher the scope annotation from within an lval *)
-let getScope lv =
-  let ret = ref STBD in
-  try AL.scopeLval (readScope ret) lv; !ret
-  with IsAbstract -> SGlobal
-
-(** Remove scope annotations from the lval *)
-let killScope lv =
-  try AL.scopeLval removeScope lv
-  with IsAbstract -> ()
-
-(** Annotate the lval w/ a scope, based on the curFun. 
-    Return the scope for the left-most variable as well *)
-let annotScope (curFun:Cil.fundec) (lv: aLval) : scope =
-  let ret = ref STBD in
-  try AL.scopeLval (addScope curFun ret) lv;  !ret
-  with IsAbstract -> SGlobal
-
-
-(** Wrapper class that checks/manipulates scope annotations 
-    (if you wanna do mixin-type things) *)
-class scoper = object
-
-  method getScope = getScope
-
-  method killScope = killScope
-
-  method addScope = addScope
+  method vvrbl (vi:varinfo) =
+    self#handleVI vi;
+    DoChildren
 
 end
+
+let doAnnotateScope (root : string) =
+  L.logStatus "Annotating scopes once and for all.\n";
+  L.flushStatus ();
+  let vis = new scopeVisitor in
+  Filetools.walkDir 
+    (fun ast file ->
+       visitCilFileSameGlobals (vis :> cilVisitor) ast;
+       (* Write back the result! *)
+       Cil.saveBinaryFile ast file;
+    ) root;
+  L.logStatus "Scope annotations complete!\n";
+  L.flushStatus ()
+

@@ -1,0 +1,4 @@
+cd /home/jan/research/relay-race/tests/aget
+duppy -Wall -W -pedantic -DDEBUG=y -g -c -o aget_comb.o aget_comb.c
+cd /home/jan/research/relay-race/tests/aget
+duppy aget_comb.o -pthread

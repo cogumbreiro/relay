@@ -131,7 +131,20 @@ let isConst e =
 let makeNullExp () =
   CConst (CStr "$SSBOT")
 
+let nullVar = Lvals.mkVarinfo true "$NULL" (TVoid [])
+
+let nullAddr =
+  { saHost = Lvals.CMem  
+      (Lvals.mkLval (Lvals.hostOfVar  nullVar) NoOffset);
+    saSummary = true; }
+
+let isNullAddr addr =
+  Lvals.compare_host nullAddr.saHost addr.saHost == 0
+
+let isNullHost h =
+  Lvals.compare_host nullAddr.saHost h == 0
   
+(* DEPRECATED 
 let rec scopeValue op (v:symVal) = 
   match v with
     Vtop
@@ -158,7 +171,7 @@ let rec scopeValue op (v:symVal) =
       AddrOffSet.iter 
         (fun ( {saHost = h; }, _) ->
            Scope.AL.scopeHost op h) aoMap
-
+*)
 
 
 
@@ -166,59 +179,69 @@ let rec scopeValue op (v:symVal) =
  * Test / Debug code
  *********************************************************)
 
-let string_of_addr (addr:symAddr) : string = 
+let d_addr addr =
   let host = hostOfAddr addr in
   let lval = (host, NoOffset) in
-  ("Cell :: lval = " ^ (string_of_lval lval) ^ " ; isSum = " ^
-     (string_of_bool addr.saSummary))
+  let str = "lval = " ^ (string_of_lval lval) in
+  let str = if addr.saSummary then str ^ "(sum)"
+    else str in
+  text str
 
-    
+let string_of_addr (addr:symAddr) : string = 
+  sprint 80 (d_addr addr)
+
 let printAddr addr =
   L.logStatus (string_of_addr addr)
 
-let string_of_pointer (addr,off) =
-  (string_of_addr addr) ^
-    (sprint 80 (d_offset Pretty.nil () off))
+let d_pointerTarg (addr, off) =
+  d_offset (d_addr addr) () off
+
+let string_of_pointer (addr, off) =
+  sprint 80 (d_pointerTarg (addr, off))
 
 
-(* Should probably use a pretty printer to handle nested structs *)
-let prefix = "Value :: "
+let d_ptrSet header addrOffSet =
+  header ++ indent 2 
+    (AddrOffSet.fold
+       (fun target cur ->
+          cur ++ d_pointerTarg target ++ line 
+       ) addrOffSet nil)
 
-let rec printVal v =
-  let buff = Buffer.create 16 in
-  Buffer.add_string buff prefix;
-  (match v with
-     Vtop -> Buffer.add_string buff "$SSTOP"
-   | Vbot -> Buffer.add_string buff "$SSBOT"
+let rec d_value v =
+  match v with
+     Vtop -> text "$SSTOP"
+   | Vbot -> text "$SSBOT"
        
    | Vval exp -> 
-       Buffer.add_string buff ("Vval: \n\t" ^ (string_of_exp exp))
-
+       dprintf "Vval: %s" (string_of_exp exp)
+         
    | Vmustptr target -> 
-       Buffer.add_string buff ("Mustptr: \n\t" ^ (string_of_pointer target))
+       text "Mustptr -> " ++  d_pointerTarg target
 
    | Vmayptr (id, addrOffSet) ->
-       Buffer.add_string buff ("Mayptr (" ^ (string_of_int id) ^ "): \n");
-       AddrOffSet.iter
-         (fun target ->
-            Buffer.add_string buff ("\t" ^ (string_of_pointer target) ^ "\n")
-         ) addrOffSet
-
+       let header = text ("Mayptr (" ^ (string_of_int id) ^ "):\n") in
+       d_ptrSet header addrOffSet
+         
    | Vextptr (id, addrOffSet) ->
-       Buffer.add_string buff ("Extptr (" ^ (string_of_int id) ^ "): \n");
-       AddrOffSet.iter
-         (fun target ->
-            Buffer.add_string buff ("\t" ^ (string_of_pointer target) ^ "\n")
-         ) addrOffSet
+       let header = text ("Extptr (" ^ (string_of_int id) ^ "):\n") in
+       d_ptrSet header addrOffSet
 
    | Vstruct offMap ->
-       Buffer.add_string buff "Struct: \n";
-       OffsetMap.iter 
-         (fun off v ->
-            Buffer.add_string buff ("\t" ^ 
-                            (sprint 80 (d_offset Pretty.nil () off)) ^ "=\n");
-            printVal v;
-         ) offMap
-  );
-  Buffer.add_string buff "\n";
-  L.logStatus (Buffer.contents buff)
+       let header = text "Struct:\n"in
+       header ++ indent 2
+         (OffsetMap.fold 
+            (fun off v cur ->
+               cur ++ 
+                 (d_offset Pretty.nil () off) ++ text " ->" ++
+                 (indent 2 (d_value v)) ++ line
+            ) offMap nil
+         )
+
+let string_of_val v =
+  sprint 80 (d_value v)
+
+let prefix = " -> "
+
+let printVal v =
+  L.logStatus prefix;
+  L.logStatus (string_of_val v)

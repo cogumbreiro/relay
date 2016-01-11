@@ -44,7 +44,8 @@ open Fstructs
 open Cil
 open Pretty
 open Callg
-open Scope
+open Access_info
+open Guarded_access_base
 
 module D = Cildump
 module LS = Lockset
@@ -55,94 +56,60 @@ module CLv = Cil_lvals
 
 
 
-
 (*******************************************************************)
 (* Correlation between lval access (read/write) and locks held     *)
 
-module Locs = Set.Make (
-  struct 
-    type t = (fKey * Cil.location)
-    let compare (k1, l1) (k2, l2) = 
-      let c = k1 - k2 in 
-      if c == 0 then Cil.compareLoc l1 l2 else c
-  end
-)
 
-type accessInfo = Locs.t
+(** True if the pseudo-access attribute sets are equal *)
+let pseudoAttsEQ a1 a2 =
+  match a1, a2 with 
+    Some s1, Some s2 -> PAS.equal s1 s2
+  | None, None -> true
+  | _ -> false
+
+let pseudoAttsSubs a1 a2 =
+  match a1, a2 with
+    Some s1, Some s2 -> PAS.subset s1 s2
+  | None, _ -> true
+  | _ -> false 
+      (* Do some error checking? should be comparing a pseudo access w/
+         a non-pseudo access? *)
+
 
 (** Correlation is between lvalue access & a set of locks known to 
     be acquired or released *)  
 type correlation = {
-  mutable corrScope : scope;          (* scope of memory accessed *)
   mutable corrLocks : LS.fullLS;      (* conflated version of LS *)
   mutable corrAccess : accessInfo;    (* info about when lvals were accessed *)
-  mutable corrLEmpty : Cil.location;
-  (* first place LS went from non-empty -> empty *)
+  mutable corrLEmpty : Cil.location;   (* first place LS became empty *)
+  mutable corrPseudo : PAS.t option
 }
 
-type lv = Lvals.aLval
 
-module CMap = Mapset.Make (Lv.OrderedLval)
-
-(** map (from lvalue -> known correlations... the locks and bookkeeping) *)
+(** map (from lvalue -> access info... locks and bookkeeping) *)
 type straintMap = correlation CMap.t
 
 
-
-(********************** Access Info Funcs ***********************)
-
-(** Pick out the first access location in the access info *)
-let firstLocation a =
-  let _, l = Locs.min_elt a in
-  l
-
-let string_of_accesses a =
-  let outString = Buffer.create 10 in
-  Buffer.add_string outString "[";
-  Locs.iter (fun (_, l) -> Buffer.add_string outString 
-               ((D.string_of_loc l) ^ ", ")) a;
-  Buffer.add_string outString "]";
-  Buffer.contents outString
-
-(** Hash-cons the info related to an access *)
-let hcAccesses a = 
-  Locs.fold (fun (k, l) s -> Locs.add (k, CLv.distillLoc l) s) a Locs.empty
-
-(** True if the given accesses infos are equal *)
-let eqAccesses (a:accessInfo) (b:accessInfo) =
-  Locs.equal a b
-
-(** True if a location has as much info as other *)
-let locSubs l1 l2 =
-  if (l1 == Cil.locUnknown) then
-    true
-  else if (l2 == Cil.locUnknown) then
-    false
-  else (* neither are unknown, but don't compare the two *) 
-    true
-
-(** Merge two access infos *)
-let combineAccs a1 a2 =
-  Locs.union a1 a2
+(********************** Singleton correlations *****************)
 
 
-(*********************** Correlation funcs ************************)
+let dummyCorr = 
+  { corrLocks = LS.LS.empty;
+    corrAccess = Locs.empty;
+    corrLEmpty = Cil.locUnknown;
+    corrPseudo = None;
+  }
 
-(** True if the two correlations are approximately equal. 
-    Assumes the keys (i.e., lvals) match *)
-let corrApproxEQ (c1:correlation) (c2:correlation) : bool =
-  (* assume scope also equal... *)
-  (LS.LS.equal c1.corrLocks c2.corrLocks) &&
-    (Locs.equal c1.corrAccess c2.corrAccess) && 
-    (Cil.compareLoc c1.corrLEmpty c2.corrLEmpty == 0)
-    
+
+(*********************** Comparison funcs ************************)
+
 
 (** True if the two correlations are exactly equal *)
 let corrExactEQ (c1:correlation) (c2:correlation) : bool =
   (LS.LS.equal c1.corrLocks c2.corrLocks) &&
-    (compare c1.corrScope c2.corrScope == 0) &&
     (Locs.equal c1.corrAccess c2.corrAccess) &&
-    (Cil.compareLoc c1.corrLEmpty c2.corrLEmpty == 0)
+    (Cil.compareLoc c1.corrLEmpty c2.corrLEmpty == 0) &&
+    (pseudoAttsEQ c1.corrPseudo c2.corrPseudo)
 
 
 (** True if the two correlations are approximately subsets of 
@@ -151,55 +118,33 @@ let subsCorr (c1:correlation) (c2:correlation) =
   if (c1 == c2 || 
         (LS.LS.subset c1.corrLocks c2.corrLocks && 
            Locs.subset c1.corrAccess c2.corrAccess &&
-           locSubs c1.corrLEmpty c2.corrLEmpty))
-    (* Ignore scoping *)
-  then
-    Some (-1)
-  else
-    None
+           locSubs c1.corrLEmpty c2.corrLEmpty && 
+           pseudoAttsSubs c1.corrPseudo c2.corrPseudo)
+     )
+  then Some (-1)
+  else None
 
 
 let cmSubs = CMap.subset subsCorr
 
-let cmAppEQ = CMap.equal corrApproxEQ      
-
-let cmExEQ = CMap.equal corrExactEQ
-
+let cmEQ = CMap.equal corrExactEQ
 
 
 (*******************************************************************)
 (* Cache of common correlations, operation results, etc.           *)
 
+(*** Combine pseudo access attributes ***)
 
-(*** Bin Ops for Locksets ***)
+let combinePseudo a1 a2 =
+  match a1, a2 with
+    None, _ -> a2
+  | _, None -> a1 (* Should this even happen? *)
+  | Some s1, Some s2 -> Some (PAS.union s1 s2)
 
-module HashedLSPointerPairCommutable =
-struct
-  type t = LS.fullLS * LS.fullLS
-  let equal (f1,s1) (f2,s2) =
-    (* assume all given locksets are the main copy *)
-    (f1 == f2 && s1 == s2) ||
-      (f1 == s2 && s1 == f2)
-  let hash (f, s) = (LS.LS.hash f) lxor (LS.LS.hash s)
-end
-  
-module LSPH = Hashtbl.Make (HashedLSPointerPairCommutable)
-  
-let combineLCache = LSPH.create 17
-
-let combineLS (a:LS.fullLS) (b:LS.fullLS) : LS.fullLS =
-  try 
-    LSPH.find combineLCache (a, b)
-  with Not_found ->
-    let result = LS.LS.unique (LS.LS.inter a b) in
-    LSPH.add combineLCache (a, b) result;
-    result
-
-(*** Single correlations ***)
 
 (** Combine two correlations by intersection. Assumes lvals match *) 
 let combineCorr (a:correlation) (b:correlation) : correlation =
-  let newLocks = combineLS a.corrLocks b.corrLocks in
+  let newLocks = LS.combineLS a.corrLocks b.corrLocks in
   let locksEmpty =
     (* record the FIRST time locks go from non-empty to empty *)
     if ((not (LS.LS.emptyPlus a.corrLocks) 
@@ -225,65 +170,43 @@ let combineCorr (a:correlation) (b:correlation) : correlation =
     
     corrLEmpty =
       locksEmpty;
-    
-    corrScope = 
-      (match (a.corrScope, b.corrScope) with
-         SGlobal, SGlobal  ->
-           a.corrScope
-             
-       | SFormal n, SFormal m when n == m ->
-           a.corrScope
-             
-       | SFormal n, SFormal m when n != m ->
-           failwith "scoped a corr to two different formal indices"
 
-       (* tbd comes from func application, but maybe a read/write access
-          already resolved the scope *)
-       | STBD, x
-       | x, STBD ->
-           x
+    corrPseudo = combinePseudo a.corrPseudo b.corrPseudo;
 
-       | _ ->
-           failwith ("combining incompatible scopes: 1) " ^
-                       (string_of_scope a.corrScope) ^ "   2) " ^
-                       (string_of_scope b.corrScope) ^ "\n")
-      );
   }
 
 
 (*** Correlation maps ***)
 
+
+let hashGA lv corr =
+  (Lv.hash_lval lv) lxor 
+    (LS.LS.hash corr.corrLocks) lxor
+    (Hashtbl.hash corr.corrLEmpty)
+
 (** Hash function for straintMap that only samples it *)
 let hashCM (x:straintMap) = 
-  if (CMap.is_empty x) then
-    0
+  if (CMap.is_empty x) then 0
   else
-    let sizeH = Hashtbl.hash (CMap.cardinal x) in
-    let min_lv, min_corr = 
-      CMap.min_binding x in
-    let minH = sizeH lxor 
-      (Lv.hash_lval min_lv) lxor 
-      (LS.LS.hash min_corr.corrLocks) lxor 
-      (Hashtbl.hash min_corr.corrScope) in
-    let med_lv, med_corr = 
-      CMap.choose x in
-    let medH = minH lxor 
-      (Lv.hash_lval med_lv) lxor 
-      (LS.LS.hash med_corr.corrLocks) lxor 
-      (Hashtbl.hash med_corr.corrScope) in
-    let max_lv, max_corr = 
-      CMap.max_binding x in
-    medH lxor 
-      (Lv.hash_lval max_lv) lxor 
-      (LS.LS.hash max_corr.corrLocks) lxor 
-      (Hashtbl.hash max_corr.corrScope)
+    let size = (CMap.cardinal x) in
+    let sizeH = Hashtbl.hash size in
+    if size == 1 then
+      let lv, corr = CMap.choose x in
+      sizeH lxor (hashGA lv corr)
+    else
+      let min_lv, min_corr = CMap.min_binding x in
+      let minH = sizeH lxor (hashGA min_lv min_corr) in
+      let med_lv, med_corr = CMap.choose x in
+      let medH = minH lxor (hashGA med_lv med_corr) in
+      let max_lv, max_corr = CMap.max_binding x in
+      medH lxor (hashGA max_lv max_corr)
 
 
 (** Hashtable for a straintMaps, requiring structural equality *)
 module HashedCMap = 
   struct
     type t = straintMap
-    let equal = cmExEQ (* hashtbl needs exactness *)
+    let equal = cmEQ (* hashtbl needs exactness *)
     let hash = hashCM
   end
 
@@ -293,23 +216,31 @@ let cmCache = CMHash.create 237
 
 let cmCacheMerge = CMHash.merge cmCache
 
-(** Make sure the maps share lvals w/ the rest of the system *)
-let uniqLvalsCM (old:straintMap) : straintMap =
-  CMap.mapk 
-    (fun lv ->
-       Lv.mergeLv lv) old
+(** Make sure the maps share lvals, etc. w/ the rest of the system *)
+let hcStraints (old:straintMap) : straintMap =
+  (* Hashcons the keys -- note: Mapk must not change the order of the keys *)
+  let temp = CMap.mapk (fun lv -> Lv.mergeLv lv) old in
+  (* Hashcons the rest *)
+  let () = CMap.iter 
+    (fun _ corr ->
+       corr.corrLocks <- LS.LS.unique corr.corrLocks;
+       corr.corrLEmpty <- CLv.distillLoc corr.corrLEmpty;
+       corr.corrAccess <- hcAccesses corr.corrAccess;
+    ) temp in
+  temp
     
+
 (** Make sure there's only one golden copy of each correlation map *)
-let cacheCM (possiblyNewCM:straintMap) : straintMap =
+let uniqueCM (possiblyNewCM:straintMap) : straintMap =
   try 
     CMHash.find cmCache possiblyNewCM
   with Not_found ->
-    let uniqCM = uniqLvalsCM possiblyNewCM in
+    let uniqCM = hcStraints possiblyNewCM in
     CMHash.add cmCache uniqCM;
     uniqCM
 
-(*** Binary ops for Correlation Maps ***)
 
+(*** Binary ops for Correlation Maps ***)
 
 module HashedCMPointerPairCommutable =
 struct
@@ -337,65 +268,113 @@ let combineCM (a:straintMap) (b:straintMap) : straintMap =
     CMPH.add combineCMCache (a, b) result;
     result
   *)
-  cacheCM (cmUnion a b)
+  uniqueCM (cmUnion a b)
 
 
 (*** All caches ***)
 
 (** Reset the bin op caches *)
 let clearCache () = begin
-  LSPH.clear combineLCache;
+  LS.clearCache ();
   CMPH.clear combineCMCache;
+  CMHash.clear cmCache
 end
 
+let printCacheStats () = begin
+  L.logStatus (Stdutil.string_of_hashstats CMHash.stats
+    cmCache "Golden GAs");
+end
 
 (*********************************************************)
 
 (** Update a guarded access set by adding a new guarded access
     (assumes there was no old corresponding guarded access)  *)
-let addCorr lv curLocks location fk scope curMap =
-  let newCorr = {corrScope = scope;
-                 corrLocks = curLocks;
+let addCorr ?(pseudo=None) lv curLocks location fk curMap =
+  let newCorr = {corrLocks = curLocks;
                  corrAccess = Locs.add (fk, location) Locs.empty;
                  corrLEmpty = Cil.locUnknown;
+                 corrPseudo = pseudo;
                 } in
   CMap.addComb combineCorr lv newCorr curMap
 
 
-(** Update a guarded access set by merging a new guarded access *)
-let updateCorr oldCorr lval newLS curConstMap =
-    let newCorr =
-      { oldCorr with
-          corrLocks = newLS;
-          corrScope = STBD;
-      }
-    in
-    CMap.addComb combineCorr lval newCorr curConstMap
+(** Update access info across functions (at a function call).
+    TODO: add calling context info? *)
+let updateAcc oldAccs updateLocks =
+  { oldAccs with corrLocks = updateLocks oldAccs.corrLocks; }
+
+
+let updateCorr lval newCorr curConstMap =
+  CMap.addComb combineCorr lval newCorr curConstMap
+    
+
+(** Add a pseudo access w/ the given pseudoAttrib *)
+let addPseudo lv curLocks location fk pseudoattrib curMap =
+  let newAttribs = PAS.singleton pseudoattrib in
+  addCorr ~pseudo:(Some newAttribs) lv curLocks location fk curMap
+    
+
  
 
 let scopeCorrelation curFunc scopeLocks 
-    corrLv corr (curSet:straintMap) : straintMap =
-  corr.corrLocks <- 
-    (*    LS.LS.unique *)
-    (scopeLocks corr.corrLocks);
-  match corr.corrScope with
-    STBD -> begin
-      match Scope.annotScope curFunc corrLv with
-        SGlobal
-      | SFormal _ as scope -> 
-          corr.corrScope <- scope; (* TODO: don't need this field *)
-          curSet
-      | STBD
-      | SFunc ->
-          (* 
-             corr.corrScope <- SGlobal;
-             curSet;
-          *)
-          CMap.remove corrLv curSet
+      corrLv corr (curSet:straintMap) : straintMap =
+  (corr.corrLocks <- LS.LS.unique (scopeLocks corr.corrLocks);
+   (* Do some pruning of what can be shared while annotating scope *)
+   match Shared.isShareableAbs curFunc corrLv with
+     None -> CMap.remove corrLv curSet
+   | _ -> curSet
+  )
 
-    end
-  | _ ->
-      curSet
 
 let scopeStraintMap curFunc scopeLocks (cmap:straintMap) =
   CMap.fold (scopeCorrelation curFunc scopeLocks) cmap cmap
+
+
+(************** Race warnings stuff ****************)
+
+(* TODO: standardize interface *)
+let enumAccesses accs =
+  CMap.fold (fun lval corr curList -> lval :: curList) accs []
+
+let iterCorrs = CMap.iter
+
+let iterGuardedAccs foo corr =
+  let pseudoAtts = match corr.corrPseudo with
+      None -> PAS.empty | Some s -> s in
+  foo corr.corrAccess corr.corrLocks pseudoAtts
+
+
+let set_of_accesses corr =
+  corr.corrAccess
+
+let hasPseudo corr =
+  match corr.corrPseudo with None -> false | Some s-> not (PAS.is_empty s)
+
+let foreachPseudo2 foo corr1 corr2 =
+  let unionThem cur corr =
+    match corr.corrPseudo with
+      None -> cur
+    | Some set ->
+        PAS.union cur set
+  in
+  let doThem ((fk, _, _) as pakey) =
+    foo fk pakey
+  in
+  let pseudos = unionThem PAS.empty corr1 in
+  let pseudos = unionThem pseudos corr2 in
+  PAS.iter doThem pseudos
+
+let locks_of_access corr =
+  corr.corrLocks
+
+
+(******************** Printing *********************)
+
+let printCorrMap cm printLocks =
+  CMap.iter 
+    (fun clval c ->
+       L.logStatus ((Lv.string_of_lvscope clval) ^ ": " ^ 
+                      (string_of_accesses c.corrAccess) ^ "~");
+       printLocks c.corrLocks;
+       L.logStatus ""
+    ) cm

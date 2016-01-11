@@ -1,0 +1,4102 @@
+Sun Aug 10 21:12:42 PDT 2008
+reserved status file: /tmp/temp.2dk6PF
+running analysis on /home/jan/research/relay/racetests/esp/ciltrees
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rss
+Registered summary type: mods
+Checking for data races
+-----
+Loading Cil Varinfo ID ranges for lookup tables
+Setting Cil Varinfo ID ranges
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.0.1
+using /tmp/relay_scratch to store acquired files
+using: /tmp/temp.2dk6PF to track status
+Initializing Steensgaard AA info
+Loading function info
+Using old PTA results
+Old PTA results loaded
+Reached end of /home/jan/research/relay/racetests/esp/ciltrees/calls.cil call graph file
+Num funcs: 143
+summary database will use:
+	/home/jan/research/relay/racetests/esp/ciltrees/relay_sums
+Initializing summary mods
+Checking left-over state in mods
+Initializing summary rss
+Checking left-over state in rss
+Initializing summary ss
+Checking left-over state in ss
+Initializing summary rs
+Checking left-over state in rs
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: false
+file server will use: 14440
+trying to clear old summaries / local srcs, etc.
+Scc_cg: Pruned 38 funcs w/out bodies for scc DAG
+Starting bottomup analysis
+-----
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #92
+=================================
+Summarizing function: serial_paranoia_check : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	261	0	0	0	0	
+
+TIMES : SCC:92 : 0.000181913375854
+TIMES : FUN:261 : 0.000174999237061
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 261
+=======
+
+SUMS (fk, lo, un, wr, re):	261	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 261 : 34
+>>> PROGRESS 1/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: rs_chars_in_buffer : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	417	0	0	0	3	
+
+TIMES : SCC:0 : 0.000958919525146
+TIMES : FUN:417 : 0.000952005386353
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 417
+=======
+
+SUMS (fk, lo, un, wr, re):	417	0	0	0	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 417 : 33531
+>>> PROGRESS 2/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #9
+=================================
+Summarizing function: module_put : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	134	0	0	0	0	
+
+TIMES : SCC:9 : 0.000247001647949
+TIMES : FUN:134 : 0.000241994857788
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 134
+=======
+
+SUMS (fk, lo, un, wr, re):	134	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 134 : 34
+>>> PROGRESS 3/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #8
+=================================
+Summarizing function: __MOD_DEC_USE_COUNT : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	137	0	0	0	0	
+
+TIMES : SCC:8 : 0.000355958938599
+TIMES : FUN:137 : 0.000352144241333
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 137
+=======
+
+SUMS (fk, lo, un, wr, re):	137	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 137 : 34
+>>> PROGRESS 4/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #62
+=================================
+Summarizing function: variable_test_bit : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	11	0	0	0	0	
+
+TIMES : SCC:62 : 0.000162124633789
+TIMES : FUN:11 : 0.000156879425049
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 11
+=======
+
+SUMS (fk, lo, un, wr, re):	11	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: oldbit
+SIZES: 11 : 34
+>>> PROGRESS 5/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #61
+=================================
+Summarizing function: test_ti_thread_flag : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	21	0	0	0	0	
+
+TIMES : SCC:61 : 0.000603914260864
+TIMES : FUN:21 : 0.000597953796387
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 21
+=======
+
+SUMS (fk, lo, un, wr, re):	21	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 21 : 34
+>>> PROGRESS 6/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #60
+=================================
+Summarizing function: test_tsk_thread_flag : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	87	0	0	0	1	
+
+TIMES : SCC:60 : 0.000623941421509
+TIMES : FUN:87 : 0.000618934631348
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 87
+=======
+
+SUMS (fk, lo, un, wr, re):	87	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 87 : 43552
+>>> PROGRESS 7/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #59
+=================================
+Summarizing function: signal_pending : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	91	0	0	0	1	
+
+TIMES : SCC:59 : 0.00151491165161
+TIMES : FUN:91 : 0.00150799751282
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 91
+=======
+
+SUMS (fk, lo, un, wr, re):	91	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 91 : 43552
+>>> PROGRESS 8/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #63
+=================================
+Summarizing function: __xchg : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	25	0	0	0	0	
+
+TIMES : SCC:63 : 0.000240087509155
+TIMES : FUN:25 : 0.000234842300415
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 25
+=======
+
+SUMS (fk, lo, un, wr, re):	25	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: x
+SIZES: 25 : 34
+>>> PROGRESS 9/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #83
+=================================
+Summarizing function: current_thread_info : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	19	0	0	0	0	
+
+TIMES : SCC:83 : 0.000342130661011
+TIMES : FUN:19 : 0.000334978103638
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 19
+=======
+
+SUMS (fk, lo, un, wr, re):	19	0	0	0	0	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*ti)
+
+SIZES: 19 : 34
+>>> PROGRESS 10/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #82
+=================================
+Summarizing function: get_current : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	81	0	0	0	1	
+
+TIMES : FUN:81 : 0.000694990158081
+TIMES : SCC:82 : 0.000701904296875
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 81
+=======
+
+SUMS (fk, lo, un, wr, re):	81	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 81 : 43559
+>>> PROGRESS 11/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #88
+=================================
+Summarizing function: inb_local : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	167	0	0	0	0	
+
+TIMES : SCC:88 : 0.000174045562744
+TIMES : FUN:167 : 0.000168085098267
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 167
+=======
+
+SUMS (fk, lo, un, wr, re):	167	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: value
+SIZES: 167 : 34
+>>> PROGRESS 12/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #87
+=================================
+Summarizing function: inb : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	173	0	0	0	0	
+
+TIMES : SCC:87 : 0.00106501579285
+TIMES : FUN:173 : 0.00105595588684
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 173
+=======
+
+SUMS (fk, lo, un, wr, re):	173	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 173 : 34
+>>> PROGRESS 13/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #86
+=================================
+Summarizing function: serial_in : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	265	0	0	0	1	
+
+TIMES : SCC:86 : 0.00065803527832
+TIMES : FUN:265 : 0.00065279006958
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 265
+=======
+
+SUMS (fk, lo, un, wr, re):	265	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 265 : 33473
+>>> PROGRESS 14/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #96
+=================================
+Summarizing function: outb_local : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	164	0	0	0	0	
+
+TIMES : SCC:96 : 0.000156164169312
+TIMES : FUN:164 : 0.000150918960571
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 164
+=======
+
+SUMS (fk, lo, un, wr, re):	164	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 164 : 34
+>>> PROGRESS 15/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #95
+=================================
+Summarizing function: outb : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	170	0	0	0	0	
+
+TIMES : SCC:95 : 0.000359058380127
+TIMES : FUN:170 : 0.000354051589966
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 170
+=======
+
+SUMS (fk, lo, un, wr, re):	170	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 170 : 34
+>>> PROGRESS 16/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #94
+=================================
+Summarizing function: serial_out : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	269	0	0	0	1	
+
+TIMES : SCC:94 : 0.000542163848877
+TIMES : FUN:269 : 0.000534057617188
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 269
+=======
+
+SUMS (fk, lo, un, wr, re):	269	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 269 : 33473
+>>> PROGRESS 17/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #15
+=================================
+Summarizing function: rs_wait_until_sent : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	255	0	1	0	7	
+
+TIMES : SCC:15 : 0.00603294372559
+TIMES : FUN:255 : 0.00602507591248
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 255
+=======
+
+SUMS (fk, lo, un, wr, re):	255	0	1	0	7	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 255 : 45541
+>>> PROGRESS 18/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #36
+=================================
+Summarizing function: rs_stop : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 21	misses: 5
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	275	0	1	1	4	
+
+TIMES : FUN:275 : 0.0021378993988
+TIMES : SCC:36 : 0.00214600563049
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 275
+=======
+
+SUMS (fk, lo, un, wr, re):	275	0	1	1	4	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 275 : 33665
+>>> PROGRESS 19/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #37
+=================================
+Summarizing function: rs_start : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	280	0	1	1	6	
+
+TIMES : SCC:37 : 0.00248980522156
+TIMES : FUN:280 : 0.00248217582703
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 280
+=======
+
+SUMS (fk, lo, un, wr, re):	280	0	1	1	6	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 280 : 33712
+>>> PROGRESS 20/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #38
+=================================
+Summarizing function: rs_flush_chars : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	395	0	1	1	7	
+
+TIMES : SCC:38 : 0.00219392776489
+TIMES : FUN:395 : 0.00218605995178
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 395
+=======
+
+SUMS (fk, lo, un, wr, re):	395	0	1	1	7	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 395 : 33746
+>>> PROGRESS 21/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #39
+=================================
+Summarizing function: rs_throttle : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	425	0	1	1	4	
+
+TIMES : FUN:425 : 0.00198292732239
+TIMES : SCC:39 : 0.00199198722839
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 425
+=======
+
+SUMS (fk, lo, un, wr, re):	425	0	1	1	4	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 425 : 67012
+>>> PROGRESS 22/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #47
+=================================
+Summarizing function: _raw_spin_unlock : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 7	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	29	0	0	0	0	
+
+TIMES : SCC:47 : 0.000210046768188
+TIMES : FUN:29 : 0.000203132629395
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 29
+=======
+
+SUMS (fk, lo, un, wr, re):	29	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 29 : 34
+>>> PROGRESS 23/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #46
+=================================
+Summarizing function: release_dma_lock : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	191	0	0	0	0	
+
+TIMES : SCC:46 : 0.000380039215088
+TIMES : FUN:191 : 0.000373840332031
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 191
+=======
+
+SUMS (fk, lo, un, wr, re):	191	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 191 : 34
+>>> PROGRESS 24/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #48
+=================================
+Summarizing function: clear_dma_ff : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	197	0	0	0	0	
+
+TIMES : FUN:197 : 0.000363111495972
+TIMES : SCC:48 : 0.00036883354187
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 197
+=======
+
+SUMS (fk, lo, un, wr, re):	197	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 197 : 34
+>>> PROGRESS 25/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #49
+=================================
+Summarizing function: disable_dma : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	195	0	0	0	0	
+
+TIMES : SCC:49 : 0.000411033630371
+TIMES : FUN:195 : 0.000403881072998
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 195
+=======
+
+SUMS (fk, lo, un, wr, re):	195	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 195 : 34
+>>> PROGRESS 26/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #51
+=================================
+Summarizing function: _raw_spin_lock : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	32	0	0	0	0	
+
+TIMES : FUN:32 : 0.000118970870972
+TIMES : SCC:51 : 0.000123977661133
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 32
+=======
+
+SUMS (fk, lo, un, wr, re):	32	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 32 : 34
+>>> PROGRESS 27/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #50
+=================================
+Summarizing function: claim_dma_lock : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	189	0	0	0	0	
+
+TIMES : SCC:50 : 0.000411987304688
+TIMES : FUN:189 : 0.000406980514526
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 189
+=======
+
+SUMS (fk, lo, un, wr, re):	189	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: flags
+SIZES: 189 : 34
+>>> PROGRESS 28/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #80
+=================================
+Summarizing function: get_order : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	15	0	0	0	0	
+
+TIMES : SCC:80 : 0.000485181808472
+TIMES : FUN:15 : 0.000478982925415
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 15
+=======
+
+SUMS (fk, lo, un, wr, re):	15	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 15 : 34
+>>> PROGRESS 29/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #97
+=================================
+Summarizing function: set_bit : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	1	0	0	0	0	
+
+TIMES : SCC:97 : 0.000200033187866
+TIMES : FUN:1 : 0.000193119049072
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 1
+=======
+
+SUMS (fk, lo, un, wr, re):	1	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 1 : 34
+>>> PROGRESS 30/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #45
+=================================
+Summarizing function: shutdown : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	372	0	1	6	13	
+
+TIMES : SCC:45 : 0.00482416152954
+TIMES : FUN:372 : 0.00481700897217
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 372
+=======
+
+SUMS (fk, lo, un, wr, re):	372	0	1	6	13	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 372 : 67621
+>>> PROGRESS 31/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #91
+=================================
+Summarizing function: rs_unthrottle : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 21	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	429	0	1	1	5	
+
+TIMES : FUN:429 : 0.00427198410034
+TIMES : SCC:91 : 0.00428104400635
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 429
+=======
+
+SUMS (fk, lo, un, wr, re):	429	0	1	1	5	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 429 : 66982
+>>> PROGRESS 32/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (2) #34
+=================================
+Summarizing function: rs_flush_buffer : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 7	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	421	0	1	4	12	
+
+Summarizing function: esp_hangup : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 34	misses: 6
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	581	0	1	12	22	
+
+Summarizing function: rs_flush_buffer : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 32	misses: 7
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	421	0	1	12	22	
+
+Summarizing function: esp_hangup : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 82	misses: 10
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	581	0	1	12	22	
+
+Summarizing function: rs_flush_buffer : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 50	misses: 7
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	421	0	1	12	22	
+
+TIMES : SCC:34 : 0.014664888382
+TIMES : FUN:421 : 0.0116958618164
+TIMES : FUN:581 : 0.00290870666504
+=================================
+Finished an SCC (2)
+=================================
+Summary for function: 421
+=======
+
+SUMS (fk, lo, un, wr, re):	421	0	1	12	22	
+
+SS Sum:
+ -> 
+$SSBOT
+Summary for function: 581
+=======
+
+SUMS (fk, lo, un, wr, re):	581	0	1	12	22	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 421 : 68664
+SIZES: 581 : 68664
+>>> PROGRESS 33/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: rs_close : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 100	misses: 10
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	557	0	1	16	36	
+
+TIMES : FUN:557 : 0.0260138511658
+TIMES : SCC:1 : 0.0260219573975
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 557
+=======
+
+SUMS (fk, lo, un, wr, re):	557	0	1	16	36	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 557 : 114993
+>>> PROGRESS 34/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #66
+=================================
+Summarizing function: module_is_live : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 253	misses: 9
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	128	0	0	0	1	
+
+TIMES : FUN:128 : 0.000274181365967
+TIMES : SCC:66 : 0.000280857086182
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 128
+=======
+
+SUMS (fk, lo, un, wr, re):	128	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 128 : 1644
+>>> PROGRESS 35/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #65
+=================================
+Summarizing function: try_module_get : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	130	0	0	0	1	
+
+TIMES : SCC:65 : 0.000672101974487
+TIMES : FUN:130 : 0.000666856765747
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 130
+=======
+
+SUMS (fk, lo, un, wr, re):	130	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 130 : 1644
+>>> PROGRESS 36/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #64
+=================================
+Summarizing function: _MOD_INC_USE_COUNT : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	139	0	0	1	2	
+
+TIMES : FUN:139 : 0.000672101974487
+TIMES : SCC:64 : 0.000676870346069
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 139
+=======
+
+SUMS (fk, lo, un, wr, re):	139	0	0	1	2	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 139 : 1713
+>>> PROGRESS 37/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #7
+=================================
+Summarizing function: check_modem_status : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	339	0	0	5	8	
+
+TIMES : SCC:7 : 0.0112099647522
+TIMES : FUN:339 : 0.0112018585205
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 339
+=======
+
+SUMS (fk, lo, un, wr, re):	339	0	0	5	8	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 339 : 66973
+>>> PROGRESS 38/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #11
+=================================
+Summarizing function: memmove : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 10	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	55	0	0	0	0	
+
+TIMES : SCC:11 : 0.00025486946106
+TIMES : FUN:55 : 0.000249147415161
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 55
+=======
+
+SUMS (fk, lo, un, wr, re):	55	0	0	0	0	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*dest)
+
+SIZES: 55 : 34
+>>> PROGRESS 39/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #24
+=================================
+Summarizing function: get_dma_residue : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	211	0	0	0	0	
+
+TIMES : SCC:24 : 0.000678062438965
+TIMES : FUN:211 : 0.000672101974487
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 211
+=======
+
+SUMS (fk, lo, un, wr, re):	211	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 211 : 34
+>>> PROGRESS 40/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #26
+=================================
+Summarizing function: enable_dma : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	193	0	0	0	0	
+
+TIMES : FUN:193 : 0.000348806381226
+TIMES : SCC:26 : 0.000354051589966
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 193
+=======
+
+SUMS (fk, lo, un, wr, re):	193	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 193 : 34
+>>> PROGRESS 41/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #27
+=================================
+Summarizing function: set_dma_count : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	208	0	0	0	0	
+
+TIMES : SCC:27 : 0.000500917434692
+TIMES : FUN:208 : 0.00049614906311
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 208
+=======
+
+SUMS (fk, lo, un, wr, re):	208	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 208 : 34
+>>> PROGRESS 42/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #29
+=================================
+Summarizing function: set_dma_page : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	202	0	0	0	0	
+
+TIMES : FUN:202 : 0.00047492980957
+TIMES : SCC:29 : 0.000481128692627
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 202
+=======
+
+SUMS (fk, lo, un, wr, re):	202	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 202 : 34
+>>> PROGRESS 43/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #28
+=================================
+Summarizing function: set_dma_addr : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 6	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	205	0	0	0	0	
+
+TIMES : FUN:205 : 0.00056791305542
+TIMES : SCC:28 : 0.00057315826416
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 205
+=======
+
+SUMS (fk, lo, un, wr, re):	205	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 205 : 34
+>>> PROGRESS 44/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #30
+=================================
+Summarizing function: set_dma_mode : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	199	0	0	0	0	
+
+TIMES : SCC:30 : 0.000358104705811
+TIMES : FUN:199 : 0.000353097915649
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 199
+=======
+
+SUMS (fk, lo, un, wr, re):	199	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 199 : 34
+>>> PROGRESS 45/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #31
+=================================
+Summarizing function: virt_to_phys : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	162	0	0	0	0	
+
+TIMES : SCC:31 : 0.000185966491699
+TIMES : FUN:162 : 0.000180006027222
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 162
+=======
+
+SUMS (fk, lo, un, wr, re):	162	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: (unsigned long )address - 3221225472UL
+SIZES: 162 : 34
+>>> PROGRESS 46/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #10
+=================================
+Summarizing function: transmit_chars_dma_done : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	332	0	0	3	6	
+
+TIMES : SCC:10 : 0.00608992576599
+TIMES : FUN:332 : 0.0060830116272
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 332
+=======
+
+SUMS (fk, lo, un, wr, re):	332	0	0	3	6	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 332 : 67012
+>>> PROGRESS 47/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #23
+=================================
+Summarizing function: __memcpy : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 15	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	48	0	0	0	0	
+
+TIMES : SCC:23 : 0.000232934951782
+TIMES : FUN:48 : 0.000225782394409
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 48
+=======
+
+SUMS (fk, lo, un, wr, re):	48	0	0	0	0	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*to)
+
+SIZES: 48 : 34
+>>> PROGRESS 48/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #104
+=================================
+Summarizing function: test_and_set_bit : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	7	0	0	0	0	
+
+TIMES : FUN:7 : 0.000159025192261
+TIMES : SCC:104 : 0.000164031982422
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 7
+=======
+
+SUMS (fk, lo, un, wr, re):	7	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: oldbit
+SIZES: 7 : 34
+>>> PROGRESS 49/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #103
+=================================
+Summarizing function: tasklet_hi_schedule : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	142	0	0	0	0	
+
+TIMES : FUN:142 : 0.000895023345947
+TIMES : SCC:103 : 0.00090217590332
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 142
+=======
+
+SUMS (fk, lo, un, wr, re):	142	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 142 : 34
+>>> PROGRESS 50/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #99
+=================================
+Summarizing function: mark_bh : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	146	0	0	0	0	
+
+TIMES : FUN:146 : 0.00037693977356
+TIMES : SCC:99 : 0.000382900238037
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 146
+=======
+
+SUMS (fk, lo, un, wr, re):	146	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 146 : 34
+>>> PROGRESS 51/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #98
+=================================
+Summarizing function: rs_sched_event : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	285	0	0	1	1	
+
+TIMES : FUN:285 : 0.000496864318848
+TIMES : SCC:98 : 0.000504016876221
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 285
+=======
+
+SUMS (fk, lo, un, wr, re):	285	0	0	1	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 285 : 33105
+>>> PROGRESS 52/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #16
+=================================
+Summarizing function: transmit_chars_dma : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	326	0	0	6	10	
+
+TIMES : SCC:16 : 0.00452208518982
+TIMES : FUN:326 : 0.00451397895813
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 326
+=======
+
+SUMS (fk, lo, un, wr, re):	326	0	0	6	10	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 326 : 67325
+>>> PROGRESS 53/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #19
+=================================
+Summarizing function: outw_local : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 19	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	176	0	0	0	0	
+
+TIMES : FUN:176 : 0.000319004058838
+TIMES : SCC:19 : 0.000324964523315
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 176
+=======
+
+SUMS (fk, lo, un, wr, re):	176	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 176 : 34
+>>> PROGRESS 54/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #18
+=================================
+Summarizing function: outw : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	182	0	0	0	0	
+
+TIMES : FUN:182 : 0.000481128692627
+TIMES : SCC:18 : 0.000488042831421
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 182
+=======
+
+SUMS (fk, lo, un, wr, re):	182	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 182 : 34
+>>> PROGRESS 55/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #72
+=================================
+Summarizing function: release_pio_buffer : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	291	0	0	2	1	
+
+TIMES : SCC:72 : 0.000221014022827
+TIMES : FUN:291 : 0.000216007232666
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 291
+=======
+
+SUMS (fk, lo, un, wr, re):	291	0	0	2	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 291 : 232
+>>> PROGRESS 56/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #77
+=================================
+Summarizing function: get_pio_buffer : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	289	0	0	1	2	
+
+TIMES : FUN:289 : 0.000212907791138
+TIMES : SCC:77 : 0.000219106674194
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 289
+=======
+
+SUMS (fk, lo, un, wr, re):	289	0	0	1	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 289 : 244
+>>> PROGRESS 57/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #17
+=================================
+Summarizing function: transmit_chars_pio : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	319	0	0	6	10	
+
+TIMES : FUN:319 : 0.00518798828125
+TIMES : SCC:17 : 0.00519490242004
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 319
+=======
+
+SUMS (fk, lo, un, wr, re):	319	0	0	6	10	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 319 : 34064
+>>> PROGRESS 58/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #22
+=================================
+Summarizing function: __constant_c_memset : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 25	misses: 6
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	62	0	0	0	0	
+
+TIMES : SCC:22 : 0.000223875045776
+TIMES : FUN:62 : 0.000217914581299
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 62
+=======
+
+SUMS (fk, lo, un, wr, re):	62	0	0	0	0	
+
+SS Sum:
+ -> 
+Extptr (0):
+  lval = (*s)
+
+SIZES: 62 : 34
+>>> PROGRESS 59/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #25
+=================================
+Summarizing function: receive_chars_dma : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	307	0	0	2	5	
+
+TIMES : SCC:25 : 0.0749709606171
+TIMES : FUN:307 : 0.074963092804
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 307
+=======
+
+SUMS (fk, lo, un, wr, re):	307	0	0	2	5	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 307 : 66812
+>>> PROGRESS 60/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #21
+=================================
+Summarizing function: receive_chars_dma_done : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 9	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	312	0	0	10	16	
+
+TIMES : FUN:312 : 0.00420904159546
+TIMES : SCC:21 : 0.00421810150146
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 312
+=======
+
+SUMS (fk, lo, un, wr, re):	312	0	0	10	16	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 312 : 67815
+>>> PROGRESS 61/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #85
+=================================
+Summarizing function: inw_local : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 14	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	179	0	0	0	0	
+
+TIMES : SCC:85 : 0.000227928161621
+TIMES : FUN:179 : 0.000221014022827
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 179
+=======
+
+SUMS (fk, lo, un, wr, re):	179	0	0	0	0	
+
+SS Sum:
+ -> 
+Vval: value
+SIZES: 179 : 34
+>>> PROGRESS 62/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #84
+=================================
+Summarizing function: inw : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	185	0	0	0	0	
+
+TIMES : SCC:84 : 0.000576019287109
+TIMES : FUN:185 : 0.000571966171265
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 185
+=======
+
+SUMS (fk, lo, un, wr, re):	185	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 185 : 34
+>>> PROGRESS 63/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #71
+=================================
+Summarizing function: receive_chars_pio : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	293	0	0	8	12	
+
+TIMES : SCC:71 : 0.00426983833313
+TIMES : FUN:293 : 0.0042622089386
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 293
+=======
+
+SUMS (fk, lo, un, wr, re):	293	0	0	8	12	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 293 : 34312
+>>> PROGRESS 64/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: rs_interrupt_single : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 32	misses: 6
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	343	0	1	24	35	
+
+TIMES : SCC:2 : 0.0183539390564
+TIMES : FUN:343 : 0.018345117569
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 343
+=======
+
+SUMS (fk, lo, un, wr, re):	343	0	1	24	35	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 343 : 170479
+>>> PROGRESS 65/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #3
+=================================
+Summarizing function: rs_write_room : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 220	misses: 6
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	412	0	0	0	3	
+
+TIMES : SCC:3 : 0.000904083251953
+TIMES : FUN:412 : 0.000895977020264
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 412
+=======
+
+SUMS (fk, lo, un, wr, re):	412	0	0	0	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 412 : 33058
+>>> PROGRESS 66/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #33
+=================================
+Summarizing function: espserial_exit : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	638	0	1	3	7	
+
+TIMES : FUN:638 : 0.00311708450317
+TIMES : SCC:33 : 0.00312399864197
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 638
+=======
+
+SUMS (fk, lo, un, wr, re):	638	0	1	3	7	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 638 : 33701
+>>> PROGRESS 67/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #4
+=================================
+Summarizing function: cleanup_module : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 9	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	127	0	1	3	7	
+
+TIMES : SCC:4 : 0.000865936279297
+TIMES : FUN:127 : 0.000861167907715
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 127
+=======
+
+SUMS (fk, lo, un, wr, re):	127	0	1	3	7	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 127 : 33702
+>>> PROGRESS 68/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #79
+=================================
+Summarizing function: change_speed : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 10	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	254	0	1	4	12	
+
+TIMES : SCC:79 : 0.00323796272278
+TIMES : FUN:254 : 0.00323081016541
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 254
+=======
+
+SUMS (fk, lo, un, wr, re):	254	0	1	4	12	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 254 : 34012
+>>> PROGRESS 69/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #5
+=================================
+Summarizing function: rs_set_termios : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 45	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	553	0	1	6	20	
+
+TIMES : FUN:553 : 0.00896191596985
+TIMES : SCC:5 : 0.00897002220154
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 553
+=======
+
+SUMS (fk, lo, un, wr, re):	553	0	1	6	20	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 553 : 67937
+>>> PROGRESS 70/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #68
+=================================
+Summarizing function: show_serial_version : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 32	misses: 9
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	616	0	0	0	1	
+
+TIMES : FUN:616 : 0.0569159984589
+TIMES : SCC:68 : 0.0569260120392
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 616
+=======
+
+SUMS (fk, lo, un, wr, re):	616	0	0	0	1	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 616 : 84
+>>> PROGRESS 71/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #93
+=================================
+Summarizing function: esp_basic_init : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	357	0	0	0	7	
+
+TIMES : SCC:93 : 0.00127506256104
+TIMES : FUN:357 : 0.00126791000366
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 357
+=======
+
+SUMS (fk, lo, un, wr, re):	357	0	0	0	7	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 357 : 66689
+>>> PROGRESS 72/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #69
+=================================
+Summarizing function: autoconfig : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 52	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	617	0	1	2	10	
+
+TIMES : FUN:617 : 0.00944709777832
+TIMES : SCC:69 : 0.00945687294006
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 617
+=======
+
+SUMS (fk, lo, un, wr, re):	617	0	1	2	10	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 617 : 33625
+>>> PROGRESS 73/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #70
+=================================
+Summarizing function: init_waitqueue_head : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 29	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	38	0	0	2	0	
+
+TIMES : SCC:70 : 0.00045108795166
+TIMES : FUN:38 : 0.000442028045654
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 38
+=======
+
+SUMS (fk, lo, un, wr, re):	38	0	0	2	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 38 : 334
+>>> PROGRESS 74/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #76
+=================================
+Summarizing function: __constant_c_and_count_memset : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	68	0	0	1	0	
+
+TIMES : FUN:68 : 0.000622987747192
+TIMES : SCC:76 : 0.000632047653198
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 68
+=======
+
+SUMS (fk, lo, un, wr, re):	68	0	0	1	0	
+
+SS Sum:
+ -> 
+Extptr (5):
+  lval = (*s)
+
+SIZES: 68 : 154
+>>> PROGRESS 75/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #67
+=================================
+Summarizing function: espserial_init : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	151	0	1	103	32	
+
+TIMES : SCC:67 : 0.0462000370026
+TIMES : FUN:151 : 0.0461921691895
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 151
+=======
+
+SUMS (fk, lo, un, wr, re):	151	0	1	103	32	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 151 : 71500
+>>> PROGRESS 76/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #6
+=================================
+Summarizing function: init_module : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 42	misses: 6
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	126	0	1	103	32	
+
+TIMES : FUN:126 : 0.0057430267334
+TIMES : SCC:6 : 0.00575089454651
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 126
+=======
+
+SUMS (fk, lo, un, wr, re):	126	0	1	103	32	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 126 : 71667
+>>> PROGRESS 77/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #13
+=================================
+Summarizing function: up : esp-2.5.62.c
+-----
+doing symstate
+TIMES : SCC:13 : 0.000261068344116
+TIMES : FUN:46 : 0.000253915786743
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 46
+=======
+
+SUMS (fk, lo, un, wr, re):	46	0	1	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 46 : 135
+>>> PROGRESS 78/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #14
+=================================
+Summarizing function: down : esp-2.5.62.c
+-----
+doing symstate
+TIMES : SCC:14 : 7.70092010498e-05
+TIMES : FUN:44 : 7.08103179932e-05
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 44
+=======
+
+SUMS (fk, lo, un, wr, re):	44	1	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 44 : 135
+>>> PROGRESS 79/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #53
+=================================
+Summarizing function: __copy_from_user : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 133	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	106	0	0	1	0	
+
+TIMES : FUN:106 : 0.00142383575439
+TIMES : SCC:53 : 0.00143194198608
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 106
+=======
+
+SUMS (fk, lo, un, wr, re):	106	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 106 : 120
+>>> PROGRESS 80/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #52
+=================================
+Summarizing function: copy_from_user : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	119	0	0	1	0	
+
+TIMES : SCC:52 : 0.00100302696228
+TIMES : FUN:119 : 0.000997066497803
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 119
+=======
+
+SUMS (fk, lo, un, wr, re):	119	0	0	1	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 119 : 120
+>>> PROGRESS 81/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #12
+=================================
+Summarizing function: rs_write : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	400	0	2	4	9	
+
+TIMES : SCC:12 : 0.00357508659363
+TIMES : FUN:400 : 0.00356698036194
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 400
+=======
+
+SUMS (fk, lo, un, wr, re):	400	0	2	4	9	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 400 : 66613
+>>> PROGRESS 82/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #20
+=================================
+Summarizing function: rs_put_char : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 6	misses: 7
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	388	0	1	3	5	
+
+TIMES : FUN:388 : 0.00125694274902
+TIMES : SCC:20 : 0.00126314163208
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 388
+=======
+
+SUMS (fk, lo, un, wr, re):	388	0	1	3	5	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 388 : 32851
+>>> PROGRESS 83/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #32
+=================================
+Summarizing function: main : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	654	0	1	105	37	
+
+TIMES : SCC:32 : 0.00436282157898
+TIMES : FUN:654 : 0.00435400009155
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 654
+=======
+
+SUMS (fk, lo, un, wr, re):	654	0	1	105	37	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 654 : 105296
+>>> PROGRESS 84/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #81
+=================================
+Summarizing function: capable : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 144	misses: 6
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	83	0	0	1	3	
+
+TIMES : SCC:81 : 0.00170183181763
+TIMES : FUN:83 : 0.00169396400452
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 83
+=======
+
+SUMS (fk, lo, un, wr, re):	83	0	0	1	3	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 83 : 86656
+>>> PROGRESS 85/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #90
+=================================
+Summarizing function: clear_bit : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 2	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	4	0	0	0	0	
+
+TIMES : FUN:4 : 0.000235080718994
+TIMES : SCC:90 : 0.000271081924438
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 4
+=======
+
+SUMS (fk, lo, un, wr, re):	4	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 4 : 34
+>>> PROGRESS 86/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #78
+=================================
+Summarizing function: startup : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	360	0	1	14	25	
+
+TIMES : SCC:78 : 0.0772480964661
+TIMES : FUN:360 : 0.0772390365601
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 360
+=======
+
+SUMS (fk, lo, un, wr, re):	360	0	1	14	25	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 360 : 154303
+>>> PROGRESS 87/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #41
+=================================
+Summarizing function: set_esp_config : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 53	misses: 5
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	454	0	1	22	39	
+
+TIMES : SCC:41 : 0.0123009681702
+TIMES : FUN:454 : 0.0122909545898
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 454
+=======
+
+SUMS (fk, lo, un, wr, re):	454	0	1	22	39	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 454 : 289084
+>>> PROGRESS 88/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #75
+=================================
+Summarizing function: __copy_to_user : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 123	misses: 10
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	100	0	0	0	0	
+
+TIMES : SCC:75 : 0.00123715400696
+TIMES : FUN:100 : 0.0012309551239
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 100
+=======
+
+SUMS (fk, lo, un, wr, re):	100	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 100 : 34
+>>> PROGRESS 89/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #74
+=================================
+Summarizing function: copy_to_user : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 3	misses: 1
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	112	0	0	0	0	
+
+TIMES : SCC:74 : 0.000898122787476
+TIMES : FUN:112 : 0.000891923904419
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 112
+=======
+
+SUMS (fk, lo, un, wr, re):	112	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 112 : 34
+>>> PROGRESS 90/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #42
+=================================
+Summarizing function: get_esp_config : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	438	0	0	0	8	
+
+TIMES : SCC:42 : 0.00111198425293
+TIMES : FUN:438 : 0.00110387802124
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 438
+=======
+
+SUMS (fk, lo, un, wr, re):	438	0	0	0	8	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 438 : 32866
+>>> PROGRESS 91/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #43
+=================================
+Summarizing function: get_lsr_info : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	466	0	1	0	1	
+
+TIMES : FUN:466 : 0.00282001495361
+TIMES : SCC:43 : 0.00282597541809
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 466
+=======
+
+SUMS (fk, lo, un, wr, re):	466	0	1	0	1	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 466 : 33523
+>>> PROGRESS 92/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #44
+=================================
+Summarizing function: set_serial_info : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	444	0	1	19	33	
+
+TIMES : FUN:444 : 0.00951313972473
+TIMES : SCC:44 : 0.00952386856079
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 444
+=======
+
+SUMS (fk, lo, un, wr, re):	444	0	1	19	33	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 444 : 221565
+>>> PROGRESS 93/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #54
+=================================
+Summarizing function: set_modem_info : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 83	misses: 7
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	493	0	1	1	2	
+
+TIMES : SCC:54 : 0.00172710418701
+TIMES : FUN:493 : 0.00171804428101
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 493
+=======
+
+SUMS (fk, lo, un, wr, re):	493	0	1	1	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 493 : 66184
+>>> PROGRESS 94/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #55
+=================================
+Summarizing function: get_modem_info : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 5	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	476	0	1	0	2	
+
+TIMES : FUN:476 : 0.0917520523071
+TIMES : SCC:55 : 0.0917611122131
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 476
+=======
+
+SUMS (fk, lo, un, wr, re):	476	0	1	0	2	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 476 : 66059
+>>> PROGRESS 95/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #73
+=================================
+Summarizing function: get_serial_info : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 4	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	433	0	0	0	7	
+
+TIMES : FUN:433 : 0.000993967056274
+TIMES : SCC:73 : 0.00100111961365
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 433
+=======
+
+SUMS (fk, lo, un, wr, re):	433	0	0	0	7	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 433 : 32815
+>>> PROGRESS 96/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #40
+=================================
+Summarizing function: rs_ioctl : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	508	0	1	26	47	
+
+TIMES : FUN:508 : 0.0328459739685
+TIMES : SCC:40 : 0.0328550338745
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 508
+=======
+
+SUMS (fk, lo, un, wr, re):	508	0	1	26	47	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 508 : 431546
+>>> PROGRESS 97/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #58
+=================================
+Summarizing function: block_til_ready : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 160	misses: 8
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	585	0	1	3	15	
+
+TIMES : SCC:58 : 0.00665497779846
+TIMES : FUN:585 : 0.00664401054382
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 585
+=======
+
+SUMS (fk, lo, un, wr, re):	585	0	1	3	15	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 585 : 165893
+>>> PROGRESS 98/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #57
+=================================
+Summarizing function: esp_open : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 43	misses: 7
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	608	0	1	23	47	
+
+TIMES : SCC:57 : 0.024178981781
+TIMES : FUN:608 : 0.0241689682007
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 608
+=======
+
+SUMS (fk, lo, un, wr, re):	608	0	1	23	47	
+
+SS Sum:
+ -> 
+$SSTOP
+SIZES: 608 : 440054
+>>> PROGRESS 99/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #56
+=================================
+Summarizing function: f : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 79	misses: 7
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	650	0	1	23	47	
+
+TIMES : SCC:56 : 0.0106129646301
+TIMES : FUN:650 : 0.010605096817
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 650
+=======
+
+SUMS (fk, lo, un, wr, re):	650	0	1	23	47	
+
+SS Sum:
+ -> 
+Vval: 0
+SIZES: 650 : 440046
+>>> PROGRESS 100/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #89
+=================================
+Summarizing function: esp_break : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 68	misses: 3
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	502	0	1	0	3	
+
+TIMES : SCC:89 : 0.00202393531799
+TIMES : FUN:502 : 0.0020170211792
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 502
+=======
+
+SUMS (fk, lo, un, wr, re):	502	0	1	0	3	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 502 : 64748
+>>> PROGRESS 101/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #102
+=================================
+Summarizing function: list_empty : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 8	misses: 4
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	35	0	0	0	1	
+
+TIMES : SCC:102 : 0.000246047973633
+TIMES : FUN:35 : 0.000239849090576
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 35
+=======
+
+SUMS (fk, lo, un, wr, re):	35	0	0	0	1	
+
+SS Sum:
+ -> 
+Vval: (unsigned int )head->next == (unsigned int )head
+SIZES: 35 : 138
+>>> PROGRESS 102/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #101
+=================================
+Summarizing function: run_task_queue : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	222	0	0	0	0	
+
+TIMES : SCC:101 : 0.000809192657471
+TIMES : FUN:222 : 0.000804901123047
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 222
+=======
+
+SUMS (fk, lo, un, wr, re):	222	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 222 : 34
+>>> PROGRESS 103/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #100
+=================================
+Summarizing function: do_serial_bh : esp-2.5.62.c
+-----
+doing symstate
+Prev ldiffCache hits: 1	misses: 2
+
+doing lockset
+doing guarded access
+SUMS (fk, lo, un, wr, re):	356	0	0	0	0	
+
+TIMES : FUN:356 : 0.000424861907959
+TIMES : SCC:100 : 0.000432014465332
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: 356
+=======
+
+SUMS (fk, lo, un, wr, re):	356	0	0	0	0	
+
+SS Sum:
+ -> 
+$SSBOT
+SIZES: 356 : 34
+>>> PROGRESS 104/104 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+
+
+
+Beginning Thread Analysis:
+-----
+Expected # thread-creation site pairs: 1
+checking a thread-creation pair
+Prev ldiffCache hits: 0	misses: 1
+
+doing symstate
+Prev ldiffCache hits: 137	misses: 3
+
+doing symstate
+now checking thread roots: f, f
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+New race added to race reports
+now checking thread roots: f, f
+now checking thread roots: f, f
+now checking thread roots: f, f
+done with pair, sending notification
+completed all thread pairs
+****
+Possible race between access to:
+__this_module.unsafe @ esp-2.5.62.c:4437 and
+__this_module.unsafe @ esp-2.5.62.c:4437
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:4460] and
+	[esp-2.5.62.c:4460]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+__this_module.unsafe @ esp-2.5.62.c:4437 and
+__this_module.unsafe @ esp-2.5.62.c:4437
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:4460] and
+	[esp-2.5.62.c:4460]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+tmp_buf @ esp-2.5.62.c:7132 and
+tmp_buf @ esp-2.5.62.c:7132
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8622] and
+	[esp-2.5.62.c:8621, esp-2.5.62.c:8623]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+tmp_buf @ esp-2.5.62.c:7132 and
+tmp_buf @ esp-2.5.62.c:7132
+	Cluster ID: 1
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8622] and
+	[esp-2.5.62.c:8622]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+tty.driver_data @ esp-2.5.62.c:8896 and
+tty.driver_data @ esp-2.5.62.c:8896
+	Cluster ID: 2
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8619] and
+	[esp-2.5.62.c:8619]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1] and
+[REP: 1]
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8635, esp-2.5.62.c:8637] and
+	[esp-2.5.62.c:8635, esp-2.5.62.c:8637]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].blocked_open and
+[REP: 1].blocked_open
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8555, esp-2.5.62.c:8597] and
+	[esp-2.5.62.c:8555, esp-2.5.62.c:8597]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].count and
+[REP: 1].count
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8553, esp-2.5.62.c:8596, esp-2.5.62.c:8618] and
+	[esp-2.5.62.c:8553, esp-2.5.62.c:8596, esp-2.5.62.c:8618, esp-2.5.62.c:8633]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].flags and
+[REP: 1].flags
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7769, esp-2.5.62.c:7773, esp-2.5.62.c:7775, esp-2.5.62.c:7777, esp-2.5.62.c:7670, esp-2.5.62.c:8531, esp-2.5.62.c:8538, esp-2.5.62.c:8600] and
+	[esp-2.5.62.c:7756, esp-2.5.62.c:7769, esp-2.5.62.c:7773, esp-2.5.62.c:7775, esp-2.5.62.c:7777, esp-2.5.62.c:7603, esp-2.5.62.c:7660, esp-2.5.62.c:7662, esp-2.5.62.c:7664, esp-2.5.62.c:7666, esp-2.5.62.c:7670, esp-2.5.62.c:8511, esp-2.5.62.c:8513, esp-2.5.62.c:8515, esp-2.5.62.c:8521, esp-2.5.62.c:8523, esp-2.5.62.c:8527, esp-2.5.62.c:8531, esp-2.5.62.c:8536, esp-2.5.62.c:8538, esp-2.5.62.c:8541, esp-2.5.62.c:8559, esp-2.5.62.c:8572, esp-2.5.62.c:8574, esp-2.5.62.c:8583, esp-2.5.62.c:8600, esp-2.5.62.c:8633]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].flags and
+[REP: 1].flags
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7769, esp-2.5.62.c:7773, esp-2.5.62.c:7775, esp-2.5.62.c:7777, esp-2.5.62.c:7670, esp-2.5.62.c:8531, esp-2.5.62.c:8538, esp-2.5.62.c:8600] and
+	[esp-2.5.62.c:7769, esp-2.5.62.c:7773, esp-2.5.62.c:7775, esp-2.5.62.c:7777, esp-2.5.62.c:7670, esp-2.5.62.c:8531, esp-2.5.62.c:8538, esp-2.5.62.c:8600]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].ignore_status_mask and
+[REP: 1].ignore_status_mask
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7784, esp-2.5.62.c:7786, esp-2.5.62.c:7789] and
+	[esp-2.5.62.c:7784, esp-2.5.62.c:7786, esp-2.5.62.c:7789]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].ignore_status_mask and
+[REP: 1].ignore_status_mask
+	Cluster ID: 16
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7784, esp-2.5.62.c:7786, esp-2.5.62.c:7789] and
+	[esp-2.5.62.c:7786, esp-2.5.62.c:7789]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].pgrp and
+[REP: 1].pgrp
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8641] and
+	[esp-2.5.62.c:8527]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].pgrp and
+[REP: 1].pgrp
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8641] and
+	[esp-2.5.62.c:8641]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].read_status_mask and
+[REP: 1].read_status_mask
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7779, esp-2.5.62.c:7781, esp-2.5.62.c:7783, esp-2.5.62.c:7787, esp-2.5.62.c:7790] and
+	[esp-2.5.62.c:7779, esp-2.5.62.c:7781, esp-2.5.62.c:7783, esp-2.5.62.c:7787, esp-2.5.62.c:7790]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].read_status_mask and
+[REP: 1].read_status_mask
+	Cluster ID: 18
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7779, esp-2.5.62.c:7781, esp-2.5.62.c:7783, esp-2.5.62.c:7787, esp-2.5.62.c:7790] and
+	[esp-2.5.62.c:7781, esp-2.5.62.c:7783, esp-2.5.62.c:7787, esp-2.5.62.c:7790]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].session and
+[REP: 1].session
+	Cluster ID: 19
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8640] and
+	[esp-2.5.62.c:8523]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].session and
+[REP: 1].session
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8640] and
+	[esp-2.5.62.c:8640]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].timeout and
+[REP: 1].timeout
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:7767] and
+	[esp-2.5.62.c:7767]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].tty and
+[REP: 1].tty
+	Cluster ID: 20
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8620] and
+	[esp-2.5.62.c:7732, esp-2.5.62.c:7755, esp-2.5.62.c:7630, esp-2.5.62.c:7656, esp-2.5.62.c:7659]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(3)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+****
+Possible race between access to:
+[REP: 1].tty and
+[REP: 1].tty
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[esp-2.5.62.c:8620] and
+	[esp-2.5.62.c:8620]
+
+	Confidence: used PTA nodes lblSet(31, 31)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+	made empty at: :-1
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+(1)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8918 355868 w/ func: f
+(2)
+	Th. 1 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+	Th. 2 spawned: esp-2.5.62.c:8919 355913 w/ func: f
+
+
+$$$$$$
+Total Warnings: 21
+
+
+Printing Alias assumptions used by warnings
+-----
+nc	3	[REP: 1]#g/[REP: 1]#g	31	31
+nc	4	[REP: 1].blocked_open#g/[REP: 1].blocked_open#g	31	31
+nc	5	[REP: 1].count#g/[REP: 1].count#g	31	31
+nc	15	[REP: 1].flags#g/[REP: 1].flags#g	31	31
+nc	6	[REP: 1].flags#g/[REP: 1].flags#g	31	31
+nc	7	[REP: 1].ignore_status_mask#g/[REP: 1].ignore_status_mask#g	31	31
+nc	16	[REP: 1].ignore_status_mask#g/[REP: 1].ignore_status_mask#g	31	31
+nc	17	[REP: 1].pgrp#g/[REP: 1].pgrp#g	31	31
+nc	8	[REP: 1].pgrp#g/[REP: 1].pgrp#g	31	31
+nc	9	[REP: 1].read_status_mask#g/[REP: 1].read_status_mask#g	31	31
+nc	18	[REP: 1].read_status_mask#g/[REP: 1].read_status_mask#g	31	31
+nc	19	[REP: 1].session#g/[REP: 1].session#g	31	31
+nc	10	[REP: 1].session#g/[REP: 1].session#g	31	31
+nc	11	[REP: 1].timeout#g/[REP: 1].timeout#g	31	31
+nc	20	[REP: 1].tty#g/[REP: 1].tty#g	31	31
+nc	12	[REP: 1].tty#g/[REP: 1].tty#g	31	31
+writeState: Not needed for CIL PTA
+writeState: Not needed for Steens PTA
+Golden lvals hash stats (len, ents, sum/min/median/max bucket)
+	597	161	909	0	3	6	
+Golden lvals hash stats (len, ents, sum/min/median/max bucket)
+	173	0	0	0	0	0	
+Golden types hash stats (len, ents, sum/min/median/max bucket)
+	173	79	183	0	0	9	
+Golden compInfos hash stats (len, ents, sum/min/median/max bucket)
+	173	0	0	0	0	0	
+Elapsed time (secs): 0.928057
+Top heap size (words): 2873344
+Current heap size (words): 2562048
+Lifetime allocated bytes: 73138388.
+Collections -- minor: 42 major: 15 compactions: 4
+return value is 0
+ran 1 times
+cleared status file: /tmp/temp.2dk6PF
+Sun Aug 10 21:12:43 PDT 2008

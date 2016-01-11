@@ -38,11 +38,17 @@ let string_of_lval (lv:lval) : string =
 let string_of_loc (loc:location) : string =
   sprint buffsize (d_loc () loc)
 
+let string_of_pp (pp:prog_point) : string =
+  sprint buffsize (d_pp () pp)
+
 let string_of_stmt (s:stmt) : string =
   sprint buffsize (d_stmt () s)
 
 let string_of_instr (i:instr) : string =
   sprint buffsize (d_instr () i)
+
+let string_of_type (t:typ) : string =
+  sprint buffsize (d_type () t)
 
 
 (***************************************)
@@ -76,12 +82,13 @@ let stripSPRE = Str.regexp "[ ]+"
 let stripWS s =
   Str.global_replace stripSPRE " " (Str.global_replace stripWSRE " " s)
 
+let unrollType x = x (* Cil.unrollType x *)
 
 (* Strip the name parts of a function's arg list entry
  * How to strip comments? yes for some reason it prints comments
  *)
 let simplifyArgs ((name, typ, attrib) : string * typ * attributes) =
-  ("", (* Cil.unrollType *) typ, attrib)  
+  ("", unrollType typ, attrib)  
 
 
 (* Make a string out of a function type, stripping names from
@@ -93,13 +100,13 @@ let rec string_of_ftype (t:typ) =
         match argL with
           None -> 
             let modTFun = TFun 
-              ((* Cil.unrollType *) resT, argL, varArgP, atts) in
+              (unrollType resT, argL, varArgP, atts) in
             stripWS (sprint buffsize (printType noAP () modTFun))
         | Some l ->
             let argNoName = List.map simplifyArgs l in
             (* strip function attributes here too *)
             let modTFun = TFun 
-              ((* Cil.unrollType *) resT, Some argNoName, varArgP, atts) in
+              (unrollType resT, Some argNoName, varArgP, atts) in
             stripWS (sprint buffsize (printType noAP () modTFun))
       end
   | TPtr (t,_) ->
@@ -108,10 +115,10 @@ let rec string_of_ftype (t:typ) =
       string_of_ftype t
   | TNamed (tinfo,_) ->
       string_of_ftype tinfo.ttype
-  | _ -> 
+  | _ ->
       let normalTypString = (sprint buffsize (printType noAP () t)) in
       normalTypString
-        
+
 
 (* Make a string out of a call expression *)
 let string_of_cexp (callexp:exp) = 

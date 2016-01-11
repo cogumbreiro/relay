@@ -46,78 +46,126 @@
 
 open Cil
 open Pta_types
-open Pta_compile
-open Intrange
 open Fstructs
-open Simplehc
+open Pretty
 open Cilinfos
-open Strutil
 
+module IH = Inthash
+module HC = Simplehc
 module D = Cildump
-module U = Uf
-module CilPTA = Myptranal
-module FC = Filecache
 module L = Logging
-module Lv = Cil_lvals
-
-
+module CLv = Cil_lvals
+module PC = Pta_compile
 
 (******************** UTILs **********************)
 
+(** Choice of "set" *)
+module LVS = Iset.Make (
+  struct
+    type t = ptaLv
+    let compare a b = compareLv a b
+  end
+)
 
-(** Table of fun id -> funInfo *)
-let funTable = Hashtbl.create 101
 
-let getFunInfo (id:vid) : funInfo =
-  Hashtbl.find funTable id
+(**************** Debugging *****************)
 
-let isFunc id =
-  Hashtbl.mem funTable id
+(* What is considered a step in the algorithm *)
+type algoStep = ptaAssign 
+    (* TODO: know if it originates from function call / field assignment *)
+
+let stepsProcessed = ref 0
+
+let curStep = ref (makeAssign dummyLv dummyRv Cil.locUnknown)
+  
+module TrackedSteps = struct
+
+  type step = algoStep
+  let curStep = curStep
+
+  let dotNode n = 
+    ""
+      
+  let dotEdge (n1, n2) =
+    ""
+      
+  (* TODO: allow different kinds of steps to have a dumper *)
+  let dotSteps steps =
+    (* Hmm... how to actually connect the lvs and rvs as a graph?
+       need to interpret deref-stars and stuff?
+       Just print for now... *)
+    List.fold_left
+      (fun curDoc (assign : step) -> 
+         curDoc ++ text (string_of_assign assign) ++ line
+      ) nil steps 
+
+end
+
+type mergeHistory =
+    HNil
+  | HMerge of mergeHistory * mergeHistory * algoStep * int
+    (* old history, current step processed, and resulting label size *)
+
+let mergeHistories h1 h2 step finalSize =
+  HMerge (h1, h2, step, finalSize)
+
+let rec d_history h =
+  match h with
+    HNil -> nil
+  | HMerge (h1, h2, assign, size) ->
+      let next = Pretty.dprintf "%s (%d)\n" 
+        (string_of_assign assign) size in
+      let h1d = d_history h1 in
+      let h2d = d_history h2 in
+      if h1d = nil then
+        if h2d = nil then
+          next
+        else next ++ indent 2 (text "nil\n" ++ h2d)
+      else
+        if h2d = nil then
+          next ++ indent 2 (h1d ++ text "nil\n")
+        else
+          next ++ indent 2 (h1d ++ h2d)
+
+let hardCodedHistoryFile = "temppta.history"
 
 (***************** Ops ************************************)
 
+(* TODO: have finer levels of type filtering *)
+let filterTypes = ref true
+
+let setFilter what =
+  filterTypes := what
 
 (** Return true if the given type matches the varinfo type of 
     the given vid *)
-let funTypesEq (typ:string) (id:vid) =
-  try
-    let finfo = getFunInfo id in
-     typ = finfo.funType
-    (* Ciltools.compare_type typ finfo.funType.node == 0 *)
-  with Not_found ->
-    false
+let funTypesEq (typ:ctyp) (id:vid) =
+  if !filterTypes then
+    try
+      let finfo = PC.getFunInfo id in
+      (* compatibleTypes typ finfo.funType *)
+      compatibleTypesNoUnroll typ finfo.funType
+    with Not_found ->
+      false
+  else true
 
 
-(** true if the lval is based on a global but not a function... *)
-let rec isGlobalLv (lv : ptaLv) : bool =
-  let host, _ = lv.node in
-  match host.node with
+let matchFunPtr typ lv =
+  let host, _ = lv in (* no field-based info for now *)
+  match host.HC.node with
     PVar v ->
-      (match v.node with
-         PGlobal (id, _) -> not (isFunc id)
-       | _ -> false
+      (match v.HC.node with
+         PGlobal (id, _) ->
+           if (funTypesEq typ id) then Some id
+           else None
+       | _ -> None  (* Mismatch for function *)
       )
-  | PDeref ptrRv ->
-      isGlobalRv ptrRv
+  | _ -> None (* Mismatch for function *)
 
-and isGlobalRv (rv : ptaRv) : bool = 
-  match rv.node with
-    PLv lv -> 
-      isGlobalLv lv
-  | PAddrOf lv ->
-      isGlobalLv lv
-  | PCast (_, rv) ->
-      isGlobalRv rv
 
 (** true if the set of lvals has an lval based on a global *)
 let hasGlobal lvs =
-  LVS.exists isGlobalLv lvs
-
-let rec getLval rv =
-  match rv.node with
-    PLv l -> l
-  | PCast (_, r) -> getLval r
-  | PAddrOf _ -> raise Not_found
+  LVS.exists PC.isGlobalLv lvs
 
 
 module IDS = IntSet
@@ -125,13 +173,17 @@ module IDS = IntSet
 
 
 (*******************************************************)
-  
-module Solver = struct
+
+module MakeSolver (U:Uf.UNIONFIND) = struct
+
+  (* Too bad we can't extend the ptNodeInfo type. Now we need the
+   * debugging info in the type all the time =( *)
 
   type ptNodeInfo = {
     mutable ptTarget : ptaVal;      (* node this guy points to *)
     mutable labels : LVS.t;         (* lvals this node represents *)
-    mutable globalPointsTo : bool;  (* true if a global ptr points to this *) 
+    mutable globalPointsTo : bool;  (* true if a global ptr points to this *)
+    mutable history : mergeHistory; (* debugging *)
   }
       
   and ptaVal = 
@@ -144,7 +196,7 @@ module Solver = struct
 
   (***************** The state ******************************)
 
-  let lvToNode = ref (LvalH.create 101)
+  let lvToNode = LvalH.create 101
 
   let changed = ref false
     
@@ -164,8 +216,10 @@ module Solver = struct
     let ni2 = U.deref n2 in
     let chosenI = U.union (n1,n2) in
     chosenI.labels <- LVS.union ni1.labels ni2.labels;
-    chosenI.globalPointsTo <- ni1.globalPointsTo or ni2.globalPointsTo
-      
+    chosenI.globalPointsTo <- ni1.globalPointsTo or ni2.globalPointsTo;
+    (* indicate that this is due to a cycle collapse? *)
+    chosenI.history <- mergeHistories ni1.history ni2.history
+      !curStep (LVS.cardinal chosenI.labels)
 
   let rec mergeRest startN curN =
     let ni = U.deref curN in
@@ -216,6 +270,8 @@ module Solver = struct
   let rec combineNodeInfo (curPath1, curPath2) (n1,n2) =
     let ni1 = U.deref n1 in
     let ni2 = U.deref n2 in
+    let h1 = ni1.history in
+    let h2 = ni2.history in
     let newTarg = 
       match ni1.ptTarget, ni2.ptTarget with
         PTBot, _ -> 
@@ -257,32 +313,39 @@ module Solver = struct
     (* finish unification *)
     let newLabels = LVS.union ni1.labels ni2.labels in
     let newGPF = ni1.globalPointsTo or ni2.globalPointsTo in
+    let newHistory = mergeHistories h1 h2 (* orig histories *) 
+      !curStep (LVS.cardinal newLabels) in
     changed := true;
     { ptTarget = newTarg;  
       labels = newLabels;
       globalPointsTo = newGPF;
+      history = newHistory;
     }
 
   and unifyNodes (curPath1,curPath2) n1 n2 =
+    (* How do i know they were not the same as before? *)
+    let oldChanged = !changed in
+    (* changed := false *)     
     (* Assume unify checks if they are the same before trying to unify *)
-    U.unify (combineNodeInfo (curPath1,curPath2)) (n1,n2)
-
+    let result = U.unify (combineNodeInfo (curPath1,curPath2)) (n1,n2) in
+    result
 
   (** Make a fresh node that represents a unique null *)
   let freshNull () : ptNode =
     U.uref { ptTarget = PTBot;
              labels = LVS.empty;
              globalPointsTo = false;
+             history = HNil;
            }
 
   (** Get the new node for the lval x *)
   let rec getNode (lv:ptaLv) : ptNode =
-    let host, _ = lv.node in
-    match host.node with
+    let host, _ = lv in
+    match host.HC.node with
       PVar _ -> begin
-        let lvNoOff = (lv_of_hostOff host NoOffset) in
+        let lvNoOff = makeLv (host, noOffset) in
         try
-          LvalH.find !lvToNode lvNoOff
+          LvalH.find lvToNode lvNoOff
         with Not_found ->
           let newNode = freshNode lvNoOff in
           newNode
@@ -291,8 +354,8 @@ module Solver = struct
     | PDeref (rv) -> begin
         (* current node should be the target of the pointer lv *)
         try
-          let phost, _ = (getLval rv).node in (* TODO: use offset? *)
-          let ptrNoOff = (lv_of_hostOff phost NoOffset) in
+          let phost, _ = (getLval rv) in (* TODO: use offset? *)
+          let ptrNoOff = makeLv (phost, noOffset) in
           let ptrNode = getNode ptrNoOff in
           let pInfo = U.deref ptrNode in
           match pInfo.ptTarget with
@@ -301,15 +364,17 @@ module Solver = struct
           | PTSelf ->
               ptrNode
           | PTBot ->
-              (* make up a node for target, and make ptr point to it *)
-              let targNoOff = (lv_of_hostOff host NoOffset) in
-              let node = freshNode targNoOff in
-              pInfo.ptTarget <- PTRef node;
-              let nInfo = U.deref node in
-              nInfo.globalPointsTo <- 
-                (nInfo.globalPointsTo) or 
+              (* get the node for target, and make ptr point to it *)
+              let targNoOff = makeLv (host, noOffset) in
+              let targNode = 
+                try LvalH.find lvToNode targNoOff 
+                with Not_found -> freshNode targNoOff in
+              pInfo.ptTarget <- PTRef targNode;
+              let targInfo = U.deref targNode in
+              targInfo.globalPointsTo <- 
+                (targInfo.globalPointsTo) or 
                 (hasGlobal pInfo.labels);
-              node
+              targNode
         with Not_found ->
           failwith "getNode given an AddrOf thing\n"
       end
@@ -320,22 +385,35 @@ module Solver = struct
       U.uref { ptTarget = PTBot;
                labels = LVS.empty;     (* label set by AddrOf assignments *)
                globalPointsTo = false;
+               history = HNil;
              } in
-    LvalH.add !lvToNode x newNode;
+    if (LvalH.mem lvToNode x) 
+    then failwith "called freshNode on an lval w/ a node"
+    else LvalH.replace lvToNode x newNode;
     newNode
 
   (***************** Assignment constraints ****************)
 
+  let recordStep step =
+    incr stepsProcessed;
+    curStep := step
+
   (** handle constraints due to an assignment *)
-  let rec doAssign (lhs : ptaLv) (rhs : ptaRv) =
+  let rec doAssign ({lhs = lhs; rhs = rhs;} as assign) =
+    recordStep assign;
+
     (* Make lhs point to rTarg (also) *)
     let assignToLeft rTarg =
       let lhsN = getNode lhs in
       let lhsNi = U.deref lhsN in
       match lhsNi.ptTarget with
         PTBot ->
+          let newTarg = PTRef rTarg in
+          let newHistory = mergeHistories lhsNi.history HNil !curStep
+            (LVS.cardinal lhsNi.labels) in
           let newLeft = { lhsNi with
-                            ptTarget = PTRef rTarg;
+                            ptTarget = newTarg;
+                            history = newHistory;
                         } in
           changed := true;
           U.update (lhsN, newLeft)
@@ -344,25 +422,37 @@ module Solver = struct
       | PTSelf ->
           unifyNodes ([], []) lhsN rTarg
     in
-    match rhs.node with
+    match rhs.HC.node with
       PAddrOf (lv) -> begin
-        let host, _ = lv.node in
-        match host.node with
+        let host, _ = lv in
+        match host.HC.node with
           PVar _ ->
             (* get node of target lv and make a pointer to it *)
             let rTarg = getNode lv in
             let rInfo = U.deref rTarg in
+            let newGP = rInfo.globalPointsTo or (PC.isGlobalLv lhs) in
+            let newLabels, newHist = 
+              if not (LVS.mem lv rInfo.labels) then begin
+                changed := true;
+                let newLabels = LVS.add lv rInfo.labels in
+                (newLabels,
+                 mergeHistories rInfo.history HNil !curStep 
+                   (LVS.cardinal newLabels))
+              end else
+                (rInfo.labels, rInfo.history)
+            in
             let newInfo = 
               { rInfo with
-                  labels = LVS.add lv rInfo.labels;
-                  globalPointsTo = rInfo.globalPointsTo or (isGlobalLv lhs);
+                  labels = newLabels;
+                  globalPointsTo = newGP;
+                  history = newHist;
               } in
             U.update (rTarg, newInfo);
             (* then join with old lhs contents *)
             assignToLeft rTarg
             
         | PDeref r -> (* copy pointer... need to be more careful w/ offsets *)
-            doAssign lhs r
+            doAssign { assign with rhs = r; } 
       end
 
     | PLv (lv) -> begin
@@ -372,8 +462,11 @@ module Solver = struct
         match rhsNi.ptTarget with
           PTBot ->
             let nullTarget = freshNull () in
+            let newHistory = mergeHistories rhsNi.history HNil !curStep
+              (LVS.cardinal rhsNi.labels) in
             let newRight = { rhsNi with
                                ptTarget = PTRef (nullTarget);
+                               history = newHistory;
                            } in
             U.update (rhsN, newRight);
             assignToLeft nullTarget
@@ -384,52 +477,39 @@ module Solver = struct
       end
 
     | PCast (_, r) -> 
-        doAssign lhs r
+        doAssign { assign with rhs = r; } 
 
   (***************** Function Call constraints ****************)
 
-
-  (** Generic way of derefencing a pointer *)
-  let derefPtr ptrLv filter : LVS.t =
+  let lvToIdFilter filter lvs =
+    LVS.fold (fun lv cur -> 
+                match filter lv with
+                  Some id -> IDS.add id cur
+                | None -> cur) lvs IDS.empty
+      
+  (** Generic way of derefencing a pointer, and getting target variable ids *)
+  let derefPtrVarId ptrLv filter : IDS.t =
     let ptrNode = getNode ptrLv in
     let ptrInfo = U.deref ptrNode in
     match ptrInfo.ptTarget with
       PTBot ->
-        LVS.empty
+        IDS.empty
     | PTRef targ ->
         let targInfo = U.deref targ in
-        LVS.filter filter targInfo.labels
+        lvToIdFilter filter targInfo.labels
     | PTSelf ->
-        LVS.filter filter ptrInfo.labels
+        lvToIdFilter filter ptrInfo.labels
 
 
   (** Return a list of target fun ids for the given ptr *)
   let resolveFPs typ ptrLv : IDS.t =
-    let lvs = derefPtr ptrLv 
-      (fun funLv -> let host, _ = funLv.node in (* no field info for now *)
-       match host.node with
-         PVar v ->
-           (match v.node with
-              PGlobal (id, _) ->
-                funTypesEq typ id
-            | _ -> false  (* Mismatch for function *)
-           )
-       | _ -> false (* Mismatch for function *)
-      ) in
-    (* Map LV set to ID set... *)
-    LVS.fold (fun lv res -> let host, _ = lv.node in
-              match host.node with
-                PVar v ->
-                  (match v.node with
-                     PGlobal (id, _) -> IDS.add id res
-                   | _ -> res)
-              | _ -> res) lvs IDS.empty
+    derefPtrVarId ptrLv (matchFunPtr typ)
 
 
   (** Return a list of fun ids *)
   let resolveFuns typ callLv : vid list =
-    let host, _ = callLv.node in
-    match host.node with
+    let host, _ = callLv in
+    match host.HC.node with
       PDeref ptrExp ->
         (* Indirect call *)
         (try
@@ -440,7 +520,7 @@ module Solver = struct
            []
         )
     | PVar v -> 
-        (match v.node with
+        (match v.HC.node with
            PGlobal (id, _) -> (* Direct call *)
              [id]
          | _ -> (* ignore *)
@@ -449,55 +529,174 @@ module Solver = struct
         )
 
   let getFormal fid index = 
-    let finfo = getFunInfo fid in
+    let finfo = PC.getFunInfo fid in
     List.nth finfo.funFormals index
-      
-  let doCall (cinfo, index, actualExp) =
+
+  let host_of_formal fid paramIndex =
+    let f = getFormal fid paramIndex in
+    makeHost (PVar f)
+
+  let host_of_ret fid =
+    makeHost (PVar (makeVar (PRet fid)))
+
+  (** Handle parameter passing for function with id [fid] *)
+  let handleCallArg loc fid (actualExp, paramIndex) =
+    if (paramIndex <> retIndex ) then
+      try 
+        let formal = makeLv (host_of_formal fid paramIndex, noOffset) in
+        List.iter (fun actual -> 
+                     let assign = makeAssign formal actual loc in
+                     doAssign assign) actualExp
+      with 
+        Not_found ->
+          L.logError ("PTA: doCall can't find func info? " ^
+                        (string_of_int fid))
+      | Failure _ ->
+          L.logError ("PTA: doCall can't handle varargs? " ^
+                        (string_of_int fid))
+    else
+      let abstractRet = 
+        makeRv (PLv (makeLv (host_of_ret fid, noOffset))) in
+      List.iter
+        (fun retRv -> match retRv.HC.node with
+           PLv lv ->
+             let assign = makeAssign lv abstractRet loc in
+             doAssign assign
+         | _ -> ()
+        ) actualExp
+
+  let doCallFun args loc fid =
+    List.iter (handleCallArg loc fid) args
+
+  let doCall (cinfo, args) =
     List.iter 
       (fun callLv ->
          let funs = resolveFuns cinfo.ctype callLv in
-         List.iter 
-           (fun fid ->
-              if (index <> retIndex ) then
-                try 
-                  let formal = lv_of_hostOff 
-                    (makeHost (PVar (getFormal fid index))) NoOffset  in
-                  List.iter 
-                    (fun actualLv -> doAssign formal actualLv) actualExp
-                with 
-                  Not_found
-                | Failure _ ->
-                    L.logError ("PTA: doCall can't find func info? " ^
-                                  (string_of_int fid))
-                      (* or vararg indexing unsoundness? *)
-              else
-                let abstractRet = 
-                  makeRv 
-                    (PLv (lv_of_hostOff 
-                            (makeHost (PVar (makeVar (PRet fid))))
-                               NoOffset)) in
-                List.iter
-                  (fun retRv ->
-                     match retRv.node with
-                       PLv lv ->
-                         doAssign lv abstractRet
-                     | _ ->
-                         ()
-                  ) actualExp 
-           ) funs
+         List.iter (doCallFun args cinfo.cloc) funs
       ) cinfo.cexp
+
+  let init root =
+    LvalH.clear lvToNode
+
+  let printStart base complex calls pseudo =
+    Printf.printf "base assigns: %d\n" (VarH.length base);
+    Printf.printf "complex assigns: %d\n" (VarH.length complex);
+    Printf.printf "calls assigns: %d\n" (VarH.length calls)
+
+  let printStatus () =
+    Printf.printf "Iterating -- steps done: %d\n" !stepsProcessed;
+    flush stdout
+
+  let printDone () =
+    Printf.printf "Finished -- steps done: %d\n" !stepsProcessed;
+    flush stdout
+
+  module NH = Hashtbl.Make (
+    struct 
+      type t = ptNodeInfo
+      let equal = (==)
+      let hash = Hashtbl.hash
+    end )
+
+  let printHistories () =
+    print_string "Merge histories:\n====================\n\n";
+    let visited = NH.create 0 in
+    LvalH.iter 
+      (fun lv node -> 
+        let info = U.deref node in
+        if NH.mem visited info then
+          Printf.printf "%s rep. visited\n\n" (string_of_ptaLv lv)
+        else begin
+          NH.add visited info ();
+          Printf.printf "%s:\n%s\n" 
+            (string_of_ptaLv lv) (sprint 80 (d_history info.history));
+       end
+      ) lvToNode 
+
+  let saveHistories fname =
+    print_string "saving merge histories\n";
+    flush stdout;
+    let mapping = LvalH.create (LvalH.length lvToNode) in
+    LvalH.iter
+      (fun lv node ->
+        let info = U.deref node in
+        LvalH.add mapping lv info.history
+      ) lvToNode;
+    let out_chan = open_out_bin fname in
+    Marshal.to_channel out_chan mapping [Marshal.Closures];
+    close_out out_chan
+
+  let loadHistories fname =
+    let in_chan = open_in_bin fname in
+    let mapping = Marshal.from_channel in_chan in
+    close_in in_chan;
+    mapping
+
+  let solve root =
+    PC.loadFuncInfo root; (* Just in case *)
+
+    changed := true;
+    (* Assume one-file mode... TODO: check *)
+    let filename = PC.getConstraintFile root in
+    let _, baseAss, complexAss, calls, pseudo = PC.loadFor filename in
+    let baseAss = PC.rehashAssigns baseAss in
+    let complexAss = PC.rehashAssigns complexAss in
+    let calls = PC.rehashCalls calls in
+
+    printStart baseAss complexAss calls pseudo;
+
+    while !changed do
+      printStatus ();
+      changed := false;
+      VarH.iter 
+        (fun vinfo assList ->
+           List.iter 
+             (fun assign -> 
+                doAssign assign) assList
+        ) baseAss;
+      
+      VarH.iter
+        (fun vinfo assList ->
+           List.iter 
+             (fun assign -> 
+                doAssign assign) assList
+        ) complexAss;
+      
+      VarH.iter
+        (fun vinfo callList ->
+           List.iter doCall callList
+        ) calls;
+
+(*      if VarH.length pseudo <> 0 then
+        failwith "Steens: not to handle temp vars"
+      ;
+*)
+    done;
+    printDone ();
+    saveHistories (Filename.concat root hardCodedHistoryFile)
+
 
 end
 
 
 (******* Finalize and save solutions **********)
 
+let aaName = "steens"
+
 let getResultsFilename (root : string) =
-  Filename.concat root ".pta_results"
+  Filename.concat root (".pta_results." ^ aaName)
 
 
+module U = Uf.NotTracked
+module Solver = MakeSolver (U)
+
+
+(* TODO: parameterize finalizer w/ solver... kind of funky to do
+   so right now because we are going to redefine types in Final,
+   based on the types in Solver. Also, need to make sure
+   that Final uses the same Uf module *)
 module Final =
-struct 
+struct
 
   type nodeRef = int
 
@@ -528,17 +727,17 @@ struct
       LVS.equal a.Solver.labels b.Solver.labels
 
   let hashNode n =
-    Hashtbl.hash n
+    Hashtbl.hash_param 16 32 n
 
   module NH = Hashtbl.Make (
     struct
       type t = Solver.ptNodeInfo
-      let equal = eqNode
+      let equal = (==) (* eqNode *)
       let hash = hashNode
     end )
+    
 
-
-  let oldNodeToID = NH.create 107 
+  let oldNodeToID = ref (NH.create 107)
 
   (* New node infos + their IDs *)
 
@@ -547,15 +746,18 @@ struct
   let idToNode = ref (IH.create 107)
     
   let lvToID = ref (LvalH.create 107)
-    
+
+  let clearOldNodeToID sizeHint =
+    oldNodeToID := NH.create sizeHint
+
   let rec convertNode n = 
     let ni = U.deref n in
     try
-      NH.find oldNodeToID ni
+      NH.find !oldNodeToID ni
     with Not_found ->
       let id = !idCounter in
       incr idCounter;
-      NH.add oldNodeToID ni id;
+      NH.add !oldNodeToID ni id;
       let newNode = 
         { finalLabels = ni.Solver.labels;
           finalGReach = false; (* just recompute this from markGlobalReach *)
@@ -567,6 +769,8 @@ struct
       id
 
   let markGlobalReach () =
+    print_string "Marking global reachability\n";
+    flush stdout;
     let visitStack = IH.create 17 in
     let rec visit g id = 
       (if (IH.mem visitStack id) then
@@ -578,7 +782,7 @@ struct
             let newG = 
               if (g) then g
               else hasGlobal node.finalLabels in
-            node.finalGReach <- newG;
+            node.finalGReach <- node.finalGReach || newG;
             match node.finalTarget with
               FBot 
             | FSelf ->
@@ -593,22 +797,32 @@ struct
     LvalH.iter 
       (fun lv id ->
          IH.clear visitStack;
-         visit (isGlobalLv lv) id
-      ) !lvToID
+         visit (PC.isGlobalLv lv) id
+      ) !lvToID;
+    print_string "Done marking global reachability\n";
+    flush stdout
 
   let convertTable () =
+    print_string "Converting Steens results to be serializable\n";
+    flush stdout;
     LvalH.iter 
       (fun lv oldN ->
-         LvalH.replace !lvToID lv (convertNode oldN))
-      !Solver.lvToNode
+         LvalH.replace !lvToID lv (convertNode oldN)
+      )
+      Solver.lvToNode;
+    print_string "Done converting\n";
+    flush stdout
 
   (** Finalize table, then save table to file *)
   let saveAll (root : string) =
-    NH.clear oldNodeToID;
+    let oldBindings = LvalH.length Solver.lvToNode in
+    clearOldNodeToID oldBindings;
+
     convertTable ();
     markGlobalReach ();
-    NH.clear oldNodeToID;
-    LvalH.clear !Solver.lvToNode;
+
+    clearOldNodeToID 0;
+    LvalH.clear Solver.lvToNode;
 
     let outName = getResultsFilename root in
     let out_chan = open_out_bin outName in
@@ -629,16 +843,16 @@ struct
   (** Use the final table to get nodes associated w/ an lval.
       May raise Not_found *)
   let rec getNode lv =
-    let host, _ = lv.node in
-    match host.node with
+    let host, _ = lv in
+    match host.HC.node with
       PVar _ -> 
-        let lvNoOff = (lv_of_hostOff host NoOffset) in
+        let lvNoOff = makeLv (host, noOffset) in
         LvalH.find !lvToID lvNoOff
         
     | PDeref (rv) ->
         (* current node should be the target of the pointer lv *)
-        let host, _ = (getLval rv).node in
-        let lvNoOff = (lv_of_hostOff host NoOffset) in
+        let host, _ = getLval rv in
+        let lvNoOff = makeLv (host, noOffset) in
         let ptrNode = getNode lvNoOff in
         let ptrInfo = derefID ptrNode in
         (match ptrInfo.finalTarget with
@@ -649,24 +863,23 @@ struct
          | FBot ->
              raise Not_found )
 
+  let accumulateTargets labels filter =
+    LVS.fold 
+      (fun funLv res ->
+         match filter funLv with
+           None -> res
+         | Some id -> IDS.add id res
+      ) labels IDS.empty
+
 
   (** Return a list of target fun ids for the given ptr *)
   let resolveFPs typ ptrLv : IDS.t =
     let accumulateTargets labels =
       LVS.fold 
         (fun funLv res ->
-           let host, _ = funLv.node in (* no field-based info for now *)
-           match host.node with
-             PVar v ->
-               (match v.node with
-                  PGlobal (id, _) ->
-                    if (funTypesEq typ id) then (* could use t also *) 
-                      IDS.add id res
-                    else
-                      res
-                | _ -> res  (* Mismatch for function *)
-               )
-           | _ -> res (* Mismatch for function *)
+           match matchFunPtr typ funLv with
+             Some id -> IDS.add id res
+           | None -> res
         ) labels IDS.empty in
     let ptrNode = getNode ptrLv in
     let ptrInfo = derefID ptrNode in
@@ -686,10 +899,10 @@ struct
     let accumulateTargets labels =
       LVS.fold 
         (fun funLv res ->
-           let host, _ = funLv.node in
-           match host.node with
+           let host, _ = funLv in
+           match host.HC.node with
              PVar v -> 
-               (match v.node with
+               (match v.HC.node with
                   PGlobal (id, _) 
                 | PLocal (id, _) ->
                     IDS.add id res
@@ -730,6 +943,9 @@ struct
     | FRef n ->
         nodePointsTo n2 n
 
+  let location_alias n1 n2 =
+    n1 = n2
+
   let compare n1 n2 =
     n1 - n2
 
@@ -748,7 +964,7 @@ struct
         raise Not_found
     | FSelf -> node
 
-  (* TODO: convert to REACHABLE from global (reflexive/transitive) *)
+  (* reachable from global (reflexive/transitive) *)
   let reachableFromG node =
     let ni = derefID node in
     ni.finalGReach
@@ -756,11 +972,19 @@ struct
   let string_of node =
     ("[REP: " ^ (string_of_int node) ^ "]")
 
-  let size_of node =
+  let label_size node =
     let ni = derefID node in
     let s = LVS.cardinal ni.finalLabels in
-    if (s == 0 && ni.finalTarget == FSelf) then 66667 (* TODO use tag *)
-    else s
+(*    if (s == 0 && ni.finalTarget == FSelf) then 66667 (* TODO use tag *)
+    else  *)
+      s
+
+  let pts_size node =
+    let ni = derefID node in
+    match ni.finalTarget with
+      FRef n -> label_size n
+    | FSelf -> label_size node
+    | FBot -> 0
 
   let reachableFrom n srcs =
     let rec reachable n s visited =
@@ -784,38 +1008,18 @@ end
 (********** Iterate through all files, solve & save **********)
 
 module FPCS = Set.Make(
-  struct
+ struct
     type t = ptaCall
     let compare = compareCall
   end
 )
   
-  
-let isFPCall ({cexp = ce;}, _, _) =
-  List.exists 
-    (fun ptaLv ->
-       let host, _ = ptaLv.node in
-       match host.node with
-         PDeref _ -> true
-       | _ -> false
-    ) ce
-    
 
 (** Load all the assignments and calls and process *)
 let analyzeAll (root : string) (fresh:bool) =
 
   (* Load info for each function *)
-  print_string "Loading function info\n";
-  flush stdout;
-  Filetools.walkDirSimple
-    (fun filename ->
-       if (Filename.check_suffix filename ".pta") then
-         let funs, _, _, _ = loadState filename in
-         List.iter 
-           (fun finfo ->
-              Hashtbl.replace funTable finfo.funId finfo
-           ) (rehashFuns funs)
-    ) root;
+  PC.loadFuncInfo root;
 
   (* Decide to process assignments or use old results *)
   let oldFile = getResultsFilename root in
@@ -827,39 +1031,9 @@ let analyzeAll (root : string) (fresh:bool) =
   end
   else begin
     (* Solve and get fresh results *)
-    print_string "Processing assignments\n";
+    print_string "Processing constraints\n";
     flush stdout;
-
-    (* Then process assignment constraints *)
-    Solver.changed := true;
-    while !Solver.changed do
-      print_string "Iterating\n";
-      flush stdout;
-      Solver.changed := false;
-      Filetools.walkDirSimple
-        (fun filename ->
-           if (Filename.check_suffix filename ".pta") then
-             let _, baseAss, complexAss, calls = loadState filename in
-             VarH.iter 
-               (fun vinfo assList ->
-                  List.iter 
-                    (fun (lhs, rhs) -> Solver.doAssign lhs rhs) assList
-               ) (rehashAssigns baseAss);
-             
-             VarH.iter
-               (fun vinfo assList ->
-                  List.iter 
-                    (fun (lhs, rhs) -> Solver.doAssign lhs rhs) assList
-               ) (rehashAssigns complexAss);
-             
-             VarH.iter
-               (fun vinfo callList ->
-                  List.iter 
-                    (fun call -> Solver.doCall call) callList
-               ) (rehashCalls calls)
-        ) root;
-    done;
-
+    Solver.solve root;
     Final.saveAll root;
     print_string "PTA Simple analysis done\n";
     flush stdout
@@ -874,15 +1048,17 @@ let analyzeAll (root : string) (fresh:bool) =
 let resolve_funptr (e:Cil.exp) : vid list =
   let e_typ = 
     try 
-      Lv.typeAfterDeref e    (* if function pointer is given *)
-    with Not_found ->
-      Lv.typeOfUnsafe e in   (* if function pointer deref is given *)
-  let lv_exps = analyze_exp e in
+      CLv.typeAfterDeref e    (* if function pointer is given *)
+    with CLv.TypeNotFound ->
+      L.logError "Pta_fi_eq: resolve_funptr not given a pointer";
+      CLv.typeOfUnsafe e in   (* if function pointer deref is given *)
+  let e_typ = cil_type_to_ptype e_typ in
+  let lv_exps = PC.analyze_exp e in
   let idSet = List.fold_left
     (fun results rv ->
        try 
          let ptrLv = getLval rv in 
-         let fids = Final.resolveFPs (D.string_of_ftype e_typ) ptrLv in
+         let fids = Final.resolveFPs e_typ ptrLv in
          IDS.union results fids
        with Not_found ->
          results
@@ -912,14 +1088,14 @@ let deref_lvs_main lvs =
 (** Return the base lvals that this expression can point to. 
     TODO return varinfo * offset pair. May raise Not_found *) 
 let deref_lval (lv:Cil.lval) = 
-  let lvs = analyze_lval lv in
+  let lvs = PC.analyze_lval lv in
   deref_lvs_main lvs
 
 
 (** Return the base lvals that this expression can point to.
     May raise Not_found *) 
 let deref_exp (e:Cil.exp) =
-  let lv_exps = analyze_exp e in
+  let lv_exps = PC.analyze_exp e in
   let lvs = List.fold_left 
     (fun results rv ->
        try 
@@ -932,8 +1108,8 @@ let deref_exp (e:Cil.exp) =
 
 (** True if the two ptr expressions may point to the same memory cell. *)
 let may_alias (e1:Cil.exp) (e2:Cil.exp) : bool =
-  let lv_exps1 = analyze_exp e1 in
-  let lv_exps2 = analyze_exp e2 in
+  let lv_exps1 = PC.analyze_exp e1 in
+  let lv_exps2 = PC.analyze_exp e2 in
   List.exists 
     (fun ptrRv1 ->
        try 
@@ -955,7 +1131,7 @@ let node_points_to = Final.nodePointsTo
 
   
 let lvals_point_to lvs v : bool =
-  let targ = lv_of_hostOff (host_of_var v) NoOffset in
+  let targ = makeLv (PC.host_of_var v, noOffset) in
   let targNode = Final.getNode targ in
   List.exists 
     (fun ptrLv ->
@@ -968,13 +1144,13 @@ let lvals_point_to lvs v : bool =
 
 
 let lval_points_to lv v : bool =
-  let lvs = analyze_lval lv in
+  let lvs = PC.analyze_lval lv in
   lvals_point_to lvs v
 
 
 (** True if the ptr expressions may point the memory cell of the var *)
 let points_to (e:Cil.exp) (v:Cil.varinfo) : bool =
-  let lv_exps = analyze_exp e in
+  let lv_exps = PC.analyze_exp e in
   let lvs = List.fold_left 
     (fun l ptrRv -> try getLval ptrRv :: l with Not_found -> l) [] lv_exps in
   lvals_point_to lvs v
@@ -982,7 +1158,7 @@ let points_to (e:Cil.exp) (v:Cil.varinfo) : bool =
 
 (** True if lvalue is reachable from a global pointer *)
 let reachableFromG (lval:Cil.lval) =
-  let lvs = analyze_lval lval in
+  let lvs = PC.analyze_lval lval in
   List.exists (fun lv ->
                  let node = Final.getNode lv in
                  Final.reachableFromG node
@@ -1018,7 +1194,7 @@ module Abs = struct
       ) [] lvs
 
   let deref_exp e : t list =
-    let lv_exps = analyze_exp e in
+    let lv_exps = PC.analyze_exp e in
     let lvs = List.fold_left 
       (fun results rv ->
          try 
@@ -1029,16 +1205,25 @@ module Abs = struct
     deref_lvs_main lvs
 
   let deref_lval lv : t list =
-    let lvs = analyze_lval lv in
+    let lvs = PC.analyze_lval lv in
     deref_lvs_main lvs
 
-  (* Get abstract node that represents this Cil lval *)
-  let getNodeLval lv =
-    let lvs = analyze_lval lv in
+  let getNodeLvs lvs =
     List.fold_left 
       (fun res lv -> match res with
          None -> (try Some (Final.getNode lv) with Not_found -> res)
-       | Some x -> res  ) None lvs
+       | Some x -> res) None lvs
+
+  (* Get abstract node that represents this Cil lval *)
+  let getNodeLval lv =
+    let lvs = PC.analyze_lval lv in
+    getNodeLvs lvs
+
+  let getNodeExp exp =
+    let exps = PC.analyze_exp exp in
+    let lvs = List.fold_left 
+      (fun cur rv -> try (getLval rv) :: cur with Not_found -> cur) [] exps in
+    getNodeLvs lvs
 
   (* Deref abstract node and get the target abstract node *)
   let deref (abs:t) : t =
@@ -1047,25 +1232,14 @@ module Abs = struct
   let may_alias abs1 abs2 = 
     Final.may_alias abs1 abs2  
 
+  let location_alias abs1 abs2 =
+    Final.location_alias abs1 abs2
+
   let points_to abs1 abs2 =
     Final.nodePointsTo abs1 abs2
 
-  (* Get Cil lvals associated w/ a node *)
+  (** Get Cil lvals associated w/ a node *)
   let lvals_of abs =
-    let rec lv_of_ptaLv ptaLv = 
-      let ho, off = ptaLv.node in
-      match ho.node with
-        PVar vi ->
-          (match vi.node with
-             PGlobal (id, _) 
-           | PLocal (id, _) ->
-               (Var (getVarinfo id), off.node)
-           | _ -> raise Not_found
-          )
-      | PDeref rv ->
-          let lv' = getLval rv in
-          (Mem (Lval (lv_of_ptaLv lv')), off.node)
-    in
     let lvs = Final.labels abs in
     LVS.fold
       (fun lv results  ->
@@ -1075,9 +1249,13 @@ module Abs = struct
            results
       ) lvs []
 
+
   (** Get the number of lvals represented by the node *)
-  let size_of abs =
-    Final.size_of abs
+  let label_size abs =
+    Final.label_size abs
+
+  let pts_size abs =
+    Final.pts_size abs
     
   (** Return true if [n] is reachable from the [srcs] *)
   let reachableFrom (abs:t) (srcs:t list) =
@@ -1095,35 +1273,29 @@ end
                           Debug 
 *****************************************************************)
 
-let printAssignment (lhs, rhs) =
-  printPtaLv lhs; print_string " = "; printPtaRv rhs; print_string "\n"
+let shouldInspect lv inspect =
+  let lvS = string_of_ptaLv lv in
+  List.exists (fun regexp -> Str.string_match regexp lvS 0) inspect
 
-let printConstraints root =
-  print_string "PTA constraints:\n";
-  Filetools.walkDirSimple
-    (fun filename ->
-       if (Filename.check_suffix filename ".pta") then
-         let _, baseAss, complexAss, calls = loadState filename in
-         VarH.iter 
-           (fun vinfo assList ->
-              List.iter 
-                (fun ass -> printAssignment ass) assList
-           ) baseAss;
-         
-         VarH.iter
-           (fun vinfo assList ->
-              List.iter 
-                (fun ass -> printAssignment ass) assList
-           ) complexAss;
-         
-         VarH.iter
-           (fun vinfo callList ->
-              List.iter 
-                (fun call -> printCallCons call) callList
-           ) calls
-    ) root;
-  print_string "\n\n"
-    
+let pHistory lv hist =
+  Printf.printf "%s:\n%s\n" 
+    (string_of_ptaLv lv) (sprint 80 (d_history hist))
+  (* TODO: make this nicer *) 
+
+let printHistory root inspect =
+  Printf.printf "Printing merge histories\n";
+  let inspect = List.map (fun str -> Str.regexp str) inspect in
+  let histFile = Filename.concat root hardCodedHistoryFile in
+  let histories = Solver.loadHistories histFile in
+  Printf.printf "Reloaded histories from %s\n" histFile;
+  if (inspect <> []) then
+    LvalH.iter 
+      (fun lv hist ->
+        if shouldInspect lv inspect then
+          pHistory lv hist
+      ) histories
+
+
 let printLvs lvals =
   LVS.iter 
     (fun label ->
@@ -1146,18 +1318,20 @@ let rec printPtrChain curNode visited =
   with Not_found ->
     print_string "\tnull\n"
 
+module Dist = Distributions
+
 let printPtsToSets () =
   let visited = Hashtbl.create 10 in
   let printed = Hashtbl.create 10 in
-  let size_dist = ref IntMap.empty in
+  let size_dist = Dist.makeDistro () in
   LvalH.iter 
     (fun k node ->
        print_string "Node w/ lval key: ";
        printPtaLv k;
-       print_string "\n";
+       print_string "\t";
 
-       print_string ("Assoc. w/ node " ^ (string_of_id node) ^ 
-         " representing: {");
+       print_string ((string_of_id node) ^ "\n");
+       print_string "Represents: {";
        let labels = Final.labels node in
        let size = LVS.cardinal labels in
        if (Hashtbl.mem printed node) then
@@ -1165,12 +1339,8 @@ let printPtsToSets () =
        else
          (printLvs labels;
           Hashtbl.add printed node true;
-          try 
-            let old_freq = IntMap.find size !size_dist in
-            size_dist := IntMap.add size (old_freq + 1) !size_dist
-          with Not_found -> 
-            size_dist := IntMap.add size 1 !size_dist
-         )
+          Dist.updateDistro size_dist size;
+         ) 
        ;
        print_string ("} (" 
                      ^ (string_of_int size) ^
@@ -1181,143 +1351,21 @@ let printPtsToSets () =
        Hashtbl.add visited node true;
        printPtrChain node visited;
        
-       print_string ("Pointed to by a global: " ^ 
+       print_string ("Reachable from a global: " ^ 
                        (string_of_bool (Final.reachableFromG node)) ^ "\n\n");
     ) !Final.lvToID;
-  print_string "Distribution of sizes: \n";
-  IntMap.iter 
-    (fun size freq ->
-       print_string ((string_of_int size) ^ ": " ^ (string_of_int freq) ^ "\n")
-    ) !size_dist;
-  print_string "\n"
+  Dist.printDistroSortKey size_dist string_of_int "rep. node sizes"
 
 
-let aliasCache = Hashtbl.create 10 (* alias file-info cache *)
+(** FP Test *)
 
-let cilAASetFile f =
-  (* TODO: cache PTA state?? *)
-  if (not (Hashtbl.mem aliasCache f.fileName)) then
-    begin
-      CilPTA.reset_globals ();
-      CilPTA.analyze_file f;
-      CilPTA.compute_results false;
-      Hashtbl.clear aliasCache;
-      Hashtbl.add aliasCache f.fileName true;
-    end
-
-
-let cilFPAA fexp =
-  (* Should also match ftypes, since the PTA may munge a bunch
-     when it comes to structs, etc. *)
-  let ftype = Cil.typeOf fexp in
-  let ftype_str = D.string_of_ftype ftype in    
-  let fdecs = 
-    try
-      CilPTA.resolve_funptr fexp
-    with 
-      Not_found
-    | CilPTA.UnknownLocation ->
-        []
-  in
-  List.fold_left 
-    (fun curList fdec ->
-       let ft = fdec.svar.vtype in
-       let fts = D.string_of_ftype ft in
-       if (fts = ftype_str) then
-         fdec.svar.vid :: curList
-       else
-         curList
-    ) [] fdecs
-
-
-let printFSet header set =
-  print_string header;
-  StringSet.iter (fun fn -> print_string (fn ^ ", ")) set;
-  print_string "\n"
-
-class testVisitor = object 
-  inherit nopCilVisitor
-
-  method vinst (i:instr) : instr list visitAction =
-    match i with
-      Call(_, callexp, _, _) -> begin
-        match callexp with
-          Lval (Var(vi),NoOffset) ->
-            SkipChildren
-
-        | Lval (Mem(ptrExp), NoOffset) ->
-            let this = ref StringSet.empty in
-            let fids = resolve_funptr ptrExp in
-            List.iter 
-              (fun fid ->
-                 let varinfo = getVarinfo fid in
-                 this := StringSet.add varinfo.vname !this
-              ) fids;
-            let cil = ref StringSet.empty in
-            let cilFids = cilFPAA ptrExp in
-            List.iter 
-              (fun fid ->
-                 let varinfo = getVarinfo fid in
-                 cil := StringSet.add varinfo.vname !cil
-              ) (List.fast_sort (fun a b -> a - b) cilFids);
-            let diff = StringSet.diff !this !cil in
-            if (not (StringSet.is_empty diff)) then
-              (print_string ("cexp: " ^ (D.string_of_exp callexp) ^ "\n");
-               printFSet "PTA says: " !this;
-               printFSet "Cil says: " !cil;
-               printFSet "Diff: " diff;
-               print_string "\n")
-            ;
-            SkipChildren
-        | _ ->
-            SkipChildren
-      end
-    | _ ->
-        SkipChildren
-
-end
-
-
-let testFunPtrs root =
-  print_string "PTA Simple testing function pointers\n";
-  flush stdout;
-  Filetools.walkDir 
-    (fun ast filename ->
-       cilAASetFile ast;
-       let vis = new testVisitor in
-       Cil.visitCilFileSameGlobals vis ast
-    ) root
+class fpTest : Pta_fp_test.fpTestable = object (self) 
     
+  method init (f:Cil.file) = ()
+    
+  method resolve_fp = resolve_funptr
 
-(*********** Print variable ids so that we actually understand the output *)
+  method name = "Steens"
 
-let tempVIDSet = Hashtbl.create 101
-
-let string_of_loc l = 
-  Pretty.sprint 80 (Cil.d_loc () l)
-
-class vidCollector = object
-  inherit nopCilVisitor 
-
-  method vvdec (vi:varinfo) =
-    Hashtbl.replace tempVIDSet vi.vid (vi.vname, vi.vdecl);
-    SkipChildren
 end
-
-let collectVidsFile f =
-  let collector = new vidCollector in
-  visitCilFileSameGlobals collector f
-
-let printVarIDs root =
-  Filetools.walkDir
-    (fun ast filename ->
-       collectVidsFile ast
-    ) root;
-  Hashtbl.iter 
-    (fun vid (vname, vdecl) ->
-       print_string ("vid : " ^ (string_of_int vid) ^ " == " ^
-                       vname ^ " @ ");
-       print_string ((string_of_loc vdecl) ^ "\n");
-    ) tempVIDSet;
-  Hashtbl.clear tempVIDSet
-
+    

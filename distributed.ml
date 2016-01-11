@@ -45,7 +45,7 @@
 
 open Fstructs
 open Readcalls
-open Scc
+open Scc_cg
 
 module L = Logging
 

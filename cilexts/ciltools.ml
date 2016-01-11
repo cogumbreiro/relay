@@ -307,19 +307,12 @@ and compare_type x y =
   compare (typeSig x) (typeSig y) 
 
 and compare_var x y =
-(*
-  let s_comp = compare x.vglob y.vglob in
-  if (s_comp <> 0) then
-    s_comp
-  else
-    let n_comp = compare x.vname y.vname in
-    if (n_comp <> 0) then
-      n_comp
-    else
-      compare_type x.vtype y.vtype
-*)
-  (* trust vid for now... *)
-  compare x.vid y.vid 
+  x.vid - y.vid
+
+and compare_var_attr x y =
+  let c = x.vid - y.vid in
+  if c == 0 then Pervasives.compare x.vattr y.vattr
+  else c
 
 and compare_fundec x y =
   compare_var x.svar y.svar
@@ -364,32 +357,6 @@ and compare_enumi (e:enuminfo) (e':enuminfo) =
       (fun c (s1, _, _) (s2, _, _) -> 
          if (c <> 0) then c
          else compare s1 s2) 0 e.eitems e'.eitems
-
-
-let compare_instr (i1:instr) (i2:instr) : int =
-  match i1, i2 with
-    (Set (_, _, loc1)),
-    (Set (_, _, loc2))
-  | (Call (_, _, _, loc1)),
-    (Call (_, _, _, loc2))
-  | (Asm (_, _, _, _, _, loc1)),
-    (Asm (_, _, _, _, _,loc2)) ->
-      compareLoc loc1 loc2
-  | (Set _), (Call _)
-  | (Call _), (Asm _)
-  | (Set _), (Asm _) ->
-      1
-  | (Call _), (Set _)
-  | (Asm _), (Call _)
-  | (Asm _), (Set _) ->
-      -1
-
-let hash_instr (i:instr) =
-  match i with
-    (Set (_, _, loc))
-  | (Call (_, _, _, loc))
-  | (Asm (_, _, _, _, _, loc)) ->
-      Hashtbl.hash loc
 
 
 let rec hash_exp x = 
@@ -458,7 +425,11 @@ and hash_type x =
   Hashtbl.hash (typeSig x)
 
 and hash_var x = 
-  Hashtbl.hash x.vid (* TODO: convert this to not rely on vids? *)
+  Hashtbl.hash x.vid 
+
+and hash_var_attr x =
+  Hashtbl.hash x.vid lxor
+    Hashtbl.hash x.vattr
 
 and hash_lhost x = 
   match x with
@@ -674,3 +645,83 @@ let eq_offset_tail o1 o2 =
           true
       | _ -> 
           false
+
+(************************************************************
+ Program point utils
+************************************************************)
+
+module HashedPP = struct
+  type t = prog_point
+  let equal = (=)
+  let hash = Hashtbl.hash
+end 
+  (* Nothing different from Hashtbl, but may need something special
+     if we have a different definition of prog_point *)
+
+module PPHash = Hashtbl.Make (HashedPP)
+
+module CompPP = struct
+  type t = prog_point
+  let compare = Pervasives.compare
+end
+
+module PPSet = Set.Make (CompPP)
+
+
+(** Get the immediate predecessor program points of a stmt *)
+let predPP stmt : prog_point list =
+  List.fold_left 
+    (fun cur pred ->
+       let parentPP = getStmtPP pred in
+       match pred.skind with
+         Instr il ->
+           let len = List.length il in
+           if len == 0 then
+             (* empty instruction list? *)
+             parentPP :: cur
+           else
+             let lastIndex = len - 1 in
+             (getInstrPP parentPP (List.nth il lastIndex) lastIndex) :: cur
+       | _ -> 
+           parentPP :: cur
+    ) [] stmt.preds
+
+(* Except for the first instruction in an instruction block,
+   the predecessor for instructions should be obvious. *)
+
+(* TODO: see if we need one for successor program points? *)
+
+
+(*************** Deprecated InstrHash stuff ***********************)
+
+let compare_instr (i1:instr) (i2:instr) : int =
+  match i1, i2 with
+    (Set (_, _, loc1)),
+    (Set (_, _, loc2))
+  | (Call (_, _, _, loc1)),
+    (Call (_, _, _, loc2))
+  | (Asm (_, _, _, _, _, loc1)),
+    (Asm (_, _, _, _, _,loc2)) ->
+      compareLoc loc1 loc2
+  | (Set _), (Call _)
+  | (Call _), (Asm _)
+  | (Set _), (Asm _) ->
+      1
+  | (Call _), (Set _)
+  | (Asm _), (Call _)
+  | (Asm _), (Set _) ->
+      -1
+
+let hash_instr (i:instr) =
+  let loc = get_instrLoc i in
+  Hashtbl.hash loc
+
+
+module HashedInstr = struct
+  type t = instr
+  let equal x y = 
+    compare_instr x y == 0
+  let hash = hash_instr
+end
+  
+module InstrHash = Hashtbl.Make (HashedInstr)

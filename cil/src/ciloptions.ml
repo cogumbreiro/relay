@@ -181,6 +181,8 @@ let options : (string * Arg.spec * string) list =
                       "Prevent small chunks of code from being duplicated";
     "--keepunused", Arg.Set Rmtmps.keepUnused,
                 "Do not remove the unused variables and types";
+    "--keepstatic", Arg.Set Rmtmps.keepStatic,
+                "Do not remove apparently unused static functions";
     "--rmUnusedInlines", Arg.Set Rmtmps.rmUnusedInlines,
                 "Delete any unused inline functions.  This is the default in MSVC mode";
 

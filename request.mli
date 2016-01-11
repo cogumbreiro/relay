@@ -1,6 +1,6 @@
 open Messages
 open Fstructs
-open Scc
+open Scc_cg
 
 open Warn_reports
 open Race_reports
@@ -33,9 +33,9 @@ val requestData : string -> string -> unit
 
 val reqWarnBarrier : int -> unit
 
-val lockWarn : fKey -> fKey -> message
+val lockWarn : root -> root -> message
 
-val unlockWarn : fKey -> fKey -> unit
+val unlockWarn : root -> root -> unit
 
 (*
 val notifyWarn : #warnReports -> unit

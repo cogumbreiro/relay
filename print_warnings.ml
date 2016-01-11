@@ -44,13 +44,12 @@ open Readcalls
 open Cil
 open Pretty
 open Fstructs
-open Scc
+open Scc_cg
 open Stdutil
 open Cilfiles
 open Cilinfos
 
 module A = Alias
-module GA = Guarded_access
 module RS = Racesummary
 module SS = Symsummary
 module SPTA = Symstate2
@@ -72,17 +71,19 @@ let cgDir = ref ""
 
 let configFile = ref "client.cfg"
 
-let over_approx_fp = ref false
-
 let userName = ref ""
+
+let printAlias = ref false
 
 (* Command-line argument parsing *)
   
 let argSpecs = 
-  [("-cg", Arg.Set_string cgFile, "name of call graph file");
+  [("-cg", Arg.Set_string cgDir, "name of call graph directory");
    ("-su", Arg.Set_string configFile, "name of config/summary bootstrap file");
    ("-u", Arg.Set_string userName, "username to use");
-   ("-oa", Arg.Set over_approx_fp, "over-approximate func pointer aliasing")]
+   ("-pa", Arg.Set printAlias, "print lvals pairs with iffy aliasing");
+  ]
+
 
 let anonArgFun (arg:string) : unit = 
   ()
@@ -90,37 +91,50 @@ let anonArgFun (arg:string) : unit =
 let usageMsg = getUsageString "-cg fname -u username [options]\n"
 
 
-
 (***************************************************)
 (* Run                                             *)
 
 (** Initialize function summaries, and watchlist of special 
     functions (e.g., pthread_create) *)
-let initSettings (cg) =
+let initSettings () =
   try
+    Cilinfos.reloadRanges !cgDir;
     let settings = Config.initSettings !configFile in
-    (*    Race.fSummaries#initSummaries settings cg; *)
     Th.initSettings settings;
     Req.init settings;
-    BS.init settings !cgDir;
-    A.initSettings settings !cgDir;
-    let _ = FS.init settings in (* ignore thread created *)
-    SPTA.init settings cg (RS.sum :> Modsummary.modSumm);
     DC.makeLCaches !cgDir;
+    A.initSettings settings !cgDir;
+
+    (* Get Callgraph structures after initializing alias analysis *)
+    let cgFile = Dumpcalls.getCallsFile !cgDir in
+    let cg = readCalls cgFile in
+
+    let () = BS.init settings !cgDir cg in
+    let _ = FS.init settings in (* ignore thread created *)
+    SPTA.init settings cg (RS.sum :> Modsummaryi.absModSumm);
     Req.setUser !userName;
+    Entry_points.initSettings settings;
+(*    Dis.init settings !cgDir; *)
+    cg
   with e -> Printf.printf "Exc. in initSettings: %s\n"
     (Printexc.to_string e) ; raise e
 
       
 (** Start printing warnings *)
 let printWarnings () : unit =
-  (* Get Callgraph structures *)
-  let cg = readCalls !cgFile in
-  Cilinfos.reloadRanges !cgDir;
-  initSettings cg;
-  GA.clearCache ();  
-  Warn.flagRacesFromSumms cg !cgDir
+  let cg = initSettings () in
+  
+  L.logStatus "\n\n\nBeginning Thread Analysis:";
+  L.logStatus "-----";
+  L.flushStatus ();    
+  Warn.flagRacesFromSumms cg !cgDir;
 
+  if !printAlias then begin
+    L.logStatus "\n\nPrinting Alias assumptions used by warnings";
+    L.logStatus "-----";
+    L.flushStatus ();
+    Warn.printAliasUses ()
+  end
 
 (** Entry point *)
 let main () = 
@@ -128,14 +142,13 @@ let main () =
     Arg.parse argSpecs anonArgFun usageMsg;
     
     (* Didn't know how to require the -cg file, etc., so check manually *)
-    if (!cgFile = "" || !configFile = "" || !userName = "") then
+    if (!cgDir = "" || !configFile = "" || !userName = "") then
       begin
         Arg.usage argSpecs usageMsg;
         exit 1
       end
     else
       begin
-        cgDir := Filename.dirname !cgFile;
         Cil.initCIL ();
         setGCConfig ();
         

@@ -1,7 +1,6 @@
 
- (For more complete installation instructions... please wait)
 
- Building from source 
+Building from source 
 ---------------------------------------------------------------------
 
  1. If you use Windows, you must first install cygwin. (Not tested)
@@ -11,14 +10,22 @@
 
  3. Download and unpack the distribution. 
 
- 4. Build CIL (see the CIL INSTALL file). Note: if you get a compilation
+ 4. Build the included version of CIL. This should be a "configure" + 
+    a "make", but see their INSTALL file. Note: if you get a compilation
     error "File "obj/x86_LINUX/feature_config.ml", line 4, ...",
     edit the obj/x86_LINUX/feature_config.ml file and remove the "-ne" junk.
 
  5. Run make in the base RELAY directory
 
- 6. Optional: go to the test directory and "make" to test
+ 6. Edit the values of the "*ROOT" environment variables in the scripts 
+    (scripts/intercept.sh, scripts/dumpcalls.sh) to be the same as 
+    the RELAY dir
 
- 7. Optional: the web UI for browsing warnings requires installation
+ 7. Optional: go to the racetests directory and run "make renew_small",
+    then run "make" to test. The first command preprocesses the tests,
+    and the second runs relay. After running the tests, the "diff_out" file
+    should show no differences.
+
+ 8. Optional: the web UI for browsing warnings requires installation
     of the Django web framework and a database backend
 

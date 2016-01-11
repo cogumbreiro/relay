@@ -15,8 +15,7 @@ def syncNotes(lab, loc):
 
 #--------------- 'Bulk-load' code base info & function info -------------
 codebase_info_file = 'info.txt'
-callgraph_file = 'calls.txt'
-warnings_file = 'warnings.xml'
+warnings_file = 'warnings2.xml'
 
 def fieldCheck(field, expected):
     if (field != expected):
@@ -40,14 +39,24 @@ def loadCodebase(dir):
             print 'Code base already existed: %s' % cb
     finally:
         cb_file.close()
-    return cb
+    return (cb, created)
 
-def loadProgInfo(dir):
-    from os.path import join
-    cb = loadCodebase(dir)
+def loadProgInfo(callgraph_file):
+    from os.path import *
+    dir = dirname (callgraph_file)
+    cb, created = loadCodebase(dir)
     if (not cb):
-        return
-    fun_file = open (join (dir, callgraph_file), 'r')
+        warn ('Could not load code base\n')
+        sys.exit(1)
+    if (not created):
+        warn ('Since code-base already existed, not reloading the callgraph\n')
+        return cb
+    try:
+        print 'Trying to load call graph data from %s' % callgraph_file
+        fun_file = open (callgraph_file, 'r')
+    except IOError :
+        warn ('call graph file not found %s\n' % callgraph_file)
+        raise
     try:
         for line in fun_file:
             parts = line.split('$')
@@ -61,7 +70,7 @@ def loadProgInfo(dir):
                 print 'Function already existed: %s' % func
     finally:
         fun_file.close()
-    return
+    return cb
  
     
 #------------------ 'Bulk-load' Warnings ---------------
@@ -81,6 +90,7 @@ class WarningsParser:
     rw_lval = None
     occurs_at = None
     locks = None
+    cluster_atts = None
     cp = None
     cp_atts = None
     spawned_at = None
@@ -93,15 +103,20 @@ class WarningsParser:
     call_edge_atts = None
     prev_tags = None
 
+    #-- db caches
     funcCache = None
     ppCache = None
     lvalCache = None
+    accessCache = None
+    callpathCache = None
 
     def __init__(self):
         self.prev_tags = []
         self.funcCache = {}
         self.ppCache = {}
         self.lvalCache = {}
+        self.accessCache = {}
+        self.callpathCache = {}
         return
 
     # --- Cached results (avoid hitting DB)
@@ -133,6 +148,26 @@ class WarningsParser:
             lv = getLval(vid, printed, size, decl, glob)
             self.lvalCache[(vid, printed)] = lv
             return lv
+
+    def getAccess(self, lv, cp, pp, locks):
+        lock_str = str(locks)
+        key = (lv, cp, pp, lock_str)
+        try:
+            return self.accessCache[key]
+        except KeyError:
+            acc = createAccess(lv, cp, pp, locks)
+            self.accessCache[key] = acc
+            return acc
+
+    def getCallpath(self, func, spawn_pp, empty_pp, edges):
+        edge_str = str(edges)
+        key = (func, spawn_pp, empty_pp, edge_str)
+        try:
+            return self.callpathCache[key]
+        except KeyError:
+            cp = getCallpath(func, spawn_pp, empty_pp, edges)
+            self.callpathCache[key] = cp
+            return cp
 
     # --- tag-end-Event notifications 
 
@@ -227,9 +262,9 @@ class WarningsParser:
         self.call_edges = []
 
     def end_cp(self):
-        self.cp = getCallpath(self.getFunc(self.cp_atts['root']),
-                              self.spawned_at, self.emptied_at,
-                              self.call_edges)
+        self.cp = self.getCallpath(self.getFunc(self.cp_atts['root']),
+                                   self.spawned_at, self.emptied_at,
+                                   self.call_edges)
         return
 
     def start_locks(self, atts):
@@ -258,13 +293,14 @@ class WarningsParser:
         self.acc2 = []
         return
 
+    # TODO: try "createAccess" or "getAccesses"... should be a bit better?
     def end_acc1 (self):
-        self.acc1 = [getAccess(self.rw_lval, self.cp, pp, self.locks)
+        self.acc1 = [self.getAccess(self.rw_lval, self.cp, pp, self.locks)
                      for pp in self.occurs_at]
         return
         
     def end_acc2 (self):
-        self.acc2 = [getAccess(self.rw_lval, self.cp, pp, self.locks)
+        self.acc2 = [self.getAccess(self.rw_lval, self.cp, pp, self.locks)
                      for pp in self.occurs_at]
         return
 
@@ -273,16 +309,18 @@ class WarningsParser:
         return
 
     def end_race(self):
-        self.races = [getRace(a1, a2)
+        self.races = [createRace(a1, a2)
                       for a1 in self.acc1
                       for a2 in self.acc2]
         return
 
     def start_cluster(self, atts):
-        pass
+        self.cluster_atts = atts
+        return
 
     def end_cluster(self):
-        cluster = createRaceCluster(self.races, self.run)
+        cluster_id = self.cluster_atts.get(u'id', None)
+        cluster = createRaceCluster(cluster_id, self.races, self.run)
         self.num_clusters += 1
         if (self.num_clusters % 20 == 0):
             print "Total race (clusters) so far: %d" % self.num_clusters
@@ -349,7 +387,7 @@ def handleCharData (data):
 def loadWarnings(dir):
     from os.path import join
     import xml.parsers.expat
-    codeb = loadCodebase(dir)
+    codeb, created = loadCodebase(dir)
     if (not codeb):
         return
     f = open (join (dir, warnings_file), 'r')
@@ -361,12 +399,13 @@ def loadWarnings(dir):
             p.EndElementHandler = eltEnd
             p.CharacterDataHandler = handleCharData
             p.ParseFile (f)
-        except xml.parsers.expat.ExpatError:
-            warn ("loadWarn error: parsing line %s col %s" %
+        except (xml.parsers.expat.ExpatError, TypeError):
+            warn ("loadWarn error: parsing line %s col %s\n" %
                   (p.ErrorLineNumber, p.ErrorColumnNumber))
+            raise
     finally:
         f.close()
-    return
+    return wp.run
 
 
 #----------- TEST Objects -------------
@@ -409,5 +448,9 @@ cluster = getRaceCluster(rc2, run)
 
 from relay.warnings.loading import *
 loadWarnings('/home/jan/research/linux-2.6.15/ciltrees')
+
+from relay.warnings.loading import *
+loadProgInfo('/home/jan/research/relay-race/nulltests/httpd-2.2.6/ciltrees/calls.steens')
+loadWarnings('/home/jan/research/relay-race/nulltests/httpd-2.2.6/ciltrees')
 """
 

@@ -36,9 +36,14 @@
 *)
 
 
-(** Merge multiple source files and output resulting AST.
+(** 
+    Merge multiple source files and output resulting AST (in text form).
+    
+    Warning: untested on large examples... (may be very inefficient)
+    Also, make sure that the input files can actually be linked (duh).
+    Namely, do not merge files that may have namespace conflicts.
 
-    Warning: untested on large examples... (read, very inefficient)
+    @see scripts/merge.sh (for an alternative that uses the CIL merger)
 *)
 
 open Gc_stats
@@ -52,93 +57,186 @@ let debug = false
 
 (***************************************************)
 (* Commandline handling                            *)
+
+
 let in_file = ref ""
 
 let out_file = ref ""
 
-let setInFile (fname:string) = 
-  in_file := fname
+let cgDir = ref ""
 
-let setOutFile (fname:string) = 
-  out_file := fname
+(* Indicates whether input files are CIL binary ASTs. Even if input is
+   text, they must be preprocessed *)
+let inBinary = ref true
 
-
-(* Indicates whether sources are CIL binary ASTs. Keep in mind that
-   sources must be preprocessed *)
-let isBinary = ref true
-
+let outBinary = ref true
 
 (* Command-line argument parsing *)
     
 let argSpecs = 
-  [("-i", Arg.String setInFile, "file w/ CIL source file names, one per line");
-   ("-o", Arg.String setOutFile, "output file name");
-   ("-nb", Arg.Clear isBinary, "flag indicating srcs are NOT CIL binary ASTs")]
+  [("-i", Arg.Set_string in_file, "file w/ source file names, one per line");
+   ("-o", Arg.Set_string out_file, "output file name");
+   ("-cg", Arg.Set_string cgDir, "use files in callgraph directory as input");
+   ("-nib", Arg.Clear inBinary, "input files are NOT binary ASTs");
+   ("-nob", Arg.Clear outBinary, "output file should NOT be a binary AST");
+  ]
 
 let anonArgFun (arg:string) : unit = 
   ()
     
-let usageMsg = getUsageString "-i fname -o fname [flags]\n"
+let usageMsg = getUsageString "[-i fname | -cg cgDir] -o fname [opts]\n"
+
+(***************************************************
+   Custom pretty printer that doesn't print 
+   original line nums at EVERY instruction... 
+ ***************************************************)
+
+class simplePrinter = object (self)
+  inherit Cil.defaultCilPrinterClass as super
+    
+  val mutable printingInstr = false
+      
+  method pInstr () (i:Cil.instr) : Pretty.doc  =
+    printingInstr <- true;
+    let result = super#pInstr () i in
+    printingInstr <- false;
+    result
+    
+  method pLineDirective ?(forcefile = false) (loc:Cil.location) : Pretty.doc =
+    if (printingInstr) then Pretty.nil
+    else super#pLineDirective ~forcefile:forcefile loc
+
+(** TODO: reduce messy type-casting when printing *)
+
+end
+
+let myPrinter = new simplePrinter
 
 
 (***************************************************)
 (* Merge Functions                                 *)
 
+(** Process a chunk of files (of this number) at a time *)
+let chunkSize = 10      
+
+(** Load a file from disk *)
 let getFile (fname:string) : Cil.file =
   try
-    if(!isBinary) then
+    if(!inBinary) then
       Cil.loadBinaryFile fname
     else
       Frontc.parse fname ();
   with Frontc.ParseError s ->
     (L.logStatus ("Exception in getFile: " ^ fname ^ " : " ^ s));
     raise (Frontc.ParseError s)
+
+
+(** Wrapper for merging a list of files for the output *)
+let doMerge (files : Cil.file list) : Cil.file =
+  let result = Mergecil.merge files !out_file in
+  if !E.hadErrors then
+    E.warn "There were errors during merging\n"
+  ;
+  result
       
 
+(** Process the next set of files (output is the last in the list) *)
+let iterChunks (curChunk : Cil.file list) (nextFile:Cil.file) : Cil.file list =
+  if (List.length curChunk > chunkSize) then
+    [doMerge curChunk]
+  else
+    (nextFile :: curChunk)
 
-let mergeSources () = 
-  let rec getSources (inFile:in_channel)
-      (curFileList:Cil.file list) : Cil.file list =
+
+(** Handle the last chunk of files *)
+let finalizeChunk (curChunk : Cil.file list) : Cil.file =
+  match curChunk with
+    [aFile] -> aFile
+  | h :: _ -> 
+      doMerge curChunk
+  | [] -> failwith "No input files?"
+      
+
+(** Output the result *)
+let writeOutput (merged:Cil.file) : unit =
+  if (!outBinary) then
+    Cil.saveBinaryFile merged !out_file
+  else
+    (let out_channel = open_out !out_file in
+     Cil.dumpFile myPrinter out_channel !out_file merged;
+     close_out out_channel)
+
+
+(* TODO incrementally merge via divide and conquer instead of
+   using this chunk-by-chunk merging? *)
+
+
+(** Iterate through the input files (depending on the source) *)
+let iterInputs () =
+  let sourcesFromFile () : Cil.file list =
+    let inFile = (open_in !in_file) in
+    let rec loop (curFileList:Cil.file list) : Cil.file list =
     try
-      let l = input_line inFile in
-      getSources inFile ((getFile l) :: curFileList)       
+      let fname = Strutil.strip (input_line inFile) in
+      let nextResult = iterChunks curFileList (getFile fname) in
+      loop nextResult
     with End_of_file ->
       L.logStatus "Reached end of input file";
       L.logStatus ("Num sources: " ^ 
-                      (string_of_int (List.length curFileList)));
+                     (string_of_int (List.length curFileList)));
       flush stdout;
       curFileList
+    in
+    let result = loop [] in
+    close_in inFile;
+    result
   in
+  let sourcesFromDir () : Cil.file list =
+    let curResults = ref [] in
+    let processFile (f:Cil.file) (_:string) : unit =
+      curResults := iterChunks !curResults f
+    in
+    Filetools.walkDir processFile !cgDir;
+    !curResults
+  in
+  let lastChunk = 
+    if (!in_file <> "") then sourcesFromFile ()
+    else if (!cgDir <> "") then sourcesFromDir ()
+    else failwith "No inputs!"
+  in
+  finalizeChunk lastChunk
 
-  try
-    (* TODO incrementally merge via divide and conquer? *)
-    let inChannel = (open_in !in_file) in
-    let sources = getSources inChannel [] in
-    let merged = 
-      Mergecil.merge sources !out_file in
-    if !E.hadErrors then
-      E.s (E.error "There were errors during merging\n");
-    let outChannel = (open_out !out_file) in
-    Cil.saveBinaryFileChannel merged outChannel;
-    close_out outChannel;
-    close_in inChannel; 
-    ()
-  with e -> (L.logError ("Exc. in mergeSources: " ^
-                             (Printexc.to_string e)));
-    raise e
-  
+
+
+let mergeSources () = 
+  let merged = iterInputs () in
+  writeOutput merged
 
 
 (***************************************************)
 (* Execution / Program Entry Point                 *)
 
 
+
+(** boolean XOR *)
+let xor b1 b2 : bool =
+  (not b1 && b2) || (b1 && not b2)
+
+
+(** Return true if the settings are fine *)
+let validateSettings () : bool=
+  (* Didn't know how to require files, so check manually *)
+  let useInFile = !in_file <> "" in
+  let useCGDir = !cgDir <> "" in
+  let hasOut = !out_file <> "" in
+  (xor useInFile useCGDir) && hasOut
+
+
 let main () = 
   try
     Arg.parse argSpecs anonArgFun usageMsg;
     
-    (* Didn't know how to require files, so check manually *)
-    if (!in_file = "" || !out_file = "") then
+    if not (validateSettings ()) then
       begin
         Arg.usage argSpecs usageMsg;
         exit 1

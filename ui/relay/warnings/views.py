@@ -30,7 +30,7 @@ def warn_detail(request, object_id):
     warn = Race_clusters.objects.get(id=object_id)
     labels = warn.races.first_race().labels().all
     return object_detail(request, queryset=warn, 
-                         extra_context={'labels' : labels;
+                         extra_context={'labels' : labels,
                                         'someInt' : 10})
 
 

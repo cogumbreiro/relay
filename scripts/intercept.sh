@@ -3,7 +3,7 @@
 # Intercepts GCC calls from a makefile -- remember to change LOCKROOT
 # Example usage: "intercept.sh make -e"
 
-LOCKROOT=/home/jan/research/relay-race
+LOCKROOT=/home/jan/research/relay
 
 CC=$LOCKROOT/scripts/mycc.pl
 GCC=$LOCKROOT/scripts/mycc.pl
@@ -16,3 +16,4 @@ export GCC
 export LOGFILE
 
 $*
+

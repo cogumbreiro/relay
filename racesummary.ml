@@ -42,18 +42,33 @@ open Fstructs
 open Cil
 open Pretty
 open Callg
-open Scope
 open Lockset
 
+open Guarded_access_base
+
+(*
+module GA = Guarded_access_sep
+*)
+
 module GA = Guarded_access
+
+(*
+module GA = Guarded_access_clust
+*)
+
 module D = Cildump
 module BS = Backed_summary
 module L = Logging
 module Stat = Mystats
 module Lv = Lvals
 module CLv = Cil_lvals
-
+module AI = Access_info
+               
 module Req = Request
+
+(*** Debug stuff ***)
+
+let verboseSum = ref false
 
 
 (*******************************************************************)
@@ -86,23 +101,15 @@ type summary = {
 (*******************************************************************)
 (* Instances of state / summaries                                  *)
 
-
-let dummyCorr = 
-  { GA.corrLocks = LS.empty;
-    GA.corrScope = SFormal (-1);
-    GA.corrAccess = GA.Locs.empty;
-    GA.corrLEmpty = Cil.locUnknown;
-  }
-
 (* Singleton representing \bottom *)
-let bottomLval = (Lv.mkVar false "$RSBOT" (TVoid []), NoOffset)
+let bottomLval = Lv.dummyLval
   
 let bottomLS = LS.doPlus LS.empty bottomLval ()
   
 let bottomCS =
   {
-    writeCorrs = GA.CMap.add bottomLval dummyCorr GA.CMap.empty;
-    readCorrs = GA.CMap.empty;
+    writeCorrs = CMap.add bottomLval GA.dummyCorr CMap.empty;
+    readCorrs = CMap.empty;
   }
 
 let bottom = 
@@ -115,8 +122,8 @@ let bottom =
 let emptyLS = LS.empty
 
 let emptyCS = {
-  writeCorrs = GA.CMap.empty;
-  readCorrs = GA.CMap.empty;
+  writeCorrs = CMap.empty;
+  readCorrs = CMap.empty;
 }
 
 let emptyState = 
@@ -144,8 +151,8 @@ let isBottomLS ls =
 
 let isBottomCS cs =
   cs == bottomCS ||
-    ((GA.cmAppEQ bottomCS.writeCorrs cs.writeCorrs) &&
-       (GA.cmAppEQ bottomCS.readCorrs cs.readCorrs))
+    ((GA.cmEQ bottomCS.writeCorrs cs.writeCorrs) &&
+       (GA.cmEQ bottomCS.readCorrs cs.readCorrs))
 
 let isBottomState s =
   s == bottom ||
@@ -163,8 +170,8 @@ let isEmptyLS ls =
 
 let isEmptyCS cs =
   cs == emptyCS ||
-    ((GA.cmAppEQ emptyCS.writeCorrs cs.writeCorrs) &&
-       (GA.cmAppEQ emptyCS.readCorrs cs.readCorrs))
+    ((GA.cmEQ emptyCS.writeCorrs cs.writeCorrs) &&
+       (GA.cmEQ emptyCS.readCorrs cs.readCorrs))
 
 let isEmptyState s =
   s == emptyState ||
@@ -232,22 +239,25 @@ let statesSubset (a:state) (b:state) : bool =
     lStateSubset a.lState b.lState &&
       cStateSubset a.cState b.cState
 
+let sumSubset a b =
+  statesSubset a.sum_in b.sum_in && (* TODO: get rid of in *)
+    statesSubset a.sum_out b.sum_out
+
+
 
 (** Combine the lock state portion of the state *)
 let combineLStates (a:lockState) (b:lockState) =
-  if (isBottomLS(a)) then
-    b
-  else if (isBottomLS(b)) then
-    a
+  if a == b then a
+  else if (isBottomLS(a)) then b
+  else if (isBottomLS(b)) then a
   else 
-    GA.combineLS a b
+    combineLS a b
 
 (** Combine the read/write access portion of the state *)
 let combineCStates (a:corrState) (b:corrState) =
-  if (isBottomCS(a)) then
-    b
-  else if (isBottomCS(b)) then
-    a
+  if a == b then a
+  else if (isBottomCS(a)) then b
+  else if (isBottomCS(b)) then a
   else
     {
       writeCorrs = GA.combineCM a.writeCorrs b.writeCorrs;
@@ -257,122 +267,116 @@ let combineCStates (a:corrState) (b:corrState) =
 (** Combine two states *)
 let combineStates (a:state) (b:state) : state =
   (* intersection w/ bottom just causes it to just return the other state *)
-  if(isBottomState(a)) then
-    b
-  else if (isBottomState(b)) then
-    a
-  else if (a == b) then
-    a
+  if (a == b) then a
+  else if(isBottomState(a)) then b
+  else if (isBottomState(b)) then a
   else
     {
       lState = combineLStates a.lState b.lState;
       cState = combineCStates a.cState b.cState;
     }
 
+let combineSummary a b =
+  {
+    sum_in = combineStates a.sum_in b.sum_in;
+    sum_out = combineStates a.sum_out b.sum_out;
+  }
 
 (** Make / Add a write correlation to the given state. 
     Scope is not yet resolved *)
 let addWriteCorr (curLocks:lockState) (s:corrState) lv
-    (loc:Cil.location) fk (sc:scope) : corrState =
-  {s with writeCorrs = GA.addCorr lv curLocks loc fk sc s.writeCorrs}
+    (loc:Cil.location) fk : corrState =
+  {s with writeCorrs = GA.addCorr lv curLocks loc fk s.writeCorrs}
+
 
 (** Make / Add a read correlation to the given state. 
     Scope is not yet resolved *)
 let addReadCorr (curLocks:lockState) (s:corrState) lv
-    (loc:Cil.location) fk (sc:scope) : corrState =
-  {s with readCorrs = GA.addCorr lv curLocks loc fk sc s.readCorrs}
+    (loc:Cil.location) fk : corrState =
+  {s with readCorrs = GA.addCorr lv curLocks loc fk s.readCorrs}
+
+
+(** Make a pseudo access *)
+let addPseudoCorr curLocks state lv loc fk pseudoattrib =
+  {state with readCorrs = 
+      GA.addPseudo lv curLocks loc fk pseudoattrib state.readCorrs}
+
+
+(** Fill in the scope fields for just the guarded access states *)
+let resolveCorrScope (curFunc:Cil.fundec) (corrState:corrState) = 
+  let scopeLocks = scopeLockset curFunc in
+  let scopeCorr = GA.scopeStraintMap curFunc scopeLocks in
+  let newWriteCorr = GA.uniqueCM (scopeCorr corrState.writeCorrs) in
+  let newReadCorr = GA.uniqueCM (scopeCorr corrState.readCorrs) in
+  makeCState newWriteCorr newReadCorr
 
 
 (** Fill scope fields of S w/ appropriate values (e.g., formal of F w/ 
     index i vs a global). Formal takes precedence over global (local scope) *)
-let resolveScope (s:state) (f:Cil.fundec) : state =
-
-  let scopeLocks = scopeLockset f in
-  
-  let scopeCorr = GA.scopeStraintMap f scopeLocks in
-  
-  let newLS = LS.unique (scopeLocks s.lState) in
-  let newWriteCorr = GA.cacheCM (scopeCorr s.cState.writeCorrs) in
-  let newReadCorr = GA.cacheCM (scopeCorr s.cState.readCorrs) in
-  makeState newLS (makeCState newWriteCorr newReadCorr)
+let resolveScope (f:Cil.fundec) (s:state) : state =
+  let newLS = LS.unique (scopeLockset f s.lState) in
+  let newCorrs = resolveCorrScope f s.cState in
+  makeState newLS newCorrs
 
 
-(* Take a summary and list the (lval, lockset) pairs in the function's 
-   end state *)
+let scopeSummary curFunc sum : summary =
+  {
+    sum_in = resolveScope curFunc sum.sum_in;
+    sum_out = resolveScope curFunc sum.sum_out;
+  }
+
+
+(* Take a guarded access set and list the lval/access info...
+   TODO: list out the essential parts instead of requiring user to
+   access the fields themselves *)
 let iterWrites f corrs =
-  GA.CMap.iter f corrs.writeCorrs
+  GA.iterCorrs f corrs.writeCorrs
 
 let iterReads f corrs =
-  GA.CMap.iter f corrs.readCorrs
+  GA.iterCorrs f corrs.readCorrs
 
 let listWriteCorr corrs =
-  GA.CMap.fold 
-    (fun lval corr curList ->
-       (lval, corr) :: curList)
-    corrs.writeCorrs []
-    
+  GA.enumAccesses corrs.writeCorrs
 
 let listReadCorr corrs =
-  GA.CMap.fold 
-    (fun lval corr curList ->
-       (lval, corr) :: curList)
-    corrs.readCorrs []
-  
+  GA.enumAccesses corrs.readCorrs
 
-let listMods (st:state) =
-  GA.CMap.fold
-    (fun lval corr curList ->
-       (lval, corr.GA.corrScope) :: curList)
-    st.cState.writeCorrs []
+let hcLockstate = LS.unique
 
+let hcGAState s = 
+  { 
+    writeCorrs = GA.uniqueCM s.writeCorrs;
+    readCorrs = GA.uniqueCM s.readCorrs;
+  }
+
+let hcState s =
+  { lState = hcLockstate s.lState;
+    cState = hcGAState s.cState; }
+
+let hcSummary s =
+  { sum_in = hcState s.sum_in;
+    sum_out = hcState s.sum_out; }
 
 (******************************************************
  * Printing summaries to stdout for debugging
  ******************************************************)
 
-let string_of_lvscope lv scope =
-  (Lv.string_of_lval lv) ^ (string_of_scope scope)
-
-        
 let printLockset ls =
   let buff = Buffer.create 24 in
-  let printASet s = 
-    if (LS.S.is_empty s) then
-      Buffer.add_string buff "empty"
-    else begin
-      Buffer.add_string buff "{";
-      LS.S.iter 
-        (fun lv l -> 
-           Buffer.add_string buff ((string_of_lock lv l) ^ ", ")
-        ) s;
-      Buffer.add_string buff ("} (" ^ (string_of_int 
-                                         (LS.S.cardinal s))  ^  ")");
-    end
-  in
   if (isBottomLS(ls)) then
     L.logStatus "LS is $BOTTOM"
   else begin
     let aSet = LS.getPlus ls in
     Buffer.add_string buff "L+ = ";
-    printASet aSet;
-    L.logStatus (Buffer.contents buff);
+    set_to_buf buff aSet;
+    L.logStatusB buff;
     Buffer.clear buff;
     let aSet = LS.getMinus ls in
     Buffer.add_string buff "L- = ";
-    printASet aSet;
-    L.logStatus (Buffer.contents buff);
+    set_to_buf buff aSet;
+    L.logStatusB buff;
     Buffer.clear buff;
   end
-    
-let printCorr clval c =
-  L.logStatus ((string_of_lvscope clval c.GA.corrScope) ^ ": " ^ 
-                 (GA.string_of_accesses c.GA.corrAccess) ^ "~");
-  printLockset c.GA.corrLocks;
-  L.logStatus ""
-
-
-let printCorrMap cm =
-  GA.CMap.iter printCorr cm
 
 
 let printCorrState cs =
@@ -380,16 +384,16 @@ let printCorrState cs =
     L.logStatus "CS is $BOTTOM"
   else (
     L.logStatus ("Write Correlations (" ^
-                   (string_of_int (GA.CMap.cardinal cs.writeCorrs)) ^ 
+                   (string_of_int (CMap.cardinal cs.writeCorrs)) ^ 
                     "):");
     L.logStatus "-----";
-    printCorrMap cs.writeCorrs;
+    GA.printCorrMap cs.writeCorrs printLockset;
     
     L.logStatus ("Read Correlations (" ^ 
-                   (string_of_int (GA.CMap.cardinal cs.readCorrs)) ^ 
+                   (string_of_int (CMap.cardinal cs.readCorrs)) ^ 
                    "):");
     L.logStatus "-----";
-    printCorrMap cs.readCorrs
+    GA.printCorrMap cs.readCorrs printLockset;
   )
    
 (** Print the state (lock set and the guarded accesses) *) 
@@ -418,8 +422,8 @@ let printSizes k s =
     L.logStatus (prefix ^ 
                    (string_of_int (LS.S.cardinal locked)) ^ "\t" ^
                    (string_of_int (LS.S.cardinal unlocked)) ^ "\t" ^
-                   (string_of_int (GA.CMap.cardinal writes)) ^ "\t" ^ 
-                   (string_of_int (GA.CMap.cardinal reads)) ^ "\t\n")
+                   (string_of_int (CMap.cardinal writes)) ^ "\t" ^ 
+                   (string_of_int (CMap.cardinal reads)) ^ "\t\n")
   )
 
 
@@ -441,36 +445,7 @@ let simplifySummary (sum:summary) : simplerSummary =
   sum
     
 let desimplifySummary (simp:simplerSummary) : summary =
-  
-  let deSimplifyLoc (loc:location) : location =
-    CLv.distillLoc loc    
-  in
-  let deSimplifyState (st:simplerState) : state =
-    let ls = LS.unique st.lState in
-    let wCorrs = st.cState.writeCorrs in
-    GA.CMap.iter (fun lv corr ->
-                    corr.GA.corrLocks <- LS.unique corr.GA.corrLocks;
-                    corr.GA.corrLEmpty <- deSimplifyLoc corr.GA.corrLEmpty;
-                    corr.GA.corrAccess <- 
-                      GA.Locs.fold 
-                      (fun (k, l) s -> GA.Locs.add (k, deSimplifyLoc l) s) 
-                      corr.GA.corrAccess GA.Locs.empty;
-                 ) wCorrs;
-    let rCorrs = st.cState.readCorrs in
-    GA.CMap.iter (fun lv corr ->
-                    corr.GA.corrLocks <- LS.unique corr.GA.corrLocks;
-                    corr.GA.corrLEmpty <- deSimplifyLoc corr.GA.corrLEmpty;
-                    corr.GA.corrAccess <- 
-                      GA.Locs.fold
-                      (fun (k, l) s -> GA.Locs.add (k, deSimplifyLoc l) s) 
-                      corr.GA.corrAccess GA.Locs.empty;
-                 ) rCorrs;
-    makeState ls (makeCState (GA.cacheCM wCorrs) (GA.cacheCM rCorrs))
-  in
-  {
-    sum_in = deSimplifyState simp.sum_in;
-    sum_out = deSimplifyState simp.sum_out;
-  }
+  hcSummary simp
     
 let deserializeFromPath fkey path : summary * BS.dbToken=
   try 
@@ -498,8 +473,6 @@ let deserializeFromFile fname : summary =
 
 module RaceSumType = struct
 
-  let id = BS.makeSumType "rs"
-
   type t = summary
 
   type simpleSum = simplerSummary
@@ -510,26 +483,70 @@ module RaceSumType = struct
 
   let initVal = bottomSummary
 
+  let unknownSummary = emptySummary
+
 end
 
 module RaceSum = Safer_sum.Make (RaceSumType)
 
-class raceSummary = object (self)
-  inherit RaceSum.data
+(** Extension to the default summary class *)
 
-  method getMods fkey = 
+(****************** Use as mod summaries ************************)
+
+let listMods (st:state) =
+  CMap.fold
+    (fun lval corr curList ->
+       try
+         let scope = Lv.getScope lval in
+         (lval, scope) :: curList
+       with Scope.BadScope as e ->
+         L.logError "listMods: no scope annotation?";
+         raise e
+    )
+    st.cState.writeCorrs []
+
+let iterMods foo st =
+  CMap.iter 
+    (fun lval corr ->
+       let scope = Lv.getScope lval in
+       foo (lval, scope)
+    ) st.cState.writeCorrs
+
+
+let foldMods foo acc st =
+  CMap.fold 
+    (fun lval corr acc ->
+       let scope = Lv.getScope lval in
+       foo (lval, scope) acc
+    ) st.cState.writeCorrs acc
+
+class virtual corrAsMods = object (self)
+
+  method virtual find : fKey -> summary
+
+  method private findTestSum fkey =
     let sum = self#find fkey in
     if isBottomSummary sum then
-      raise Modsummary.BottomSummary
+      raise Modsummaryi.BottomSummary
     else
-      let outSt = sum.sum_out in
-      listMods outSt
+      sum.sum_out
+
+  method getMods fkey = 
+    let outSt = self#findTestSum fkey in
+    listMods outSt
+
+  method iterMods fkey foo =
+    let outSt = self#findTestSum fkey in
+    iterMods foo outSt
+
+  method foldMods : 'a . fKey -> (Lv.aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a =
+    fun fkey foo acc ->
+      let outSt = self#findTestSum fkey in
+      foldMods foo acc outSt
 
 end
 
-let sum = new raceSummary
 
-let _ = BS.registerType (sum :> RaceSum.data)
 
 (*************************************************
  * Initialization, parsing of the config file 
@@ -579,16 +596,16 @@ let lockset_from_string (descrip:string) =
         in
         let scope = try 
           if (scp.[0] == 'f') then
-            SFormal (int_of_string (Str.string_after scp 1))
+            Scope.SFormal (int_of_string (Str.string_after scp 1))
           else if (scp.[0] == 'g') then
-            SGlobal
+            Scope.SGlobal
           else begin
             informError();
-            SGlobal
+            Scope.SGlobal
           end
         with Failure f ->
           informError();
-          SGlobal
+          Scope.SGlobal
         in
         let lv, lock = makeSimpleLock name scope protType in 
         if (op.[0] == '+') then
@@ -632,81 +649,82 @@ let lockset_from_string (descrip:string) =
     Used for bootstrapping summaries for missing (as in, we don't have
     the source) or base functions. TODO: implement (didn't need it yet) *)
 let straints_from_string (descrip:string) = 
-  GA.CMap.empty
+  CMap.empty
 
 
-let initSummaries settings cg = begin
-  (* TODO: just build a reverse map and use that *)
-  let fKey_of_fNT (fn,ft) =
+class raceSummary sumID  = object (self)
+  inherit RaceSum.data sumID as super
+  inherit corrAsMods
+
+  method private fKey_of_fNT cg (fn, ft) =
     FMap.fold
       (fun fid fnode curResults ->
-         if (compareNT (fn,ft) (fnode.name, fnode.typ) == 0) then
-           fid :: curResults
-         else
-           curResults
-        ) cg []
-  in
-  (* Initialize summaries based on config file *)
-  let lockSettings = Config.getGroup settings "LOCK_FUNCS" in
-  Config.iter
-    (fun funcName details ->
-       let fields = topSplitter details in
-       match fields with
-         typString :: locks :: corrSet :: [] ->
-           (* Make a new summary *)
-           let ls = lockset_from_string locks in
-           let straints = straints_from_string corrSet in
-           let fids = fKey_of_fNT (funcName, typString) in
-           List.iter 
-             (fun fkey ->
-                (* Don't analyze functions w/ pre-specified summaries *)
-                BS.setFinal fkey RaceSumType.id;
-                (* Add the pre-specified summary *)
-                let newSumm = try
-                  (* If there's an existing entry *)
-                  let exSumm = sum#find fkey in
-                  { exSumm with 
-                      sum_out = (combineStates exSumm.sum_out 
-                                   (makeState ls 
-                                      (makeCState straints GA.CMap.empty)));
-                  }
-                with Not_found ->
-                  (* otherwise, make a new entry *)
-                  { sum_in = emptyState;
-                    sum_out = makeState ls 
-                      (makeCState straints GA.CMap.empty);
-                  }
-                in
-                sum#addReplace fkey newSumm;
-             ) fids;
+         (*         if (compareNT (fn,ft) (fnode.name, fnode.typ) == 0) then *)
+         if fn = fnode.name then fid :: curResults
+         else curResults
+      ) cg []
+      
+  method initSummaries settings cg = begin
+    (* Initialize summaries based on config file *)
+    initialized <- true;
+    let lockSettings = Config.getGroup settings "LOCK_FUNCS" in
+    Config.iter
+      (fun funcName details ->
+         let fields = topSplitter details in
+         match fields with
+           typString :: locks :: corrSet :: [] ->
+             (* Make a new summary *)
+             let ls = lockset_from_string locks in
+             let straints = straints_from_string corrSet in
+             let fids = self#fKey_of_fNT cg (funcName, typString) in
+             List.iter 
+               (fun fkey ->
+                  (* Don't analyze functions w/ pre-specified summaries *)
+                  BS.setFinal fkey (self#sumTyp);
+                  (* Add the pre-specified summary *)
+                  let newSumm = try
+                    (* If there's an existing entry *)
+                    let exSumm = self#find fkey in
+                    L.logError ("Multiple lock summaries for " ^ 
+                                  string_of_fkey fkey);
+                    { exSumm with 
+                        sum_out = (combineStates exSumm.sum_out 
+                                     (makeState ls 
+                                        (makeCState straints CMap.empty)));
+                    }
+                  with Not_found ->
+                    (* otherwise, make a new entry *)
+                    { sum_in = emptyState;
+                      sum_out = makeState ls 
+                        (makeCState straints CMap.empty);
+                    }
+                  in
+                  self#addReplace fkey newSumm;
+               ) fids;
          | _ -> L.logError ~prior:0
              ("corrupt lock summary (from config) " ^ details);
-    ) lockSettings;
-  (* Initialize the rest of the summaries for functions w/ no bodies *)
-  FMap.iter 
-    (fun k n ->
-       if (n.hasBody) then
-           () (* leave a missing entry *)
-       else begin
-         (* no def/body for the func, so just set to empty/done *)
-         if not (BS.isFinal k RaceSumType.id) then begin
-           sum#addReplace k emptySummary;
-           BS.setFinal k RaceSumType.id;
-         end
-       end
-    ) cg
+      ) lockSettings;
+    (* Initialize the rest of the summaries for functions w/ no bodies *)
+    super#initSummaries settings cg
+      
+  end 
+    
 end
 
+let sum = new raceSummary (BS.makeSumType "rs")
 
+let _ = BS.registerType (sum :> RaceSum.data)
 
-let printSummary k =
-  let summ = sum#find k in
+let printSummary fkey summ =
   if (isBottomSummary(summ)) then
     L.logStatus ("$BOTTOM")
   else begin
     (* Only print the sizes when running on linux (reduce log space) *)
-    (*      printState summ.sum_out; *)
-    printSizes k summ.sum_out;
-    ()
+    if !verboseSum
+    then (printSizes fkey summ.sum_out; printState summ.sum_out)
+    else printSizes fkey summ.sum_out
   end
 
+let findPrintSumm fkey =
+  let summ = sum#find fkey in
+  printSummary fkey summ

@@ -34,6 +34,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 *)
+
 (** Module that handles requests between the server and the worker processes. 
     - client requests work
     - client notifies server of work completion
@@ -45,7 +46,7 @@
 open Messages
 open Unix
 open Fstructs
-open Scc
+open Scc_cg
 open Scp
 open Stdutil
 open Warn_reports
@@ -134,40 +135,6 @@ let quit exit_code =
 
 (**************** request operations *************)
 
-(* 
-class virtual reqHandler = object (self)
-
-  method virtual initServer : unit -> int
-
-  method virtual getSCCWork : 'a. unit -> 'a message
-
-  method virtual sccDone : scc -> (fKey * string) list -> unit
-    
-  method virtual requestSumm : fKey list -> (fKey * BS.dbToken) list
-    
-  method virtual requestData : string -> string -> unit
-    
-  method virtual reqWarnBarrier : int -> unit
-    
-  method virtual lockWarn : 'a. fKey -> fKey -> 'a message
-    
-  method virtual unlockWarn : fKey -> fKey -> unit
-    
-  method virtual notifyWarn : 'a . (#warnReports as 'a) -> unit
-
-  method virtual notifyRace : RP.raceTable -> unit
-
-(*
-  method virtual notifyRace : RP.raceReports -> unit
-*)
-
-(* if client converts report to string first, required buffer is too large *)
-
-end 
-
-*)
-
-
 (***** Helper functions for Socket-based implementation *****)
 
 let userName = ref ""
@@ -222,276 +189,227 @@ exception SummariesNotFound
 
 (** Request handler that communicates w/ server through sockets *)
 
-(*
-class sockBasedReqHandler = object (self)
-  inherit reqHandler 
-*)
+(** Initialize communication between client and server. Server
+  assigns the same Run Number / Generation Num to all workers *)
+let initServer () : int =
+  try
+    match sendMessage MInit with
+      MInitReply i -> i
+    | _ -> 
+        L.logError ("initServer: failed, shutting down");
+        quit 1
+  with Unix_error (e, _, _) ->
+    L.logError ("initServer: failed - " ^ (error_message e));
+    quit 1
+      
+(** Ask server for the next SCC available for analysis *)
+let getSCCWork () =
+  try
+    sendMessage MReqSCCWork
+  with Unix_error (em, _, _) as e ->
+    L.logError ("getSCCWork: failed - " ^ (error_message em));
+    raise e
 
-  (** Initialize communication between client and server. Server
-      assigns the same Run Number / Generation Num to all workers *)
-  let initServer () : int =
-    try
-      match sendMessage MInit with
-        MInitReply i -> i
-      | _ -> 
-          L.logError ("initServer: failed, shutting down");
-          quit 1
-    with Unix_error (e, _, _) ->
-      L.logError ("initServer: failed - " ^ (error_message e));
-      quit 1
-    
-  (** Ask server for the next SCC available for analysis *)
-  let getSCCWork () =
-    try
-      sendMessage MReqSCCWork
-    with Unix_error (em, _, _) as e ->
-      L.logError ("getSCCWork: failed - " ^ (error_message em));
-      raise e
-
-  (** Inform server that the [scc] is now complete, and summaries
-      for its functions are located at [summPaths] *)
-  let sccDone scc summPaths =
-    try
-      match sendMessage (MNotiSCCDone 
-                           (scc, !userName, !myAddr, summPaths)) with
-        MSuccess -> ()
-      | _ ->
-          L.logError ("sccDone: failed");
-    with Unix_error (em, _, _) as e->
-      L.logError ("sccDone: failed - " ^ (error_message em));
-      raise e
-
-
-  (** Ask the server where summaries for the requested functions 
-      and analyses ([reqs]) can be found.
-      TODO: modify server_socket.ml and distributed.ml to correlate the
-      location of the summary w/ fKey + sumType also *)
-  let askServerForPeers reqs =
-    (* Hack for now... *)
-    let reqs = List.map (fun (fKey, sumTyp) -> fKey) reqs in
-    match sendMessage (MReqSum reqs) with
-      MReplySum table -> 
-        table
+(** Inform server that the [scc] is now complete, and summaries
+  for its functions are located at [summPaths] *)
+let sccDone scc summPaths =
+  try
+    match sendMessage (MNotiSCCDone 
+                         (scc, !userName, !myAddr, summPaths)) with
+      MSuccess -> ()
     | _ ->
-        L.logError ("askServerForPeers: failed (unexpected reply)");
-        raise SummariesNotFound
+        L.logError ("sccDone: failed");
+  with Unix_error (em, _, _) as e->
+    L.logError ("sccDone: failed - " ^ (error_message em));
+    raise e
 
 
-  (** Download the requested summaries. *)
-  let requestSumm (reqs : (fKey * BS.sumType) list) : 
-      (fKey * BS.sumType * BS.dbToken) list =
-    (* Track the locations of successfully downloaded function summaries *)
-    let (succeeded : (fKey * BS.sumType * BS.dbToken) list ref) = ref [] in
-    let addToSucceeded tok fname =
-      let k = BS.key_of_name fname in
-      let sumT = BS.stype_of_name fname in
-      (* TODO: get the type of summary from the fname as well, or think
-         of how to pass the original fkey + sumtype *)
-      succeeded := (* may be fed same key multiple times for diff summs *)
+(** Ask the server where summaries for the requested functions 
+    and analyses ([reqs]) can be found. 
+    TODO: modify server_socket.ml and distributed.ml to correlate the 
+    location of the summary w/ fKey + sumType also *)
+let askServerForPeers reqs =
+  (* Hack for now... TODO: carry the sumType also *)
+  let projectKey keysAndTypes = 
+    List.fold_left (fun cur (fKey, _) -> Stdutil.addOnce cur fKey) [] reqs
+  in
+  let projectTypes keysAndTypes =
+    List.fold_left (fun cur (_, sumTyp) -> Stdutil.addOnce cur sumTyp) [] reqs
+  in
+  let attachTypes keysTable sumTypes =
+    let newTable = Hashtbl.create 13 in
+    Hashtbl.iter 
+      (fun (srcUser, srcAddr) (keyPaths : (fKey * string) list) ->
+         let fullPaths = 
+           List.fold_left 
+             (fun cur (key, path) ->
+                List.fold_left 
+                  (fun cur sumTyp ->
+                     ((BS.getBasename key sumTyp), path) :: cur
+                  ) cur sumTypes
+             ) [] keyPaths in
+         Hashtbl.add newTable (srcUser, srcAddr) fullPaths
+      ) keysTable;
+    newTable
+  in
+  let reqs = projectKey reqs in
+  match sendMessage (MReqSum reqs) with
+    MReplySum table -> 
+      attachTypes table (projectTypes reqs)
+  | _ ->
+      L.logError ("askServerForPeers: failed (unexpected reply)");
+      raise SummariesNotFound
+
+
+(** Download the requested summaries. *)
+let requestSumm (reqs : (fKey * BS.sumType) list) : 
+                   (fKey * BS.sumType * BS.dbToken) list =
+
+  (* Track the locations of successfully downloaded function summaries *)
+  let (succeeded : (fKey * BS.sumType * BS.dbToken) list ref) = ref [] in
+  let addToSucceeded tok fname =
+    let k = BS.key_of_name fname in
+    let sumT = BS.stype_of_name fname in
+    (* TODO: get the type of summary from the fname as well, or think
+     of how to pass the original fkey + sumtype *)
+    succeeded := (* may be fed same key multiple times for diff summs *)
         if (List.exists (fun (k', t', _) -> k = k' && sumT = t') !succeeded) 
         then !succeeded
         else (k, sumT, tok) :: !succeeded
-    in
+  in
 
-    (* Copy from one peer identified as ([srcUser], [srcAddr]) all
-       the function summaries known to be stored 
-       (as tracked by [keyPaths]) *)
-    let doPeer (srcUser, srcAddr) (keyPaths : (fKey * string) list) =
-      (* just pick a random destination path to download all summs *)
-      let dest, tok = BS.anyDBPath () in
-      let dest = if (Filename.is_relative dest) then
-        Filename.concat cwd dest
-      else
-        dest in
+  (* Copy from one peer identified as ([srcUser], [srcAddr]) all
+   the function summaries known to be stored 
+   (as tracked by [keyPaths]) *)
+  let doPeer (srcUser, srcAddr) (srcs : (string * string) list) =
+    (* just pick a random destination path to download all summs *)
+    let dest, tok = BS.anyDBPath () in
+    let dest = if (Filename.is_relative dest) 
+    then Filename.concat cwd dest
+    else dest in
       
-      (* get actual filenames for each fkey requested *)
-      let srcs = List.fold_left 
-        (fun l (fkey, path) ->
-           let names = BS.possibleNames fkey in
-           List.rev_append (List.map (fun n -> (n, path)) names) l
-        ) [] keyPaths in
-      
-      (* Try to use file server to acquire summaries *)
-      let doneFS = Stat.time "scp" 
-        (FS.requestFiles srcAddr srcs) dest in
-      
-      (* If any are left, use scp *)
-      let notDone = List.filter 
-        (fun (fname, _) -> 
-           not (List.exists (fun other -> fname = other) doneFS)
-        ) srcs in
-      let doneSCP = 
-        if (notDone != []) then
-          (L.logError "requestSumm: resorting to scp";
-           Stat.time "scp" 
-             (fun dest ->
-                match batchScp (srcUser, srcAddr) notDone dest with
-                  (0, _) -> 
-                    (* on normal exit: assume all succeeded *)
-                    List.map (fun (n, _) -> n) notDone
-                | (_, comm) ->
-                    L.logError ("requestSumm scp failed: " ^ comm);
-                    []
-             ) dest
-          )
-        else []
-      in
-      
-      (* Track final set of completed keys *)
-      List.iter (addToSucceeded tok) doneFS;
-      List.iter (addToSucceeded tok) doneSCP;
-    in  (* end doPeer *)
+    (* Try to use file server to acquire summaries *)
+    let doneFS = Stat.time "scp" 
+      (FS.requestFiles srcAddr srcs) dest in
     
-    (* Coordinate transfers from all the peers *)
-    let getFromPeers table =
-      (* reply is a table of peers + the files the peer has  *)
-      Hashtbl.iter doPeer table;
-      
-      (* Warn if things aren't acquired! *)
-      let lenR = List.length reqs in
-      let lenS = List.length !succeeded in
-      if (lenR <> lenS) then (
-        L.logError ("requestSumm: Asked for " ^ (string_of_int lenR) ^ 
-                      " sums, got " ^ (string_of_int lenS) ^ "\n");
-        List.iter 
-          (fun (reqFkey, reqStyp) ->
-             (* TODO: check the reqStyp also *)
-             if (not (List.exists (fun (fk, st, tok) -> reqFkey = fk) 
-                        !succeeded)) 
-             then L.logError ("Missing: " ^ (string_of_fkey reqFkey))) reqs;
-        raise SummariesNotFound
-      );
-      
-      (* Finally, return the list of summaries that were acquired,
-         along with the local location in which they were stored   *)
-      !succeeded
-    in (* end getFromPeers *)
-
-    let t = 
-      try askServerForPeers reqs
-      with Unix_error (e, _, _) ->
-        L.logError ("requestSumm: server error - " ^ (error_message e));
-        raise SummariesNotFound
+    (* If any are left, use scp *)
+    let notDone = List.filter 
+      (fun (fname, _) -> 
+         not (List.exists (fun other -> fname = other) doneFS)
+      ) srcs in
+    let doneSCP = 
+      if (notDone != []) then
+        (L.logError "requestSumm: resorting to scp";
+         Stat.time "scp" 
+           (fun dest ->
+              match batchScp (srcUser, srcAddr) notDone dest with
+                (0, _) -> 
+                  (* on normal exit: assume all succeeded *)
+                  List.map (fun (n, _) -> n) notDone
+              | (_, comm) ->
+                  L.logError ("requestSumm scp failed: " ^ comm);
+                  []
+           ) dest
+        )
+      else []
     in
-    getFromPeers t
+    
+    (* Track final set of completed keys *)
+    List.iter (addToSucceeded tok) doneFS;
+    List.iter (addToSucceeded tok) doneSCP;
+  in  (* end doPeer *)
+  
+  (* Coordinate transfers from all the peers *)
+  let getFromPeers table =
+    (* reply is a table of peers + the files the peer has  *)
+    Hashtbl.iter doPeer table;
+    
+    (* Warn if things aren't acquired! *)
+    let lenR = List.length reqs in
+    let lenS = List.length !succeeded in
+    if (lenR <> lenS) then (
+      L.logError ("requestSumm: Asked for " ^ (string_of_int lenR) ^ 
+                    " sums, got " ^ (string_of_int lenS) ^ "\n");
+      List.iter 
+        (fun (reqFkey, reqStyp) ->
+           (* TODO: check the reqStyp also *)
+           if (not (List.exists (fun (fk, st, tok) -> reqFkey = fk) 
+                      !succeeded)) 
+           then 
+             L.logError ("Missing: " ^ (string_of_fkey reqFkey) ^ " " 
+                         ^ BS.string_of_sumType reqStyp)) reqs;
+      raise SummariesNotFound
+    );
+    
+    (* Finally, return the list of summaries that were acquired,
+       along with the local location in which they were stored   *)
+    !succeeded
+  in (* end getFromPeers *)
 
-
-  (** Request that the server coordinate transfer of file [fname] to
-      the local [destPath]. Meant to be used for AST files, etc. 
-      This means [fname] is relative to the callgraph / AST directory.
-      UNTESTED!!! *)
-  let requestData fname destPath =
-    try
-      match sendMessage (MReqData (fname, destPath)) with
-        MSuccess -> ()
-      | _ -> L.logError ("requestData: failed");
-    with Unix_error (em, _, _) as e ->
-      L.logError ("requestData: failed - " ^ (error_message em));
-      raise e
-
-  (** Request to begin the warning generation phase, indicating that
-      [num] pairs of function roots are to be compared.
-      TODO: Have server assign work, so [num] may be phased-out *)
-  let reqWarnBarrier num = 
-    try
-	  match sendMessage (MWarnBarrier num) with
-	    MSuccess -> ()
-	  | _ -> L.logError ("reqWarnBarrier: failed");
-    with Unix_error (em, _, _) as e ->
-	  L.logError ("reqWarnBarrier: failed - " ^ (error_message em));
-      raise e
-
-  (** Request from this worker that warnings be checked for the
-      function pair ([fk1], [fk2]) *)
-  let lockWarn (fk1:fKey) (fk2:fKey) =
-    try
-      sendMessage (MLockWarn (fk1, fk2))
+  let t = 
+    try askServerForPeers reqs
     with Unix_error (e, _, _) ->
-      L.logError ("lockWarn: failed - " ^ (error_message e));
-      MFail
-
-  (** Inform server that this worker has checked function pair ([fk1], [fk2]) *)
-  let unlockWarn fk1 fk2 =
-    try
-      match sendMessage (MUnlockWarn (fk1, fk2)) with
-        MSuccess -> ()
-      | _ -> L.logError ("unlockWarn: failed");
-    with Unix_error (em, _, _) as e ->
-      L.logError ("unlockWarn: failed - " ^ (error_message em));
-      raise e
+      L.logError ("requestSumm: server error - " ^ (error_message e));
+      raise SummariesNotFound
+  in
+  getFromPeers t
 
 
-(*
-  let notifyWarn warnData =
-    try
-      match sendMessage (MNotiWarn warnData) with
-        MSuccess -> ()
-      | _ -> L.logError ("notifyWarn: failed");
-    with Unix_error (em, _, _) as e ->
-      L.logError ("notifyWarn: failed - " ^ (error_message em));
-      raise e
-*)
-
-  (** Send server all the data-race warnings found by this worker *)
-  let notifyRace warnData =
-    try
-      match sendMessage (MNotiRace warnData) with
-        MSuccess -> ()
-      | _ -> L.logError ("notifyRace: failed");
-    with Unix_error (em, _, _) as e ->
-      L.logError ("notifyRace: failed - " ^ (error_message em));
-      raise e
-
-(*
-end (* end socket-based req handler *)
-*)
-
-
-
-(******* External interface for request satisfaction *******)
-
-(* (Skipped right to it (above)... previous class had trouble compiling
-   when using the patched ocaml compiler that tracks memory usage
-
-
-let handler = new sockBasedReqHandler
-
-let initServer () =
-  handler#initServer ()
-
-let getSCCWork () =
-  Stat.time "Req getScc" handler#getSCCWork ()
-
-let sccDone scc summPaths =
-  Stat.time "Req sccDone" (handler#sccDone scc) summPaths
-
-let requestSumm req =
-  handler#requestSumm req 
-
+(** Request that the server coordinate transfer of file [fname] to
+    the local [destPath]. Meant to be used for AST files, etc. 
+    This means [fname] is relative to the callgraph / AST directory.
+    UNTESTED!!! *)
 let requestData fname destPath =
-  handler#requestData fname destPath
-
+  try
+    (match sendMessage (MReqData (fname, destPath)) with
+       MSuccess -> ()
+     | _ -> L.logError ("requestData: failed");
+    )
+  with Unix_error (em, _, _) as e ->
+    L.logError ("requestData: failed - " ^ (error_message em));
+    raise e
+      
+(** Request to begin the warning generation phase, indicating that
+    [num] pairs of function roots are to be compared.
+    TODO: Have server assign work, so [num] may be phased-out *)
 let reqWarnBarrier num = 
-  handler#reqWarnBarrier num
+  try
+    (match sendMessage (MWarnBarrier num) with
+       MSuccess -> ()
+     | _ -> L.logError ("reqWarnBarrier: failed");
+    )
+  with Unix_error (em, _, _) as e ->
+    L.logError ("reqWarnBarrier: failed - " ^ (error_message em));
+    raise e
+      
+(** Request from this worker that warnings be checked for the
+  * function pair ([k1], [k2])*)
+let lockWarn (k1:root) (k2:root) =
+  try
+    sendMessage (MLockWarn (k1, k2))
+  with Unix_error (e, _, _) ->
+    L.logError ("lockWarn: failed - " ^ (error_message e));
+    MFail
 
-
-let lockWarn fk1 fk2 =
-  handler#lockWarn fk1 fk2
-
-
+(** Inform server that this worker has checked the given root pair *)
 let unlockWarn fk1 fk2 =
-  handler#unlockWarn fk1 fk2
+  try
+    match sendMessage (MUnlockWarn (fk1, fk2)) with
+      MSuccess -> ()
+    | _ -> L.logError ("unlockWarn: failed");
+  with Unix_error (em, _, _) as e ->
+    L.logError ("unlockWarn: failed - " ^ (error_message em));
+    raise e
 
-
-let notifyWarn (warnData : #warnReports) =
-  handler#notifyWarn warnData
-
-
-let notifyRace warnData = 
-  handler#notifyRace warnData
-
-*)
-
+(** Send server all the data-race warnings found by this worker *)
+let notifyRace warnData =
+  try
+    match sendMessage (MNotiRace warnData) with
+      MSuccess -> ()
+    | _ -> L.logError ("notifyRace: failed");
+  with Unix_error (em, _, _) as e ->
+    L.logError ("notifyRace: failed - " ^ (error_message em));
+    raise e
 
 (***** Clear out the local scratch directory *******)
 

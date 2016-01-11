@@ -792,6 +792,7 @@ and location = {
     byte: int;             (** The byte position in the source file *)
 }
 
+
 (* Type signatures. Two types are identical iff they have identical 
  * signatures *)
 and typsig = 
@@ -802,6 +803,17 @@ and typsig =
   | TSEnum of string * attribute list
   | TSBase of typ
 
+(** Describe a unique program point within "current" function 
+    as a stmt id and the instruction index within a basic block.
+    This can only be used once a CFG is created. Also, if the
+    CFG is recomputed, it must assign the same stmt ids.
+
+    A value of -1 for either means unknown / inapplicable
+*)
+type prog_point = {
+  pp_stmt : int;
+  pp_instr: int;
+}
 
 
 (** To be able to add/remove features easily, each feature should be package 
@@ -848,6 +860,17 @@ let compareLoc (a: location) (b: location) : int =
     if linecmp != 0 
     then linecmp
     else a.byte - b.byte
+
+let ppUnknown = { pp_stmt = -1; pp_instr = -1; }
+
+let comparePP a b = 
+  let c = a.pp_stmt - b.pp_stmt in
+  if c == 0 then a.pp_instr - b.pp_instr
+  else c
+
+(** The current program point (only makes sense within CFGs) *)
+let curProgPoint = ref ppUnknown
+
 
 let argsToList : (string * typ * attributes) list option 
                   -> (string * typ * attributes) list 
@@ -923,9 +946,15 @@ class type cilVisitor = object
     (** Invoked on each offset appearing in the list of a 
       * CompoundInit initializer.  *)
 
+  method vinstStart : instr list -> unit
+    (** Notify user that a list of instructions is about to be visited *)
+
   method vinst: instr -> instr list visitAction 
     (** Invoked on each instruction occurrence. The [ChangeTo] action can 
      * replace this instruction with a list of instructions *)
+
+  method vinstEnd : instr list -> unit
+    (** Notify user that visitation hours for the instruction list are over *)
 
   method vstmt: stmt -> stmt visitAction        
     (** Control-flow statement. *)
@@ -969,7 +998,9 @@ class nopCilVisitor : cilVisitor = object
                                                          * field)  *)
   method voffs (o:offset) = DoChildren      (* lval or recursive offset *)
   method vinitoffs (o:offset) = DoChildren  (* initializer offset *)
+  method vinstStart (il:instr list) = ()
   method vinst (i:instr) = DoChildren       (* imperative instruction *)
+  method vinstEnd (il:instr list) = ()
   method vstmt (s:stmt) = DoChildren        (* constrol-flow statement *)
   method vblock (b: block) = DoChildren
   method vfunc (f:fundec) = DoChildren      (* function definition *)
@@ -1047,13 +1078,50 @@ let rec get_stmtLoc (statement : stmtkind) =
     | TryExcept (_, _, _, l) -> l
 
 
+
+(** Get the current program point (for the current function) *)
+let getCurrentPP () =
+  !curProgPoint
+
+
+(** Get the prog_point associated with the given statement *)
+let getStmtPP s =
+  { pp_stmt = s.sid; pp_instr = -1; }
+
+
+(** Get the prog_point associated with the given instruction, index,
+    and the given prog_point of the parent statement *)
+let getInstrPP stmtPP instr index =
+  { stmtPP with pp_instr = index; }
+
+
+(** @return Some(sid) if the pp is for a stmt, and not an instr.
+    If it was for an instr, return None *)
+let isStmtPP pp =
+  if pp.pp_instr != -1 then None
+  else Some (pp.pp_stmt)
+
+
+(** Update current location and prog_point for given current stmt *)
+let setStmtLocation s =
+  currentLoc := get_stmtLoc s.skind;
+  curProgPoint := getStmtPP s
+
+
+(** Update location for current instruction (within current stmt).
+    Assumes parent stmt has already been visited  *)
+let setInstrLocation instr instrIndex =
+  currentLoc := get_instrLoc instr;
+  curProgPoint := getInstrPP !curProgPoint instr instrIndex
+
+
 (* The next variable identifier to use. Counts up *)
 let nextGlobalVID = ref 1
 
 let setNextVID x =
   nextGlobalVID := x
 
-(* The next compindo identifier to use. Counts up. *)
+(* The next compinfo identifier to use. Counts up. *)
 let nextCompinfoKey = ref 1
 
 let setNextCKey x =
@@ -1065,7 +1133,10 @@ let d_loc (_: unit) (loc: location) : doc =
 
 let d_thisloc (_: unit) : doc = d_loc () !currentLoc
 
-let error (fmt : ('a,unit,doc) format) : 'a = 
+let d_pp () (pp: prog_point) : doc =
+  text "sid: " ++ num pp.pp_stmt ++ text " instr: " ++ num pp.pp_instr
+
+let error (fmt : ('a,unit,doc) format) : 'a =
   let f d = 
     E.hadErrors := true; 
     ignore (eprintf "@!%t: Error: %a@!" 
@@ -1877,6 +1948,11 @@ let isPointerType t =
 let isFunctionType t = 
   match unrollType t with
     TFun _ -> true
+  | _ -> false
+
+let isStructType t =
+  match unrollType t with
+    TComp _ -> true
   | _ -> false
 
 (**** Compute the type of an expression ****)
@@ -4835,7 +4911,9 @@ and childrenStmt (toPrepend: instr list ref) (vis:cilVisitor) (s:stmt): stmt =
         (* Don't do stmts, but we better not change those *)
         if e' != e || b' != b then Switch (e', b', stmts, l) else s.skind
     | Instr il -> 
+        vis#vinstStart il;
         let il' = mapNoCopyList fInst il in
+        vis#vinstEnd il;
         if il' != il then Instr il' else s.skind
     | Block b -> 
         let b' = fBlock b in 
@@ -4848,7 +4926,9 @@ and childrenStmt (toPrepend: instr list ref) (vis:cilVisitor) (s:stmt): stmt =
         let b' = fBlock b in
         assertEmptyQueue vis;
         (* visit the instructions *)
+        vis#vinstStart il;
         let il' = mapNoCopyList fInst il in
+        vis#vinstEnd il;
         (* Visit the expression *)
         let e' = fExp e in
         let il'' = 
