@@ -42,11 +42,12 @@
     treated as constraints in the actual points-to analysis *)
 
 open Cil
+open Pretty
 open Filetools
 open Pta_types
+open Logging
 
 module HC = Simplehc
-module D = Cildump
 
 
 (*************** State management **************)
@@ -68,19 +69,23 @@ let combineFunInfo oldInfo newInfo =
     if oldInfo.funFormals = [] then newInfo.funFormals 
     else if newInfo.funFormals = [] then oldInfo.funFormals
     else if newInfo.funFormals <> oldInfo.funFormals then begin
-      prerr_string 
-        ("combineFunInfo formals diff: " ^ string_of_int oldInfo.funId ^ "\n");
+      let vi = Cilinfos.getVarinfo oldInfo.funId in
+      logErrorF "combineFunInfo formals diff: %s:%d\n" vi.vname oldInfo.funId;
+      let oldD = d_fun_formals oldInfo.funFormals ++ line in
+      let newD = d_fun_formals newInfo.funFormals ++ line in
+      logErrorD oldD;
+      logErrorD newD;
       oldInfo.funFormals
     end else oldInfo.funFormals
   in
   let ftype = 
     if compareType oldInfo.funType newInfo.funType == 0 
-    then oldInfo.funType else begin
-      prerr_string 
-        ("combineFunInfo ftype diff: " ^ string_of_int oldInfo.funId ^ "\n");
-      prerr_string 
-        ("old: " ^ string_of_type oldInfo.funType ^ 
-           " new: " ^ string_of_type newInfo.funType ^ "\n");
+    then oldInfo.funType 
+    else begin
+      logErrorF "combineFunInfo ftype diff: %d\n" oldInfo.funId;
+      logErrorF "old: %s\nnew: %s\n" 
+        (string_of_type oldInfo.funType)
+        (string_of_type newInfo.funType);
       oldInfo.funType 
     end in
   { oldInfo with funFormals = fformals; funType = ftype; }
@@ -417,7 +422,7 @@ let analyzeCall retopt fexpr actuals loc =
        match rv.HC.node with
          PLv lv -> lv :: curL
        | _ -> 
-           prerr_string "ignoring call expr that's not an lval\n";
+           logError "ignoring call expr that's not an lval";
            curL
     ) [] callRvs in
   let ctyp = Cil_lvals.typeOfUnsafe fexpr in
@@ -439,21 +444,6 @@ let analyzeCall retopt fexpr actuals loc =
      | None ->
          args) in
   let args = List.rev args in
-
-(*
-  (* DEBUG call before simplifiers are applied *)
-  begin
-    print_string ("Constraint for call: " ^ (D.string_of_exp fexpr) ^ " @ " ^
-                    (D.string_of_loc loc) ^ "\n");
-    List.iter 
-      (fun (rvs, index) ->
-         print_string ("   " ^ string_of_int index ^ ": ");
-         List.iter (fun rv -> print_string (string_of_ptaRv rv ^ ", ")) rvs;
-         print_string "\n";
-      ) args;
-    print_string "\n";
-  end;
-*)
   newCall (cinfo, args)
 
 
@@ -534,7 +524,7 @@ let analyze_function (f : fundec ) : unit =
             };
   addFunInfo !curFun;
   
-  print_string ("Analyzing function " ^ f.svar.vname ^ "\n");
+  logStatusF "Analyzing function %s\n" f.svar.vname;
   analyze_block f.sbody
     
     
@@ -576,7 +566,7 @@ let analyze_global (g : global ) : unit =
 
 
 let analyze_file (f : file) : unit =
-  print_string ("Analyzing file " ^ f.fileName ^ "\n");
+  logStatusF "Analyzing file %s\n" f.fileName;
   iterGlobals f analyze_global
 
 
@@ -599,13 +589,22 @@ let singleConsFile = "__pta_constraints"
 let getConstraintFile root =
   (Filename.concat root singleConsFile)
 
+let stateExists root = 
+  let consFile = getPTAFile (getConstraintFile root) in
+  Sys.file_exists consFile
+    
 (** Compile constraints and place them all in one single file *)
 let analyzeAllInOne (root :string) : unit =
-  initState ();
-  Filetools.walkDir
-    (fun ast file ->
-       analyze_file ast;
-    ) root;
-  saveState (getConstraintFile root);
-  initState ()
-
+  if stateExists root then begin
+    logStatus "Constraints already exist. Skipping Compilation!!!"
+  end else begin
+    logStatus "Constraints do not yet exist. Compiling constraints!!!";
+    initState ();
+    Filetools.walkDir
+      (fun ast file ->
+         analyze_file ast;
+      ) root;
+    saveState (getConstraintFile root);
+    initState ()
+  end
+    

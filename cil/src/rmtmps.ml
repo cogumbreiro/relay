@@ -504,7 +504,7 @@ class markReachableVisitor
 
               (* to recurse, we must ask explicitly *)
 	      let recurse f = visitType f.ftype in
-	      List.iter recurse c.cfields;
+	      List.iter recurse (!getCfields c);
 	      visitAttrs attrs;
 	      visitAttrs c.cattr
 	    end;

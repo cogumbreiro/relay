@@ -12,6 +12,8 @@ module type NodeInfo = sig
 
   val iterNeighs : (id -> unit) -> id -> unit
 
+  val clearState : unit -> unit 
+
 end
 
 
@@ -30,7 +32,18 @@ module CycleDetector (N:NodeInfo) = struct
        let hash x = N.hashID x
      end) 
 
-  let bookkeeping = NH.create 17
+  (* Maybe make this an array... clearing is "expensive" if search is sparse.
+
+     (64 bits for the 2 ints * 100000 nodes == 25MB of crap 
+     to crawl per round of clearing... takes too long / wouldn't want
+     to reallocate that!)
+
+     Or keep a list of accessed indexes and clear just those ? 
+     
+     Also... OfflineNode doesn't use int as ID...
+  *)
+
+  let bookkeeping = NH.create 17 
   let sccStack = Stack.create ()
   let stackHeight = ref 0
   let curIndex = ref 0
@@ -43,6 +56,7 @@ module CycleDetector (N:NodeInfo) = struct
     stackHeight := 0;
     NH.clear bookkeeping;
     curIndex := 0;
+    N.clearState ();
   end
 
   let getInfo id = 

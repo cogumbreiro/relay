@@ -41,17 +41,14 @@
 
 open Cil
 open Callg
-open Messages
 open Manage_sums
 open Warn_reports
 open Logging
 
 module RP = Race_reports
 module LS = Lockset
-module BS = Backed_summary
-module RS = Racesummary
+module RS = Racestate.RS
 module SPTA = Racestate.SPTA
-module Req = Request
 module Stat = Mystats
 module Lv = Lvals
 
@@ -60,8 +57,11 @@ module Lv = Lvals
 
 let warnRepLock = ref false
 let localRaces = new RP.raceReports ()
+
+(*
 let localRaces2 = new RP.RaceWarnOut.report 
   ~maxWarningsPerKey:5 ~limitWarnings:true ()
+*)
 
 let makeLockList ls =
   (* let ls = LS.getLocked ls in
@@ -77,8 +77,8 @@ let makeLockList ls =
 
 (* TODO: make this not hardcoded *)
 let hardCodedSumTypes () =
-  BS.getDescriptors [RS.sum#sumTyp;
-                     SPTA.SS.sum#sumTyp; ]
+  Backed_summary.getDescriptors [RS.sum#sumTyp;
+                                 SPTA.SS.sum#sumTyp; ]
     
 
 
@@ -96,7 +96,7 @@ class warningChecker cg cgDir = object (self)
     logStatus "completed all thread pairs";
     flushStatus ();
     try
-      Req.notifyRace localRaces#data
+      Request.notifyRace localRaces#data
     with e ->
       logError ("Warnings notifyDone: " ^ (Printexc.to_string e));
       raise e
@@ -131,7 +131,7 @@ class warningChecker cg cgDir = object (self)
                      } ) in
     
     let _ = localRaces#addWarning raceData in
-    let _ = localRaces2#addWarning (access1, access2) raceData in
+(*    let _ = localRaces2#addWarning (access1, access2) raceData in *)
     ()
 
   (* HACK for main for now... we should actually have a config file
@@ -192,9 +192,10 @@ let flagRacesFromSumms cg cgDir = begin
    * TODO: give the server the race2pakey data so that the server
    * writes out the warnings w/ IDs that match *)
   localRaces#saveToXML (Filename.concat cgDir "warnings2.xml");
-  localRaces2#saveToXML (Filename.concat cgDir "warnings3.xml");
+(*  localRaces2#saveToXML (Filename.concat cgDir "warnings3.xml");
   localRaces2#serialize (Filename.concat cgDir "warnings3.dat");
   localRaces2#clear (); (* don't need it after... *)
+*)
   localRaces#printWarnings;  (* for local debugging *)
 end
 

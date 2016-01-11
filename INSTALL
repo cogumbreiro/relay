@@ -1,0 +1,33 @@
+
+ (For more complete installation instructions... please wait)
+
+ Building from source 
+---------------------------------------------------------------------
+
+ *) If you use Windows, you must first install cygwin. (Not tested)
+    
+ *) You must install OCaml version 3.08 or higher (see instructions at
+    http://caml.inria.fr/ocaml).
+    - Other dependencies include the M4 preprocessor
+
+ *) Download and unpack this RELAY distribution. 
+
+ *) Build the copy of CIL that is in the RELAY distribution
+    (see the CIL INSTALL file). Note: if you get a compilation
+    error "File "obj/x86_LINUX/feature_config.ml", line 4, ...",
+    edit the obj/x86_LINUX/feature_config.ml file and remove the "-ne" junk.
+
+ *) Run make in the base RELAY directory
+
+ *) Configuration files are the *.cfg files in the RELAY directory.
+    You do not need to edit them to get up and running, but if you wish
+    to change where summaries are stored, edit them (e.g., edit storage.cfg)
+
+ *) To test RELAY go to the racetest directory and "make renew_small; make".
+    To test the RADAR nullpointer analysis go to nulltests directory.
+    Other tests (callgraph analysis tests) are found in a separate tarball.
+
+ 7. Optional: the web UI for browsing warnings requires installation
+    of the Django web framework and a database backend, and editing
+    ui/relay/setting.py, etc... Very raw right now.
+

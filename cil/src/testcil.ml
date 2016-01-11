@@ -251,7 +251,7 @@ let testSizeOf () =
               (fun f -> 
                 if f.fname <> "___missing_field_name" then 
                   checkOffsets (addOffsetLval (Field(f, NoOffset)) lv) f.ftype)
-              c.cfields
+              (!getCfields c)
         | TArray (bt, Some len, _) -> 
             let leni = 
               match isInteger len with

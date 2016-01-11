@@ -364,7 +364,7 @@ and checkCompInfo (isadef: defuse) comp =
         | _ -> ());
         checkAttributes f.fattr
       in
-      List.iter checkField comp.cfields
+      List.iter checkField (!getCfields comp)
     end
   end
 
@@ -448,7 +448,7 @@ and checkOffset basetyp : offset -> typ = function
       (* Now check that the host is shared propertly *)
       checkCompInfo Used fi.fcomp;
       (* Check that this exact field is part of the host *)
-      if not (List.exists (fun f -> f == fi) fi.fcomp.cfields) then
+      if not (List.exists (fun f -> f == fi) (!getCfields fi.fcomp)) then
         ignore (warn "Field %s not part of %s" 
                   fi.fname (compFullName fi.fcomp));
       checkOffset fi.ftype o
@@ -647,11 +647,11 @@ and checkInit  (i: init) : typ =
                 in
                 loopFields
                   (List.filter (fun f -> f.fname <> missingFieldName) 
-                     comp.cfields) 
+                     (!getCfields comp)) 
                   initl
 
               else (* UNION *)
-                if comp.cfields == [] then begin
+                if (!getCfields comp) == [] then begin
                   if initl != [] then 
                     ignore (warn "Initializer for empty union not empty");
                 end else begin
@@ -659,7 +659,7 @@ and checkInit  (i: init) : typ =
                     [(Field(f, NoOffset), ei)] -> 
                       if f.fcomp != comp then 
                         ignore (bug "Wrong designator for union initializer");
-                      if !msvcMode && f != List.hd comp.cfields then
+                      if !msvcMode && f != List.hd (!getCfields comp) then
                         ignore (warn "On MSVC you can only initialize the first field of a union");
                       checkInitType ei f.ftype
                       

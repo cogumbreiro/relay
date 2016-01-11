@@ -15,31 +15,31 @@ let addOnceP eq lst item =
   if (List.exists (fun other -> eq item other) lst) then lst
   else item :: lst
 
+let rec insertSortLoop cmp x curH curL =
+  match curL with
+    h :: t -> 
+      let c = cmp x h in
+      if c == 0 then List.rev_append curH curL
+      else if c < 0 then List.rev_append (x :: curH) curL
+      else insertSortLoop cmp x (h :: curH) t
+  | [] -> List.rev (x :: curH)
+
 let insertSort cmp x l =
-  let rec loop curH curL =
-    match curL with
-      h :: t -> 
-        let c = cmp x h in
-        if c == 0 then List.rev_append curH curL
-        else if c < 0 then List.rev_append (x :: curH) curL
-        else loop (h :: curH) t
-    | [] -> List.rev (x :: curH)
-  in 
-  loop [] l
+  insertSortLoop cmp x [] l
+
+let rec insertSortCombLoop cmp combine x curH curL =
+  match curL with
+    h :: t -> 
+      let c = cmp x h in
+      if c == 0 then 
+        let combo = combine x h in 
+        List.rev_append curH (combo :: t) 
+      else if c < 0 then List.rev_append (x :: curH) curL
+      else insertSortCombLoop cmp combine x (h :: curH) t
+  | [] -> List.rev (x :: curH)
 
 let insertSortCombine cmp combine x l =
-  let rec loop curH curL =
-    match curL with
-      h :: t -> 
-        let c = cmp x h in
-        if c == 0 then 
-          let combo = combine x h in 
-          List.rev_append curH (combo :: t) 
-        else if c < 0 then List.rev_append (x :: curH) curL
-        else loop (h :: curH) t
-    | [] -> List.rev (x :: curH)
-  in 
-  loop [] l
+  insertSortCombLoop cmp combine x [] l
 
 (** Take the union of two lists, slowly *)
 let union l1 l2 =
@@ -48,18 +48,18 @@ let union l1 l2 =
 let unionEq eq l1 l2 =
   List.fold_left (addOnceP eq) l1 l2
 
+let rec mergeUniqLoop cmp cur l1 l2 =
+  match l1, l2 with
+    [], _ -> List.rev_append cur l2
+  | _, [] -> List.rev_append cur l1
+  | h1 :: t1, h2 :: t2 ->
+      let c = cmp h1 h2 in
+      if c == 0 then mergeUniqLoop cmp (h1 :: cur) t1 t2
+      else if c < 0 then mergeUniqLoop cmp (h1 :: cur) t1 l2
+      else mergeUniqLoop cmp (h2 :: cur) l1 t2
+
 let mergeUnique cmp l1 l2 =
-  let rec loop cur l1 l2 =
-    match l1, l2 with
-      [], _ -> List.rev_append cur l2
-    | _, [] -> List.rev_append cur l1
-    | h1 :: t1, h2 :: t2 ->
-        let c = cmp h1 h2 in
-        if c == 0 then loop (h1 :: cur) t1 t2
-        else if c < 0 then loop (h1 :: cur) t1 l2
-        else loop (h2 :: cur) l1 t2
-  in
-  loop [] l1 l2
+  mergeUniqLoop cmp [] l1 l2
 
 let mergeUniqueCombine cmp comb l1 l2 =
   let rec loop cur l1 l2 =
@@ -149,55 +149,52 @@ let listFindReplace (eq: 'a -> 'b -> bool) (replace : 'a -> 'b -> 'a)
   in
   findReplace [] l
 
-
+let rec compareLoop cmp cur l1tail l2tail =
+  if cur != 0 then cur
+  else match l1tail, l2tail with
+    h1::t1, h2::t2 ->
+      compareLoop cmp (cmp h1 h2) t1 t2
+  | [], [] -> 0
+  | [], _ -> -1
+  | _, [] -> 1
+        
 (** Compare 2 lists lexicographically given a comparison function for elems *)
 let compare cmp l1 l2 =
-  let rec loop cur l1tail l2tail =
-    if cur != 0 then cur
-    else match l1tail, l2tail with
+  compareLoop cmp 0 l1 l2
+
+let rec eqLoop cmp cur l1tail l2tail =
+  if cur then 
+    match l1tail, l2tail with
       h1::t1, h2::t2 ->
-        loop (cmp h1 h2) t1 t2
-    | [], [] -> 0
-    | [], _ -> -1
-    | _, [] -> 1
-  in
-  loop 0 l1 l2
+        eqLoop cmp (cmp h1 h2) t1 t2
+    | [], [] -> true
+    | [], _ -> false
+    | _, [] -> false
+  else cur
 
 let eq cmp l1 l2 =
-  let rec loop cur l1tail l2tail =
-    if cur then 
-      match l1tail, l2tail with
-        h1::t1, h2::t2 ->
-          loop (cmp h1 h2) t1 t2
-      | [], [] -> true
-      | [], _ -> false
-      | _, [] -> false
-    else cur
-  in
-  loop true l1 l2
+  eqLoop cmp true l1 l2
 
+
+(* DJB2-like *)
+let rec hashLoop hElem cur l =
+  match l with
+    [] -> cur
+  | h :: t -> hashLoop hElem ((cur lsl 5) + cur lxor hElem h) t
 
 (** Hash a list given a hash function for individual elements *)
 let hash hElem l =
-  (* DJB2-like *)
-  let rec loop cur l =
-    match l with
-      [] -> cur
-    | h :: t -> loop ((cur lsl 5) + cur lxor hElem h) t
-  in
-  loop 5381 l
+  hashLoop hElem 5381 l
+
+let rec hashSliceLoop hElem cur l n =
+  if n <= 0 then (cur lsl 5 + cur lxor List.length l)
+  else match l with
+    [] -> cur
+  | h :: t -> hashSliceLoop hElem ((cur lsl 5) + cur lxor hElem h) t (n -1)
 
 (** Hash only the first n bits *)
 let hash_slice hElem l n =
-  let rec loop cur l n =
-    if n <= 0 then (cur lsl 5 + cur lxor List.length l)
-    else match l with
-      [] -> cur
-    | h :: t -> loop ((cur lsl 5) + cur lxor hElem h) t (n -1)
-  in
-  loop 5381 l n
-
-
+  hashSliceLoop hElem 5381 l n
 
 let pickFromList ls randomize =
   if randomize then begin
@@ -314,11 +311,12 @@ let findStreaks p ls =
   in
   List.rev (loop false ls [] [])
 
-
+let listIterHelper1 foo l2 x1 =
+  List.iter (foo x1) l2
 
 (** Iterate through ordered pairs of [l1] and [l2] *)
 let listIterOrderedPairs foo l1 l2 =
-  List.iter (fun x1 -> List.iter (fun x2 -> foo x1 x2) l2) l1
+  List.iter (listIterHelper1 foo l2) l1
 
 (** Iterate unordered pair combinations within given list [ls] *)
 let listIterPairs foo ls =
@@ -354,13 +352,13 @@ let addToPartition pred x parts =
   in
   doAdd [] parts
        
+let rec mapCrossLoop foo rest cur =
+  match rest with
+    [] -> cur
+  | h :: l -> mapCrossLoop foo l (List.rev_append (foo h) cur)
+      
 let rev_mapCross (foo : 'a -> 'b list) (l : 'a list) : 'b list =
-  let rec loop rest cur =
-    match rest with
-      [] -> cur
-    | h :: l -> loop l (List.rev_append (foo h) cur)
-  in
-  loop l []
+  mapCrossLoop foo l []
 
 let rec mapCross foo = function
     [] -> []

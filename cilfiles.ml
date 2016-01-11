@@ -92,9 +92,9 @@ let initRanges () =
   vidMap := RangeMap.empty;
   ckeyMap := RangeMap.empty
 
-
-(** Add a (id range -> file) mapping *)
+(** Add a (id range -> file) mapping to the global range maps *)
 let addRanges startVid endVid startCkey endCkey curFile =
+  (* Only add if it is a non-empty set *)
   if (startVid <= endVid) then
     vidMap := RangeMap.add 
       {r_lower = startVid; r_upper = endVid;} 
@@ -105,6 +105,30 @@ let addRanges startVid endVid startCkey endCkey curFile =
       {r_lower = startCkey; r_upper = endCkey;} 
       (changeExtension curFile cinfoExt) !ckeyMap
 
+
+(** Return true if the given file is supposed to own the "golden" copy
+    of the given kind of info *)
+let ownsIDKind (id:int) map (kindExt:string) (file:string) : bool =
+  try
+    let owningFile = RangeMap.find { r_lower = id; r_upper = id; } map in
+    let chExt = changeExtension file kindExt in
+(*  Printf.printf "ownsID comparing query(%s) to owner(%s)\n" chExt owningFile;
+*)
+    chExt = owningFile
+  with Not_found ->
+    failwith 
+      (Printf.sprintf "ownsIDKind given unknown ID %d for %s\n" id kindExt)
+
+  
+(** Return true if the given file is supposed to own the "golden" copy
+    of the varinfo *)
+let ownsVID (vid: int) (file:string) : bool =
+  ownsIDKind vid !vidMap vinfoExt file 
+    
+let ownsCKey (ckey: int) (file:string) : bool =
+  ownsIDKind ckey !ckeyMap cinfoExt file
+
+(************************************************************)
 
 (** Save the ranges *)
 let saveRanges (fname: string) =

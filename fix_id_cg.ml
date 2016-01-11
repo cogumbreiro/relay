@@ -111,8 +111,6 @@ let initSettings () = begin
   if !outDir = "" then
     outDir := !cgDir;
   let settings = Config.initSettings !configFile in
-  DC.makeLCaches (!cgDir);
-  Cilinfos.reloadRanges !cgDir;
   A.initSettings settings !cgDir;
   A.setFilterFunSig !filterFunSig;
 end
@@ -143,6 +141,8 @@ let main () =
         end;
         
         (* TODO: split these up, but ensure that they happen in this order *)
+        DC.makeLCaches (!cgDir);
+        Cilinfos.reloadRanges !cgDir;
         if (!pta) then begin
           L.logStatus "Pre-pass analysis of pta constraints";
           L.flushStatus ();

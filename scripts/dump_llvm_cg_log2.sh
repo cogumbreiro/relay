@@ -5,7 +5,8 @@ if [ $# -ne "1" ]; then
 fi
 
 FILE=$1
-START=`dirname $FILE`
+DIR_OF_FILE=`dirname $FILE.c`
+START=`cd $DIR_OF_FILE; pwd`
 echo "START: $START"
 LLVM_DUMP=/home/jan/research/llvm26/print_indir_calls2.sh
 SUFFIX=llvm_anders
@@ -23,5 +24,5 @@ echo "TOTAL TIME: $DIFF (s)" >> $START/log.llvm
 
 # now generate the callgraph
 (cd $RELAY; $LLVM_CG -cg $START/ciltrees -i $START/log.llvm -o calls.$SUFFIX 2>&1 | tee $START/ciltrees/log.txt.$SUFFIX)
-(cd $RELAY; $RELAY/scc_stats.exe -cg $START/ciltrees/calls.$SUFFIX >> $START/ciltrees/log.txt.$SUFFIX)
+(cd $RELAY; $RELAY/scc_stats.exe -su client.cfg.llvm_anders2 -cg $START/ciltrees/calls.$SUFFIX >> $START/ciltrees/log.txt.$SUFFIX)
 

@@ -1,0 +1,1750 @@
+
+The 52 warnings w/ locks (some obvious dupes though)
+
+---
+
+Race Warning id: 23603
+
+Acc#	Lval	Occurs at	Locks held 	Access path
+1 	nr_threads 	1139 in kernel/fork.c 	[ tasklist_lock (285402) ] 	fork_sync_thread (59077) -> ...
+2 	nr_threads 	917 in kernel/fork.c 	[] 	fork_sync_thread (59077) -> ...
+2 		1139 in kernel/fork.c 	[]
+
+REASON: RACE -- from 2_5_2007 (but benign)
+
+---
+
+Race Warning id: 23844
+
+Acc#	Lval	Occurs at	Locks held 	Access path
+1 	nr_msix_devices 	497 in drivers/pci/msi.c 	[] 	poll_thread (169515) -> ...
+2 	nr_msix_devices 	497 in drivers/pci/msi.c 	[ event_semaphore (169185) ] 	event_thread (169248) -> ...
+
+
+void pci_scan_msi_device(struct pci_dev *dev)
+{
+	if (!dev)
+		return;
+
+   	if (pci_find_capability(dev, PCI_CAP_ID_MSIX) > 0)
+		nr_msix_devices++;                                  //HERE
+	else if (pci_find_capability(dev, PCI_CAP_ID_MSI) > 0)
+		nr_reserved_vectors++;
+}
+
+called by:
+    <- pci_scan_single_device (no locks)
+        <- pci_scan_slot (no locks ... annotated w/ __devinit... with hotplug it doesn't mean anything though)
+            <- cpci_configure_slot
+            <- cpqhp_configure_device
+            <- pciehp_configure_device
+            <- shpchp_configure_device
+            <- pci_scan_child_bus
+                <- pci_do_scan_bus
+                    <- the 4 above
+
+
+event_semaphore is only used as a signal, so this is all accessed w/out locks
+
+REASON: RACE (and fixed later see http://lkml.org/lkml/2006/6/20/460)
+
+---
+
+Race Warning id: 23845
+
+131:
+
+#define total_swapcache_pages  swapper_space.nrpages
+
+void __delete_from_swap_cache(struct page *page)
+{
+	BUG_ON(!PageLocked(page));
+	BUG_ON(!PageSwapCache(page));
+	BUG_ON(PageWriteback(page));
+	BUG_ON(PagePrivate(page));
+
+	radix_tree_delete(&swapper_space.page_tree, page_private(page));
+	set_page_private(page, 0);
+	ClearPageSwapCache(page);
+	total_swapcache_pages--;        //HERE?
+	pagecache_acct(-1);
+	INC_CACHE_INFO(del_total);
+}
+
+called by:
+    <- delete_from_swap_cache (w/ swapper_space.tree_lock)
+    <- remove_exclusive_swap_page (w/ swapper_space.tree_lock)
+    <- shrink_list (w/ mapping->tree_lock) also where LS is made empty
+
+mapping = page_mapping(page)
+
+552 static inline struct address_space *page_mapping(struct page *page)
+553 {
+554         struct address_space *mapping = page->mapping;
+555 
+556         if (unlikely(PageSwapCache(page)))
+557                 mapping = &swapper_space;
+558         else if (unlikely((unsigned long)mapping & PAGE_MAPPING_ANON))
+559                 mapping = NULL;
+560         return mapping;
+561 }
+
+Value :: Extptr (2): 
+        Cell :: lval = swapper_space ; isSum = false
+
+        Cell :: lval = (*(page->mapping)) ; isSum = false
+
+
+in this case, PageSwapCache should be true -- so... swapper_space.tree_lock
+
+
+86:
+
+__add_to_swap_cache (w / swapper_space.tree_lock)
+
+
+REASON: conditional -- lock not linear unless condition is true
+
+---
+Race Warning id: 23682
+
+1 	(args.clp)->cl_lease_time 	2680 in fs/nfs/nfs4proc.c 	[ (args.clp)->cl_lock (380194) ] 	reclaimer (380192) -> ...
+2 	(args.clp)->cl_lease_time 	106 in fs/nfs/nfs4renewd.c 	[] 	reclaimer (380192) -> ...
+2 		2655 in fs/nfs/nfs4proc.c 	[] 	
+
+
+REASON: unique -- dupe from 2_27_2007? (called w/ this.recover_state()) otherwise ...
+
+---
+Race Warning id: 23596
+
+1 	(journal->j_running_transaction)->t_checkpoint_list 	593 in fs/jbd/checkpoint.c 	[ journal->j_list_lock (395085) ] 	kjournald (395072) -> ...
+2 	(journal->j_running_transaction)->t_checkpoint_list 	715 in fs/jbd/commit.c 	[] 	kjournald (395072) -> ...
+2 		832 in fs/jbd/commit.c 	[] 	
+2 		589 in fs/jbd/checkpoint.c 	[] 	
+2 		592 in fs/jbd/checkpoint.c 	[] 	
+2 		593 in fs/jbd/checkpoint.c 	[] 	
+2 		630 in fs/jbd/checkpoint.c 	[] 
+1 	(journal->j_running_transaction)->t_checkpoint_list 	594 in fs/jbd/checkpoint.c 	[ journal->j_list_lock (395085) ] 	kjournald (395072) -> ...
+1 	(journal->j_running_transaction)->t_checkpoint_list 	595 in fs/jbd/checkpoint.c 	[ journal->j_list_lock (395085) ] 	kjournald (395072) -> ...
+1 	(journal->j_running_transaction)->t_checkpoint_list 	597 in fs/jbd/checkpoint.c 	[ journal->j_list_lock (395085) ] 	kjournald (395072) -> ...
+
+
+589, 592, 593, 594, 595, 597:
+
+in __journal_insert_checkpoint 
+    includes write:
+	transaction->t_checkpoint_list = jh;
+    (apparently all callers have journal->j_list_lock)
+
+630:
+    in __journal_drop_transaction (assumes caller has journal->j_list_lock)
+    J_ASSERT(transaction->t_checkpoint_list == NULL);
+
+
+715, 832: 
+
+made empty at: fs/jbd/commit.c:787
+
+void journal_commit_transaction(journal_t *journal)
+{
+
+	commit_transaction = journal->j_running_transaction;
+
+    //...
+
+    J_ASSERT(commit_transaction->t_checkpoint_list == NULL); // 715
+
+restart_loop:
+	/*
+	 * As there are other places (journal_unmap_buffer()) adding buffers
+	 * to this list we have to be careful and hold the j_list_lock.
+	 */
+	spin_lock(&journal->j_list_lock);   // so it's not locked yet!
+
+    //...
+			__journal_insert_checkpoint(jh, commit_transaction); // TO OTHER
+
+
+    //.. unlock somewhere
+
+	spin_lock(&journal->j_list_lock);
+
+    //...
+
+	if (commit_transaction->t_checkpoint_list == NULL) { // 832
+
+    }
+}
+
+hmm each kjournald should have its own journal, so it's not a race unless 
+another thread can call those functions
+
+other access:
+
+static inline void __buffer_unlink(struct journal_head *jh)
+{
+	transaction_t *transaction;
+
+	transaction = jh->b_cp_transaction;
+	jh->b_cp_transaction = NULL;
+
+	jh->b_cpnext->b_cpprev = jh->b_cpprev;
+	jh->b_cpprev->b_cpnext = jh->b_cpnext;
+	if (transaction->t_checkpoint_list == jh)           //HERE
+		transaction->t_checkpoint_list = jh->b_cpnext;  //HERE
+	if (transaction->t_checkpoint_list == jh)           //HERE
+		transaction->t_checkpoint_list = NULL;          //HERE
+}
+
+accessible from journal_flush (accessible from parent threads)
+
+REASON: RACE (w/ other access from parent threads)
+
+hmm journal_start_thread blocks until thread finishes, but it is called from
+journal_reset, which is called by:
+    <- journal_create
+        <- ext3_create_journal
+            <- ext3_fill_super
+    <- journal_load
+        <- ext3_load_journal
+            <- ext3_fill_super
+
+ext3_fill_super does one or the other...
+    <- get_sb_bdev
+        <- ext3_get_sb
+            <- stored in ext3_fs_type.get_sb (package-private struct)
+
+---
+
+Race Warning id: 23722
+
+1 	vmlist->size 	277 in mm/vmalloc.c 	[ vmlist_lock (364890) ] 	____call_usermodehelper (435766) -> ...
+2 	vmlist->size 	270 in arch/i386/mm/ioremap.c 	[] 	pccardd (165467) -> ...
+2 		277 in mm/vmalloc.c 	[] 	
+2 		73 in mm/vmalloc.c 	[]
+
+made empty at: arch/i386/mm/ioremap.c:270
+
+vmalloc.c:277 in __remove_vm_area (caller has vmlist_lock)
+    //...
+    for (p = &vmlist ; (tmp = *p) != NULL ;p = &tmp->next) {
+		 if (tmp->addr == addr)
+			 goto found;
+	}
+    //...
+    	tmp->size -= PAGE_SIZE;     //this guy
+
+caller uses: write_lock(&vmlist_lock)
+
+73 in unmap_vm_area (reads area->size w/ no lock)
+called by: 
+    <- __remove_vm_area (w/ vmlist_lock)
+    <- im_free (on a different list w/ a different lock)
+
+
+ioremap.c:270 in 
+
+void iounmap(volatile void __iomem *addr)
+{
+
+    //...    
+
+	read_lock(&vmlist_lock);
+	for (p = vmlist; p; p = p->next) {
+		if (p->addr == addr)
+			break;
+	}
+	read_unlock(&vmlist_lock);
+
+		change_page_attr(virt_to_page(__va(p->phys_addr)),
+				 p->size >> PAGE_SHIFT,                     //THIS GUY?
+				 PAGE_KERNEL);
+
+    //...
+}
+
+most likely doesn't have lock (otherwise, why would it use the read_lock?)
+
+REASON: RACE (not sure of implications)
+
+
+---
+
+Race Warning id: 23887
+
+1 	((*(c->inocache_list)))->state 	194 in fs/jffs2/gc.c 	[ c->alloc_sem (392243) ] 	jffs2_garbage_collect_thread (392238) -> ...
+2 	((*(c->inocache_list)))->state 	167 in fs/jffs2/gc.c 	[] 	jffs2_garbage_collect_thread (392238) -> ...
+2 		168 in fs/jffs2/gc.c 	[] 	
+2 		173 in fs/jffs2/gc.c 	[] 	
+2 		174 in fs/jffs2/gc.c 	[] 	
+2 		175 in fs/jffs2/gc.c 	[] 	
+2 		179 in fs/jffs2/gc.c 	[] 	
+2 		191 in fs/jffs2/gc.c 	[] 	
+2 		573 in fs/jffs2/fs.c 	[] 	
+1 	((*(c->inocache_list)))->state 	858 in fs/jffs2/nodelist.c 	[ c->alloc_sem (392243) ] 	jffs2_garbage_collect_thread (392238) -> ...
+
+made empty at: fs/jffs2/gc.c:368
+
+gc.c: 167, 168, 173, 174, 175, 179, 191, 194: in jffs2_garbage_collect_pass
+
+		spin_lock(&c->inocache_lock);
+
+		ic = jffs2_get_ino_cache(c, c->checked_ino++);
+
+    //...
+
+		switch(ic->state) {             //HERE 167, 168, 173, 174... 191
+		case INO_STATE_CHECKEDABSENT:   //HERE
+		case INO_STATE_PRESENT:         //HERE
+			D1(printk(KERN_DEBUG "Skipping ino #%u already checked\n", ic->ino));
+			spin_unlock(&c->inocache_lock);
+    //...
+173                 case INO_STATE_GC:
+174                 case INO_STATE_CHECKING:
+175                         printk(KERN_WARNING "Inode #%u is in state %d during CRC check phase!\n", ic->ino, ic->state);
+176                         spin_unlock(&c->inocache_lock);
+177                         BUG();
+178 
+179                 case INO_STATE_READING:  //does BUG() fall-through ?
+179                 case INO_STATE_READING:
+180                         /* We need to wait for it to finish, lest we move on
+181                            and trigger the BUG() above while we haven't yet
+182                            finished checking all its nodes */
+183                         D1(printk(KERN_DEBUG "Waiting for ino #%u to finish reading\n", ic->ino));
+184                         up(&c->alloc_sem);
+185                         sleep_on_spinunlock(&c->inocache_wq, &c->inocache_lock);
+186                         return 0;
+
+
+		ic->state = INO_STATE_CHECKING;
+		spin_unlock(&c->inocache_lock);
+
+is that fallthrough dangerous?
+
+
+fs.c: 573 : in jffs2_gc_fetch_inode
+
+			spin_lock(&c->inocache_lock);
+			ic = jffs2_get_ino_cache(c, inum);
+			if (!ic) {
+				D1(printk(KERN_DEBUG "Inode cache for ino #%u is gone.\n", inum));
+				spin_unlock(&c->inocache_lock);
+				return NULL;
+			}
+			if (ic->state != INO_STATE_CHECKEDABSENT) {
+
+
+made empty in jffs2_garbage_collect_pass
+
+	spin_unlock(&c->inocache_lock);
+
+	f = jffs2_gc_fetch_inode(c, inum, nlink);   //HERE
+
+nodelist.c: 858: in jffs2_set_inocache_state
+	spin_lock(&c->inocache_lock);
+	ic->state = state;
+	wake_up(&c->inocache_wq);
+	spin_unlock(&c->inocache_lock);
+
+
+
+hmm... maybe it is that fall-through / read of the switch
+
+REASON: lost lock? (inaccurate CIL translation of switch statement?)
+
+---
+
+Race Warning id: 24053
+
+1 	swapper_space.page_tree.height 	760 in lib/radix-tree.c 	[ swapper_space.tree_lock (325127) ] 	do_linuxrc (442927) -> ...
+2 	swapper_space.page_tree.height 	760 in lib/radix-tree.c 	[] 	____call_usermodehelper (435766) -> ...
+2 		179 in lib/radix-tree.c 	[] 	
+2 		214 in lib/radix-tree.c 	[] 
+
+        made empty at: mm/vmscan.c:537
+
+dupe of "lost lock", but re-examine 
+
+760: in radix_tree_delete
+	root->height = 0
+
+179, 214: in radix_tree_extend
+		root->height = height;
+		root->height++;
+
+made empty in shrink_list:
+			__delete_from_swap_cache(page);             //HERE
+			write_unlock_irq(&mapping->tree_lock);
+
+mapping is either &swapper_space or page->mapping
+
+REASON: conditional? -- lock not linear unless condition is true
+
+---
+
+Race Warning id: 23829
+
+1 	console_locked 	731 in kernel/printk.c 	[] 	stopmachine (432041) -> ...
+2 	console_locked 	619 in kernel/printk.c 	[ console_sem (439638) ] 	fork_sync_thread (59077) -> ...
+2 		767 in kernel/printk.c 	[ console_sem (439638) ] 
+
+used for WARN_CONSOLE_UNLOCKED
+
+REASON: RACE (benign) -- dupe from 2_27_2007
+
+
+---
+
+Race Warning id: 24081
+
+
+1 	c->nextblock 	144 in fs/jffs2/wbuf.c 	[ c->erase_completion_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ...
+1 	 	191 in fs/jffs2/nodemgmt.c 
+1 	    251 in fs/jffs2/nodemgmt.c
+1 	 	434 in fs/jffs2/nodemgmt.c 	
+2 	c->nextblock 	680 in fs/jffs2/summary.c 	[] 	jffs2_garbage_collect_thread (392238) -> ...
+2 		397 in fs/jffs2/nodemgmt.c 	[] 	
+2 		143 in fs/jffs2/wbuf.c 	[] 	
+2 		523 in fs/jffs2/nodemgmt.c 	[] 	
+2 		567 in fs/jffs2/nodemgmt.c 	[] 	
+2 		264 in fs/jffs2/nodemgmt.c 	[] 	
+2 		323 in fs/jffs2/nodemgmt.c 	[] 	
+2 		343 in fs/jffs2/nodemgmt.c 	[] 
+
+1st LS
+    made empty at: fs/jffs2/nodemgmt.c:308
+2nd LS
+    made empty at: fs/jffs2/nodemgmt.c:323
+
+summary.c: 680
+
+nodemgmt.c: 264, 323, 343 in
+
+/* Called with alloc_sem _and_ erase_completion_lock */
+static int jffs2_do_reserve_space(struct jffs2_sb_info *c, uint32_t minsize, uint32_t *ofs, uint32_t *len, uint32_t sumsize)
+{
+	struct jffs2_eraseblock *jeb = c->nextblock;    //264 (doesn't know about erase_completion_lock yet)
+
+
+			jffs2_close_nextblock(c, jeb);          //308 goes to 191
+
+				spin_lock(&c->erase_completion_lock);
+				jeb = c->nextblock;                 //323 (knows of erase_completion_lock)
+
+            jffs2_close_nextblock(c, jeb); //332 goes to 191
+
+            jeb = c->nextblock; //343
+
+nodemgmt.c: 397
+
+ *	Must be called with the alloc_sem held.
+ */
+
+int jffs2_add_physical_node_ref(struct jffs2_sb_info *c, struct jffs2_raw_node_ref *new)
+{
+    //...
+#if 1
+	/* we could get some obsolete nodes after nextblock was refiled
+	   in wbuf.c */
+	if ((c->nextblock || !ref_obsolete(new))    //HERE
+	    &&(jeb != c->nextblock || ref_offset(new) != //HERE
+            jeb->offset + (c->sector_size - jeb->free_size))) {
+		printk(KERN_WARNING "argh. node added in wrong place\n");
+		jffs2_free_raw_node_ref(new);
+		return -EINVAL;
+	}
+#endif
+	spin_lock(&c->erase_completion_lock);
+
+    //...
+}
+
+definitely doesn't have erase_completion_lock, but may have alloc_sem
+
+nodemgmt.c: 191 (should be called w/ erase_completion_lock)
+    c->nextblock = NULL;
+
+nodemgmt.c: 523, 567 in jffs2_mark_node_obsolete (w/ erase_completion_lock)
+
+wbuf.c:143: in jffs2_block_refile (w/ no lock)
+called by:
+    <- jffs2_wbuf_recover (w/ erase_completion_lock)
+    <- jffs2_flash_writev (w/ erase_completion_lock)
+
+doesn't look like these last couple guys use the alloc_sem
+
+REASON: RACE (uses erase_completion_lock and alloc_sem, but not consistently?)
+
+hmmm actually only happens within the same thread?
+
+
+
+---
+
+Race Warning id: 24173
+
+1 	pidmap_array.page 	70 in kernel/pid.c 	[ tasklist_lock (285402) , tty_sem (283137) ] 	do_linuxrc (442927) -> ...
+2 	pidmap_array.page 	96 in kernel/pid.c 	[ nlmsvc_sema (390798) pidmap_lock (435417) ] 	reclaimer (391223) -> ...
+
+
+70:
+
+fastcall void free_pidmap(int pid)
+{
+	pidmap_t *map = pidmap_array + pid / BITS_PER_PAGE;
+	int offset = pid & BITS_PER_PAGE_MASK;
+
+	clear_bit(offset, map->page);   //just reads page addr, clears bit at addr
+	atomic_inc(&map->nr_free);
+}
+
+called by:
+    <- do_fork (no lock)
+    <- detach_pid (no lock)
+        <- __set_special_pids (no lock)
+            <- sys_setsid (tasklist_lock, tty_sem)
+                <- do_linuxrc (no lock)
+
+
+96 in alloc_pidmap(X)
+    pid = last + 1
+    map = &pidmap_array[pid/BITS_PER_PAGE] 
+    //...
+		if (unlikely(!map->page)) {
+			unsigned long page = get_zeroed_page(GFP_KERNEL);
+			/*
+			 * Free the page if someone raced with us
+			 * installing it:
+			 */
+			spin_lock(&pidmap_lock);
+			if (map->page)
+				free_page(page);
+			else
+				map->page = (void *)page;       //WRITE HERE
+			spin_unlock(&pidmap_lock);
+
+REASON: RACE (they expect it and handle it)
+
+see also (2 others):
+
+****
+Possible race between access to:
+pidmap_array.page @ kernel/pid.c:60 and
+pidmap_array.page @ kernel/pid.c:60
+        Accessed at locs:
+        [kernel/pid.c:96, ] and
+        [kernel/pid.c:70, ]
+
+        Confidence: no PTA nodes
+
+LS for 1st access:
+L+ = {nlmsvc_sema#tbd, pidmap_lock#tbd, } (2)
+        made empty at: :-1
+LS for 2nd access:
+L+ = {tasklist_lock#tbd, } (1)
+        made empty at: :-1
+        Th. 1 spawned: fs/lockd/clntlock.c:201 w/ func: reclaimer
+        Th. 2 spawned: drivers/scsi/qla2xxx/qla_os.c:1441 
+        w/ func: qla2x00_do_dpc
+
+same
+
+****
+Possible race between access to:
+pidmap_array.page @ kernel/pid.c:60 and
+pidmap_array.page @ kernel/pid.c:60
+        Accessed at locs:
+        [kernel/pid.c:96, ] and
+        [kernel/pid.c:86, kernel/pid.c:93, kernel/pid.c:98, kernel/pid.c:103, 
+        kernel/pid.c:108, kernel/pid.c:70, ]
+
+        Confidence: no PTA nodes
+
+LS for 1st access:
+L+ = {pidmap_lock#tbd, } (1)
+        made empty at: :-1
+LS for 2nd access:
+L+ = empty;
+        made empty at: kernel/pid.c:93
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: fs/lockd/clntlock.c:201 w/ func: reclaimer
+
+almost the same
+
+
+REASON: RACE (double-checked locking for some of the reads)
+
+
+---
+
+Race Warning id: 24231
+
+1 	dev_base->next 	3088 in net/core/dev.c 	[ dev_base_lock (21277) ] 	bnep_session (77356) -> ...
+2 	dev_base->next 	841 in net/ipv4/devinet.c 	[ dev_base_lock (16779) ] 	sync_thread (59060) -> ...
+
+"different" locks? declared as 
+
+extern rwlock_t                         dev_base_lock; 
+in netdevice.h
+
+but defined in dev.c
+
+171 DEFINE_RWLOCK(dev_base_lock);
+174 EXPORT_SYMBOL(dev_base_lock);
+
+REASON: own linking error? (made the same lock have two different IDs)
+
+---
+
+Race Warning id: 24463
+
+1 	printk_buf 	554 in kernel/printk.c 	[] 	stopmachine (432041) -> ...
+2 	printk_buf 	295 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	fork_sync_thread (59077) -> ...
+2 		361 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		367 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		371 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		386 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		392 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		397 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		430 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		453 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		457 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		487 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		490 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		191 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		197 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		203 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		207 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		210 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		217 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		223 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		228 in lib/vsprintf.c 	[ logbuf_lock (439640) ] 	
+2 		233 in lib/vsprintf.c 	[ logbuf_lock (439640) ]
+1 	printk_buf 	568 in kernel/printk.c 	[] 	stopmachine (432041) -> ...
+1 	printk_buf 	570 in kernel/printk.c 	[] 	stopmachine (432041) -> ...
+1 	printk_buf 	589 in kernel/printk.c 	[] 	stopmachine (432041) -> ...
+1 	printk_buf 	599 in kernel/printk.c 	[] 	stopmachine (432041) -> ...
+1 	printk_buf 	602 in kernel/printk.c 	[] 	stopmachine (432041) -> ...
+1 	printk_buf 	603 in kernel/printk.c 	[] 	stopmachine (432041) -> ...
+
+probably that re-entrant use of logbuf_lock (yeah, it is)
+
+vprintk
+    <- vscnprintf
+        <- vsnprintf
+            <- WARN_ON (printk) done once
+                <- vprintk (locks again... w/out zapping)
+if (unlikely(oops_in_progress) && printk_cpu == smp_processor_id()) fails
+
+REASON: lost lock - re-entrant deadlock?
+
+---
+
+Race Warning id: 27926
+
+1 	irq_desc.status 	287 in kernel/irq/manage.c 	[ irq_desc.lock (166347) ] 	____call_usermodehelper (435766) -> ...
+2 	irq_desc.status 	287 in kernel/irq/manage.c 	[] 	kafsasyncd (419108) -> ...
+2 		42 in kernel/irq/manage.c 	[]
+
+
+287: in free_irq (w/ lock)
+
+42: in synchronize_irq (w/ out lock)
+called by:
+    <- free_irq (w/ out lock)
+
+REASON: RACE (but used for synchronization?)
+
+---
+
+Race Warning id: 27817
+
+
+1 	thread_finished 	584 in drivers/pci/hotplug/cpci_hotplug_core.c 	[] 	poll_thread (169515) -> ...
+2 	thread_finished 	536 in drivers/pci/hotplug/cpci_hotplug_core.c 	[ event_semaphore (169412) ] 	event_thread (169510) -> ...
+2 		538 in drivers/pci/hotplug/cpci_hotplug_core.c 	[ event_semaphore (169412) ] 	
+2 		540 in drivers/pci/hotplug/cpci_hotplug_core.c 	[ event_semaphore (169412) ] 	
+2 		551 in drivers/pci/hotplug/cpci_hotplug_core.c 	[ event_semaphore (169412) ] 
+
+584: in poll_thread (w/out lock)
+    thread_finished = 1;
+
+536, 538, 540, 551: reads (incidental lock?)
+
+REASON: RACE (benign)
+
+---
+
+Race Warning id: 27783
+
+
+1 	swap_list.next 	199 in mm/swapfile.c 	[] 	____call_usermodehelper (435766) -> ...
+2 	swap_list.next 	185 in mm/swapfile.c 	[ swap_lock (424164) ] 	kafsasyncd (419108) -> ...
+2 		205 in mm/swapfile.c 	[ swap_lock (424164) ] 	
+1 	swap_list.next 	263 in mm/swapfile.c 	[] 	____call_usermodehelper (435766) -> ...
+
+199, 185, 205: in get_swap_page (w/ lock)
+
+263: in swap_entry_free (w/out lock) 
+called by:
+    <- swap_free (conditionally locked)
+    <- free_swap_and_cache (conditionally locked)
+
+REASON: conditional locking
+
+---
+
+Race Warning id: 27577
+
+dupe of the console_locked warning (but w/ a different path)
+
+1 	console_locked 	619 in kernel/printk.c 	[ console_sem (439638) ] 	do_linuxrc (442927) -> ...
+2 	console_locked 	731 in kernel/printk.c 	[] 	____call_usermodehelper (435766) -> ...
+1 	console_locked 	767 in kernel/printk.c 	[ console_sem (439638) ] 	do_linuxrc (442927) -> ...
+
+REASON: RACE (benign) -- dupe
+
+---
+
+Race Warning id: 27418
+
+dupe of nr_threads warning, but from a different thread
+
+1 	nr_threads 	47 in kernel/exit.c 	[ tasklist_lock (285402) , [REP: 0].proc_lock |32234| ] 	cifs_demultiplex_thread (414616) -> ...
+2 	nr_threads 	917 in kernel/fork.c 	[] 	fork_sync_thread (59077) -> ...
+2 		1139 in kernel/fork.c 	[] 
+
+
+47: in __unhash_process (no lock)
+called by:
+    <- ... apparently w/ locks
+
+917: one racy read
+1139 w/ lock
+
+REASON: RACE (benign one decrs and the other is just a read to check bound)
+
+---
+
+Race Warning id: 27446
+
+dupe of printk_buf warning, but from a different thread
+
+    [ logbuf_lock (439640) ] do_linuxrc (442927) -> ...
+ 	[] 	____call_usermodehelper (435766) -> .
+
+REASON: lost lock -- deadlock? -- dupe
+
+---
+
+
+Race Warning id: 27240
+
+1 	key_cleanup_task.wq_data 	85 in kernel/workqueue.c 	[ [REP: 0].lock |32234| ] 	do_linuxrc (442927) -> ...
+2 	key_cleanup_task.wq_data 	85 in kernel/workqueue.c 	[] 	____call_usermodehelper (435766) -> ...
+
+
+85: in __queue_work(struct cpu_workqueue_struct *cwq, struct work_struct *work)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&cwq->lock, flags);
+	work->wq_data = cwq;                            //HERE
+	list_add_tail(&work->entry, &cwq->worklist);
+	cwq->insert_sequence++;
+	wake_up(&cwq->more_work);
+	spin_unlock_irqrestore(&cwq->lock, flags);
+}
+
+hmm how does cwq get mapped by callers?
+
+called by:
+    <- queue_work as:
+        __queue_work(per_cpu_ptr(wq->cpu_wq, cpu), work)
+        <- schedule_work as queue_work(keventd_wq, work)
+        <- call_usermodehelper_keys as queue_work(khelper_wq, ...)
+
+
+REASON: lost lock in per_cpu_ptr ?
+
+---
+
+Race Warning id: 27365
+
+1 	swap_cache_info.del_total 	133 in mm/swap_state.c 	[ swapper_space.tree_lock (325127) ] 	do_linuxrc (442927) -> ...
+2 	swap_cache_info.del_total 	133 in mm/swap_state.c 	[] 	____call_usermodehelper (435766) -> ...
+
+made empty at: mm/page_alloc.c:976
+
+void __delete_from_swap_cache(struct page *page)
+{
+	BUG_ON(!PageLocked(page));
+	BUG_ON(!PageSwapCache(page));
+	BUG_ON(PageWriteback(page));
+	BUG_ON(PagePrivate(page));
+
+	radix_tree_delete(&swapper_space.page_tree, page_private(page));
+	set_page_private(page, 0);
+	ClearPageSwapCache(page);
+	total_swapcache_pages--;
+	pagecache_acct(-1);
+	INC_CACHE_INFO(del_total);      //HERE
+}
+
+called by:
+    <- delete_from_swap_cache (w/ swapper_space.tree_lock)
+    <- remove_exclusive_swap_page (w/ swapper_space.tree_lock)
+    <- shrink_list (w/ mapping->tree_lock) also where LS is made empty
+
+mapping = page_mapping(page)
+
+which as we know, returns 2 possible pointers
+
+hmm but both thread roots can reach shrink_list before hitting 
+__delete_from_swap_cache, so why does one have the lock and the other not?
+
+made empty at call to out_of_memory(gfp_mask, order);
+
+which is only reachable from the 2
+    delete_from_swap_cache
+    remove_exclusive_swap_page
+
+but the immediate parent is __alloc_pages, which reaches all 3
+
+still don't know
+
+REASON: lost lock
+
+---
+
+Race Warning id: 27138
+
+1 	audit_skb_queue.qlen 	664 in include/linux/skbuff.h 	[ audit_skb_queue.lock (431840) ] 	do_linuxrc (442927) -> ...
+2 	audit_skb_queue.qlen 	664 in include/linux/skbuff.h 	[] 	____call_usermodehelper (435766) -> ...
+2 		590 in include/linux/skbuff.h 	[]
+
+664: in __skb_queue_tail (no lock)
+caller apparently has lock
+
+590: skb_queue_len (no lock)
+called by
+    <- audit_log_start (no lock 3x -- a while cond, an if cond, and a print)
+        <- audit_log_exit (no lock)
+            <- audit_free (no lock)
+                <- __put_task_struct (no lock)
+                    <- ... probably no longer in scope
+    <- kauditd_thread (if empty check: sleep-based busy-wait)
+    <- audit_receive (loops down -- uses audit_netlink_sem instead)
+        <- 
+
+
+REASON: RACE
+
+---
+
+Race Warning id: 26978
+
+1 	proc_inum_idr.id_free_cnt 	44 in lib/idr.c 	[ proc_inum_lock (365712) , proc_inum_idr.lock (365711) ] 	____call_usermodehelper (435766) -> ...
+2 	proc_inum_idr.id_free_cnt 	77 in lib/idr.c 	[] 	pccardd (165467) -> ...
+2 		339 in lib/idr.c 	[] 	
+2 		44 in lib/idr.c 	[] 	
+2 		59 in lib/idr.c 	[] 	
+1 	proc_inum_idr.id_free_cnt 	59 in lib/idr.c 	[ proc_inum_lock (365712) , proc_inum_idr.lock (365711) ] 	____call_usermodehelper (435766) -> ...
+
+
+
+REASON: RACE but designed that way (detects and retries) -- dupe from 1_30_2007
+
+
+---
+
+Race Warning id: 26940
+
+1 	(*(c->inocache_list)) 	917 in fs/jffs2/nodelist.c 	[ c->inocache_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ...
+2 	(*(c->inocache_list)) 	872 in fs/jffs2/nodelist.c 	[] 	jffs2_garbage_collect_thread (392238) -> ...
+2 		874 in fs/jffs2/nodelist.c 	[] 	
+2 		913 in fs/jffs2/nodelist.c 	[] 	
+2 		916 in fs/jffs2/nodelist.c 	[] 
+
+
+913, 916, 917 (w): jffs2_del_ino_cache (w/ lock)
+
+872, 874 : jffs2_get_ino_cache (no lock)
+called by:
+    <- jffs2_gc_fetch_inode (w/ lock)
+    <- jffs2_garbage_collect_pass (w/ lock)
+
+but it all happens in a loop...
+
+
+REASON: lost lock - re-entrant?
+
+---
+
+Race Warning id: 26889
+
+1 	swap_token_mm 	89 in mm/thrash.c 	[ swap_token_lock (424020) ] 	kjournald (395072) -> ...
+2 	swap_token_mm 	100 in mm/thrash.c 	[] 	fork_sync_thread (59077) -> ...
+2 		233 in include/linux/swap.h 	[] 	
+2 		244 in include/linux/swap.h 	[] 	
+1 	swap_token_mm 	102 in mm/thrash.c 	[ swap_token_lock (424020) ] 	kjournald (395072) -> ...
+
+
+REASON: RACE. Double-checked locking though -- dupe from 11_7_2006
+
+---
+
+Race Warning id: 31686
+
+
+1 	c->gc_task 	81 in fs/jffs2/background.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	141 in fs/jffs2/background.c
+2 	c->gc_task 	27 in fs/jffs2/background.c 	[ c->erase_completion_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ... 	None
+2 		28 in fs/jffs2/background.c 	[ c->erase_completion_lock (392243) ] 
+1 	c->gc_task 	141 in fs/jffs2/background.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	141 in fs/jffs2/background.c
+
+81: in jffs2_garbage_collect_thread (no lock), but parent can't resume yet
+
+REASON: not in parallel (parent waiting on "completion" gc_thread_start)
+
+---
+
+Race Warning id: 31598
+
+1 	nr_skbs 	181 in net/core/netpoll.c 	[ skb_list_lock (66837) ] 	bnep_session (77356) -> ... 	None
+2 	nr_skbs 	174 in net/core/netpoll.c 	[] 	bnep_session (77356) -> ... 	221 in net/core/netpoll.c
+2 		181 in net/core/netpoll.c 	[] 		
+2 		220 in net/core/netpoll.c 	[] 		
+2 		231 in net/core/netpoll.c 	[]
+1 	nr_skbs 	231 in net/core/netpoll.c 	[ skb_list_lock (66837) ] 	bnep_session (77356) -> ... 	None
+
+
+174 r, 181 w: in refill_skbs (w/ lock)
+
+220 r: in find_skb (no lock) --> goes to 174 to read again
+
+231 w: in find_skb (w/ lock)
+
+REASON: RACE (double-checked)
+
+---
+
+Race Warning id: 31243
+
+
+1 	swap_token_check 	68 in mm/thrash.c 	[] 	kjournald (395072) -> ... 	68 in mm/thrash.c
+2 	swap_token_check 	103 in mm/thrash.c 	[ swap_token_lock (424020) ] 	fork_sync_thread (59077) -> ... 	None
+1 	swap_token_check 	79 in mm/thrash.c 	[] 	kjournald (395072) -> ... 	68 in mm/thrash.c
+1 	swap_token_check 	103 in mm/thrash.c 	[] 	kjournald (395072) -> ... 	68 in mm/thrash.c
+
+
+68: in grab_swap_token (no lock)
+
+79: in grab_swap_token (w/ lock)
+
+103: in __put_swap_token (w/ lock)
+
+the access at 68 should only happen if there's no swap_token_default_timeout,
+which is only changeable from sysctl? not sure how this works, so I can't
+tell if it's dangerous (but it seems like designer knew it would be a race)
+
+REASON: RACE (but not sure if program values will be set to hit that path)
+
+---
+
+Race Warning id: 31083
+
+1 	c->nr_free_blocks 	438 in fs/jffs2/erase.c 	[ c->erase_completion_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ... 	252 in fs/jffs2/nodemgmt.c
+1 	c->nr_free_blocks 	252 in fs/jffs2/nodemgmt.c 	[ c->erase_completion_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ... 	252 in fs/jffs2/nodemgmt.c
+2 	c->nr_free_blocks 	62 in fs/jffs2/nodemgmt.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	240 in fs/jffs2/nodemgmt.c
+2 		80 in fs/jffs2/nodemgmt.c 	[] 		
+2 		103 in fs/jffs2/nodemgmt.c 	[] 		
+2 		756 in fs/jffs2/nodemgmt.c 	[] 		
+2 		438 in fs/jffs2/erase.c 	[] 		
+2 		1087 in fs/jffs2/gc.c 	[] 		
+2 		54 in fs/jffs2/gc.c 	[] 		
+2 		232 in fs/jffs2/nodemgmt.c 	[] 		
+2 		252 in fs/jffs2/nodemgmt.c 	[] 
+
+
+erase.c:438: in jffs2_mark_erased_block  (w/ lock)
+
+nodemgmt.c: 232, 252 in jffs2_find_nextblock (caller holds lock)
+
+nodemgmt.c: 80, 103 in jffs2_reserve_space (w/ lock) 
+
+gc.c: 54 in jffs2_find_gc_block (no lock, expects caller to have)
+  called by:
+    <- jffs2_garbage_collect_pass (w/ lock)
+
+gc.c: 1087: in jffs2_garbage_collect_dnode (no lock)
+  called by:
+    <- jffs2_garbage_collect_live (no lock, for sure)
+
+not sure if the read in 1087 is dangerous
+
+REASON: RACE
+
+---
+
+Race Warning id: 30953
+
+
+1 	journal->j_revoke 	486 in fs/jbd/revoke.c 	[ journal->j_state_lock (395085) ] 	kjournald (395072) -> ... 	None
+2 	journal->j_revoke 	515 in fs/jbd/revoke.c 	[] 	kjournald (395072) -> ... 	424 in fs/jbd/commit.c
+2 		485 in fs/jbd/revoke.c 	[] 		
+1 	journal->j_revoke 	488 in fs/jbd/revoke.c 	[ journal->j_state_lock (395085) ] 	kjournald (395072) -> ... 	None
+
+
+485, 486, 488 in journal_switch_revoke_table (no lock)
+called by:
+    <- journal_commit_transaction (w/ lock)
+
+
+515 in journal_write_revoke_records (no lock)
+called by:
+    <- journal_commit_transaction (for sure... no lock)
+
+only the commit thread can access it... the only commit thread only touches a given journal (and parent thread doesn't call these functions)
+
+
+REASON: unique / not in parallel 
+
+---
+
+
+Race Warning id: 35726
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(tr->blkcore_priv)->rq 	355 in block/elevator.c 	[ (*(((tr->blkcore_priv)->rq)->queue_lock)) (211212) ] 	mtd_blktrans_thread (211139) -> ... 	None
+2 	(tr->blkcore_priv)->rq 	80 in drivers/mtd/mtd_blkdevs.c 	[] 	mtd_blktrans_thread (211139) -> ... 	131 in drivers/mtd/mtd_blkdevs.c
+2 		350 in block/ll_rw_blk.c 	[] 		
+2 		368 in block/ll_rw_blk.c 	[] 		
+2 		624 in include/linux/blkdev.h 	[] 		
+2 		2942 in block/ll_rw_blk.c 	[] 		
+2 		3179 in block/ll_rw_blk.c 	[] 
+
+
+
+elevator.c: 355 in __elv_add_request (no lock)
+called by: (w/ lock)
+
+mtd_blkdevs.c: 80 in 
+
+static int mtd_blktrans_thread(void *arg)
+{
+	struct mtd_blktrans_ops *tr = arg;
+	struct request_queue *rq = tr->blkcore_priv->rq;    // HERE
+
+no locks
+    <- NOBODY ELSE (that's the thread)
+
+gets fresh obj before passed to each thread
+
+
+--
+
+loses lock at: 131
+
+		spin_lock_irq(rq->queue_lock);
+
+		end_request(req, res);          //HERE
+
+382         tr->blkcore_priv = kmalloc(sizeof(*tr->blkcore_priv), GFP_KERNEL);
+
+
+--
+
+3179 in 
+
+
+REASON: unique
+
+---
+
+Race Warning id: 30770
+
+
+1 	pidmap_array.page 	96 in kernel/pid.c 	[ pidmap_lock (435417) ] 	wait_for_helper (435783) -> ... 	None
+2 	pidmap_array.page 	70 in kernel/pid.c 	[ tasklist_lock (285402) ] 	event_thread (169510) -> ... 	None
+
+same as earlier warning (above) but w/ lines reversed
+
+---
+
+Race Warning id: 35483
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	surprise_rm_pending 	476 in drivers/pci/hotplug/pciehp_ctrl.c 	[] 	event_thread (169248) -> ... 	538 in drivers/pci/hotplug/pciehp_ctrl.c
+1 		733 in drivers/pci/hotplug/pciehp_ctrl.c 	[] 		
+2 	surprise_rm_pending 	534 in drivers/pci/hotplug/pciehp_ctrl.c 	[ event_semaphore (169185) ] 	event_thread (169248) -> ... 	None
+2 		535 in drivers/pci/hotplug/pciehp_ctrl.c 	[ event_semaphore (169185) ] 
+
+733 in interrupt_event_handler (no ctrl->crit_sect, should have event_semaphore, but that's not a mutex)
+surprise_rm_pending = (unsigned long) p_slot;
+called by:
+    event_thread
+
+538 in event_thread calls interrupt_event_handler (w/ event_semaphore)
+
+535, 534 in event_thread (w/ event_semaphore... but not a mutex)
+
+476 in pciehp_surprise_rm_thread (no locks)     surprise_rm_pending = 0;
+called by:
+    <- event_thread
+
+only be one of these threads is ever made (from entry-point, not looping) (and all accesses happen in the thread)
+
+REASON: not in parallel
+
+
+---
+
+Race Warning id: 30532
+
+
+1 	[REP: 726] 	36 in arch/i386/mm/ioremap.c 	[ semOperations (169819) , sem_hpcaccess (169818) ] 	hpc_poll_thread (169830) -> ... 	None
+2 	[REP: 726] 	36 in arch/i386/mm/ioremap.c 	[ event_semaphore (168720) ] 	event_thread (168790) -> ... 	None
+
+36 in ioremap_pte_range (no locks)
+
+uh... REP: 726 is "__constr_expr_0" which is?
+
+
+---
+
+Race Warning id: 30257
+
+
+1 	nr_reserved_vectors 	499 in drivers/pci/msi.c 	[] 	poll_thread (169515) -> ... 	None
+2 	nr_reserved_vectors 	499 in drivers/pci/msi.c 	[ event_semaphore (169185) ] 	event_thread (169248) -> ... 	None
+
+499 in pci_scan_msi_device (no locks)
+called by:
+    <- pci_scan_single_device (no locks)
+        <- pci_scan_slot (no locks)
+            <- pci_scan_child_bus (no locks)
+                <-
+            <- pciehp_configure_device (no locks)
+                <- board_added (no locks)
+                    <- pci_enable_slot (no locks)
+                        <- pciehp_surprise_rm_thread (no locks)
+                        <- pciehp_pushbutton_thread (no locks)
+        <- pci_rescan_slot (no locks)
+            <- pci_rescan_bus (no locks)
+                <- pci_rescan_buses (no locks)
+                    <- pci_rescan (no locks)
+                        <- enable_slot (no locks)
+                            <- in funptr table
+
+going by above nr_msix_devices warning... this is also a race
+
+REASON: RACE (fixed by linux folks later?)
+
+---
+
+Race Warning id: 30250
+
+
+1 	swap_list.next 	263 in mm/swapfile.c 	[] 	do_linuxrc (442927) -> ... 	830 in mm/memory.c
+2 	swap_list.next 	185 in mm/swapfile.c 	[ swap_lock (424164) ] 	____call_usermodehelper (435766) -> ... 	None
+2 		205 in mm/swapfile.c 	[ swap_lock (424164) ] 
+
+dupe
+
+REASON: conditional locking (dupe)
+
+---
+
+Race Warning id: 30045
+
+
+1 	journal->j_commit_sequence 	828 in fs/jbd/commit.c 	[ journal->j_list_lock (395085) ] 	kjournald (395072) -> ... 	None
+2 	journal->j_commit_sequence 	852 in fs/jbd/commit.c 	[] 	kjournald (395072) -> ... 	852 in fs/jbd/commit.c
+2 		438 in fs/jbd/journal.c 	[] 		
+2 		143 in fs/jbd/journal.c 	[] 		
+2 		146 in fs/jbd/journal.c 	[] 		
+2 		176 in fs/jbd/journal.c 	[]
+
+REASON: RACE (read for debug) -- dupe from 2_5_2007
+
+---
+
+
+Race Warning id: 29819
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	journal->j_flags 	969 in fs/jbd/journal.c 	[ journal->j_state_lock (395085) ] 	kjournald (395072) -> ... 	None
+1 	 	971 in fs/jbd/journal.c 	
+1  	  	1467 in fs/jbd/journal.c  	
+1  	  	148 in fs/jbd/commit.c  	
+2 	journal->j_flags 	198 in fs/jbd/commit.c 	[] 	kjournald (395072) -> ... 	200 in fs/jbd/commit.c
+2 		969 in fs/jbd/journal.c 	[] 		
+2 		971 in fs/jbd/journal.c 	[] 		
+2 		1460 in fs/jbd/journal.c 	[] 		
+2 		1467 in fs/jbd/journal.c 	[] 		
+2 		1008 in include/linux/jbd.h 	[] 		
+2 		1478 in fs/jbd/journal.c 	[] 		
+2 		140 in fs/jbd/journal.c 	[] 		
+2 		182 in fs/jbd/journal.c 	[] 		
+2 		130 in fs/jbd/commit.c 	[] 		
+2 		148 in fs/jbd/commit.c 	[] 		
+
+
+journal.c: 
+
+    969, 971 in journal_update_superblock (w/ lock)
+    1467     in __journal_abort_hard (w/ lock)
+    1460 (r) in __journal_abort_hard (no lock read to see if already set)
+        (this read is benign)
+
+
+commit.c:
+
+    148      in journal_write_commit_record (w/ lock)
+    198, 200 in journal_commit_transaction (no lock) -- 
+         200 is a call to journal_update_superblock (see above)
+
+definitely a race, but not sure if it's a bug 
+(shouldn't it use atomic bit set, atomic bit read functions?)
+
+REASON: RACE
+
+---
+
+Race Warning id: 29725
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	c->gcblock 	394 in fs/jffs2/gc.c 	[ c->erase_completion_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ... 	98 in fs/jffs2/gc.c
+1 	 	572 in fs/jffs2/nodemgmt.c 	
+1  	  	98 in fs/jffs2/gc.c  	
+2 	c->gcblock 	209 in fs/jffs2/gc.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	516 in fs/jffs2/gc.c
+2 		390 in fs/jffs2/gc.c 	[] 		
+2 		570 in fs/jffs2/nodemgmt.c 	[] 		
+2 		596 in fs/jffs2/nodemgmt.c 	[] 		
+2 		511 in fs/jffs2/gc.c 	[] 		
+2 		1134 in fs/jffs2/gc.c 	[] 		
+2 		1184 in fs/jffs2/gc.c 	[] 		
+2 		419 in fs/jffs2/gc.c 	[] 	
+
+
+gc.c:
+
+    209, 390, 394: in jffs2_garbage_collect_pass (w/ lock, no sem)
+
+    98: in jffs2_find_gc_block (called w/ lock)
+
+    511, 516: in jffs2_garbage_collect_pristine (no lock)
+        called by:
+        <- jffs2_garbage_collect_pass (w/out lock)
+    516: is a call to jffs2_reserve_space_gc
+
+
+jffs2_reserve_space_gc -> jffs2_do_reserve_space -> jffs2_find_nextblock -> 
+jffs2_flush_wbuf_pad -> __jffs2_flush_wbuf -> jffs2_wbuf_recover -> 
+back to reserve_space...
+
+    419: in jffs2_garbage_collect_live (w/ lock)
+
+    1134, 1184: in jffs2_garbage_collect_dnode (no lock)
+        called by jffs2_garbage_collect_live (w/out lock... w/ f->sem)
+
+
+nodemgmt.c:
+
+    570, 572, 596: in jffs2_mark_node_obsolete (w/ lock)    
+    
+ok, so it should be race, not sure if it's a bug
+
+REASON: RACE
+
+---
+
+Race Warning id: 29712
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	dev_base->next 	3088 in net/core/dev.c 	[ dev_base_lock (21277) ] 	bnep_session (77356) -> ... 	None
+2 	dev_base->next 	3081 in net/core/dev.c 	[] 	bnep_session (77356) -> ... 	3088 in net/core/dev.c
+2 		3088 in net/core/dev.c 	[] 		
+
+
+3088 w/ dev_base_lock
+3081 no dev_base_lock
+
+in unregister_netdevice
+
+/* ...
+ *	Callers must hold the rtnl semaphore.  You may want
+ *	unregister_netdev() instead of this...
+ */
+they even ASSERT_RTNL()
+
+is it really true?
+
+called by unregister_netdev() w/ a call to rtnl_lock()
+
+ 56 void rtnl_lock(void)
+ 57 {
+ 58         rtnl_shlock();
+ 59 }
+
+1041 #define rtnl_shlock()           down(&rtnl_sem)
+
+
+oh... the probably killed the lock...
+
+1054 #define ASSERT_RTNL() do { \
+1055         if (unlikely(down_trylock(&rtnl_sem) == 0)) { \
+1056                 up(&rtnl_sem); \
+1057                 printk(KERN_ERR "RTNL: assertion failed at %s (%d)\n", \
+1058                        __FILE__,  __LINE__); \
+1059                 dump_stack(); \
+1060         } \
+1061 } while(0)
+
+REASON: lost lock (conditional from trylock in assert)
+
+
+
+---
+
+Race Warning id: 29660
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(journal->j_superblock)->s_start 	951 in fs/jbd/journal.c 	[ journal->j_state_lock (395085) ] 	kjournald (395072) -> ... 	None
+2 	(journal->j_superblock)->s_start 	937 in fs/jbd/journal.c 	[] 	kjournald (395072) -> ... 	968 in fs/jbd/journal.c
+2 		968 in fs/jbd/journal.c 	[]
+
+
+951 in journal_update_superblock w/ lock (sets to cpu_to_be32(journal->j_tail))
+
+937 in journal_update_superblock w/out lock (checks if == 0)
+
+968 in journal_update_superblock w/ lock (checks if == 0)
+
+hmm, but the write at 951 has nothing to do w/ the actions after 968?
+
+REASON: RACE (double-checked)
+
+---
+
+Race Warning id: 29627
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	thread_finished 	584 in drivers/pci/hotplug/cpci_hotplug_core.c 	[] 	poll_thread (169515) -> ... 	None
+2 	thread_finished 	547 in drivers/pci/hotplug/cpci_hotplug_core.c 	[ event_semaphore (169412) ] 	event_thread (169510) -> ... 	None
+
+
+similar to old one (but access at 547 instead)
+
+584 no lock (sets to 1)
+
+547 no lock (sets to 1) (uses event_semaphore, but for waiting)
+
+REASON: RACE (benign -- idempotent)
+
+---
+
+Race Warning id: 29578
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	acct_globals.file 	183 in kernel/acct.c 	[ acct_globals.lock (433053) ] 	do_linuxrc (442927) -> ... 	199 in kernel/acct.c
+1 	 	186 in kernel/acct.c 	
+2 	acct_globals.file 	285 in kernel/acct.c 	[] 	____call_usermodehelper (435766) -> ... 	198 in kernel/acct.c
+2 		559 in kernel/acct.c 	[] 		
+2 		563 in kernel/acct.c 	[] 		
+2 		140 in kernel/acct.c 	[] 		
+2 		178 in kernel/acct.c 	[] 		
+2 		179 in kernel/acct.c 	[] 		
+
+178, 179, 183, 186, in acct_file_reopen (called w/ lock?)
+
+198, 199 w/out lock
+    198: call to do_acct_process -> ... -> acct_process? (see below)
+    199: call to filp_close
+
+
+140 in check_free_space (w/ lock)
+
+285 in acct_auto_close_mnt (w/ lock)
+
+559 in acct_process (no lock) "accelerate the common fastpath"
+
+REASON: RACE (benign?)
+
+---
+
+Race Warning id: 29480
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	c->dirty_size 	416 in fs/jffs2/nodemgmt.c 	[ c->erase_completion_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ... 	364 in fs/jffs2/nodemgmt.c
+1 	 	364 in fs/jffs2/wbuf.c 	
+1  	  	370 in fs/jffs2/wbuf.c  	
+1  	  	527 in fs/jffs2/nodemgmt.c  	
+1  	  	540 in fs/jffs2/nodemgmt.c  	
+1  	  	137 in fs/jffs2/erase.c  	
+1  	  	185 in fs/jffs2/erase.c  	
+1  	  	60 in fs/jffs2/erase.c  	
+1 	 	93 in fs/jffs2/erase.c 	
+1  	  	110 in fs/jffs2/gc.c  	
+1  	  	173 in fs/jffs2/nodemgmt.c
+2 	c->dirty_size 	416 in fs/jffs2/nodemgmt.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	364 in fs/jffs2/nodemgmt.c
+2 		38 in fs/jffs2/debug.c 	[] 		
+2 		41 in fs/jffs2/debug.c 	[] 		
+2 		364 in fs/jffs2/wbuf.c 	[] 		
+2 		370 in fs/jffs2/wbuf.c 	[] 		
+2 		78 in fs/jffs2/nodemgmt.c 	[] 		
+2 		101 in fs/jffs2/nodemgmt.c 	[] 		
+2 		527 in fs/jffs2/nodemgmt.c 	[] 		
+2 		540 in fs/jffs2/nodemgmt.c 	[] 		
+2 		137 in fs/jffs2/erase.c 	[] 		
+2 		754 in fs/jffs2/nodemgmt.c 	[] 		
+2 		185 in fs/jffs2/erase.c 	[] 		
+2 		60 in fs/jffs2/erase.c 	[] 		
+2 		93 in fs/jffs2/erase.c 	[] 		
+2 		110 in fs/jffs2/gc.c 	[] 		
+2 		173 in fs/jffs2/nodemgmt.c 	[] 		
+
+
+nodemgmt.c:
+
+78, 101 in jffs2_reserve_space (w/ lock)
+
+173 in jffs2_close_nextblock (no lock)
+called by:
+    <- caller apparently has lock though
+
+416 in jffs2_add_physical_node_ref (w/ lock)
+
+364 in jffs2_do_reserve_space
+    calls jffs2_mark_node_obsolete (w/out lock, but that's fine)
+
+527, 540 in jffs2_mark_node_obsolete (w/ lock)
+
+754 in jffs2_thread_should_wake (no lock)
+called by:
+    <- jffs2_garbage_collect_trigger (w/ lock)
+    <- jffs2_garbage_collect_thread  (no lock)
+
+c is based on the superblock (which can be shared?)
+
+debug.c:
+
+38, 41: in __jffs2_dbg_acct_sanity_check_nolock
+
+REASON: RACE (but in __jffs2_dbg_acct_sanity_check_nolock)
+
+
+---
+
+Race Warning id: 29430
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	swapper_space.page_tree.height 	695 in lib/radix-tree.c 	[ swapper_space.tree_lock (325127) ] 	do_linuxrc (442927) -> ... 	None
+1 	 	359 in lib/radix-tree.c 	
+1 	 	402 in lib/radix-tree.c 	
+1 	 	290 in lib/radix-tree.c 	
+2 	swapper_space.page_tree.height 	760 in lib/radix-tree.c 	[] 	recall_thread (379860) -> ... 	537 in mm/vmscan.c
+2 		179 in lib/radix-tree.c 	[] 		
+2 		214 in lib/radix-tree.c 	[] 		
+
+dupe of "lost lock", but re-examine 
+
+695, 760: in radix_tree_delete
+	root->height = 0
+
+179, 214: in radix_tree_extend
+		root->height = height;
+		root->height++;
+
+vmscan 537: made empty in shrink_list:
+			__delete_from_swap_cache(page);             //HERE
+			write_unlock_irq(&mapping->tree_lock);
+
+mapping is either &swapper_space or page->mapping
+
+359 in radix_tree_tag_set
+402 in radix_tree_tag_clear
+290 in __lookup_slot
+but callers (starting from do_linuxrc) have locks
+
+so it must be some path from recall_thread to radix_tree_extend where it loses
+the lock...
+
+radix_tree_delete
+    <-
+    <- __remove_from_page_cache
+        <- shrink_list
+        <- invalidate_complete_page
+        <- remove_from_page_cache
+    <-
+
+radix_tree_extend
+    <- radix_tree_insert
+        <- __add_to_swap_cache (w/ swapper_space.tree_lock)
+            <- add_to_swap
+                <- shrink_list (w/ out lock... gets later for other access)
+                    <- shrink_cache
+                        <- shrink_zone
+                            <- shrink_caches
+            <- add_to_swap_cache
+                <- read_swap_cache_async
+
+        <- add_to_page_cache (w/ on mapping->page_tree w/ mapping->tree_lock)
+            <-  add_to_page_lru (passed mapping as arg)
+                <- find_or_create_page (passed mapping)
+                    <- grow_dev_page (bdev->bd_inode->i_mapping)
+                        <- grow_buffers (passed bdev)... bdev not swap_space?
+            <- find_lock_huge_page (passed mapping)
+                <- huge_tlb_fault (mapping = vma->vm_file->f_mapping)
+
+seriously... still don't know why it's messed up
+
+REASON: lost lock (that swapper_space one again...)
+
+---
+
+Race Warning id: 29251
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	swapper_space.page_tree.height 	760 in lib/radix-tree.c 	[ swapper_space.tree_lock (325127) ] 	do_linuxrc (442927) -> ... 	None
+2 	swapper_space.page_tree.height 	214 in lib/radix-tree.c 	[] 	____call_usermodehelper (435766) -> ... 	537 in mm/vmscan.c
+2 		237 in lib/radix-tree.c 	[] 		
+2 		245 in lib/radix-tree.c 	[] 		
+2 		695 in lib/radix-tree.c 	[] 		
+2 		359 in lib/radix-tree.c 	[] 		
+2 		402 in lib/radix-tree.c 	[] 		
+2 		174 in lib/radix-tree.c 	[] 		
+2 		199 in lib/radix-tree.c 	[] 		
+2 		290 in lib/radix-tree.c 	[] 
+
+
+dupe of "lost lock", but re-examine 
+
+695, 760: in radix_tree_delete
+	root->height = 0
+
+174, 179, 199, 214: in radix_tree_extend (174, 199 didn't show up because they're reads)
+
+237, 245: in radix_tree_insert (calls radix_tree_extend, why didn't this show up earlier? it's the only caller... those are reads)
+
+359 in radix_tree_tag_set
+    <- __set_page_dirty_buffers (w/ mapping->tree_lock) 
+    <- nfs_set_page_writeback_locked (no locks)
+        <- nfs_scan_lock_dirty (no locks)
+        <- nfs_scan_list (no locks)
+402 in radix_tree_tag_clear
+290 in __lookup_slot
+but callers (starting from do_linuxrc) have locks
+
+
+REASON: lost lock (that swapper_space / shrink_list guy)
+
+
+---
+
+Race Warning id: 29417
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	c->nr_erasing_blocks 	395 in fs/jffs2/gc.c 	[ c->erase_completion_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ... 	240 in fs/jffs2/nodemgmt.c
+1 	 	124 in fs/jffs2/wbuf.c 	
+1  	  	155 in fs/jffs2/wbuf.c
+1  	  	387 in fs/jffs2/wbuf.c
+1  	  	586 in fs/jffs2/nodemgmt.c  	
+1  	  	197 in fs/jffs2/erase.c  	
+1  	  	437 in fs/jffs2/erase.c  	
+1  	  	212 in fs/jffs2/nodemgmt.c  	
+2 	c->nr_erasing_blocks 	395 in fs/jffs2/gc.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	240 in fs/jffs2/nodemgmt.c
+2 		124 in fs/jffs2/wbuf.c 	[] 		
+2 		155 in fs/jffs2/wbuf.c 	[] 		
+2 		387 in fs/jffs2/wbuf.c 	[] 		
+2 		62 in fs/jffs2/nodemgmt.c 	[] 		
+2 		78 in fs/jffs2/nodemgmt.c 	[] 		
+2 		80 in fs/jffs2/nodemgmt.c 	[] 		
+2 		103 in fs/jffs2/nodemgmt.c 	[] 		
+2 		586 in fs/jffs2/nodemgmt.c 	[] 		
+2 		754 in fs/jffs2/nodemgmt.c 	[] 		
+2 		756 in fs/jffs2/nodemgmt.c 	[] 		
+2 		197 in fs/jffs2/erase.c 	[] 		
+2 		437 in fs/jffs2/erase.c 	[] 		
+2 		1087 in fs/jffs2/gc.c 	[] 		
+2 		205 in fs/jffs2/nodemgmt.c 	[] 		
+2 		212 in fs/jffs2/nodemgmt.c 	[] 		
+2 		218 in fs/jffs2/nodemgmt.c 	[] 		
+2 		229 in fs/jffs2/nodemgmt.c 	[] 		
+2 		232 in fs/jffs2/nodemgmt.c 	[] 		
+
+
+gc.c
+
+395 in jffs2_garbage_collect_pass w/ lock
+
+1087 in jffs2_garbage_collect_dnode (no lock)
+    called by jffs2_garbage_collect_live (w/out lock... w/ f->sem)
+
+nodemgmt.c
+
+62, 78, 80, 103 in jffs2_reserve_space (w/ lock)
+
+205, 212, 218, 229, 232 in jffs2_find_nextblock (caller holds)
+
+240 call to jffs2_erase_pending_blocks (w/out lock)
+-> jffs2_erase_pending_blocks -> jffs2_mark_erased_block -> access 437 (w/ l)
+
+586 in jffs2_mark_node_obsolete (w/ lock)
+
+754, 756 in jffs2_thread_should_wake
+called by:
+    <- jffs2_garbage_collect_trigger (w/ lock)
+    <- jffs2_garbage_collect_thread  (no lock)
+
+wbuf.c
+should have locks
+
+erase.c
+should have locks
+
+race from the access at 1087?
+
+REASON: RACE -- similar to other c->blah races
+
+---
+
+Race Warning id: 29333
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	c->erasing_size 	133 in fs/jffs2/erase.c 	[ c->erase_completion_lock (392243) , c->erase_free_sem (392243) ] 	jffs2_garbage_collect_thread (392238) -> ... 	None
+1 	 	184 in fs/jffs2/erase.c 	
+1  	  	193 in fs/jffs2/erase.c  	
+1  	  	429 in fs/jffs2/erase.c  	
+1  	  	59 in fs/jffs2/erase.c  	
+1  	  	92 in fs/jffs2/erase.c  	
+2 	c->erasing_size 	38 in fs/jffs2/debug.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	134 in fs/jffs2/background.c
+2 		41 in fs/jffs2/debug.c 	[] 		
+2 		78 in fs/jffs2/nodemgmt.c 	[] 		
+2 		101 in fs/jffs2/nodemgmt.c 	[] 		
+2 		133 in fs/jffs2/erase.c 	[] 		
+2 		754 in fs/jffs2/nodemgmt.c 	[] 		
+2 		184 in fs/jffs2/erase.c 	[] 		
+2 		193 in fs/jffs2/erase.c 	[] 		
+2 		429 in fs/jffs2/erase.c 	[] 		
+2 		59 in fs/jffs2/erase.c 	[] 		
+2 		92 in fs/jffs2/erase.c 	[] 		
+
+debug.c
+38, 41 in __jffs2_dbg_acct_sanity_check_nolock
+
+we know that's a racy read already... look again to see if there's another
+
+erase.c
+59, 92 in jffs2_erase_block (w/ lock)
+133 in jffs2_erase_pending_blocks (w/ lock)
+184, 193 in jffs2_erase_failed (w/ lock)
+429 in jffs2_mark_erased_block (w/ lock)
+
+nodemgmt.c 
+78, 101 in jffs2_reserve_space (w/ lock)
+754     in jffs2_thread_should_wake
+called by:
+    <- jffs2_garbage_collect_trigger (w/ lock)
+    <- jffs2_garbage_collect_thread  (no lock)
+
+REASON: RACE (just in __jffs2_dbg_acct_sanity_check_nolock)
+
+---
+
+Race Warning id: 29273
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	(jffs2_compressor_list.next)->compr_buf 	107 in fs/jffs2/compr.c 	[ jffs2_compressor_list_lock (394233) ] 	jffs2_garbage_collect_thread (392238) -> ... 	None
+1 	 	118 in fs/jffs2/compr.c 	
+1 	 	141 in fs/jffs2/compr.c 	
+2 	(jffs2_compressor_list.next)->compr_buf 	102 in fs/jffs2/compr.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	104 in fs/jffs2/compr.c
+2 		104 in fs/jffs2/compr.c 	[] 		
+2 		109 in fs/jffs2/compr.c 	[] 		
+2 		126 in fs/jffs2/compr.c 	[] 		
+2 		140 in fs/jffs2/compr.c 	[] 		
+
+compr.c
+
+102, 107, 109, 118, 140, 141 in jffs2_compress (w/ lock)
+
+104, 126 in jffs2_compress (no lock)
+
+so what if it checks that this->compr_buf != NULL, then it gets NULL, then they try to free the null?
+
+REASON: RACE (may be dangerous)
+
+---
+
+Race Warning id: 29237
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	rt_deadline 	738 in net/ipv4/route.c 	[] 	sync_thread (59060) -> ... 	738 in net/ipv4/route.c
+1 	 	681 in net/ipv4/route.c 	
+2 	rt_deadline 	714 in net/ipv4/route.c 	[ rt_flush_lock (55207) ] 	sync_thread (59060) -> ... 	None
+2 		715 in net/ipv4/route.c 	[ rt_flush_lock (55207) ] 		
+2 		737 in net/ipv4/route.c 	[ rt_flush_lock (55207) ] 		
+
+
+714, 715, 737, 738 in rt_cache_flush (w/ lock by using spin_lock_bh)
+
+681 in rt_run_flush (no lock) sets rt_deadline = 0
+called by:
+    <- rt_cache_flush (w/out lock for sure, after that crit section)
+    <- through fun ptr in (rt_flush_timer)
+
+but the rt_flush_timer is deleted before the check in 714, etc..
+
+
+714         if (del_timer(&rt_flush_timer) && delay > 0 && rt_deadline) {
+715                 long tmo = (long)(rt_deadline - now);
+
+
+
+REASON: not in parallel
+
+---
+
+Race Warning id: 29171
+
+
+Acc#	Lval	Occurs at	Locks held 	Access path	Loses lock at
+1 	c->unchecked_size 	510 in fs/jffs2/nodemgmt.c 	[ c->erase_completion_lock (392243) ] 	jffs2_garbage_collect_thread (392238) -> ... 	None
+1 	 	304 in fs/jffs2/readinode.c 	
+1 	 	496 in fs/jffs2/nodelist.c 	
+2 	c->unchecked_size 	134 in fs/jffs2/gc.c 	[] 	jffs2_garbage_collect_thread (392238) -> ... 	134 in fs/jffs2/background.c
+2 		142 in fs/jffs2/gc.c 	[] 		
+2 		38 in fs/jffs2/debug.c 	[] 		
+2 		41 in fs/jffs2/debug.c 	[] 		
+2 		78 in fs/jffs2/nodemgmt.c 	[] 		
+2 		101 in fs/jffs2/nodemgmt.c 	[] 		
+2 		510 in fs/jffs2/nodemgmt.c 	[] 		
+2 		740 in fs/jffs2/nodemgmt.c 	[] 		
+2 		304 in fs/jffs2/readinode.c [] 		
+2 		496 in fs/jffs2/nodelist.c 	[] 		
+
+debug.c:
+38, 41 in __jffs2_dbg_acct_sanity_check_nolock
+
+know that's racy already... are there other races?
+
+REASON: RACE (in __jffs2_dbg_acct_sanity_check_nolock)
+
+
+---
+
+19 RACES based off a global variable (may be a struct or pointer)
+
+31 RACES total
+
+50 Examined
+

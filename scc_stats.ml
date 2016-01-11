@@ -44,11 +44,7 @@ open Fstructs
 open Stdutil
 open Pretty
 
-module Dis = Distributed
 module L = Logging
-module Th = Threads
-module DC = Default_cache
-module A = Alias
 
 let cgFile = ref ""
 
@@ -541,9 +537,9 @@ module ThreadReachStats = struct
     printSet roots "Roots";
 
     (* Find which functions actually fork new threads *)
-    let threadCreatorCallers = Th.findTCCallers cg in
+    let threadCreatorCallers = Threads.findTCCallers cg in
     let tcc = List.fold_left 
-      (fun cur tc -> FSet.add tc.Th.tccID cur) FSet.empty 
+      (fun cur tc -> FSet.add tc.Threads.tccID cur) FSet.empty 
       threadCreatorCallers in
     printSet tcc "Thread creators";
 
@@ -552,7 +548,7 @@ module ThreadReachStats = struct
     printSet tccRoots "Roots reaching spawn (RRS)";
     
     (* Find the fork targets (i.e., thread roots) *)
-    let threadRoots = Th.getThreadRoots cg threadCreatorCallers in
+    let threadRoots = Threads.getThreadRoots cg threadCreatorCallers in
     printSet threadRoots "Thread roots (TR)";
     
     (* Find call graph roots that are "entry points" *)
@@ -596,9 +592,10 @@ end
 let initSettings cg =
   try
     let settings = Config.initSettings !configFile in
-    DC.makeLCaches (!cgDir);
-    A.initSettings settings !cgDir;
-    Th.initSettings settings;
+    Default_cache.makeLCaches !cgDir;
+    Cilinfos.reloadRanges !cgDir;
+    Alias.initSettings settings !cgDir;
+    Threads.initSettings settings;
     Entry_points.initSettings settings; 
 
   with e -> Printf.printf "Exc. in initSettings: %s\n"
@@ -611,7 +608,7 @@ let doStats stat cg sccGraph =
   if(!findCycles) then
     if(!pruneDone) then
       stat#checkCyclesPruned sccGraph 
-        (fun scc -> Dis.isSccDone scc.scc_num)
+        (fun scc -> Distributed.isSccDone scc.scc_num)
     else stat#checkCycles sccGraph
   else();
   stat#checkHasBody cg sccGraph;
@@ -639,6 +636,8 @@ let doStats stat cg sccGraph =
 let doStats () = begin
   let cg = readCalls !cgFile in
   let sccGraph = getSCCGraph cg in
+  L.logStatus "SCC Graph computed\n";
+  L.flushStatus ();
   initSettings cg;
   let stat = new SccStats.statPrinter in
   doStats stat cg sccGraph;
@@ -647,7 +646,8 @@ let doStats () = begin
   if !reachable_stats then ThreadReachStats.printReachStats cg sccGraph ;
 
 end
-  
+
+
 let main () =
   try
     Arg.parse argSpecs anonArgFun usageMsg;
@@ -659,6 +659,8 @@ let main () =
         exit 1
       end
     else begin
+      Stdutil.printCmdline ();
+      Cil.initCIL ();
       doStats ();      
       exit 0;
     end

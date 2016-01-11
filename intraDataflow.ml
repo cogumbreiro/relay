@@ -271,9 +271,10 @@ end
 **************************************************)
 
 
-(** Functor to make a intra-procedural analysis that is flow-sensitive *)
-module FlowSensitive (S:DFTransfer) : IntraProcAnalysis with type T.st  = S.st = struct
-
+(** Functor to make a intra-procedural flow-sensitive forwards analysis *)
+module FlowSensForward (S:DFTransfer) 
+  : IntraProcAnalysis with type T.st  = S.st = struct
+    
   module T = S
 
   type state = T.st
@@ -365,6 +366,7 @@ module FlowSensitive (S:DFTransfer) : IntraProcAnalysis with type T.st  = S.st =
     curFunc := func;
     curFunID := funID;
     CilTrans.initStmtStartData input;
+    CilDF.clearPPData ();
     !S.transF#handleFunc funID func
 
 
@@ -490,6 +492,159 @@ struct
     Osize.size_kb !fiState
 
 end
+
+
+(** Functor to make a intra-procedural flow-sensitive backwards analysis *)
+module FlowSensBackward (S:DFTransfer) 
+  : IntraProcAnalysis with type T.st  = S.st = struct
+    
+  module T = S
+
+  type state = T.st
+
+  (** The function being analyzed *)
+  let curFunc = ref dummyFunDec
+  let curFunID = ref dummyFID
+
+  (******************************
+       Logging / debugging
+  ******************************)
+
+  (** Given a message [m], create a message specific to this analysis *)
+  let message (m:string) : string = (S.name ^ ": " ^ m)
+
+
+  (**************************************************
+    Interface with CIL for flow-sensitive analysis.
+    (@see dataflow.ml)
+  **************************************************)
+  module CilTrans = struct
+
+    let debug = ref S.debug
+
+    let name = S.name
+
+    type t = S.st
+
+    let stmtStartData : t Inthash.t = Inthash.create 37
+
+    let pretty () (d: t) =
+      (* TODO, use this instead of own print functions for inspect? *)
+      Pretty.nil
+
+    (** initializes DF facts -- ASSUMES curFunc is set! *)
+    let initStmtStartData (exitData: t) =
+      (* Set all pre-statement state to $BOTTOM -- T.funcExitData will handle
+         the "exitData" at the right place *)
+      Inthash.clear stmtStartData;
+      List.iter
+        (fun stmt ->
+           Inthash.add stmtStartData stmt.sid S.stMan#bottom
+        ) !curFunc.sallstmts
+        
+
+    (** @return the dataflow fact at statement [s]. If it is not set,
+        return $BOTTOM *)
+    let getStmtData (data: t Inthash.t) (s: stmt) : t = 
+      try Inthash.find data s.sid
+      with Not_found -> S.stMan#bottom
+            
+    let combineStmtStartData (s: stmt) ~(old: t) (newD: t) : t option =
+      if (S.stMan#stateSubset newD old) then
+        None
+      else
+        Some (S.stMan#combineStates old newD)
+
+    let combineSuccessors (d1: t) (d2: t) : t = 
+      S.stMan#combineStates d1 d2
+
+    let doInstr (i: instr) (inSt: t) =
+      (* If the input state is bottom, the next state should also be bottom *)
+      if (S.stMan#isBottom inSt) then DF.Default
+      else !S.transF#handleInstr i inSt
+          
+    let filterStmt _ _ = true
+
+    let funcExitData = S.stMan#initialState
+
+    (** This is actually for branches also (there is no doGuard) *)
+    let doStmt (s: stmt) : t DF.action = 
+      let handle_stmt (d : t) : t = 
+        match s.skind with 
+          Instr _ -> d
+        | If (exp, _, _, _) ->
+            (match !S.transF#handleGuard exp d with
+               DF.GDefault -> d
+             | DF.GUse d' -> d'
+             | DF.GUnreachable -> S.stMan#bottom)
+        | _ ->
+            (match !S.transF#handleStmt s d with
+               DF.SDefault -> d
+             | DF.SDone -> 
+                 failwith "Not allowing SDone in IntraDataflow.Backwards"
+             | DF.SUse d -> d)
+      in
+      (* Return Post to let the instruction handler run first *)
+      DF.Post handle_stmt
+
+    let copy (d:t) = d
+
+  end (* End CilTrans *)
+
+  module CilDF = Dataflow.BackwardsDataFlow(CilTrans) 
+
+  (******** Output functor signature *******)
+
+  (** Prepare analysis *)
+  let initialize (funID: funID) (func:fundec) (input:state) : unit =
+    curFunc := func;
+    curFunID := funID;
+    CilTrans.initStmtStartData input;
+    CilDF.clearPPData ();
+    !S.transF#handleFunc funID func
+
+
+  (** @return the dataflow fact at the given prog_point. 
+      If it is not set, return $BOTTOM *)
+  let getDataBefore (pp:prog_point) : state = 
+    CilDF.getDataBefore pp
+
+  let getDataAfter pp =
+    CilDF.getDataAfter pp
+
+  (** Replace the state at the given prog_point *)
+  let setDataBefore (pp:prog_point) (s:state) : unit =
+    CilDF.setDataBefore pp s
+
+  let setDataAfter pp s =
+    CilDF.setDataAfter pp s
+
+  (** Run the fixed-point computation on the function [cfg] *)
+  let compute (cfg:fundec) : unit = 
+    (* let sinks = List.filter (fun stmt -> stmt.succs = []) cfg.sallstmts in *)
+    let sinks, nonsinks = List.partition (fun stmt -> stmt.succs = []) 
+      cfg.sallstmts in
+    (* Add sinks first... but add them all... *)
+    CilDF.compute (List.rev_append sinks (List.rev nonsinks))
+      
+  (** Return the output state for summarization *)
+  let getOutState () : state  =
+    List.fold_left 
+      (fun curState s ->
+         (* Consider Return statements *)
+         match (s.skind, s.succs) with
+           Return _, _ ->
+             let n = CilTrans.getStmtData CilTrans.stmtStartData s in
+             S.stMan#combineStates curState n
+         | _, _ -> 
+             curState
+      ) S.stMan#bottom !curFunc.sallstmts
+      
+  let sizeOfState () =
+    Osize.size_kb CilTrans.stmtStartData
+
+end
+
 
 
 (************************************************************
@@ -637,9 +792,12 @@ let runNonFixpoint (nonFixpoint: analysis list) (pre_req: analysis list)
   let runOn sumKey cfg =
     List.iter 
       (fun analysis ->
-         if not (analysis#isFinal sumKey) then analysis#compute sumKey cfg ;
+         if not (analysis#isFinal sumKey) then 
+           analysis#compute sumKey cfg ;
          let changed = analysis#summarize sumKey cfg in
-         if changed then logError "runNonFixpoint: Why did summary change?"
+         if changed then 
+           logError "runNonFixpoint: Why did summary change?";
+         analysis#flushSummaries ();
       ) nonFixpoint
   in
   
@@ -654,15 +812,11 @@ let runNonFixpoint (nonFixpoint: analysis list) (pre_req: analysis list)
   in
   
   let getCFGAndDo fid foo =
-    try 
-      let fnode = FMap.find fid !curCG in
-      let fkey = fid_to_fkey fid in
-      match Cilinfos.getFunc fkey fnode.defFile with
-        Some cfg -> foo fid cfg
-      | None -> () 
-    with Not_found -> 
-      logErrorF "intraDataflow: runNonFixpoint can't find CFG for %s\n" 
-        (fid_to_string prevFID); 
+    let fnode = FMap.find fid !curCG in
+    let fkey = fid_to_fkey fid in
+    match Cilinfos.getFunc fkey fnode.defFile with
+      Some cfg -> foo fid cfg
+    | None -> () 
   in
     
 
@@ -805,7 +959,7 @@ class ['st] inspectorGadget
            logStatus (name ^ " after instr: No change\n")
        | DF.Done newSt -> 
            if stMan#stateSubset newSt prevState then
-             logStatus (name ^ " after instr: No change\n")
+             logStatus (name ^ " after instr: Out Subs In\n")
            else begin
              logStatus (name ^ " after instr: \n");
              stMan#printState newSt
@@ -868,7 +1022,7 @@ end
 
 (**************** Simple summary manager **************)
 
-class type ['sum, 'st] summarizer = object
+class type ['st, 'sum] summarizer = object
 
   (** Make the summary, and possibly update the database. 
       Assume implementation only needs to be able query state.
@@ -880,6 +1034,22 @@ class type ['sum, 'st] summarizer = object
   method setInspect : bool -> unit
 
   method flushSummaries : unit -> unit
+
+end
+
+class ['st, 'sum] noneSummarizer (sums : 'sum BS.base) = object (self)
+  
+  method summarize (sk: sumKey) (f: fundec) (get: prog_point -> 'st) : bool =
+    false
+
+  method scopeIt (f : fundec) (sum: 'sum) =
+    sum
+
+  method setInspect (b: bool) =
+    ()
+
+  method flushSummaries () =
+    ()
 
 end
 

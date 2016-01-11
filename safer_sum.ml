@@ -111,7 +111,7 @@ module Make (I:Summarizeable) = struct
           (fun () ->
              logError ~prior:0 "deserialization giving up";
              Checkpoint.clearCheck checkPointK; (* Don't nuke on reboot *)
-             quit 1;
+             exit 1;
              (* maybe re-raise exception, but we don't have the latest exc. *)
           ) numRetries retryTime;
         !result
@@ -139,7 +139,7 @@ module Make (I:Summarizeable) = struct
             (fun () -> 
                logError ~prior:0 "deserialization giving up";
                Checkpoint.clearCheck checkPointK; (* Don't nuke on reboot *)
-               quit 1; (* fail fast *)
+               exit 1; (* fail fast *)
             ) numRetries retryTime;
           !result
 

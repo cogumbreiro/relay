@@ -45,11 +45,9 @@ open Cil
 open Pretty
 open Callg
 open Guarded_access_base
+open Logging
 
-module D = Cildump
 module LS = Lockset
-module L = Logging
-module Stat = Mystats
 module Lv = Lvals
 module Accs = Access_info
 
@@ -251,7 +249,7 @@ let clearCache () = begin
 end
 
 let printCacheStats () = begin
-  L.logStatus (Stdutil.string_of_hashstats CMHash.stats
+  logStatus (Stdutil.string_of_hashstats CMHash.stats
     cmCache "Golden GAs");
 end
 
@@ -296,26 +294,37 @@ let updateCorr lval newAccs curConstMap =
 
 
 (************** Annotate scopes ***************)
- 
-
 
 let scopeAccs curFunc scopeLocks corrLv accs (curSet:straintMap) : straintMap =
-  (
-    (* Do some pruning of what can be shared while annotating scope *)
-    match Shared.isShareableAbs curFunc corrLv with
-      None -> CMap.remove corrLv curSet
-    | _ ->
-        let () = 
-          AccSet.iter 
-            (fun corr ->
-               corr.corrLocks <- LS.LS.unique (scopeLocks corr.corrLocks);
-            ) accs in
-        curSet
-  )
-
+  (* Do some pruning of what can be shared while annotating scope *)
+  match Shared.isShareableAbs curFunc corrLv with
+    None -> 
+      CMap.remove corrLv curSet
+  | _ ->
+      AccSet.iter 
+        (fun corr ->
+           corr.corrLocks <- LS.LS.unique (scopeLocks corr.corrLocks);
+        ) accs;
+      curSet
 
 let scopeStraintMap curFunc scopeLocks (cmap:straintMap) =
   CMap.fold (scopeAccs curFunc scopeLocks) cmap cmap
+
+let corrMentionsFormal corr =
+  let setHasFormal set = 
+    LS.LS.S.exists
+      (fun lv _ -> 
+         match Lvals.getScope lv with
+           Scope.SFormal _ -> true
+         | Scope.SGlobal | Scope.SFunc | Scope.STBD -> false) set
+  in
+  AccSet.exists
+    (fun ga ->
+       setHasFormal (LS.LS.getPlus ga.corrLocks) ||   
+         setHasFormal (LS.LS.getMinus ga.corrLocks)) corr 
+         
+let splitGlobalsFormals cmap =
+  splitGlobalsFormalsBase corrMentionsFormal cmap
 
 
 (************* Race checking ***************)
@@ -363,7 +372,7 @@ let d_accLoc (fk, loc) =
   Cil.d_loc () loc
 
 let d_accs accs printLocks =
-  L.seq_to_doc
+  seq_to_doc
     Pretty.line
     AccSet.iter
     (fun corr ->
@@ -376,7 +385,7 @@ let d_accs accs printLocks =
     Pretty.nil
 
 let d_corrMap cm printLocks =
-  L.map_to_doc 
+  map_to_doc 
     Pretty.line
     CMap.iter
     (fun clval accs ->
@@ -387,4 +396,4 @@ let d_corrMap cm printLocks =
 
 let printCorrMap cm printLocks =
   let doc = d_corrMap cm printLocks in
-  L.logStatusD doc;
+  logStatusD doc;

@@ -23,6 +23,8 @@ module CGraph  = struct
 
 end
 
+let dummySCCID = -1
+
 (***** Convert SCC DAG to something "more convenient" *****)
 
 type 'a sccPoly = {

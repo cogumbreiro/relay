@@ -89,25 +89,27 @@ module type IntraProcAnalysis =
     val sizeOfState : unit -> int
   end
 
-module FlowSensitive :
+module FlowSensForward :
   functor (S : DFTransfer) -> IntraProcAnalysis with type T.st = S.st
 
 module FlowInsensitive :
   functor (S : DFTransfer) -> IntraProcAnalysis with type T.st = S.st
 
+module FlowSensBackward :
+  functor (S : DFTransfer) -> IntraProcAnalysis with type T.st = S.st
 
 val curCG : Callg.callG ref
 val curSCCCG : Scc_cg.sccGraph ref
 
 val checkupSummary :
-  'a ->
-  'b ->
+  Callg.funID ->
+  Cil.fundec ->
   'c ->
-  ('a -> 'c) ->
+  (Callg.funID -> 'c) ->
   ('c -> bool) ->
   ('c -> 'c -> bool) ->
   ('c -> 'c -> 'c) ->
-  ('b -> 'c -> 'c) -> ('a -> 'c -> 'd) -> bool -> ('c -> unit) -> bool
+  (Cil.fundec -> 'c -> 'c) -> (Callg.funID -> 'c -> 'd) -> bool -> ('c -> unit) -> bool
 
 class type analysis = 
 object
@@ -139,7 +141,7 @@ end
 
 class ['a] inspectingTransF : ('a, 'sum) stateLattice -> string -> ['a] transFunc
 
-class type ['sum, 'st] summarizer =
+class type ['st, 'sum] summarizer =
   object
     method flushSummaries : unit -> unit
     method setInspect : bool -> unit
@@ -148,6 +150,9 @@ class type ['sum, 'st] summarizer =
     method summarize :
       Summary_keys.sumKey -> Cil.fundec -> (Cil.prog_point -> 'st) -> bool
   end
+
+class ['a, 'b] noneSummarizer : 
+  'b Backed_summary.base -> ['a, 'b] summarizer
 
 class ['a, 'b] summaryIsState :
   ('a, 'a) stateLattice ->
@@ -160,20 +165,20 @@ class ['a, 'b] summaryIsState :
   end
 
 class virtual ['a, 'b] summaryIsOutput :
-  ('a, 'a) stateLattice -> 'a Backed_summary.base ->
+  ('a, 'a) stateLattice -> 'b Backed_summary.base -> 
 object 
-    constraint 'b = 'a
-    method virtual scopeIt : Cil.fundec -> 'a -> 'a
-    method flushSummaries : unit -> unit
-    method setInspect : bool -> unit
-    method summarize :
-      Summary_keys.sumKey -> Cil.fundec -> (Cil.prog_point -> 'b) -> bool
-  end
+  constraint 'b = 'a
+  method virtual scopeIt : Cil.fundec -> 'b -> 'b
+  method flushSummaries : unit -> unit
+  method setInspect : bool -> unit
+  method summarize :
+    Summary_keys.sumKey -> Cil.fundec -> (Cil.prog_point -> 'b) -> bool
+end
 
 (* TODO: make this like the summaryIsOutput -- i.e., make it a summarizer *)
 class ['a, 'b] summaryIsFIS :
   ('a, 'a) stateLattice ->
-  object
-    constraint 'b = 'a
-    method makeSummary : Cil.fundec -> (Cil.stmt -> Cil.instr -> 'a) -> 'a
-  end
+object
+  constraint 'b = 'a
+  method makeSummary : Cil.fundec -> (Cil.stmt -> Cil.instr -> 'a) -> 'a
+end

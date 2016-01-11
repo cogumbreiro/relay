@@ -46,8 +46,16 @@ let getTargetFile (_:unit) =
 let makeCFG fundec =
   if fundec.smaxstmtid = None && fundec.sallstmts = [] then begin
     Printf.printf "Making cfg for %s\n" fundec.svar.vname;
+(*
     Cil.prepareCFG fundec;
     Cil.computeCFGInfo fundec false;
+*)
+    Cil.prepareCFG fundec;
+    Cfg.clearCFGinfo fundec;
+    ignore (Cfg.cfgFun fundec); (* handles "noreturn" attribute... *)
+(*    let dotFile = 
+      Filename.concat (getDumpTo ()) (fundec.svar.vname ^ ".cfg.dot") in
+    Cfg.printCfgFilename dotFile fundec *)
   end else
     Printf.printf "Skipping cfg for %s\n" fundec.svar.vname
 

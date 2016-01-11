@@ -132,7 +132,7 @@ class attribute_checker target rflag = object (self)
 		rflag := true
 	      else
 		ignore(visitCilType (new attribute_checker target rflag) 
-			 f.ftype)) cinfo.cfields;
+			 f.ftype)) (!getCfields cinfo);
 	end;
 	DoChildren	
     | TNamed(t1, a) ->
@@ -221,9 +221,22 @@ let globally_unique_sids f =
   let thisVisitor = new sidVisitor in
   visitCilFileSameGlobals thisVisitor f 
 
+ 
+(** Compare 2 lists lexicographically given a comparison function for elems *)
+let rec compareLoop cmp cur l1tail l2tail =
+  if cur != 0 then cur
+  else match l1tail, l2tail with
+    h1::t1, h2::t2 ->
+      compareLoop cmp (cmp h1 h2) t1 t2
+  | [], [] -> 0
+  | [], _ -> -1
+  | _, [] -> 1
+        
+let compareList cmp l1 l2 =
+  compareLoop cmp 0 l1 l2
+
 
 (** Comparing expressions without a Out_of_memory error **********************)
- 
 let rec compare_exp x y =
  
    match x,y with
@@ -304,8 +317,61 @@ and compare_lhost x y =
       compare x y
 
 and compare_type x y =
-  if x == y then 0 
-  else compare (typeSig x) (typeSig y) 
+  if x == y then 0
+  else match x, y with
+    TComp (ci1, a1), TComp (ci2, a2) ->
+      let c = compare_compi ci1 ci2 in
+      if c == 0 then Pervasives.compare a1 a2
+      else c
+
+  | TPtr (t1, a1), TPtr (t2, a2) ->
+      let c = compare_type t1 t2 in
+      if c == 0 then Pervasives.compare a1 a2
+      else c
+        
+  | TArray (t1, e1, a1), TArray (t2, e2, a2) ->
+      let c = compare_type t1 t2 in
+      if c == 0 then 
+        let c = Pervasives.compare a1 a2 in
+        if c == 0 then   
+          (match e1, e2 with
+             Some e1, Some e2 -> compare_exp e1 e2
+           | _ -> Pervasives.compare e1 e2)
+        else c
+      else c
+        
+  | TEnum (e1, a1), TEnum (e2, a2) ->
+      let c = compare_enumi e1 e2 in
+      if c == 0 then Pervasives.compare a1 a2
+      else c
+
+  | TNamed (ti1, a1), TNamed (ti2, a2) ->
+      (* require same typedef ... *)
+      let c = Pervasives.compare ti1.tname ti2.tname in
+      if c == 0 then
+        let c = compare_type ti1.ttype ti2.ttype in
+        if c == 0 then Pervasives.compare a1 a2
+        else c
+      else c
+
+  | TFun (rt1, argsOpt1, va1, a1), TFun (rt2, argsOpt2, va2, a2) ->
+      let c = compare_type rt1 rt2 in
+      if c == 0 then
+        let c = compareList 
+          (fun (n1, t1, a1) (n2, t2, a2) -> 
+             let c = Pervasives.compare (n1, a1) (n2, a2) in
+             if c == 0 then compare_type t1 t2
+             else c
+          ) (argsToList argsOpt1) (argsToList argsOpt2) in
+        if c == 0 then 
+          let c = Pervasives.compare va1 va2 in
+          if c == 0 then Pervasives.compare a1 a2
+          else c
+        else c
+      else c
+
+  | _, _ -> Pervasives.compare x y
+    
 
 and compare_var x y =
   x.vid - y.vid
@@ -319,24 +385,23 @@ and compare_fundec x y =
   compare_var x.svar y.svar
  
 and compare_offset x y = 
-   match x, y with
-     Field(fi1,o1),Field(fi2,o2)->
-       let f_comp = compare fi1.fname fi2.fname in
-       if (f_comp <> 0) then
-         f_comp 
-       else
-         let c_comp = compare_compi fi1.fcomp fi2.fcomp in
-         if (c_comp <> 0) then c_comp
-         else compare_offset o1 o2
-
-   | Index(e1,o1),Index(e2,o2) ->
-       let e_comp = compare_exp e1 e2 in
-       if (e_comp <> 0) then
-         e_comp
-       else
-         compare_offset o1 o2 
-   | _, _ -> compare x y
-
+  match x, y with
+    NoOffset, NoOffset -> 0
+  | Field(fi1,o1),Field(fi2,o2)->
+      let f_comp = compare fi1.fname fi2.fname in
+      if (f_comp <> 0) then f_comp 
+      else
+        let c_comp = compare_compi fi1.fcomp fi2.fcomp in
+        if (c_comp <> 0) then c_comp
+        else compare_offset o1 o2
+          
+  | Index(e1,o1),Index(e2,o2) ->
+      let e_comp = compare_exp e1 e2 in
+      if (e_comp <> 0) then e_comp
+      else
+        compare_offset o1 o2 
+  | _, _ -> compare x y
+      
 (*--------------------*)
 (* Contributed by Jan *)
 
@@ -358,6 +423,9 @@ and compare_enumi (e:enuminfo) (e':enuminfo) =
       (fun c (s1, _, _) (s2, _, _) -> 
          if (c <> 0) then c
          else compare s1 s2) 0 e.eitems e'.eitems
+
+let equal_type (t1:typ) (t2:typ) =
+  compare_type t1 t2 == 0
 
 
 let rec hash_exp x = 
@@ -423,7 +491,34 @@ and hash_lval x =
        e_hash lxor o_hash
  
 and hash_type x =
-  Hashtbl.hash (typeSig x)
+  match x with
+    TComp (ci1, a1) ->
+      (hash_compi ci1) lxor (Hashtbl.hash a1)
+
+  | TPtr (t1, a1) ->
+      39490 lxor (hash_type t1) lxor (Hashtbl.hash a1)
+        
+  | TArray (t1, e1, a1) ->
+      (hash_type t1) lxor 
+        (match e1 with None -> 11198443 | Some e -> (hash_exp e lsl 14))
+      lxor (Hashtbl.hash a1)
+        
+  | TEnum (e1, a1) ->
+      (hash_enumi e1) lxor (Hashtbl.hash a1)
+
+  | TNamed (ti1, a1) ->
+      (* require same typedef ... *)
+      (Hashtbl.hash ti1.tname) lxor (hash_type ti1.ttype) 
+      lxor (Hashtbl.hash a1)
+
+  | TFun (rt1, argsOpt1, va1, a1) ->
+      (hash_type rt1) lxor
+        List.fold_left (fun acc (n, t, a) ->
+                          (acc lsl 1) lxor (hash_type t)) 0 
+        (argsToList argsOpt1)
+      lxor Hashtbl.hash va1
+    
+  | TVoid _ | TInt _ | TFloat _ | TBuiltin_va_list _ -> Hashtbl.hash x
 
 and hash_var x = 
   Hashtbl.hash x.vid 

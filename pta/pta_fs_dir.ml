@@ -1,7 +1,6 @@
 
 
-(** Pointer analysis that is flow-insensitive, field-sensitive
-    and uses directional constraints. *)
+(** Andersen's pointer analysis (field-insensitive) *)
 
 open Pta_types
 open Pta_shared
@@ -12,7 +11,6 @@ open Pta_cycle
 open Logging
 
 module Stats = Mystats
-module Arr = GrowArray
 module IH = Inthash
 module PC = Pta_compile
 module CLv = Cil_lvals
@@ -320,6 +318,20 @@ module LCDSolver = struct
                                    for this "info" were renamed *)
   }
 
+
+  (* Hashcons the NS sets *)
+  module NSHashable = struct
+    type t = NS.t
+    let equal a b = NS.equal a b
+    let hash x = Hashtbl.hash_param 15 30 x
+  end
+ 
+  module NSHash = Weak.Make (NSHashable)
+
+  let goldenNS = NSHash.create 137
+  let uniqNS ns =
+    NSHash.merge goldenNS ns
+
   (***************** The state ******************************)
 
   let freshNodeInfo () =
@@ -354,11 +366,11 @@ module LCDSolver = struct
 
   (** Forwarding indices... hints to update the NS.t 
       and remove duplicate entries *)
-  let idToNewIDInfo = Arr.make 128 (Arr.Elem (dummyIndex, dummyNI))
+  let idToNewIDInfo = GrowArray.make 128 (GrowArray.Elem (dummyIndex, dummyNI))
     (* TODO: figure out the needed array size once and for all instead of
        using this grow array with setg and getg *)
-  let setArr = ref Arr.setg
-  let getArr = ref Arr.getg
+  let setArr = ref GrowArray.setg
+  let getArr = ref GrowArray.getg
 
   (** Constraints on which the the cycle detection has already tested *)
   let cycleBlackList = SimpCS.create 1
@@ -399,9 +411,6 @@ module LCDSolver = struct
     with Not_found -> ()
 
           
-  let updateNeighbors neighSetRef oldIndex newIndex =
-    neighSetRef := NS.add newIndex (NS.remove oldIndex !neighSetRef)
-      
   let string_of_pts set =
     sprint 80 
       (text "{" ++ seq_to_doc (text ", ")  NS.iter num set nil ++ text "}")
@@ -439,19 +448,31 @@ module LCDSolver = struct
     else cur
 
   let updateIDSet set =
-    NS.fold updateIDSetHelper set set
-      
-  let updatePtSet nodeInfo =
-    nodeInfo.ptTargets <- updateIDSet nodeInfo.ptTargets
-      
+    uniqNS (NS.fold updateIDSetHelper set set)
+            
+  module NSUpHash = Hashtbl.Make(NSHashable)
+  let memoizedUpdateNS = Hashtbl.create 137
+  let memoizeRound = ref 0
+
+  let memoUpdateIDSet set =
+    if !memoizeRound < !unifyGeneration then begin
+      memoizeRound := !unifyGeneration;
+      Hashtbl.clear memoizedUpdateNS;
+    end;
+    try Hashtbl.find memoizedUpdateNS set      
+    with Not_found ->
+      let updated = updateIDSet set in
+      Hashtbl.add memoizedUpdateNS set updated;
+      updated
+
   let updateNSSets nodeInfo = 
     if nodeInfo.lastUpdated < !unifyGeneration then begin
       nodeInfo.lastUpdated <- !unifyGeneration;
-      nodeInfo.ptTargets <- updateIDSet nodeInfo.ptTargets;
-      nodeInfo.oldTargets <- updateIDSet nodeInfo.oldTargets;
-      nodeInfo.subsCons <- updateIDSet nodeInfo.subsCons;
-      nodeInfo.complexL <- updateIDSet nodeInfo.complexL;
-      nodeInfo.complexR <- updateIDSet nodeInfo.complexR;
+      nodeInfo.ptTargets <- memoUpdateIDSet nodeInfo.ptTargets;
+      nodeInfo.oldTargets <- memoUpdateIDSet nodeInfo.oldTargets;
+      nodeInfo.subsCons <- memoUpdateIDSet nodeInfo.subsCons;
+      nodeInfo.complexL <- memoUpdateIDSet nodeInfo.complexL;
+      nodeInfo.complexR <- memoUpdateIDSet nodeInfo.complexR;
     end
             
   let getNodeInfo id =
@@ -504,7 +525,7 @@ module LCDSolver = struct
   (** Reset constraint graph, indices, and points-to graph *)
   let reset () =
     LvalH.clear lvToID;
-    Arr.clear idToNewIDInfo;
+    GrowArray.clear idToNewIDInfo;
     SimpCS.clear cycleBlackList;
     curNodeID := 0
 
@@ -701,7 +722,7 @@ module LCDSolver = struct
 
   (** Load the initial constraint and points-to graph from the root directory *)
   let loadConstraints root =
-    (* Assume one-file mode. TODO: check *)
+    (* Assume one-file mode. *)
     let filename = PC.getConstraintFile root in
     let _, baseAss, complexAss, calls, _ = 
       PC.loadFor filename in
@@ -732,12 +753,12 @@ module LCDSolver = struct
   end
       
   (********* Merge cycles **********)
-      
+
   let mergeSetsWithout2 s1 s2 x y =
-    NS.remove y (NS.remove x (NS.union s1 s2))
+    uniqNS (NS.remove y (NS.remove x (NS.union s1 s2)))
 
   let mergeSetsWithout s1 s2 x =
-   (NS.remove x (NS.union s1 s2))
+    uniqNS ((NS.remove x (NS.union s1 s2)))
     
   (** Hmm... nodes are only pointer equivalent, not location equivalent,
       so only merge if they aren't locations.
@@ -851,13 +872,25 @@ module LCDSolver = struct
   module SCCNodeInfo = struct
     type id = nodeID
 
+    let lastNSItered = ref NS.empty 
+      (* if first iteration (when there is technically no "last" iter)
+         was really empty, that's ok because there's nothing to iter *)
+
+    let clearState () =
+      lastNSItered := NS.empty
+
     let iterNeighs foo nodeID =
       let _, node = getNodeInfo nodeID in
-      NS.iter foo node.subsCons
+      if !lastNSItered == node.subsCons then 
+        () (* simple fastpath for when there are tons of duplicate sets *)
+      else begin
+        lastNSItered := node.subsCons;
+        NS.iter foo node.subsCons
+      end
  
     let eqID a b = a == b
     let hashID a = a
-    let maxStack = 100
+    let maxStack = 200
 
   end
 
@@ -1001,10 +1034,10 @@ module LCDSolver = struct
   let flowPtsTo ni curNodeID =
     let shouldDetect = ref false in
     (* First make sure IDs are representative *)
-    Stats.time "updatePTS" updatePtSet ni; 
+    Stats.time "updatePTS" updateNSSets ni; 
     NS.iter
       (fun destID ->
-         let newID, destInfo = Stats.time "get" getNodeInfo destID in
+         let newID, destInfo = getNodeInfo destID in
          (* Don't flow to functions *)
          if isFuncInfo destInfo then ()
          else if newID == curNodeID then () (* Don't flow to self *)
@@ -1012,7 +1045,8 @@ module LCDSolver = struct
            if not (NS.subset ni.ptTargets destInfo.ptTargets)
            then begin
              debugFlow curNodeID ni newID destInfo;
-             destInfo.ptTargets <- NS.union ni.ptTargets destInfo.ptTargets;
+             destInfo.ptTargets <- 
+               (uniqNS (NS.union ni.ptTargets destInfo.ptTargets));
              addToWork newID;
            end else
              shouldDetect := !shouldDetect or 
@@ -1026,8 +1060,8 @@ module LCDSolver = struct
     (* Make it 2x just in case... *)
     ignore (!getArr idToNewIDInfo (2 * len)) ;
     (* array length should now be fixed so we no longer need to check bounds *)
-    setArr := Arr.set;
-    getArr := Arr.get
+    setArr := GrowArray.set;
+    getArr := GrowArray.get
 
   (* Debugging *)
   let printLvToID () =
@@ -1144,16 +1178,16 @@ module Final = struct
     }
 
   let lvToID = ref (LvalH.create 107)
-  let idToNode = ref (Arr.make 128 (Arr.Elem dummyInfo))
+  let idToNode = ref (GrowArray.make 128 (GrowArray.Elem dummyInfo))
 
   let getIDLv lval =
     LvalH.find !lvToID lval
     
   let setID id node =
-    Arr.setg !idToNode id node
+    GrowArray.setg !idToNode id node
 
   let derefID id =
-    try Arr.get !idToNode id 
+    try GrowArray.get !idToNode id 
     with (Invalid_argument "index out of bounds") as ex ->
       logError ("derefID: no node for id " ^ (string_of_int id));
       raise ex
@@ -1260,7 +1294,7 @@ module Final = struct
   let oldNodeToID = ref (NewNH.create 37)
   let newLvToID = ref (LvalH.create 37)
   let newNodeToID = ref (NewNH.create 37)
-  let newIDToNode = ref (Arr.make 128 (Arr.Elem dummyInfo))
+  let newIDToNode = ref (GrowArray.make 128 (GrowArray.Elem dummyInfo))
 
   (** Filled by the "rehash" *)
   let nodeToID = ref (NewNH.create 37)
@@ -1272,10 +1306,10 @@ module Final = struct
     (* abitrarily expecting an 8 fold decrease *)
     oldNodeToID := NewNH.create (sizeHint / 8);
     newNodeToID := NewNH.create (sizeHint / 8);
-    newIDToNode := Arr.make (sizeHint / 8) (Arr.Elem dummyInfo)
+    newIDToNode := GrowArray.make (sizeHint / 8) (GrowArray.Elem dummyInfo)
       
   let setNewNode info2ID id2Info newID newNode =
-    Arr.setg id2Info newID newNode;
+    GrowArray.setg id2Info newID newNode;
     NewNH.replace info2ID newNode newID
 
   let rec rehashID oldID =
@@ -1306,7 +1340,7 @@ module Final = struct
   let rehashTable () =
     print_string "Rehashing data to find more equivalences\n";
     flush stdout;
-    let oldNum = (Arr.max_init_index !idToNode) in
+    let oldNum = (GrowArray.max_init_index !idToNode) in
     clearRehashTemp oldNum;
     LvalH.iter
       (fun lv oldID ->
@@ -1315,7 +1349,7 @@ module Final = struct
       )
       !lvToID;
     Printf.printf "Old bindings: %d\tNew: %d\n\n" 
-      oldNum (Arr.max_init_index !newIDToNode);
+      oldNum (GrowArray.max_init_index !newIDToNode);
     lvToID := !newLvToID;
     idToNode := !newIDToNode;
     nodeToID := !newNodeToID;
@@ -1354,7 +1388,7 @@ module Final = struct
     idToNode := id2N;
     nodeToID := n2ID;
     close_in in_chan;
-    curNewIndex := (Arr.max_init_index !idToNode + 1)
+    curNewIndex := (GrowArray.max_init_index !idToNode + 1)
 
   (** Get ID from node info *)
   let getIDInfo info =
@@ -1362,7 +1396,7 @@ module Final = struct
       (* TODO: try storing one reference copy of info in there too... *)
       NewNH.find !nodeToID info
     with Not_found -> 
-      assert (!curNewIndex > Arr.max_init_index !idToNode);
+      assert (!curNewIndex > GrowArray.max_init_index !idToNode);
       let newID = !curNewIndex in
       incr curNewIndex;
       setNewNode !nodeToID !idToNode newID info;
@@ -1501,7 +1535,7 @@ module Final = struct
         NCache.find nodeCache ptrLv
       with Not_found ->
         let nodeID, nodeInfo = regenNodeinfo ptrLv in
-        NCache.add nodeCache ptrLv (nodeID, nodeInfo);
+        ignore (NCache.add nodeCache ptrLv (nodeID, nodeInfo));
         (nodeID, nodeInfo)
  
 
@@ -1556,7 +1590,7 @@ module Final = struct
         end
       in
       let result = visit srcID in
-      RCache.add reachableCache (targID, srcID) result;
+      ignore (RCache.add reachableCache (targID, srcID) result);
       result
     
 
@@ -1668,7 +1702,7 @@ module Abs = struct
                    Final.combineInfo info cur
                 ) targets Final.emptyInfo in
       let finalID = Final.getIDInfo finalInfo in
-      DCache.add derefCache abs finalID;
+      ignore (DCache.add derefCache abs finalID);
       finalID
 
   let deref_lval lv = 
@@ -1800,7 +1834,12 @@ let may_alias (ptr1 : Cil.exp) (ptr2 : Cil.exp) : bool =
 
 
 let points_to (ptr : Cil.exp) (v : varinfo) : bool =
-  failwith "TODO"
+  match Abs.getNodeExp ptr , Abs.getNodeLval (Var v, NoOffset)  with
+    Some abs1, Some abs2 ->
+      Abs.points_to abs1 abs2 
+  | _, _ -> 
+      logError "Pta_fs_dir may_alias couldn't find node";
+      false
 
 
 

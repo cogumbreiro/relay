@@ -48,7 +48,7 @@ let compareFunID a b = Summary_keys.compareSumKey a b
 let fid_to_string a = Summary_keys.string_of_sumKey a
 let fid_of_string s = Summary_keys.sumKey_of_string s
 
-let dummyFID = (-1, "dummy")
+let dummyFID = (-12345, "dummy")
 
 (** Use this to project out context-sensitivity, or use it to get the
     original function id to get the varinfo / cfg *)
@@ -84,12 +84,14 @@ let addIndirectTarg funID targs =
 let mergeIndirectTargs targs1 targs2 = 
   List_utils.mergeUnique compareFunID targs1 targs2
 
+exception MergeCalleeMismatch
+
 let mergeCallTypes c1 c2 =
   match c1, c2 with
     CDirect (_, _), CDirect (_, _) -> c1
   | CIndirect (pp, c1), CIndirect (_, c2) ->
       CIndirect (pp, mergeIndirectTargs c1 c2)
-  | _, _ -> failwith "mergeCallees mismatch"
+  | _, _ -> raise MergeCalleeMismatch
 
 let addCallee call callees =
   List_utils.insertSortCombine compareTargets mergeCallTypes call callees
@@ -372,11 +374,14 @@ let warnCorrupt line =
   raise CorruptCGFile
 
 let combineNodeInfo n1 n2 = 
-  { n1 with
-      ccallees = mergeCallees n1.ccallees n2.ccallees;
-      ccallers = List_utils.union n1.ccallers n2.ccallers; 
-      hasBody = n1.hasBody or n2.hasBody; }
-    
+  try 
+    { n1 with
+        ccallees = mergeCallees n1.ccallees n2.ccallees;
+        ccallers = List_utils.union n1.ccallers n2.ccallers; 
+        hasBody = n1.hasBody or n2.hasBody; }
+  with MergeCalleeMismatch ->
+    logErrorF "MergeCalleeMismatch for %s\n" n1.name;
+    raise MergeCalleeMismatch
     
 (** Read the call graph data from the given filename "readFrom" *)
 let readCalls (readFrom:string) : callG =
@@ -449,11 +454,17 @@ let readCalls (readFrom:string) : callG =
           [ funcName ; typString ; funID ] -> begin
             let fid = fid_of_string funID in
             let newCallees = makeCallees callees [] in
-            let called = try
-              (* Merge if there's an existing entry *)
-              let curNode = FMap.find fid !curCG in
-              mergeCallees curNode.ccallees newCallees
-            with Not_found -> newCallees in
+            let called = 
+              try
+                (* Merge if there's an existing entry *)
+                let curNode = FMap.find fid !curCG in
+                mergeCallees curNode.ccallees newCallees
+              with 
+                Not_found -> newCallees
+              | MergeCalleeMismatch ->
+                  logErrorF "MergeCalleeMismatch for %s (%s)\n" funcName funID;
+                  raise MergeCalleeMismatch
+            in
 
             (* Just replace it all (already merged callees)*)
             curCG := FMap.add fid

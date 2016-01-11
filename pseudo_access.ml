@@ -43,8 +43,8 @@ open Fstructs
 open Logging
 open Cildump
 open Summary_keys
+open Pretty
 
-module IH = Inthash
 module RS = Racesummary
 module BS = Backed_summary
 module GA = Guarded_access_base
@@ -76,13 +76,10 @@ let getPaKeyHead (x, y, z) : paKeyHead =
   (x, y)
 
 let string_of_pakeyhead (x, y) =
-  "(" ^ fid_to_string x ^
-  "," ^ string_of_int y ^ ")"
+  Printf.sprintf "(%s,%d)" (fid_to_string x) y
 
 let string_of_pakey (x, y, z) =
-  "(" ^ fid_to_string x ^
-  "," ^ string_of_int y ^
-  "," ^ string_of_int z ^ ")"
+  Printf.sprintf "(%s,%d,%d)" (fid_to_string x) y z
 
 module PaKeyHash = Hashtbl.Make(
   struct
@@ -107,20 +104,13 @@ module PaKeyHeadHash = Hashtbl.Make(
   end
 )
 
-module PaKeyHeadSet = Set.Make(
-  struct
-    type t = paKeyHead
-    let compare = Pervasives.compare
-  end
-)
-
 (* TODO Right now the paRegions type supports multiple targets for an lval,
    but this isn't being used entirely properly.  For the case where an lval
    locally has multiple targets, these targets get added to the binding for
    the original lval.  But for the case where an lval can refer to targets
    resulting from callers passing in arguments, these targets cannot be
    determined locally, so only the original lval itself gets added as a
-   target.  To support this, summary application would need keep track of
+   target.  To support this, summary application would need to keep track of
    when a pseudo access lval gets renamed to something, and then modify the
    PAR summary of the callee with this additional target.  This new target
    would get a unique pa id, rather than just propagating the original one. *)
@@ -162,37 +152,40 @@ let computePaKey2LvalsTable (par : paRegions) =
 
 
 let printPaRegions (par : paRegions) key =
-  let processTarget targetLv (i, stat) =
-    Lvals.string_of_lval targetLv ^ "["
+  let str_of_target targetLv (i, stat) =
+    Lvals.string_of_lval targetLv ^ "#["
       ^ string_of_int i ^ "] "
       ^ match stat with
-          None -> "None "
-        | Some Racy -> "Racy "
-        | Some NotRacy -> "NotRacy " in
+          None -> "None"
+        | Some Racy -> "Racy"
+        | Some NotRacy -> "NotRacy" in
 
-  let processPaBinding origLv (pakey, targetStatus) =
-    let str = ref "" in
-    LvalHash.iter
-      (fun t s ->
-         str := !str ^ processTarget t s
-      ) targetStatus;
-    "  " ^ Lvals.string_of_lval origLv ^ "["
-      ^ string_of_int (snd pakey) ^ "] -> {" ^ !str ^ "}" in
+  let str_of_PaBinding origLv (pakey, targetStatus) =
+    let doc = 
+      text "{ " ++ 
+        map_to_doc (text ", ") 
+        LvalHash.iter
+        (fun t s -> text (str_of_target t s)) targetStatus nil ++ text " }" in
+    Printf.sprintf "%s#[%d] -> %s"
+      (Lvals.string_of_lval origLv) (snd pakey) (sprint 80 doc)
+  in
   
-  let processLockset ls (loc, paBindings) =
+  let print_locksetPA ls (loc, paBindings) =
     logStatus ("Lockset has reprloc " ^ string_of_loc loc);
     RS.printLockset ls;
-    let str = ref "" in
+    let buff = Buffer.create 32 in
     LvalHash.iter
       (fun a b ->
-         str := !str ^ processPaBinding a b ^ "; "
+         Buffer.add_string buff (str_of_PaBinding a b ^ "; ")
       ) paBindings;
-    logStatus !str in
+    Buffer.add_string buff "\n";
+    logStatusB buff
+  in
   
   logStatus ("PAR summary for key " ^ fid_to_string key);
   LSHash.iter
     (fun ls (loc, paBindings) ->
-       processLockset ls (loc, paBindings)
+       print_locksetPA ls (loc, paBindings)
     ) par
     
 
@@ -200,8 +193,7 @@ let emptySumm () : paRegions * paKeyHead2LsTable * paKey2LvalsTable =
   LSHash.create 0, PaKeyHeadHash.create 0, PaKeyHash.create 0
 
 let printSumm (par, _) key =
-  printPaRegions par key (* JAN changed signature... 
-                            will need to see where to change callers *)
+  printPaRegions par key
 
 let wrapSummary par =
   par, computePaKeyHead2LsTable par, computePaKey2LvalsTable par
@@ -237,10 +229,7 @@ let areTargetsSafe targetStatus =
     ) targetStatus true 
   in
 (*
-    logStatus ("areTargetsSafe " ^
-      match result with
-        true -> "true"
-      | false -> "false");
+    logStatus ("areTargetsSafe " ^ (string_of_bool result));;
 *)
     result
 

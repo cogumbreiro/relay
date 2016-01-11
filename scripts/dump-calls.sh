@@ -5,6 +5,8 @@
 # Requires the "duppy" script
 # Remember to change RELAYROOT
 
+# Uses the steensgaard callgraph (see dump*.sh to dump anders, etc)
+
 CURROOT=$PWD
 DUMPROOT=$PWD/ciltrees
 RELAYROOT=/home/jan/research/relay-race
@@ -14,7 +16,7 @@ LOG=$DUMPROOT/log.txt
 
 #gcc-log has "cd" and "duppy" commands on each line
 CMDS=$PWD/gcc-log.txt
-
+CONFIG=client.cfg.steens
 
 /bin/rm -rf $DUMPROOT
 mkdir -p $DUMPROOT
@@ -46,9 +48,9 @@ STARTTIME=$(date +%s)
 
 # fix variable / struct ids + dump the call graph
 
-cd $RELAYROOT; ./fix_id_cg.exe -cg $DUMPROOT >> $LOG 2>&1
+cd $RELAYROOT; ./fix_id_cg.exe -su $CONFIG -cg $DUMPROOT >> $LOG 2>&1
 # hard-coding the calls file...
-cd $RELAYROOT; ./scc_stats.exe -cg $DUMPROOT/calls.steens >> $LOG 2>&1
+cd $RELAYROOT; ./scc_stats.exe -su $CONFIG -cg $DUMPROOT/calls.steens >> $LOG 2>&1
 
 
 ENDTIME=$(date +%s)

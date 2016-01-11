@@ -81,6 +81,9 @@ module HCDSolver (I:HCDIn) = struct
     let hashID x = hash x
     let maxStack = max_int
 
+    let clearState () = 
+      ()
+
     let iterNeighs foo id =
       let succs = findNeighs id in
       List.iter foo succs

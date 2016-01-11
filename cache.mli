@@ -13,10 +13,10 @@ sig
   (** Clear the cache *)
   val clear : 'a t -> unit
       
-  val replace : 'a t -> key -> 'a -> unit
+  val replace : 'a t -> key -> 'a -> key option
 
   (** Add new entry to the cache, evicting an item if needed *)
-  val add : 'a t -> key -> 'a -> unit 
+  val add : 'a t -> key -> 'a -> key option
 
   (** Get an entry from the cache, may raise Not_found *)
   val find : 'a t -> key -> 'a

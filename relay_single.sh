@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#--- test one callgraph w/ null analysis
-
-#TODO remove the need to the Lockset partitioning phase
+#--- run one instance of relay (along with the server)
 
 CILTREES=$1
 shift 

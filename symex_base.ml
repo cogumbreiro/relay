@@ -122,8 +122,11 @@ end
 (** Actual Symex *)
 module type SYMEX = sig
 
-  open Fstructs
-  open Callg
+
+  (** Expose symex DF type for optimizations... *)
+  type symSt
+  val getSymstate : Cil.prog_point -> symSt
+  val statesEqual : symSt -> symSt -> bool
 
   module SS : sig
 
@@ -152,6 +155,9 @@ module type SYMEX = sig
     (bool * (Lvals.aExp list))
 
   val substActForm2 : Cil.prog_point -> Cil.exp list -> Lvals.aLval ->
+    (bool * (Lvals.aLval list))
+
+  val substActForm2FI : Cil.exp list -> Lvals.aLval ->
     (bool * (Lvals.aLval list))
 
   val substActForm3 : Cil.prog_point -> Cil.exp list -> Lvals.aLval -> (Lvals.aLval list)

@@ -1,0 +1,3724 @@
+
+///////////////// Examined Feb 10-11, 2007 ////////////////////////
+
+//****
+Possible race between access to:
+(pgd_cache->array[0])->avail @ include/asm/pgtable.h:38 and
+((uid_cachep->nodelists[0])->shared)->avail @ kernel/user.c:28
+        Accessed at locs:
+        mm/slab.c:2786 and
+        mm/slab.c:2699
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/oom_kill.c:297
+LS for 2nd access:
+        L+ = {(uid_cachep->nodelists[0])->list_lock#tbd, }
+        made empty at: :-1
+        Th. 1 spawned: drivers/base/firmware_class.c:589
+        w/ func: request_firmware_work_func
+        Th. 2 spawned: net/rxrpc/krxsecd.c:128 w/ func: rxrpc_krxsecd
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+        L+ = {(fs_cachep->nodelists[0])->list_lock#tbd, }
+        lval 2: ((fs_cachep->nodelists[0])->shared)->avail
+
+(1)
+LS for 2nd access:
+        L+ = {(task_struct_cachep->nodelists[0])->list_lock#tbd, }
+        lval 2: ((task_struct_cachep->nodelists[0])->shared)->avail
+
+(2)
+LS for 2nd access:
+        L+ = {(mm_cachep->nodelists[0])->list_lock#tbd, }
+        lval 2: ((mm_cachep->nodelists[0])->shared)->avail
+
+
+//FIRST
+
+/*
+ * Called with disabled ints.
+ */
+static inline void __cache_free(kmem_cache_t *cachep, void *objp)
+{
+	struct array_cache *ac = ac_data(cachep);
+    //...
+	check_irq_off();                     //IRQs off
+
+	if (likely(ac->avail < ac->limit)) {
+		STATS_INC_FREEHIT(cachep);
+		ac->entry[ac->avail++] = objp;   //HERE
+		return;
+	} else {
+		STATS_INC_FREEMISS(cachep);
+		cache_flusharray(cachep, ac);    //CALLS SECOND ACCESS
+		ac->entry[ac->avail++] = objp;
+	}
+
+}
+
+
+//SECOND
+
+static void cache_flusharray(kmem_cache_t *cachep, struct array_cache *ac)
+{
+	int batchcount;
+	struct kmem_list3 *l3;
+	int node = numa_node_id();
+
+	batchcount = ac->batchcount;
+
+	check_irq_off();                  // IRQs off
+
+	l3 = cachep->nodelists[node];
+	spin_lock(&l3->list_lock);        // has a list lock
+	if (l3->shared) {
+		struct array_cache *shared_array = l3->shared;
+		int max = shared_array->limit-shared_array->avail;  //HERE
+
+        //...
+
+    }
+
+}
+
+should be different cache/arrays in the different accesses?
+
+//REASON: unlikely alias?
+
+
+
+//****
+Possible race between access to:
+REP_NODE.d_subdirs.next and
+REP_NODE.d_subdirs.next
+        Accessed at locs:
+        include/linux/list.h:223 and
+        fs/dcache.c:568
+
+LS for 1st access:
+        L+ = {dcache_lock#tbd, }
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: drivers/pcmcia/cs.c:679
+        Th. 1 spawned: drivers/net/wireless/airo.c:2726 w/ func: airo_thread
+        Th. 2 spawned: drivers/pcmcia/cs.c:243 w/ func: pccardd
+
+//FIRST (holds lock... check later)
+
+the access during "list_del_init (entry)"
+
+all calls to list_del_init inside dcache.c hold the lock (as confirmed
+by the LS recorded above)
+
+
+
+
+//SECOND
+
+static int select_parent(struct dentry * parent)
+{
+	struct dentry *this_parent = parent;
+	struct list_head *next;
+	int found = 0;
+
+	spin_lock(&dcache_lock);             //SAME LOCK!
+repeat:
+	next = this_parent->d_subdirs.next;  //HERE
+resume:
+
+    //...
+
+out:
+	spin_unlock(&dcache_lock);
+	return found;
+}
+
+
+
+//EMPTY AT:
+
+//I think __skt is globalized before entry
+
+static int pccardd(void *__skt) {           //THREAD ROOT
+
+    //...
+
+	add_wait_queue(&skt->thread_wait, &wait);
+	complete(&skt->thread_done);
+
+	for (;;) {
+
+        spin_lock_irqsave(&skt->thread_lock, flags);
+		events = skt->thread_events;
+		skt->thread_events = 0;                           // one event handler
+		spin_unlock_irqrestore(&skt->thread_lock, flags);
+
+
+		if (events) {
+			down(&skt->skt_sem);
+			if (events & SS_DETECT)
+				socket_detect_change(skt);  //HERE!
+			if (events & SS_BATDEAD)
+
+            //...
+        }
+
+        //...
+    }
+	/* make sure we are running before we exit */
+	set_current_state(TASK_RUNNING);
+
+	remove_wait_queue(&skt->thread_wait, &wait);
+
+	/* remove from the device core */
+	class_device_unregister(&skt->dev);
+
+	complete_and_exit(&skt->thread_done, 0);
+}
+
+
+updated record (2/15/2006):
+
+Possible race between access to:
+[REP: 13824].d_subdirs.next and
+[REP: 13824].d_subdirs.next
+	Accessed at locs:
+	[include/linux/list.h:223, include/linux/list.h:223, ] and
+	[fs/dcache.c:568, fs/dcache.c:573, fs/libfs.c:264, include/linux/list.h:222, include/linux/list.h:255, net/sunrpc/rpc_pipe.c:494, ]
+
+LS for 1st access:
+	L+ = {dcache_lock#tbd, }
+	made empty at: :-1
+LS for 2nd access:
+	L+ = empty
+	made empty at: net/sunrpc/rpc_pipe.c:589
+	Th. 1 spawned: init/main.c:394 w/ func: init
+	Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+
+dcache.c:568 (has lock)
+dcache.c:573 (has lock)
+libfs.c:264 (has lock)
+rpc_pipe.c:494 (has lock)
+
+not sure about those who call "list_empty()?" and "list_del_init()"...
+
+what happens at 589?
+
+__rpc_rmdir(struct inode *dir, struct dentry *dentry)
+{
+	int error;
+
+	shrink_dcache_parent(dentry);
+	if (dentry->d_inode)
+		rpc_close_pipes(dentry->d_inode);
+	if ((error = simple_rmdir(dir, dentry)) != 0)       //HERE
+
+caller does use
+
+rpc_lookup_negative(char *path, struct nameidata *nd)
+{
+   struct dentry *dentry;
+   struct inode *dir;
+   int error;
+
+   if ((error = rpc_lookup_parent(path, nd)) != 0)
+       return ERR_PTR(error);
+       dir = nd->dentry->d_inode;
+       down(&dir->i_sem);
+       dentry = lookup_hash(nd);
+       if (IS_ERR(dentry))
+          goto out_err;
+       if (dentry->d_inode) {
+          dput(dentry);
+          dentry = ERR_PTR(-EEXIST);
+          goto out_err;
+       }
+       return dentry;
+out_err:
+   up(&dir->i_sem);
+   rpc_release_path(nd);
+   return dentry;
+}
+
+which does path-sensitive locking... (but not on dcache_lock)
+
+
+
+
+
+Possible race between access to:
+(_a164_620707_fork.proc_dentry)->d_subdirs.next @ kernel/fork.c:157 and
+_a717_466698_dcache.d_subdirs.next @ fs/dcache.c:712
+	Accessed at locs:
+	[include/linux/list.h:223, include/linux/list.h:223, ] and
+	[fs/dcache.c:749, ]
+
+LS for 1st access:
+	L+ = {kernel_flag#tbd, dcache_lock#tbd, }
+	made empty at: :-1
+LS for 2nd access:
+	L+ = empty
+	made empty at: net/sunrpc/rpc_pipe.c:672
+	Th. 1 spawned: init/main.c:394 w/ func: init
+	Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+
+Possible race between access to:
+(_a164_620707_fork.proc_dentry)->d_subdirs.next @ kernel/fork.c:157 and
+(class_subsys.kset.kobj.dentry)->d_subdirs.next @ drivers/base/class.c:75
+	Accessed at locs:
+	[include/linux/list.h:223, include/linux/list.h:223, ] and
+	[fs/libfs.c:264, include/linux/list.h:67, ]
+
+LS for 1st access:
+	L+ = {kernel_flag#tbd, dcache_lock#tbd, }
+	made empty at: :-1
+LS for 2nd access:
+	L+ = {((class_subsys.kset.kobj.dentry)->d_inode)->i_sem#tbd, }
+	made empty at: :-1
+	Th. 1 spawned: init/main.c:394 w/ func: init
+	Th. 2 spawned: init/main.c:394 w/ func: init
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 2nd access:
+	L+ = {((bus_subsys.kset.kobj.dentry)->d_inode)->i_sem#tbd, }
+	lval 2: (bus_subsys.kset.kobj.dentry)->d_subdirs.next
+	Th. 1 spawned: init/main.c:394 w/ func: init
+	Th. 2 spawned: init/main.c:394 w/ func: init
+
+(1)
+LS for 2nd access:
+	L+ = {((devices_subsys.kset.kobj.dentry)->d_inode)->i_sem#tbd, }
+	lval 2: (devices_subsys.kset.kobj.dentry)->d_subdirs.next
+	Th. 1 spawned: init/main.c:394 w/ func: init
+	Th. 2 spawned: init/main.c:394 w/ func: init
+
+access at dcache.c:749 is an init fresh memory
+
+
+updated record (2/17/2006)
+
+Possible race between access to:
+_a717_466698_dcache.d_subdirs.next @ fs/dcache.c:712 and
+_a717_466698_dcache.d_subdirs.next @ fs/dcache.c:712
+        Accessed at locs:
+        [fs/dcache.c:749, include/linux/list.h:223, include/linux/list.h:223, ] and
+        [fs/dcache.c:568, fs/dcache.c:573, fs/libfs.c:264, include/linux/list.h:222,
+ include/linux/list.h:255, net/sunrpc/rpc_pipe.c:494, ]
+
+        Confidence: no PTA nodes
+
+LS for 1st access:
+        L+ = empty
+        made empty at: net/sunrpc/rpc_pipe.c:610
+LS for 2nd access:
+        L+ = empty
+        made empty at: net/sunrpc/rpc_pipe.c:589
+        Th. 1 spawned: fs/lockd/clntlock.c:201 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+
+and we know from before, access at 749 is init fresh memory
+
+
+//REASON: lost lock / mixed in w/ an init fresh memory
+
+
+
+
+
+//****
+Possible race between access to:
+REP_NODE.ar_hln and
+REP_NODE.ar_hln
+        Accessed at locs:
+        net/core/netpoll.c:430 and
+        net/core/netpoll.c:430
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: net/bluetooth/bnep/core.c:579 w/ func: bnep_session
+        Th. 2 spawned: net/bluetooth/bnep/core.c:579 w/ func: bnep_session
+
+
+//FIRST AND SECOND
+
+
+static void arp_reply(struct sk_buff *skb)
+{
+
+    //...
+
+	arp = skb->nh.arph;
+
+    //...
+
+	arp = (struct arphdr *) skb_put(send_skb, size);
+
+    //...
+
+	/*
+	 * Fill out the arp protocol part.
+	 *
+	 * we only support ethernet device type,
+	 * which (according to RFC 1390) should always equal 1 (Ethernet).
+	 */
+	arp->ar_hrd = htons(np->dev->type);
+	arp->ar_pro = htons(ETH_P_IP);
+	arp->ar_hln = np->dev->addr_len;     // HERE
+
+
+    //...
+}
+
+where skb_put is:
+
+817 static inline unsigned char *skb_put(struct sk_buff *skb, unsigned int len)
+818 {
+819         unsigned char *tmp = skb->tail;
+820         SKB_LINEAR_ASSERT(skb);
+821         skb->tail += len;
+822         skb->len  += len;
+823         if (unlikely(skb->tail>skb->end))
+824                 skb_over_panic(skb, len, current_text_addr());
+825         return tmp;
+826 }
+
+
+
+called by:
+
+446 int __netpoll_rx(struct sk_buff *skb)
+447 {
+        //...
+459         if (skb->protocol == __constant_htons(ETH_P_ARP) &&
+460             atomic_read(&trapped)) {
+461                 arp_reply(skb);
+462                 return 1;
+463         }
+        //...
+    }
+
+which is called by :
+
+ 47 static inline int netpoll_rx(struct sk_buff *skb)
+ 48 {
+ 49         struct netpoll_info *npinfo = skb->dev->npinfo;
+
+ 53         if (!npinfo || (!npinfo->rx_np && !npinfo->rx_flags))
+ 54                 return 0;
+
+ 56         spin_lock_irqsave(&npinfo->rx_lock, flags);
+ 57         /* check rx_flags again with the lock held */
+ 58         if (npinfo->rx_flags && __netpoll_rx(skb))
+ 59                 ret = 1;
+ 60         spin_unlock_irqrestore(&npinfo->rx_lock, flags);
+
+
+
+should hold that rx_lock (it does at the end of this function)
+does scoping kill the lock in some caller? caller bnep_rx_frame makes
+a new skb and passes that along...
+
+
+//REASON: lost lock?
+
+
+Possible race between access to:
+(vc_cons[0].d)->vc_origin @ include/linux/console_struct.h:111 and
+(vc_cons[0].d)->vc_origin @ include/linux/console_struct.h:111
+        Accessed at locs:
+        drivers/char/vt.c:573 and
+        drivers/char/vt.c:572
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/page_alloc.c:976
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/auditsc.c:684
+        Th. 1 spawned: fs/jbd/journal.c:215 w/ func: kjournald
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+
+static void set_origin(struct vc_data *vc)
+{
+	WARN_CONSOLE_UNLOCKED();                //... see comment about this macro
+
+	if (!CON_IS_VISIBLE(vc) ||
+	    !vc->vc_sw->con_set_origin ||
+	    !vc->vc_sw->con_set_origin(vc))
+		vc->vc_origin = (unsigned long)vc->vc_screenbuf;
+	vc->vc_visible_origin = vc->vc_origin;
+	vc->vc_scr_end = vc->vc_origin + vc->vc_screenbuf_size;
+	vc->vc_pos = vc->vc_origin + vc->vc_size_row * vc->vc_y + 2 * vc->vc_x;
+}
+
+
+//REASON: possible race if reached from one path (acknowledged by comment)
+
+over 30 other warnings to similar vc fields?
+
+
+//****
+Possible race between access to:
+REP_NODE.s_element and
+REP_NODE.s_element
+        Accessed at locs:
+        fs/sysfs/dir.c:48 and
+        fs/sysfs/dir.c:48
+
+LS for 1st access:
+        L+ = {event_semaphore#tbd, }
+        made empty at: drivers/base/class.c:535
+LS for 2nd access:
+        L+ = empty
+        made empty at: drivers/base/init.c:27
+        Th. 1 spawned: drivers/pci/hotplug/pciehp_ctrl.c:554 
+        w/ func: event_thread
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+/*
+ * Allocates a new sysfs_dirent and links it to the parent sysfs_dirent
+ */
+static struct sysfs_dirent * sysfs_new_dirent(struct sysfs_dirent * parent_sd,
+						void * element)
+{
+	struct sysfs_dirent * sd;
+
+	sd = kmem_cache_alloc(sysfs_dir_cachep, GFP_KERNEL); //INIT
+	if (!sd)
+		return NULL;
+
+	memset(sd, 0, sizeof(*sd));
+	atomic_set(&sd->s_count, 1);
+	INIT_LIST_HEAD(&sd->s_children);
+	list_add(&sd->s_sibling, &parent_sd->s_children); // ESCAPES?
+
+	sd->s_element = element;  // HERE
+
+	return sd;
+}
+
+call from sysfs_dir_open(), and call from 
+sysfs_make_dirent() <- sysfs_add_link() <- sysfs_create_link(), etc...
+all lock (&dentry->d_inode->i_sem) where dentry can be different parts of some obj...
+
+
+where did we lose the lock then (if it was ever around)?
+
+
+int class_device_add(struct class_device *class_dev)
+{
+    //...
+	class_dev = class_device_get(class_dev);  //negative ptr arith here
+
+    //...
+
+	class_dev->uevent_attr.attr.owner = parent_class->owner;
+	class_dev->uevent_attr.store = store_uevent;
+	class_device_create_file(class_dev, &class_dev->uevent_attr);  //HERE
+
+    //...
+}
+
+and
+
+void __init driver_init(void)
+{
+	/* These are the core pieces */
+	devices_init();                     //AFTER THIS
+	buses_init();  
+
+    //...
+}
+
+updated report:
+
+Possible race between access to:
+_a40_319285_dir.s_element @ fs/sysfs/dir.c:35 and
+_a40_319285_dir.s_element @ fs/sysfs/dir.c:35
+	Accessed at locs:
+	[fs/sysfs/dir.c:48, ] and
+	[fs/sysfs/dir.c:48, ]
+
+LS for 1st access:
+	L+ = empty
+	made empty at: drivers/base/init.c:27
+LS for 2nd access:
+	L+ = empty
+	made empty at: drivers/base/init.c:27
+	Th. 1 spawned: init/main.c:394 w/ func: init
+	Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+//REASON: looks like init (except it's already escaped?), since there are no other accesses to it -- should be fine (won't come back around w/ the same obj)?
+
+
+//****
+Possible race between access to:
+(*(REP_NODE.inode)) and
+(*((vc_cons[0].d)->vc_origin)) @ include/linux/console_struct.h:111
+        Accessed at locs:
+        mm/slab.c:2293 and
+        drivers/char/vt.c:597
+
+LS for 1st access:
+        L+ = empty
+        made empty at: kernel/auditsc.c:770
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/auditsc.c:684
+        Th. 1 spawned: drivers/base/firmware_class.c:589 
+        w/ func: request_firmware_work_func
+        Th. 2 spawned: net/rxrpc/krxsecd.c:128 w/ func: rxrpc_krxsecd
+
+Different possible paths & LS (first 4):
+
+(0)
+        made empty at: kernel/signal.c:712
+        lval 1: (*(REP_NODE.pids[0].pid_list.next))
+        Th. 1 spawned: drivers/base/firmware_class.c:589 
+        w/ func: request_firmware_work_func
+        Th. 2 spawned: net/rxrpc/krxsecd.c:128 w/ func: rxrpc_krxsecd
+
+(1)
+        made empty at: mm/oom_kill.c:297
+        lval 1: (*(REP_NODE.ring_info.ring_pages))
+        Th. 1 spawned: drivers/base/firmware_class.c:589
+        w/ func: request_firmware_work_func
+        Th. 2 spawned: net/rxrpc/krxsecd.c:128 w/ func: rxrpc_krxsecd
+
+
+//SECOND 
+
+static void clear_buffer_attributes(struct vc_data *vc)
+{
+	unsigned short *p = (unsigned short *)vc->vc_origin;  //this guy
+	int count = vc->vc_screenbuf_size / 2;
+	int mask = vc->vc_hi_font_mask | 0xff;
+
+	for (; count > 0; count--, p++) {
+		scr_writew((scr_readw(p)&mask) |            //HERE?
+            (vc->vc_video_erase_char & ~mask), p);  //HERE?
+	}
+}
+
+//REASON: unlikely aliasing (second is a pointer to a short, first is ptr to random objects)
+
+
+
+
+//****
+Possible race between access to:
+REP_NODE.b_count.counter and
+REP_NODE.b_count.counter
+        Accessed at locs:
+        fs/jbd/journal.c:361 and
+        fs/jbd/journal.c:361
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: fs/jbd/journal.c:215 w/ func: kjournald
+        Th. 2 spawned: fs/jbd/journal.c:215 w/ func: kjournald
+
+
+//FIRST AND SECOND
+
+
+jbd_lock_bh_state(...)
+
+
+	atomic_set(&new_bh->b_count, 1);
+
+
+struct buffer_head *bh_in = jh2bh(jh_in);
+361 uses  jbd_lock_bh_state(bh_in);
+1742 uses jbd_lock_bh_journal_head(bh);
+
+both use bit_spin_lock
+
+
+
+warning for 361, 1742 also
+
+
+//REASON: used bit_spin_lock 
+
+
+
+//****
+Possible race between access to:
+REP_NODE.event.len and
+REP_NODE.event.len
+        Accessed at locs:
+        fs/inotify.c:251 and
+        fs/inotify.c:251
+
+LS for 1st access:
+        L+ = empty
+        made empty at: kernel/auditsc.c:770
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/auditsc.c:770
+        Th. 1 spawned: drivers/net/wireless/airo.c:2726 w/ func: airo_thread
+        Th. 2 spawned: net/ipv4/ipvs/ip_vs_sync.c:858 w/ func: fork_sync_thread
+
+Different possible paths & LS (first 4):
+
+(0)
+        Th. 1 spawned: drivers/mtd/mtd_blkdevs.c:412
+        w/ func: mtd_blktrans_thread
+        Th. 2 spawned: drivers/net/irda/sir_kthread.c:482 w/ func: irda_thread
+
+(1)
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: net/rxrpc/krxtimod.c:39 w/ func: krxtimod
+
+
+
+//FIRST AND SECOND
+
+
+/*
+ * kernel_event - create a new kernel event with the given parameters
+ *
+ * This function can sleep.
+ */
+static struct inotify_kernel_event * kernel_event(s32 wd, u32 mask, u32 cookie,
+						  const char *name)
+{
+	struct inotify_kernel_event *kevent;
+
+	kevent = kmem_cache_alloc(event_cachep, GFP_KERNEL);
+
+    //...
+
+	if (name) {
+
+    //...
+
+		memcpy(kevent->name, name, len);
+		if (rem)
+			memset(kevent->name + len, 0, rem);		
+		kevent->event.len = len + rem;              // HERE
+    
+    //...
+	return kevent;
+}
+
+
+//REASON init fresh memory
+
+
+
+//****
+Possible race between access to:
+REP_NODE.stats.tx_bytes and
+REP_NODE.stats.tx_bytes
+        Accessed at locs:
+        net/bluetooth/bnep/core.c:456 and
+        net/bluetooth/bnep/core.c:456
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: net/bluetooth/bnep/core.c:579 w/ func: bnep_session
+        Th. 2 spawned: net/bluetooth/bnep/core.c:579 w/ func: bnep_session
+
+
+
+//FIRST AND SECOND
+
+
+static inline int bnep_tx_frame(struct bnep_session *s, struct sk_buff *skb)
+{
+    //...
+
+	/* FIXME: linearize skb */
+	{
+		len = kernel_sendmsg(sock, &s->msg, iv, il, len);
+	}
+	kfree_skb(skb);
+
+	if (len > 0) {
+		s->stats.tx_bytes += len;       //HERE
+		s->stats.tx_packets++;
+		return 0;
+	}
+
+	return len;
+}
+
+//called by thread root: "s" is the object passed as an arg to the new thread
+
+see previous warning about stats.rx_bytes
+
+unique obj each time (as far as this access is concerned... s object itself
+may be shared)
+
+//REASON obj is already on a list, but those who iterate through the list don't touch this stat field?
+
+
+
+//****
+Possible race between access to:
+((swapper_space.page_tree.rnode)->slots[0])->count @ mm/swap_state.c:36 and
+((((journal->j_dev)->bd_inode)->i_mapping)->page_tree.rnode)->count @ fs/jbd/jou
+rnal.c:213
+        Accessed at locs:
+        lib/radix-tree.c:753 and
+        lib/radix-tree.c:273
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/vmscan.c:537
+LS for 2nd access:
+        L+ = {(((journal->j_dev)->bd_inode)->i_mapping)->tree_lock#tbd, }
+        made empty at: :-1
+        Th. 1 spawned: fs/afs/kafstimod.c:40 w/ func: kafstimod
+        Th. 2 spawned: fs/jbd/journal.c:215 w/ func: kjournald
+
+
+//FIRST
+
+/**
+ *	radix_tree_delete    -    delete an item from a radix tree
+ *	@root:		radix tree root
+ *	@index:		index key
+ *
+ *	Remove the item at @index from the radix tree rooted at @root.
+ *	Returns the address of the deleted item, or NULL if it was not present.
+ */
+void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
+{
+
+	struct radix_tree_path path[RADIX_TREE_MAX_PATH], *pathp = path;
+	pathp->node = NULL;
+
+	slot = root->rnode;
+
+    for ( ; height > 0; height--) {
+		int offset;
+
+		if (slot == NULL)
+			goto out;
+    
+        //...
+
+		pathp[1].node = slot;
+		slot = slot->slots[offset];
+		pathp++;
+
+        //...
+	}
+
+
+	do {
+        //...
+
+		pathp--;
+
+	} while (pathp->node && nr_cleared_tags);
+
+
+	/* Now free the nodes we do not need anymore */
+	for (pathp = orig_pathp; pathp->node; pathp--) {
+		pathp->node->slots[pathp->offset] = NULL;
+		if (--pathp->node->count)                       //HERE
+            goto out;
+
+  		/* Node with zero slots in use so free it */
+		radix_tree_node_free(pathp->node);
+	}
+
+	root->rnode = NULL;
+	root->height = 0;
+out:
+	return ret;
+}
+
+//SECOND
+
+
+int radix_tree_insert(struct radix_tree_root *root,
+			unsigned long index, void *item)
+{
+    //...
+
+	if (node) {
+		node->count++;                  //HERE
+		node->slots[offset] = item;
+
+
+    //...
+}
+
+second holds a lock that makes sense (tree_lock)... does the first?
+
+
+first access made empty at: mm/vmscan.c:537
+
+static int shrink_list(struct list_head *page_list, struct scan_control *sc)
+{
+    //...
+
+		if (PagePrivate(page)) {
+			if (!try_to_release_page(page, sc->gfp_mask))
+				goto activate_locked;
+			if (!mapping && page_count(page) == 1)      // read count ???
+				goto free_it;
+		}
+
+
+		write_lock_irq(&mapping->tree_lock);
+
+		/*
+		 * The non-racy check for busy page.  It is critical to check
+		 * PageDirty _after_ making sure that the page is freeable and
+		 * not in use by anybody. 	(pagecache + us == 2)
+		 */
+		if (unlikely(page_count(page) != 2))            // read count ???
+			goto cannot_free;
+
+
+		if (PageSwapCache(page)) {
+			swp_entry_t swap = { .val = page_private(page) };
+			__delete_from_swap_cache(page);
+			write_unlock_irq(&mapping->tree_lock);
+        //...
+
+        }
+
+        //...
+        write_unlock_irq(&mapping->tree_lock);
+
+    //...
+}
+
+Inspecting LS: state before instr
+#line 521
+_write_lock_irq(& mapping->tree_lock);
+L+ = empty;
+L- = {inode_lock#tbd, swapper_space.tree_lock#tbd, log_wait.lock#tbd, 
+        mmlist_lock#tbd, swap_lock#tbd, console_sem#tbd, logbuf_lock#tbd, 
+        tlbstate_lock#tbd, mem_map->u.ptl#tbd, (zone_table[0])->lock#tbd, 
+        (zone_table[0])->lru_lock#tbd, 
+(radix_tree_node_cachep->nodelists[0])->list_lock#tbd, 
+(bh_cachep->nodelists[0])->list_lock#tbd, [REP: 1]#tbd, } (14)
+
+Inspecting LS: state after instr
+L+ = empty;
+L- = {inode_lock#tbd, swapper_space.tree_lock#tbd, log_wait.lock#tbd, 
+mmlist_lock#tbd, swap_lock#tbd, console_sem#tbd, logbuf_lock#tbd, 
+tlbstate_lock#tbd, mem_map->u.ptl#tbd, (zone_table[0])->lock#tbd, 
+(zone_table[0])->lru_lock#tbd, 
+(radix_tree_node_cachep->nodelists[0])->list_lock#tbd, 
+(bh_cachep->nodelists[0])->list_lock#tbd, [REP: 1]#tbd, } (14)
+
+mapping = page_mapping(page);
+
+552 static inline struct address_space *page_mapping(struct page *page)
+553 {
+554         struct address_space *mapping = page->mapping;
+555 
+556         if (unlikely(PageSwapCache(page)))
+557                 mapping = &swapper_space;
+558         else if (unlikely((unsigned long)mapping & PAGE_MAPPING_ANON))
+559                 mapping = NULL;
+560         return mapping;
+561 }
+
+update: why did it lose a lock again?
+
+Possible race between access to:
+((swapper_space.page_tree.rnode)->slots[0])->count @ include/linux/mm.h:551 and
+_a87_237215_radix.count @ lib/radix-tree.c:82
+	Accessed at locs:
+	[lib/radix-tree.c:753, ] and
+	[lib/radix-tree.c:212, ]
+
+not the same second access, but it looks like an access to a fresh obj
+
+
+if (!(node = radix_tree_node_alloc(root)))
+			return -ENOMEM;
+
+		/* Increase the height.  */
+		node->slots[0] = root->rnode;
+
+		/* Propagate the aggregated tag info into the new root */
+		for (tag = 0; tag < RADIX_TREE_TAGS; tag++) {
+			if (tags[tag])
+				tag_set(node, tag, 0);
+		}
+
+		node->count = 1;  //HERE
+
+//REASON: unlikely aliasing? used PTA node |n| = 30748
+
+
+
+
+//****
+Possible race between access to:
+REP_NODE.mnt_sb and
+REP_NODE.mnt_sb
+        Accessed at locs:
+        fs/super.c:838 and
+        fs/super.c:838
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: fs/nfs/delegation.c:319 w/ func: recall_thread
+        Th. 2 spawned: fs/nfs/delegation.c:319 w/ func: recall_thread
+
+
+struct vfsmount *
+do_kern_mount(const char *fstype, int flags, const char *name, void *data)
+{
+
+    //...
+	mnt = alloc_vfsmnt(name);
+    //...
+    mnt->mnt_sb = sb;                   //HERE
+	mnt->mnt_root = dget(sb->s_root);
+	mnt->mnt_mountpoint = sb->s_root;
+    //...
+}
+
+
+
+//REASON init fresh memory
+
+
+//****
+Possible race between access to:
+REP_NODE.vm_mm and
+REP_NODE.vm_mm
+        Accessed at locs:
+        mm/hugetlb.c:315 and
+        kernel/fork.c:236
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/memory.c:822
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/do_mounts_initrd.c:59 w/ func: do_linuxrc
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+//SECOND
+
+
+		tmp = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
+		if (!tmp)
+			goto fail_nomem;
+		*tmp = *mpnt;                  ///struct copy? shouldn't it use memcpy?
+
+    //...
+		tmp->vm_flags &= ~VM_LOCKED;
+		tmp->vm_mm = mm;
+
+    //...
+   			/* insert tmp into the share list, just after mpnt */
+			spin_lock(&file->f_mapping->i_mmap_lock);
+			tmp->vm_truncate_count = mpnt->vm_truncate_count;
+			flush_dcache_mmap_lock(file->f_mapping);
+			vma_prio_tree_add(tmp, mpnt);
+			flush_dcache_mmap_unlock(file->f_mapping);
+			spin_unlock(&file->f_mapping->i_mmap_lock);
+    //...
+
+//REASON: init fresh memory
+
+
+//****
+Possible race between access to:
+REP_NODE.lock and
+REP_NODE.lock
+        Accessed at locs:
+        kernel/workqueue.c:287 and
+        kernel/workqueue.c:287
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+
+static struct task_struct *create_workqueue_thread(struct workqueue_struct *wq,
+						   int cpu)
+{
+	struct cpu_workqueue_struct *cwq = per_cpu_ptr(wq->cpu_wq, cpu);
+	struct task_struct *p;
+
+	spin_lock_init(&cwq->lock);     // HERE
+
+    //...
+}
+
+callers pass a fresh wq to this func, except for 
+
+
+493 /* We're holding the cpucontrol mutex here */
+494 static int __devinit workqueue_cpu_callback(struct notifier_block *nfb,
+495                                   unsigned long action,
+496                                   void *hcpu)
+
+
+504                 list_for_each_entry(wq, &workqueues, list) {
+505                         if (!create_workqueue_thread(wq, hotcpu)) {
+506                                 printk("workqueue for %i failed\n", hotcpu);
+507                                 return NOTIFY_BAD;
+508                         }
+509                 }
+
+
+//REASON: init fresh memory
+
+
+//****
+Possible race between access to:
+rpc_task_id @ net/sunrpc/sched.c:28 and
+rpc_task_id @ net/sunrpc/sched.c:28
+        Accessed at locs:
+        net/sunrpc/sched.c:787 and
+        net/sunrpc/sched.c:787
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: fs/nfs/delegation.c:319 w/ func: recall_thread
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+/*
+ * Creation and deletion of RPC task structures
+ */
+void rpc_init_task(struct rpc_task *task, struct rpc_clnt *clnt, rpc_action callback, int flags)
+{
+	memset(task, 0, sizeof(*task));
+	init_timer(&task->tk_timer);
+	task->tk_timer.data     = (unsigned long) task;
+
+
+#ifdef RPC_DEBUG
+	task->tk_magic = RPC_TASK_MAGIC_ID;
+	task->tk_pid = rpc_task_id++;
+#endif
+	/* Add to global list of all tasks */
+	spin_lock(&rpc_sched_lock);
+
+    //...
+
+}
+
+probably ok as long as nobody gets the same ID
+
+//REASON: race on a monotonic debug variable, but what if two folks get the same debug ID?
+
+
+
+//****
+Possible race between access to:
+REP_NODE.task.u.tk_work.data and
+REP_NODE.task.u.tk_work.data
+        Accessed at locs:
+        net/sunrpc/sched.c:285 and
+        net/sunrpc/sched.c:285
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: fs/nfs/delegation.c:319 w/ func: recall_thread
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+
+/*
+ * Make an RPC task runnable.
+ *
+ * Note: If the task is ASYNC, this must be called with 
+ * the spinlock held to protect the wait queue operation.
+ */
+static void rpc_make_runnable(struct rpc_task *task)
+{
+
+
+	if (RPC_IS_ASYNC(task)) {
+		int status;
+
+		INIT_WORK(&task->u.tk_work, rpc_async_schedule, (void *)task); //HERE
+		status = queue_work(task->tk_workqueue, &task->u.tk_work);
+
+    //...
+    }
+
+}
+
+updated record:
+
+no race on data field anymore
+
+//REASON: read/write conditioned on lock state on entry to function (update (2/19): warning on data field is gone)
+
+
+
+//****
+Possible race between access to:
+REP_NODE.partial_crc and
+REP_NODE.partial_crc
+        Accessed at locs:
+        fs/jffs2/readinode.c:211 and
+        fs/jffs2/readinode.c:211
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: fs/jffs2/background.c:44 
+        w/ func: jffs2_garbage_collect_thread
+        Th. 2 spawned: fs/jffs2/background.c:44
+        w/ func: jffs2_garbage_collect_thread
+
+
+
+//FIRST AND SECOND
+
+/*
+ * Helper function for jffs2_get_inode_nodes().
+ * It is called every time an inode node is found.
+ *
+ * Returns: 0 on succes;
+ * 	    1 if the node should be marked obsolete;
+ * 	    negative error code on failure.
+ */
+static inline int read_dnode(struct jffs2_sb_info *c, struct jffs2_raw_node_ref *ref,
+			     struct jffs2_raw_inode *rd, struct rb_root *tnp, int rdlen,
+			     uint32_t *latest_mctime, uint32_t *mctime_ver)
+{
+	struct jffs2_tmp_dnode_info *tn;
+	//...
+	tn = jffs2_alloc_tmp_dnode_info();
+    //...
+	tn->partial_crc = 0; //HERE
+    //...
+}
+
+
+//REASON: init fresh memory
+
+
+****
+Possible race between access to:
+skbuff_fclone_cache @ net/core/skbuff.c:72 and
+skbuff_fclone_cache @ net/core/skbuff.c:72
+        Accessed at locs:
+        net/core/skbuff.c:1798 and
+        net/core/skbuff.c:143
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/dcache.c:110
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+//FIRST
+
+void __init skb_init(void)      //__init function!!!
+{
+	skbuff_head_cache = kmem_cache_create("skbuff_head_cache",
+					      sizeof(struct sk_buff),
+					      0,
+					      SLAB_HWCACHE_ALIGN,
+					      NULL, NULL);
+	if (!skbuff_head_cache)
+		panic("cannot create skbuff cache");
+
+	skbuff_fclone_cache = kmem_cache_create("skbuff_fclone_cache", //HERE
+						(2*sizeof(struct sk_buff)) +
+						sizeof(atomic_t),
+						0,
+						SLAB_HWCACHE_ALIGN,
+						NULL, NULL);
+	if (!skbuff_fclone_cache)
+		panic("cannot create skbuff cache");
+}
+
+
+//REASON: init global var
+
+
+
+
+//****
+Possible race between access to:
+REP_NODE.mm_rb.rb_node and
+REP_NODE.mm_rb.rb_node
+        Accessed at locs:
+        lib/rbtree.c:42 and
+        lib/rbtree.c:42
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: net/ipv4/ipvs/ip_vs_sync.c:858 w/ func: fork_sync_thread
+        Th. 2 spawned: net/ipv4/ipvs/ip_vs_sync.c:858 w/ func: fork_sync_thread
+
+
+
+static void __rb_rotate_left(struct rb_node *node, struct rb_root *root)
+{
+	struct rb_node *right = node->rb_right;
+
+	if ((node->rb_right = right->rb_left))
+		right->rb_left->rb_parent = node;
+	right->rb_left = node;
+
+	if ((right->rb_parent = node->rb_parent))
+	{
+		if (node == node->rb_parent->rb_left)
+			node->rb_parent->rb_left = right;
+		else
+			node->rb_parent->rb_right = right;
+	}
+	else
+		root->rb_node = right;      //HERE
+	node->rb_parent = right;
+}
+
+
+//come back later... too deep in callgraph
+
+
+****
+Possible race between access to:
+REP_NODE.d_lru.prev and
+REP_NODE.d_lru.prev
+        Accessed at locs:
+        include/linux/list.h:163 and
+        fs/dcache.c:748
+
+LS for 1st access:
+        L+ = {REP_NODE.d_lock#tbd, semOperations#tbd, }
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/namei.c:1202
+        Th. 1 spawned: drivers/pci/hotplug/ibmphp_hpc.c:1084 w/ func: hpc_poll_t
+hread
+        Th. 2 spawned: drivers/pcmcia/cs.c:243 w/ func: pccardd
+
+
+//SECOND
+
+struct dentry *d_alloc(struct dentry * parent, const struct qstr *name)
+{
+    //...
+    
+	dentry = kmem_cache_alloc(dentry_cache, GFP_KERNEL); 
+
+    //...
+
+	dentry->d_mounted = 0;
+	dentry->d_cookie = NULL;
+	INIT_HLIST_NODE(&dentry->d_hash);
+	INIT_LIST_HEAD(&dentry->d_lru);
+
+    //...
+	spin_lock(&dcache_lock);
+	if (parent)
+		list_add(&dentry->d_child, &parent->d_subdirs);
+	dentry_stat.nr_dentry++;
+	spin_unlock(&dcache_lock);
+	return dentry;
+}
+
+
+//REASON init fresh memory
+
+//****
+Possible race between access to:
+REP_NODE.d_fsdata and
+REP_NODE.d_fsdata
+        Accessed at locs:
+        fs/sysfs/inode.c:140 and
+        fs/sysfs/dir.c:66
+
+LS for 1st access:
+        L+ = {event_semaphore#tbd, }
+        made empty at: fs/sysfs/group.c:58
+LS for 2nd access:
+        L+ = empty
+        made empty at: drivers/base/platform.c:483
+        Th. 1 spawned: drivers/pci/hotplug/pciehp_ctrl.c:554
+        w/ func: event_thread
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+//FIRST
+
+int sysfs_create(struct dentry * dentry, int mode, int (*init)(struct inode *))
+{
+	int error = 0;
+	struct inode * inode = NULL;
+	if (dentry) {
+		if (!dentry->d_inode) {
+			struct sysfs_dirent * sd = dentry->d_fsdata;
+        //...
+
+        }
+    //...
+    }
+//...
+}
+
+looks like callers don't hold a lock?!
+
+
+
+//SECOND
+
+int sysfs_make_dirent(struct sysfs_dirent * parent_sd, struct dentry * dentry,
+			void * element, umode_t mode, int type)
+{
+	struct sysfs_dirent * sd;
+
+	sd = sysfs_new_dirent(parent_sd, element);
+	if (!sd)
+		return -ENOMEM;
+
+	sd->s_mode = mode;
+	sd->s_type = type;
+	sd->s_dentry = dentry;
+	if (dentry) {                          //ONLY IF NOT NULL (usually NULL?!)
+		dentry->d_fsdata = sysfs_get(sd);       //WRITE HERE
+		dentry->d_op = &sysfs_dentry_ops;
+	}
+
+	return 0;
+}
+
+similar to previous warning w/ sysfs_make_dirent in the chain?
+
+should hold parent (or some other) dir's inode sem... three callers hold:
+
+down(&p->d_inode->i_sem);
+down(&dir->d_inode->i_sem);
+down(&dentry->d_inode->i_sem);
+
+LS made empty at:
+
+int __init platform_bus_init(void)
+{
+	device_register(&platform_bus);
+	return bus_register(&platform_bus_type);    //here?
+}
+
+different base var each time... merging w/ REP_NODE?
+
+not sure how the base BLAH relates to the dentry?
+
+    either 1) a fresh dentry
+           2) dentry from cache
+           3) dentry from inode's lookup function (funptr)
+
+
+
+update (2/16):
+
+Possible race between access to:
+_a717_466698_dcache.d_fsdata @ fs/dcache.c:712 and
+_a717_466698_dcache.d_fsdata @ fs/dcache.c:712
+        Accessed at locs:
+        [fs/dcache.c:744, fs/sysfs/dir.c:66, ] and
+        [fs/sysfs/dir.c:115, fs/sysfs/dir.c:247, fs/sysfs/inode.c:140, fs/sysfs/inode.c:229, fs/sysfs/sysfs.h:73, ]
+
+        Confidence: no PTA nodes
+
+LS for 1st access:
+        L+ = {nodemgr_serialize#tbd, }
+        made empty at: drivers/base/core.c:292
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/sysfs/group.c:79
+        Th. 1 spawned: drivers/ieee1394/nodemgr.c:1710 
+        w/ func: nodemgr_host_thread
+        Th. 2 spawned: net/bluetooth/bnep/core.c:579 w/ func: bnep_session
+
+dcache.c:744 is init fresh memory
+
+dir.c:66 should hold x->d_inode->i_sem on entry for some x (see above)
+
+dir.c:115 holds parent inode lock in func (assuming ptr arith is right)
+	down(&p->d_inode->i_sem);
+	*d = lookup_one_len(n, p, strlen(n));
+    //...		sysfs_put((*d)->d_fsdata);
+	up(&p->d_inode->i_sem);
+
+dir.c:247 holds parent's lock
+	struct dentry * parent = dget(d->d_parent);
+	struct sysfs_dirent * sd;
+
+	down(&parent->d_inode->i_sem);
+	d_delete(d);
+	sd = d->d_fsdata;
+
+inode.c:140 called by
+    <- create_dir (w/ parent lock)
+    <- others that don't reach bnep_session (thread root)
+
+inode.c:229 called by
+    <- lots of callers... some are on fresh memory
+
+sysfs.h:73 called by
+    <- sysfs_put (w/ atomic_dec_and_test)
+
+
+//REASON: lost lock / holds parent's lock before accessing child's field? / init fresh memory / custom mutex
+
+
+
+
+
+//****
+Possible race between access to:
+aio_nr @ include/linux/aio.h:245 and
+aio_nr @ include/linux/aio.h:245
+        Accessed at locs:
+        fs/aio.c:384 and
+        fs/aio.c:385
+
+LS for 1st access:
+        L+ = empty
+        made empty at: fs/aio.c:385
+LS for 2nd access:
+        L+ = empty
+        made empty at: mm/oom_kill.c:297
+        Th. 1 spawned: fs/jbd/journal.c:215 w/ func: kjournald
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+//FIRST AND SECOND
+
+
+void fastcall __put_ioctx(struct kioctx *ctx)
+{
+    //...
+	if (nr_events) {
+		spin_lock(&aio_nr_lock);
+		BUG_ON(aio_nr - nr_events > aio_nr);    // HERE
+		aio_nr -= nr_events;                    // HERE
+		spin_unlock(&aio_nr_lock);
+	}
+    //...
+}
+
+definitely holds the lock... why does it say the first access's LS is made empty at the second access?
+
+access somewhere else? &aio_nr is taken and put into a sysctl table...
+
+update (2/16):
+
+it's because of an unreachable stmt having LS = {} instead of BOTTOM
+
+//REASON: lost lock (own bug... LS was {} instead of BOTTOM in corner-case)
+
+
+
+//****
+Possible race between access to:
+(*((vc_cons[0].d)->vc_pos)) @ include/linux/console_struct.h:111 and
+(*((vc_cons[0].d)->vc_pos)) @ include/linux/console_struct.h:111
+        Accessed at locs:
+        drivers/char/vt.c:534 and
+        drivers/char/vt.c:534
+
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/page_alloc.c:976
+LS for 2nd access:
+        L+ = empty
+        made empty at: mm/page_alloc.c:976
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: net/rxrpc/krxtimod.c:39 w/ func: krxtimod
+
+Different possible paths & LS (first 4):
+
+(0)
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: fs/smbfs/smbiod.c:76 w/ func: smbiod
+
+(1)
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: drivers/pci/hotplug/ibmphp_hpc.c:1084
+        w/ func: hpc_poll_thread
+
+static void hide_softcursor(struct vc_data *vc)
+{
+	if (softcursor_original != -1) {
+		scr_writew(softcursor_original, (u16 *)vc->vc_pos); //HERE
+
+        //...
+    }
+}
+
+
+called by 
+   hide_cursor <- update_region (WARN_UNLOCKED here) <- fbconn_scrolldelta 
+or hide_cursor <- redraw_screen (WARN_UNLOCKED here)
+
+//REASON race (but acknowledged in comments)
+
+
+
+//****
+Possible race between access to:
+mp_irqs[0].mpc_dstapic @ include/asm/mpspec.h:23 and
+mp_irqs[0].mpc_dstapic @ include/asm/mpspec.h:23
+        Accessed at locs:
+        arch/i386/kernel/io_apic.c:1825 and
+        arch/i386/kernel/io_apic.c:783
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+
+
+//FIRST
+
+static void __init setup_ioapic_ids_from_mpc(void)
+{
+    //...
+	for (apic = 0; apic < nr_ioapics; apic++) {
+
+		/* Read the register 0 value */
+		spin_lock_irqsave(&ioapic_lock, flags);
+		reg_00.raw = io_apic_read(apic, 0);
+		spin_unlock_irqrestore(&ioapic_lock, flags);
+        //...
+
+		/*
+		 * We need to adjust the IRQ routing table
+		 * if the ID changed.
+		 */
+		if (old_id != mp_ioapics[apic].mpc_apicid)
+			for (i = 0; i < mp_irq_entries; i++)
+				if (mp_irqs[i].mpc_dstapic == old_id)   //HERE
+					mp_irqs[i].mpc_dstapic              //HERE
+						= mp_ioapics[apic].mpc_apicid;
+
+		/*
+		 * Read the right value from the MPC table and
+		 * write it into the ID register.
+	 	 */
+
+		reg_00.bits.ID = mp_ioapics[apic].mpc_apicid;
+		spin_lock_irqsave(&ioapic_lock, flags);
+		io_apic_write(apic, 0, reg_00.raw);
+		spin_unlock_irqrestore(&ioapic_lock, flags);
+    
+        //...
+	}
+}
+
+//SECOND 
+
+static int __init find_isa_irq_apic(int irq, int type)
+{
+	int i;
+    //...
+	if (i < mp_irq_entries) {
+		int apic;
+		for(apic = 0; apic < nr_ioapics; apic++) {
+			if (mp_ioapics[apic].mpc_apicid == 
+                mp_irqs[i].mpc_dstapic)             //HERE
+				return apic;
+		}
+	}
+	return -1;
+}
+
+
+hmm starts from init, but those are globals and they do some locking...
+
+actually init does lock_kernel() then calls smp_prepare_cpus -> ... -> 
+    setup_IO_APIC() -> ...
+
+void __lockfunc lock_kernel(void)
+{
+    struct task_struct *task = current;
+    int depth = task->lock_depth + 1;
+
+    if (likely(!depth))
+        /*
+         * No recursion worries - we set up lock_depth _after_
+         */
+        down(&kernel_sem);
+
+    task->lock_depth = depth;
+}
+
+oh... it only holds the kernel_sem on some paths
+
+
+
+//REASON lock_kernel() only holds lock on some paths
+
+
+
+//****
+Possible race between access to:
+(((tr->blkcore_priv)->rq)->flush_rq)->queuelist.prev @ drivers/mtd/mtd_blkdevs.c
+:372 and
+(((tr->blkcore_priv)->rq)->flush_rq)->queuelist.prev @ drivers/mtd/mtd_blkdevs.c
+:372
+        Accessed at locs:
+        block/ll_rw_blk.c:270 and
+        include/linux/list.h:222
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: drivers/mtd/mtd_blkdevs.c:412
+        w/ func: mtd_blktrans_thread
+        Th. 2 spawned: drivers/mtd/mtd_blkdevs.c:412
+        w/ func: mtd_blktrans_thread
+
+//FIRST
+
+static inline void rq_init(request_queue_t *q, struct request *rq)
+{
+	INIT_LIST_HEAD(&rq->queuelist);     //HERE
+
+    //...
+}
+
+//SECOND
+
+static inline void list_del_init(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);   //HERE
+	INIT_LIST_HEAD(entry);
+}
+
+
+one caller of rq_init is:
+
+blk_start_post_flush, which is called by:
+
+static int __blk_complete_barrier_rq(request_queue_t *q, struct request *rq,
+                                     int sectors, int queue_locked)
+{
+    //...
+                if (!queue_locked)
+                        spin_lock_irqsave(q->queue_lock, flags);
+
+                blk_start_post_flush(q, rq); // ~~~> FIRST
+
+                if (!queue_locked)
+                        spin_unlock_irqrestore(q->queue_lock, flags);
+        }
+
+        return 1;
+}
+
+may or may not have the lock... (but this is not the path taken by thread root)
+
+another caller is:
+
+static struct request *get_request(request_queue_t *q, int rw, struct bio *bio,
+                                   gfp_t gfp_mask) {
+
+    //...
+
+    rq = blk_alloc_request(q, rw, bio, priv, gfp_mask);
+
+    //...
+
+    rq_init(q, rq); //HERE
+
+}
+
+
+last caller is blk_start_pre_flush, which is called by:
+     thread root mtd_blktrans_thread
+
+
+
+ 96         spin_lock_irq(rq->queue_lock);
+ 97 
+ 98         while (!tr->blkcore_priv->exiting) {
+ 99                 struct request *req;
+100                 struct mtd_blktrans_dev *dev;
+101                 int res = 0;
+102                 DECLARE_WAITQUEUE(wait, current);
+103 
+104                 req = elv_next_request(rq);
+//...
+123                 spin_unlock_irq(rq->queue_lock);
+124 
+125                 down(&dev->sem);
+126                 res = do_blktrans_request(tr, dev, req);
+127                 up(&dev->sem);
+128 
+129                 spin_lock_irq(rq->queue_lock);
+130 
+131                 end_request(req, res);
+132         }
+133         spin_unlock_irq(rq->queue_lock);
+
+
+who knows where the call to list_del_init happens... too many paths to there
+
+
+//REASON init fresh memory?
+
+
+//****
+Possible race between access to:
+REP_NODE.sched_time and
+REP_NODE.sched_time
+        Accessed at locs:
+        kernel/fork.c:947 and
+        kernel/posix-cpu-timers.c:462
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = {REP_NODE.proc_lock#tbd, tasklist_lock#tbd, }
+        made empty at: :-1
+        Th. 1 spawned: net/ipv4/ipvs/ip_vs_sync.c:858 w/ func: fork_sync_thread
+        Th. 2 spawned: net/rxrpc/krxsecd.c:128 w/ func: rxrpc_krxsecd
+
+//FIRST happens in copy_process
+
+
+//REASON init fresh memory
+
+//****
+Possible race between access to:
+nr_threads @ include/linux/sched.h:95 and
+nr_threads @ include/linux/sched.h:95
+        Accessed at locs:
+        kernel/fork.c:1139 and
+        kernel/fork.c:917
+
+LS for 1st access:
+        L+ = {tasklist_lock#tbd, }
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/fork.c:1139
+        Th. 1 spawned: fs/lockd/clntlock.c:201 w/ func: reclaimer
+        Th. 2 spawned: kernel/kmod.c:206 w/ func: wait_for_helper
+
+//SECOND
+
+	/*
+	 * If multiple threads are within copy_process(), then this check
+	 * triggers too late. This doesn't hurt, the check is only there
+	 * to stop root fork bombs.
+	 */
+	if (nr_threads >= max_threads)      //HERE
+		goto bad_fork_cleanup_count;
+
+
+//REASON race (but benign)
+
+
+Possible race between access to:
+REP_NODE.bi_io_vec and
+REP_NODE.bi_io_vec
+        Accessed at locs:
+        fs/bio.c:178 and
+        fs/bio.c:178
+
+LS for 1st access:
+        L+ = empty
+        made empty at: fs/dcache.c:110
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/dcache.c:110
+        Th. 1 spawned: drivers/net/wireless/airo.c:2726 w/ func: airo_thread
+        Th. 2 spawned: net/ipv4/ipvs/ip_vs_sync.c:858 w/ func: fork_sync_thread
+
+Different possible paths & LS (first 4):
+
+(0)
+        Th. 1 spawned: drivers/mtd/mtd_blkdevs.c:412
+        w/ func: mtd_blktrans_thread
+        Th. 2 spawned: drivers/net/irda/sir_kthread.c:482 w/ func: irda_thread
+
+(1)
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: net/rxrpc/krxtimod.c:39 w/ func: krxtimod
+
+
+
+struct bio *bio_alloc_bioset(gfp_t gfp_mask, int nr_iovecs, struct bio_set *bs)
+{
+	struct bio *bio = mempool_alloc(bs->bio_pool, gfp_mask);
+
+	if (likely(bio)) {
+		struct bio_vec *bvl = NULL;
+
+		bio_init(bio);
+
+        //...
+
+		bio->bi_io_vec = bvl;       //HERE
+	}
+out:
+	return bio;
+}
+
+
+//REASON init fresh memory
+
+
+//****
+Possible race between access to:
+audit_freelist.next @ kernel/audit.c:106 and
+(pci_devices.next)->next @ include/linux/pci.h:294
+        Accessed at locs:
+        include/linux/list.h:164 and
+        drivers/pci/search.c:245
+
+LS for 1st access:
+        L+ = {audit_freelist_lock#tbd, }
+        made empty at: :-1
+LS for 2nd access:
+        L+ = {pci_bus_lock#tbd, }
+        made empty at: :-1
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: fs/smbfs/smbiod.c:76 w/ func: smbiod
+
+Different possible paths & LS (first 4):
+
+(0)
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: drivers/pci/hotplug/ibmphp_hpc.c:1084
+        w/ func: hpc_poll_thread
+
+(1)
+        Th. 1 spawned: drivers/ieee1394/nodemgr.c:374
+        w/ func: nodemgr_rescan_bus_thread
+        Th. 2 spawned: net/bluetooth/cmtp/core.c:378 w/ func: cmtp_session
+
+//FIRST
+
+need to find a place that locks audit_freelist_lock and calls list_del()
+
+564 static struct audit_buffer * audit_buffer_alloc(struct audit_context *ctx,
+565                                                 gfp_t gfp_mask, int type)
+566 {
+567         unsigned long flags;
+568         struct audit_buffer *ab = NULL;
+569         struct nlmsghdr *nlh;
+570 
+571         spin_lock_irqsave(&audit_freelist_lock, flags);
+572         if (!list_empty(&audit_freelist)) {
+573                 ab = list_entry(audit_freelist.next,
+574                                 struct audit_buffer, list);
+575                 list_del(&ab->list);                          //HERE
+576                 --audit_freelist_count;
+577         }
+578         spin_unlock_irqrestore(&audit_freelist_lock, flags);
+579 
+
+hmm... audit_freelist is not exported
+
+
+//SECOND
+
+
+struct pci_dev * 
+pci_get_subsys(unsigned int vendor, unsigned int device,
+	       unsigned int ss_vendor, unsigned int ss_device,
+	       struct pci_dev *from)
+{
+	struct list_head *n;
+	spin_lock(&pci_bus_lock);
+	n = from ? from->global_list.next : pci_devices.next;
+	while (n && (n != &pci_devices)) {
+		dev = pci_dev_g(n);
+		if ((vendor == PCI_ANY_ID || dev->vendor == vendor) &&
+		    (device == PCI_ANY_ID || dev->device == device) &&
+		    (ss_vendor == PCI_ANY_ID || dev->subsystem_vendor == ss_vendor) &&
+		    (ss_device == PCI_ANY_ID || dev->subsystem_device == ss_device))
+			goto exit;
+		n = n->next;        //HERE
+	}
+exit:
+	pci_dev_put(from);
+	dev = pci_dev_get(dev);
+	spin_unlock(&pci_bus_lock);
+	return dev;
+}
+
+callgraph for both is huge... maybe lists got mixed in somewhere
+
+//REASON unlikely aliasing (audit_freelist aliases w/ lots)
+
+
+
+//****
+Possible race between access to:
+(*(REP_NODE.parser_state.aml)) and
+(*((vc_cons[0].d)->vc_origin)) @ include/linux/console_struct.h:111
+        Accessed at locs:
+        drivers/acpi/parser/psargs.c:80 and
+        drivers/char/vt.c:597
+
+LS for 1st access:
+        L+ = {event_semaphore#tbd, }
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/auditsc.c:684
+        Th. 1 spawned: drivers/pci/hotplug/shpchp_ctrl.c:727 w/ func: event_thre
+ad
+        Th. 2 spawned: net/bluetooth/hidp/core.c:634 w/ func: hidp_session
+
+should be the same thing... vc_origin is
+
+//REASON: unlikely aliasing (second is a pointer to a short, first is ptr to random things)
+
+
+
+
+//****
+Possible race between access to:
+REP_NODE.tk_callback and
+REP_NODE.tk_callback
+        Accessed at locs:
+        net/sunrpc/sched.c:622 and
+        net/sunrpc/sched.c:610
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: fs/nfs/delegation.c:319 w/ func: recall_thread
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+//FIRST AND SECOND
+
+static int __rpc_execute(struct rpc_task *task)
+{
+	int		status = 0;
+
+	dprintk("RPC: %4d rpc_execute flgs %x\n",
+				task->tk_pid, task->tk_flags);
+
+	BUG_ON(RPC_IS_QUEUED(task));                        //SHOULDN'T be on list
+
+	for (;;) {
+		/*
+		 * Garbage collection of pending timers...
+		 */
+		rpc_delete_timer(task);
+
+		/*
+		 * Execute any pending callback.
+		 */
+		if (RPC_DO_CALLBACK(task)) {                    //HERE
+
+			/* Define a callback save pointer */
+			void (*save_callback)(struct rpc_task *);
+	
+			/* 
+			 * If a callback exists, save it, reset it,
+			 * call it.
+			 * The save is needed to stop from resetting
+			 * another callback set within the callback handler
+			 * - Dave
+			 */
+			save_callback=task->tk_callback;
+			task->tk_callback=NULL;                     //HERE
+			lock_kernel();
+			save_callback(task);
+			unlock_kernel();
+		}
+
+        //...
+    }
+
+    //...
+}
+
+
+for rpc_call_sync, rpc_call_async, the task is fresh
+for nfs_execute_write <- nfs_flush_multi, the task is removed from pages list
+for nfs_commit_list the task is fresh
+
+//REASON: removed from list in some contexts / init fresh memory in some
+
+
+
+//****
+Possible race between access to:
+REP_NODE.fl_type and
+REP_NODE.fl_type
+        Accessed at locs:
+        fs/locks.c:286 and
+        fs/locks.c:1102
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/do_mounts_initrd.c:59 w/ func: do_linuxrc
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+//FIRST
+
+static int assign_type(struct file_lock *fl, int type)
+{
+	switch (type) {
+	case F_RDLCK:
+	case F_WRLCK:
+	case F_UNLCK:
+		fl->fl_type = type;
+		break;
+	default:
+		return -EINVAL;
+	}
+	return 0;
+}
+
+branch from lease_alloc uses a fresh file lock
+branch from locks_remove_flock also acquires the big kernel lock
+
+1918         lock_kernel();
+1919         before = &inode->i_flock;
+1920 
+1921         while ((fl = *before) != NULL) {
+1922                 if (fl->fl_file == filp) {
+1923                         if (IS_FLOCK(fl)) {
+1924                                 locks_delete_lock(before);
+1925                                 continue;
+1926                         }
+1927                         if (IS_LEASE(fl)) {
+1928                                 lease_modify(before, F_UNLCK);
+1929                                 continue;
+1930                         }
+1931                         /* What? */
+1932                         BUG();
+1933                 }
+1934                 before = &fl->fl_next;
+1935         }
+1936         unlock_kernel();
+
+
+//SECOND 
+
+static void time_out_leases(struct inode *inode)
+{
+	struct file_lock **before;
+	struct file_lock *fl;
+
+	before = &inode->i_flock;
+	while ((fl = *before) && IS_LEASE(fl) && 
+        (fl->fl_type & F_INPROGRESS)) {         //HERE
+        //...
+    }
+}
+
+second is called here 
+
+__break_lease (struct inode *inode, unsigned int mode) {
+    //...
+
+1136         lock_kernel();
+1137 
+1138         time_out_leases(inode);
+
+
+//REASON init fresh memory / lock_kernel() wasn't modeled correctly
+
+
+//****
+Possible race between access to:
+REP_NODE.timestamp and
+REP_NODE.timestamp
+        Accessed at locs:
+        kernel/sched.c:1861 and
+        kernel/sched.c:1861
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/swap_state.c:79
+LS for 2nd access:
+        L+ = empty
+        made empty at: mm/swap_state.c:79
+        Th. 1 spawned: drivers/ieee1394/nodemgr.c:374
+        w/ func: nodemgr_rescan_bus_thread
+        Th. 2 spawned: net/bluetooth/cmtp/core.c:378 w/ func: cmtp_session
+
+Different possible paths & LS (first 4):
+
+(0)
+        made empty at: mm/oom_kill.c:297
+        Th. 1 spawned: drivers/ieee1394/nodemgr.c:374
+        w/ func: nodemgr_rescan_bus_thread
+        Th. 2 spawned: drivers/media/dvb/dvb-core/dvb_ca_en50221.c:1697 
+        w/ func: dvb_ca_en50221_thread
+
+
+/*
+ * pull_task - move a task from a remote runqueue to the local runqueue.
+ * Both runqueues must be locked.
+ */
+static inline
+void pull_task(runqueue_t *src_rq, prio_array_t *src_array, task_t *p,
+	       runqueue_t *this_rq, prio_array_t *this_array, int this_cpu)
+{
+	dequeue_task(p, src_array);
+	dec_nr_running(p, src_rq);
+	set_task_cpu(p, this_cpu);
+	inc_nr_running(p, this_rq);
+	enqueue_task(p, this_array);
+	p->timestamp = (p->timestamp - src_rq->timestamp_last_tick)     //HERE
+				+ this_rq->timestamp_last_tick;
+	/*
+	 * Note that idle threads have a prio of MAX_PRIO, for this test
+	 * to be always true for them.
+	 */
+	if (TASK_PREEMPTS_CURR(p, this_rq))
+		resched_task(this_rq->curr);
+}
+
+called by:
+
+ * Called with both runqueues locked.
+ */
+static int move_tasks(runqueue_t *this_rq, int this_cpu, runqueue_t *busiest,
+                      unsigned long max_nr_move, struct sched_domain *sd,
+                      enum idle_type idle, int *all_pinned)
+{
+    //...
+}
+
+called by 
+
+2174  * Called with this_rq unlocked.
+2175  */
+2176 static int load_balance(int this_cpu, runqueue_t *this_rq,
+2177                         struct sched_domain *sd, enum idle_type idle)
+2178 {
+    //...
+2215                 double_rq_lock(this_rq, busiest);
+2216                 nr_moved = move_tasks(this_rq, this_cpu, busiest,
+2217                                         imbalance, sd, idle, &all_pinned);
+2218                 double_rq_unlock(this_rq, busiest);
+
+/*
+ * double_rq_lock - safely lock two runqueues
+ *
+ * Note this does not disable interrupts like task_rq_lock,
+ * you need to do so manually before calling.
+ */
+static void double_rq_lock(runqueue_t *rq1, runqueue_t *rq2)
+	__acquires(rq1->lock)
+	__acquires(rq2->lock)
+{
+	if (rq1 == rq2) {
+		spin_lock(&rq1->lock);
+		__acquire(rq2->lock);	/* Fake it out ;) */
+	} else {
+		if (rq1 < rq2) {
+			spin_lock(&rq1->lock);
+			spin_lock(&rq2->lock);
+		} else {
+			spin_lock(&rq2->lock);
+			spin_lock(&rq1->lock);
+		}
+	}
+}
+
+
+
+and by:
+
+2298  * Called from schedule when this_rq is about to become idle (NEWLY_IDLE).
+2299  * this_rq is locked.
+2300  */
+2301 static int load_balance_newidle(int this_cpu, runqueue_t *this_rq,
+2302                                 struct sched_domain *sd)
+2303 {
+    //...
+2331         if (busiest->nr_running > 1) {
+2332                 /* Attempt to move tasks */
+2333                 double_lock_balance(this_rq, busiest);
+2334                 nr_moved = move_tasks(this_rq, this_cpu, busiest,
+2335                                         imbalance, sd, NEWLY_IDLE, NULL);
+2336                 spin_unlock(&busiest->lock);
+2337         }
+
+/*
+ * double_lock_balance - lock the busiest runqueue, this_rq is locked already.
+ */
+static void double_lock_balance(runqueue_t *this_rq, runqueue_t *busiest)
+	__releases(this_rq->lock)
+	__acquires(busiest->lock)
+	__acquires(this_rq->lock)
+{
+	if (unlikely(!spin_trylock(&busiest->lock))) {
+		if (busiest < this_rq) {do_exit()
+			spin_unlock(&this_rq->lock);
+			spin_lock(&busiest->lock);
+			spin_lock(&this_rq->lock);
+		} else
+			spin_lock(&busiest->lock);
+	}
+}
+
+looks like caller does hold this_rq's lock
+
+finally, it's called by:
+
+2380  * Called with busiest_rq locked.
+2381  */
+2382 static void active_load_balance(runqueue_t *busiest_rq, int busiest_cpu)
+2383 {
+    //...
+2401         /* move a task from busiest_rq to target_rq */
+2402         double_lock_balance(busiest_rq, target_rq);
+2403 
+2404         /* Search for an sd spanning us and the target CPU. */
+2405         for_each_domain(target_cpu, sd)
+2406                 if ((sd->flags & SD_LOAD_BALANCE) &&
+2407                         cpu_isset(busiest_cpu, sd->span))
+2408                                 break;
+2409 
+2410         if (unlikely(sd == NULL))
+2411                 goto out;
+2412 
+2413         schedstat_inc(sd, alb_cnt);
+2414 
+2415         if (move_tasks(target_rq, target_cpu, busiest_rq, 1, sd, SCHED_IDLE, NULL))
+
+which is called by migration thread... looks like lock is also held here...
+
+
+when is the runqueue not locked?
+
+some lock is lost here:
+
+static int __add_to_swap_cache(struct page *page, swp_entry_t entry,
+			       gfp_t gfp_mask)
+{
+    //...
+		write_lock_irq(&swapper_space.tree_lock);
+		error = radix_tree_insert(&swapper_space.page_tree,     //HERE?
+						entry.val, page);
+    //...
+		write_unlock_irq(&swapper_space.tree_lock);
+    //...
+}
+
+
+Looks like that's where it enters an SCC... probably inters. between
+different locks for this same REP_NODE messes it up
+
+update (2/15): more accesses
+
+[REP: 1949].timestamp and
+[REP: 1949].timestamp
+	Accessed at locs:
+	[kernel/sched.c:739, kernel/sched.c:1861, kernel/sched.c:3067, kernel/sched.c:3068, kernel/sched.c:3075, ] and
+	[kernel/sched.c:1861, kernel/sched.c:3102, ]
+
+LS for 1st access:
+	L+ = empty
+	made empty at: fs/dcache.c:110
+LS for 2nd access:
+	L+ = empty
+	made empty at: fs/dcache.c:110
+	Th. 1 spawned: kernel/kthread.c:112 w/ func: kthread
+	Th. 2 spawned: fs/jffs2/background.c:44 
+    w/ func: jffs2_garbage_collect_thread
+
+sched.c:1861 (previously checked that all callers have lock)
+
+
+sched.c:739
+
+static int recalc_task_prio(task_t *p, unsigned long long now)
+{
+	/* Caller must always ensure 'now >= p->timestamp' */
+	unsigned long long __sleep_time = now - p->timestamp;  //READ
+
+    //..
+}
+
+called by 
+    activate_task (no lock held)
+        -> try_to_wake_up (uses task_rq_lock)
+        -> __migrate_task (uses double_rq_lock)
+    schedule (uses spin_lock_irq, but calls idle_balance(), etc. which
+              manipulates locks)
+
+inside double_rq_lock:
+
+	if (rq1 == rq2) {
+		spin_lock(&rq1->lock);
+		__acquire(rq2->lock);	/* Fake it out ;) */
+
+may need to interpret guards (to know both are locked)
+
+
+static inline runqueue_t *task_rq_lock(task_t *p, unsigned long *flags)
+	__acquires(rq->lock)
+{
+	struct runqueue *rq;
+
+repeat_lock_task:
+	local_irq_save(*flags);
+	rq = task_rq(p);
+	spin_lock(&rq->lock);
+	if (unlikely(rq != task_rq(p))) {
+		spin_unlock_irqrestore(&rq->lock, *flags);
+		goto repeat_lock_task;
+	}
+	return rq;
+}
+
+does the ptr arith work out?
+sched.c:3067, 3068, 3075, 3102
+    
+    inside schedule(), which uses spin_lock_irq, but calls idle_balance()
+
+does the swapping of run_queues mess up the locking?
+
+
+
+//REASON lost lock (asm ptr arith)
+
+
+//****
+Possible race between access to:
+REP_NODE.i_nlink and
+REP_NODE.i_nlink
+        Accessed at locs:
+        fs/inode.c:1102 and
+        net/sunrpc/rpc_pipe.c:571
+
+LS for 1st access:
+        L+ = empty
+        made empty at: drivers/pcmcia/cardbus.c:237
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/lockd/clntproc.c:351
+        Th. 1 spawned: drivers/pcmcia/cs.c:243 w/ func: pccardd
+        Th. 2 spawned: fs/lockd/clntlock.c:201 w/ func: reclaimer
+
+
+//FIRST
+
+/*
+ * Normal UNIX filesystem behaviour: delete the
+ * inode when the usage count drops to zero, and
+ * i_nlink is zero.
+ */
+void generic_drop_inode(struct inode *inode)
+{
+	if (!inode->i_nlink)                //HERE
+		generic_delete_inode(inode);
+	else
+		generic_forget_inode(inode);
+}
+
+//comment from one caller says the global "inode_lock" should be held on entry and unlocked by drop function
+
+the caller does acquire the lock, but by using "atomic_dec_and_lock" which is more like a trylock
+
+
+
+//SECOND
+
+static int
+__rpc_mkdir(struct inode *dir, struct dentry *dentry)
+{
+	struct inode *inode;
+
+	inode = rpc_get_inode(dir->i_sb, S_IFDIR | S_IRUSR
+    //...
+	dir->i_nlink++;                             //HERE
+    //...
+}
+
+called by rpc_mkdir <- rpc_setup_pipedir <- rpc_new_client <- rpc_create_client <- nlm_bind_host (acquires host->h_sema... not inode_lock) <- (stopped tracing up)
+
+
+
+//emptied first LS :
+
+int cb_alloc(struct pcmcia_socket * s)
+{
+	struct pci_bus *bus = s->cb_dev->subordinate;
+
+    //...
+
+	pci_enable_bridges(bus);
+	pci_bus_add_devices(bus);           //HERE
+
+	s->irq.AssignedIRQ = s->pci_irq;
+	return CS_SUCCESS;
+}
+
+//emptied second LS :
+
+
+static int
+nlmclnt_call(struct nlm_rqst *req, u32 proc)
+{
+	struct nlm_host	*host = req->a_host;
+	struct rpc_clnt	*clnt;
+	struct nlm_args	*argp = &req->a_args;
+	struct nlm_res	*resp = &req->a_res;
+	struct rpc_message msg = {
+		.rpc_argp	= argp,
+		.rpc_resp	= resp,
+	};
+	int		status;
+
+	dprintk("lockd: call procedure %d on %s\n",
+			(int)proc, host->h_name);
+
+	do {
+		if (host->h_reclaiming && !argp->reclaim)
+			goto in_grace_period;
+
+		/* If we have no RPC client yet, create one. */
+		if ((clnt = nlm_bind_host(host)) == NULL)
+			return -ENOLCK;
+		msg.rpc_proc = &clnt->cl_procinfo[proc];
+
+		/* Perform the RPC call. If an error occurs, try again */
+		if ((status = rpc_call_sync(clnt, &msg, 0)) < 0) {              //HERE
+
+    //...
+        }
+    //...
+    }
+    //...
+}
+
+
+//REASON: race if rpc pipe's name already exists (gets the same inode) and is being reclaimed at the same time it's being "created"? can't find a common lock... also, atomic_dec_and_lock may not be handled correctly
+
+
+
+//****
+Possible race between access to:
+(((((init_task.tasks.next)->mm)->mmap)->vm_file)->f_mapping)->i_mmap_writable @ 
+include/linux/sched.h:999 and
+(((((init_task.tasks.next)->mm)->mmap)->vm_file)->f_mapping)->i_mmap_writable @ 
+include/linux/sched.h:999
+        Accessed at locs:
+        mm/mmap.c:169 and
+        mm/mmap.c:169
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/oom_kill.c:297
+LS for 2nd access:
+        L+ = empty
+        made empty at: mm/oom_kill.c:297
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: fs/smbfs/smbiod.c:76 w/ func: smbiod
+
+Different possible paths & LS (first 4):
+
+(0)
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: drivers/pci/hotplug/ibmphp_hpc.c:1084
+        w/ func: hpc_poll_thread
+
+//FIRST AND SECOND
+
+/*
+ * Requires inode->i_mapping->i_mmap_lock
+ */
+static void __remove_shared_vm_struct(struct vm_area_struct *vma,
+		struct file *file, struct address_space *mapping)
+{
+	if (vma->vm_flags & VM_DENYWRITE)
+		atomic_inc(&file->f_dentry->d_inode->i_writecount);
+	if (vma->vm_flags & VM_SHARED)
+		mapping->i_mmap_writable--;         //HERE
+
+    //...
+}
+
+
+called 
+    by unlink_file_vma w/ the lock
+    by vma_adjust conditionally w/ the lock
+
+
+
+        if (file) {
+                mapping = file->f_mapping;
+                if (!(vma->vm_flags & VM_NONLINEAR))
+                        root = &mapping->i_mmap;
+                spin_lock(&mapping->i_mmap_lock);       //LOCK
+
+
+    //...
+        if (remove_next) {
+                /*
+                 * vma_merge has merged next into vma, and needs
+                 * us to remove next before dropping the locks.
+                 */
+                __vma_unlink(mm, next, vma);
+                if (file)
+                        __remove_shared_vm_struct(next, file, mapping);
+
+conditioned on (file != NULL)
+
+also an access at 375 in __vma_link_file
+
+also has a conditional lock
+
+
+//REASON: conditional lock / access (intra-proc. path-sensitive)
+
+
+//****
+Possible race between access to:
+g_cpucache_up @ mm/slab.c:654 and
+g_cpucache_up @ mm/slab.c:654
+        Accessed at locs:
+        mm/slab.c:1789 and
+        mm/slab.c:1789
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+kmem_cache_t *
+kmem_cache_create (const char *name, size_t size, size_t align,
+	unsigned long flags, void (*ctor)(void*, kmem_cache_t *, unsigned long),
+	void (*dtor)(void*, kmem_cache_t *, unsigned long))
+{
+    //...
+
+	down(&cache_chain_sem);         //LOCK?
+
+
+	if (g_cpucache_up == FULL) {        //HERE
+		enable_cpucache(cachep);
+	} else {
+		if (g_cpucache_up == NONE) {    //HERE
+
+            //...
+
+			set_up_list3s(cachep, SIZE_AC);
+			if (INDEX_AC == INDEX_L3)
+				g_cpucache_up = PARTIAL_L3;     //HERE
+			else
+				g_cpucache_up = PARTIAL_AC;     //HERE
+
+    //...
+	up(&cache_chain_sem);
+	return cachep;
+}
+
+this access is also reachible from init (where it should be holding the big kernel lock)
+
+other access to g_cpucache_up is at:
+
+/* Initialisation.
+ * Called after the gfp() functions have been enabled, and before smp_init().
+ */
+void __init kmem_cache_init(void)
+{
+    //...
+    /* Done! */
+    g_cpucache_up = FULL;
+    //...
+}
+
+
+
+this is probably the racy access that is not the one recorded... it happens as part of the init process, which should hold the big kernel lock
+
+
+//REASON lock_kernel() only holds lock on some paths
+
+
+//****
+Possible race between access to:
+REP_NODE.end and
+REP_NODE.end
+        Accessed at locs:
+        net/core/skbuff.c:658 and
+        net/core/skbuff.c:860
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: net/bluetooth/bnep/core.c:579 w/ func: bnep_session
+        Th. 2 spawned: net/bluetooth/bnep/core.c:579 w/ func: bnep_session
+
+//FIRST
+
+int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
+		     gfp_t gfp_mask)
+{
+	int i;
+	u8 *data;
+
+	if (skb_shared(skb))        //HMMM!!!
+		BUG();
+
+	size = SKB_DATA_ALIGN(size);
+
+	data = kmalloc(size + sizeof(struct skb_shared_info), gfp_mask);
+	if (!data)
+		goto nodata;
+
+
+	skb->head     = data;
+	skb->end      = data + size;        //HERE
+
+    //...
+ 	skb->nohdr    = 0;
+	atomic_set(&skb_shinfo(skb)->dataref, 1);   //HMMM
+	return 0;
+
+nodata:
+	return -ENOMEM;
+}
+
+//REASON: should only be accessed w/ reference count == 1
+
+
+//****
+Possible race between access to:
+((((((init_task.tasks.next)->mm)->mmap)->vm_file)->f_vfsmnt)->mnt_sb)->s_count @ include/linux/sched.h:999 and
+((((((init_task.tasks.next)->mm)->mmap)->vm_file)->f_vfsmnt)->mnt_sb)->s_count @ include/linux/sched.h:999
+        Accessed at locs:
+        fs/super.c:172 and
+        fs/super.c:172
+
+LS for 1st access:
+        L+ = empty
+        made empty at: fs/super.c:178
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/super.c:178
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: fs/smbfs/smbiod.c:76 w/ func: smbiod
+
+Different possible paths & LS (first 4):
+
+(0)
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: drivers/pci/hotplug/ibmphp_hpc.c:1084
+        w/ func: hpc_poll_thread
+
+
+//FIRST AND SECOND
+
+void deactivate_super(struct super_block *s)
+{
+	struct file_system_type *fs = s->s_type;
+	if (atomic_dec_and_lock(&s->s_active, &sb_lock)) {
+		s->s_count -= S_BIAS-1;         //HERE
+		spin_unlock(&sb_lock);
+		DQUOT_OFF(s);
+		down_write(&s->s_umount);
+		fs->kill_sb(s);
+		put_filesystem(fs);
+		put_super(s);               //LOSES a lock here?
+	}
+}
+
+put_super calls __put_super w/ the sb_lock, and __put_super mods s_count
+
+__put_super is also called by:
+    
+128  * The caller must hold sb_lock.
+129  */
+130 int __put_super_and_need_restart(struct super_block *sb)
+131 {
+132         /* check for race with generic_shutdown_super() */
+133         if (list_empty(&sb->s_list)) {
+134                 /* super block is removed, need to restart... */
+135                 __put_super(sb);
+136                 return 1;
+137         }
+138         /* can't be the last, since s_list is still in use */
+139         sb->s_count--;
+140         BUG_ON(sb->s_count == 0);
+141         return 0;
+142 }
+
+
+__put_super_and_need_restart called by:
+    sync_supers             w/ lock
+    sync_filesystems        w/ lock
+    get_super               w/ lock
+    user_get_super          w/ lock
+    
+
+seems most likely that atomic_dec_and_lock isn't handled properly
+
+//REASON atomic_dec_and_lock may not be handled correctly
+
+
+//****
+Possible race between access to:
+journal->j_commit_sequence @ fs/jbd/journal.c:213 and
+journal->j_commit_sequence @ fs/jbd/journal.c:213
+        Accessed at locs:
+        fs/jbd/commit.c:828 and
+        fs/jbd/journal.c:143
+
+LS for 1st access:
+        L+ = {journal->j_list_lock#tbd, }
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/jbd/commit.c:852
+        Th. 1 spawned: fs/jbd/journal.c:215 w/ func: kjournald
+        Th. 2 spawned: fs/jbd/journal.c:215 w/ func: kjournald
+
+
+//FIRST
+
+void journal_commit_transaction(journal_t *journal)
+{
+    //...
+
+
+	spin_unlock(&journal->j_list_lock);
+	/*
+	 * This is a bit sleazy.  We borrow j_list_lock to protect
+	 * journal->j_committing_transaction in __journal_remove_checkpoint.
+	 * Really, __journal_remove_checkpoint should be using j_state_lock but
+	 * it's a bit hassle to hold that across __journal_remove_checkpoint
+	 */
+	spin_lock(&journal->j_state_lock);
+	spin_lock(&journal->j_list_lock);
+
+	if (commit_transaction->t_forget) {
+		spin_unlock(&journal->j_list_lock);
+		spin_unlock(&journal->j_state_lock);
+		goto restart_loop;
+	}
+
+    //...
+
+	journal->j_commit_sequence = commit_transaction->t_tid;   //HERE
+	journal->j_committing_transaction = NULL;
+	spin_unlock(&journal->j_state_lock);
+    
+    //...
+
+	spin_unlock(&journal->j_list_lock);
+
+	jbd_debug(1, "JBD: commit %d complete, head %d\n",
+		  journal->j_commit_sequence, journal->j_tail_sequence); //HERE
+
+	wake_up(&journal->j_wait_done_commit);
+}
+
+
+according to the comments, journal->j_list_lock is the protector
+
+
+//SECOND
+
+
+static int kjournald(void *arg)
+{
+    //...
+
+	spin_lock(&journal->j_state_lock);
+
+loop:
+	if (journal->j_flags & JFS_UNMOUNT)
+		goto end_loop;
+
+	jbd_debug(1, "commit_sequence=%d, commit_request=%d\n",
+		journal->j_commit_sequence, journal->j_commit_request);     //HERE
+
+	if (journal->j_commit_sequence != journal->j_commit_request) {  //HERE
+		jbd_debug(1, "OK, requests differ\n");
+		spin_unlock(&journal->j_state_lock);
+        //...
+    }
+    //...
+}
+
+
+the racy read for jbd_debug in the first func is responsible
+
+
+//REASON: benign race (racy read for debug output)
+
+
+//****
+Possible race between access to:
+body_len @ init/initramfs.c:82 and
+body_len @ init/initramfs.c:82
+        Accessed at locs:
+        init/initramfs.c:103 and
+        init/initramfs.c:103
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+static void __init parse_header(char *s)
+{
+	unsigned long parsed[12];
+	char buf[9];
+	int i;
+    //...
+	uid = parsed[2];
+	gid = parsed[3];
+	nlink = parsed[4];
+	body_len = parsed[6];       //HERE
+    //...
+}
+
+probably a big kernel lock miss (thread root is init)
+
+//REASON lock_kernel() only holds lock on some paths
+
+
+//****
+Possible race between access to:
+hardirq_stack[0].tinfo.task @ arch/i386/kernel/irq.c:124 and
+hardirq_stack[0].tinfo.task @ arch/i386/kernel/irq.c:124
+        Accessed at locs:
+        arch/i386/kernel/irq.c:138 and
+        arch/i386/kernel/irq.c:138
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+//FIRST AND SECOND
+
+
+/*
+ * allocate per-cpu stacks for hardirq and for softirq processing
+ */
+void irq_ctx_init(int cpu)
+{
+	union irq_ctx *irqctx;
+
+	if (hardirq_ctx[cpu])
+		return;
+
+	irqctx = (union irq_ctx*) &hardirq_stack[cpu*THREAD_SIZE];
+	irqctx->tinfo.task              = NULL;                     //HERE
+	irqctx->tinfo.exec_domain       = NULL;
+	irqctx->tinfo.cpu               = cpu;
+
+    //...
+}
+
+called from init (which should hold the big kernel lock)
+
+//REASON lock_kernel() only holds lock on some paths
+
+
+//****
+Possible race between access to:
+REP_NODE.s_element and
+REP_NODE.s_element
+        Accessed at locs:
+        fs/sysfs/dir.c:288 and
+        fs/sysfs/dir.c:48
+
+LS for 1st access:
+        L+ = {event_semaphore#tbd, }
+        made empty at: drivers/pci/remove.c:97
+LS for 2nd access:
+        L+ = empty
+        made empty at: drivers/base/init.c:27
+        Th. 1 spawned: drivers/pci/hotplug/pciehp_ctrl.c:554 
+        w/ func: event_thread
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+//SECOND
+
+static struct sysfs_dirent * sysfs_new_dirent(struct sysfs_dirent * parent_sd,
+						void * element)
+{
+	sd = kmem_cache_alloc(sysfs_dir_cachep, GFP_KERNEL); //ALLOC
+    //...
+	list_add(&sd->s_sibling, &parent_sd->s_children);   //ESCAPE?
+	sd->s_element = element;                            //HERE
+
+	return sd;
+}
+
+same as previous warning where parent->d_inode->i_sem is held by callers?
+
+
+//FIRST
+
+void sysfs_remove_dir(struct kobject * kobj)
+{
+	struct dentry * dentry = dget(kobj->dentry);
+
+    //...
+	down(&dentry->d_inode->i_sem);
+	parent_sd = dentry->d_fsdata;
+	list_for_each_entry_safe(sd, tmp, &parent_sd->s_children, s_sibling) {
+		if (!sd->s_element || !(sd->s_type & SYSFS_NOT_PINNED))
+			continue;
+		list_del_init(&sd->s_sibling);
+		sysfs_drop_dentry(sd, dentry);
+		sysfs_put(sd);
+	}
+	up(&dentry->d_inode->i_sem);
+    //...
+}
+
+//REASON lost lock (update: no longer a warning)
+
+
+//****
+Possible race between access to:
+REP_NODE.fl_owner and
+REP_NODE.fl_owner
+        Accessed at locs:
+        fs/locks.c:226 and
+        fs/locks.c:226
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+/*
+ * Initialize a new lock from an existing file_lock structure.
+ */
+void locks_copy_lock(struct file_lock *new, struct file_lock *fl)
+{
+	new->fl_owner = fl->fl_owner; //HERE
+	new->fl_pid = fl->fl_pid;
+    //...
+}
+
+
+path from init should hold the big kernel lock
+
+//REASON lock_kernel() only holds lock on some paths
+
+
+
+//****
+Possible race between access to:
+event @ fs/namespace.c:43 and
+event @ fs/namespace.c:43
+        Accessed at locs:
+        fs/namespace.c:137 and
+        fs/namespace.c:144
+
+LS for 1st access:
+        L+ = {vfsmount_lock#tbd, }
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/pnode.c:215
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+//FIRST
+static void touch_namespace(struct namespace *ns)
+{
+	if (ns) {
+		ns->event = ++event;                        //HERE
+		wake_up_interruptible(&ns->poll);
+	}
+}
+
+callers hold vfsmount_lock
+
+
+//SECOND
+static void __touch_namespace(struct namespace *ns)
+{
+	if (ns && ns->event != event) {                 //HERE
+		ns->event = event;
+		wake_up_interruptible(&ns->poll);
+	}
+}
+
+called by umount_tree <-
+            do_umount    (w/ lock),
+            copy_tree    (w/ lock),
+            do_loopback  (w/ lock),
+            expire_mount (w/ lock),
+            __put_namespace (w/ lock),
+            propagate_mnt (w/ lock),
+            
+
+...
+
+where did it lose the lock? in propagate_mount
+
+211         spin_lock(&vfsmount_lock);
+212         while (!list_empty(&tmp_list)) {
+213                 child = list_entry(tmp_list.next, struct vfsmount, mnt_hash);
+214                 list_del_init(&child->mnt_hash);
+215                 umount_tree(child, 0, &umount_list);    //HERE?!
+216         }
+217         spin_unlock(&vfsmount_lock);
+
+could be that there is a racy access to event somewhere else
+
+update (2/16):
+
+Possible race between access to:
+event @ fs/namespace.c:43 and
+event @ fs/namespace.c:43
+        Accessed at locs:
+        [fs/namespace.c:137, fs/namespace.c:567, ] and
+        [fs/namespace.c:137, fs/namespace.c:144, fs/namespace.c:145, fs/namespa
+ce.c:567, ]
+
+        Confidence: no PTA nodes
+
+LS for 1st access:
+        L+ = {vfsmount_lock#tbd, }
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: fs/pnode.c:215
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+namespace:567
+	spin_lock(&vfsmount_lock);
+	event++;
+
+namespace:144/145 (see above)
+
+namespace:137 (see above)
+
+
+
+//REASON lock_kernel() ?
+
+
+//****
+Possible race between access to:
+REP_NODE.pending.signal.sig[0] and
+REP_NODE.pending.signal.sig[0]
+        Accessed at locs:
+        include/linux/signal.h:182 and
+        include/linux/signal.h:182
+
+LS for 1st access:
+        L+ = empty
+        made empty at: kernel/signal.c:712
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/signal.c:712
+        Th. 1 spawned: drivers/mtd/mtd_blkdevs.c:412
+        w/ func: mtd_blktrans_thread
+        Th. 2 spawned: drivers/net/irda/sir_kthread.c:482 w/ func: irda_thread
+
+Different possible paths & LS (first 4):
+
+(0)
+        Th. 1 spawned: drivers/media/dvb/dvb-core/dvb_frontend.c:626
+        w/ func: dvb_frontend_thread
+        Th. 2 spawned: net/rxrpc/krxtimod.c:39 w/ func: krxtimod
+
+
+
+static inline void sigdelsetmask(sigset_t *set, unsigned long mask)
+{
+	set->sig[0] &= ~mask;       //HERE
+}
+
+loses lock at:
+
+static void handle_stop_signal(int sig, struct task_struct *p)
+{
+    //...
+	spin_unlock(&p->sighand->siglock);
+	do_notify_parent_cldstop(p, (p->ptrace & PT_PTRACED), CLD_STOPPED); //HERE
+	spin_lock(&p->sighand->siglock);
+    //...
+}
+
+called by <-
+    sys_rt_sigsuspend  (w/ no sighand lock)
+        <- no non-ASM callers        
+    sys_sigreturn      (w/ no sighand lock)
+        <- no non-ASM callers
+    sys_rt_sigreturn   (w/ no sighand lock)
+        <- no non-ASM callers
+    sock_xmit          (w/ current->sighand->siglock)
+    compat_sys_rt_sigtimedwait (w/ no sighand lock)
+        <- no non-ASM callers
+    rm_from_queue      (assume caller holds sighand lock)
+        <- __group_complete_signal  (no lock yet) but does it during coredump?
+            <- __group_send_sig_info (assert_spin_locked(&p->sighand->siglock))
+                <- do_notify_parent_cldstop (gets &psig->siglock)
+                    where psig = tsk->parent->sighand;
+
+        <- handle_stop_signal       (no lock yet)
+            <-
+    ...
+
+hmm does it think LS intersection is w/
+     w/ tsk->sighand->siglock vs tsk->parent->sighand->siglock?
+
+
+//REASON: race? "asm_linkage" callers don't hold lock, others do... so many callers =(
+
+
+//////////////////// FROM BOTTOM of 2_5_2007 set //////////////////
+
+****
+Possible race between access to:
+size_or_mask @ arch/i386/kernel/cpu/mtrr/mtrr.h:86 and
+size_or_mask @ arch/i386/kernel/cpu/mtrr/mtrr.h:86
+        Accessed at locs:
+        arch/i386/kernel/cpu/mtrr/main.c:620 and
+        arch/i386/kernel/cpu/mtrr/main.c:620
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+/**
+ * mtrr_bp_init - initialize mtrrs on the boot CPU
+ *
+ * This needs to be called early; before any of the other CPUs are 
+ * initialized (i.e. before smp_init()).
+ * 
+ */
+void __init mtrr_bp_init(void)
+{
+	init_ifs();
+
+	if (cpu_has_mtrr) {
+		mtrr_if = &generic_mtrr_ops;
+		size_or_mask = 0xff000000;	/* 36 bits */
+		size_and_mask = 0x00f00000;
+
+    //...
+    }
+}
+
+comment is not so much concerned if it holds the BKL (which it does), but that it happens before smp_init()?
+
+//REASON  lock_kernel() 
+
+
+****
+Possible race between access to:
+(*(REP_NODE.pgd)) and
+(*(REP_NODE.pgd))
+        Accessed at locs:
+        arch/i386/mm/hugetlbpage.c:43 and
+        mm/hugetlb.c:301
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/memory.c:822
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/fork.c:500
+        Th. 1 spawned: drivers/pci/hotplug/pciehp_ctrl.c:554 w/ func: event_thre
+ad
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+hmmm over 2142 matches for "w/ func: init"...
+
+
+//FIRST
+pte_t *huge_pte_offset(struct mm_struct *mm, unsigned long addr)
+{
+	pgd_t *pgd;
+	pud_t *pud;
+	pmd_t *pmd = NULL;
+
+	pgd = pgd_offset(mm, addr);
+	if (pgd_present(*pgd)) {            //DEREF HERE
+        //...
+    }
+    //...
+}
+
+converting virtual addr to physical through a series of lookups?
+
+mm -> pgd -> pud -> pmd -> 
+
+
+//SECOND
+int copy_hugetlb_page_range(struct mm_struct *dst, struct mm_struct *src,
+			    struct vm_area_struct *vma)
+{
+    //...
+	for (addr = vma->vm_start; addr < vma->vm_end; addr += HPAGE_SIZE) {
+		src_pte = huge_pte_offset(src, addr);   //TO FIRST
+		if (!src_pte)
+			continue;
+		dst_pte = huge_pte_alloc(dst, addr);
+		if (!dst_pte)
+			goto nomem;
+		spin_lock(&dst->page_table_lock);
+		spin_lock(&src->page_table_lock);
+		if (!pte_none(*src_pte)) {
+			entry = *src_pte;
+			ptepage = pte_page(entry);
+			get_page(ptepage);
+			add_mm_counter(dst, file_rss, HPAGE_SIZE / PAGE_SIZE);
+			set_huge_pte_at(dst, addr, dst_pte, entry);             //HERE?
+		}
+		spin_unlock(&src->page_table_lock);
+		spin_unlock(&dst->page_table_lock);
+	}
+	return 0;
+
+nomem:
+	return -ENOMEM;
+}
+
+
+unsure how often the copy_hugetlb_page_range happens...
+
+LS1 empty at:
+unsigned long unmap_vmas(struct mmu_gather **tlbp,
+		struct vm_area_struct *vma, unsigned long start_addr,
+		unsigned long end_addr, unsigned long *nr_accounted,
+		struct zap_details *details)
+{
+    //...   if (*) {
+			} else
+				start = unmap_page_range(*tlbp, vma,
+						start, end, &zap_work, details);    //HERE
+    //...
+}
+
+
+LS2 empty at:
+static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
+{
+//...
+good_mm:
+	tsk->mm = mm;
+	tsk->active_mm = mm;
+	return 0;
+
+free_pt:
+	mmput(mm);              //HERE
+//...
+}
+
+
+
+****
+Possible race between access to:
+REP_NODE.f_u.fu_list.next and
+REP_NODE.f_u.fu_list.next
+        Accessed at locs:
+        fs/file_table.c:98 and
+        fs/file_table.c:98
+
+LS for 1st access:
+        L+ = empty
+        made empty at: kernel/futex.c:820
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/futex.c:820
+        Th. 1 spawned: drivers/pci/hotplug/ibmphp_hpc.c:1084 
+        w/ func: hpc_poll_thread
+        Th. 2 spawned: drivers/pcmcia/cs.c:243 w/ func: pccardd
+
+Different possible paths & LS (first 4):
+
+(0)
+        Th. 1 spawned: drivers/mtd/mtd_blkdevs.c:412 
+        w/ func: mtd_blktrans_thread
+        Th. 2 spawned: drivers/net/irda/sir_kthread.c:482 w/ func: irda_thread
+
+
+
+/* Find an unused file structure and return a pointer to it.
+ * Returns NULL, if there are no more free file structures or
+ * we run out of memory.
+ */
+struct file *get_empty_filp(void)
+{
+	static int old_max;
+	struct file * f;
+
+	/*
+	 * Privileged users can go above max_files
+	 */
+	if (files_stat.nr_files >= files_stat.max_files &&
+				!capable(CAP_SYS_ADMIN))
+		goto over;
+
+	f = kmem_cache_alloc(filp_cachep, GFP_KERNEL);  //FRESH
+	if (f == NULL)
+		goto fail;
+
+	memset(f, 0, sizeof(*f));
+	if (security_file_alloc(f))
+		goto fail_sec;
+
+	eventpoll_init_file(f);
+	atomic_set(&f->f_count, 1);
+	f->f_uid = current->fsuid;
+	f->f_gid = current->fsgid;
+	rwlock_init(&f->f_owner.lock);
+	/* f->f_version: 0 */
+	INIT_LIST_HEAD(&f->f_u.fu_list);        //HERE
+	return f;
+
+    //...
+}
+
+//REASON init fresh memory
+
+
+****
+Possible race between access to:
+REP_NODE.vm_start and
+REP_NODE.vm_start
+        Accessed at locs:
+        mm/mmap.c:1723 and
+        mm/mmap.c:1792
+
+LS for 1st access:
+        L+ = empty
+        made empty at: mm/oom_kill.c:297
+LS for 2nd access:
+        L+ = empty
+        made empty at: mm/memory.c:822
+        Th. 1 spawned: init/do_mounts_initrd.c:59 w/ func: do_linuxrc
+        Th. 2 spawned: kernel/kmod.c:206 w/ func: wait_for_helper
+
+Different possible paths & LS (first 4):
+
+(0)
+        made empty at: mm/oom_kill.c:297
+        Th. 1 spawned: init/do_mounts_initrd.c:59 w/ func: do_linuxrc
+        Th. 2 spawned: kernel/kmod.c:209 w/ func: ____call_usermodehelper
+
+
+/*
+ * Split a vma into two pieces at address 'addr', a new vma is allocated
+ * either for the first part or the the tail.
+ */
+int split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
+	      unsigned long addr, int new_below)
+{
+    //...
+
+	new = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
+	if (!new)
+		return -ENOMEM;
+
+	/* most fields are the same, copy all, and then fixup */
+	*new = *vma;
+
+	if (new_below)
+		new->vm_end = addr;
+	else {
+		new->vm_start = addr;       //HERE
+		new->vm_pgoff += ((addr - vma->vm_start) >> PAGE_SHIFT);
+	}
+    //...
+}
+
+//REASON init fresh memory
+
+
+****
+Possible race between access to:
+(*(REP_NODE.inode)) and
+(*((vc_cons[0].d)->vc_origin)) @ include/linux/console_struct.h:111
+        Accessed at locs:
+        mm/slab.c:2299 and
+        drivers/char/vt.c:597
+
+LS for 1st access:
+        L+ = empty
+        made empty at: kernel/auditsc.c:770
+LS for 2nd access:
+        L+ = empty
+        made empty at: kernel/auditsc.c:684
+        Th. 1 spawned: drivers/base/firmware_class.c:589
+        w/ func: request_firmware_work_func
+        Th. 2 spawned: net/rxrpc/krxsecd.c:128 w/ func: rxrpc_krxsecd
+
+Different possible paths & LS (first 4):
+
+(0)
+        made empty at: kernel/signal.c:712
+        lval 1: (*(REP_NODE.pids[0].pid_list.next))
+        Th. 1 spawned: drivers/base/firmware_class.c:589
+        w/ func: request_firmware_work_func
+        Th. 2 spawned: net/rxrpc/krxsecd.c:128 w/ func: rxrpc_krxsecd
+
+one points to a screen position, the other points to an inode...
+
+//REASON unlikely aliasing (blob of 30748)
+
+
+****
+Possible race between access to:
+crc_32_tab[0] @ init/../lib/inflate.c:1039 and
+crc_32_tab[0] @ init/../lib/inflate.c:1039
+        Accessed at locs:
+        init/../lib/inflate.c:1066 and
+        init/initramfs.c:409
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+
+//FIRST
+
+/*
+ * Code to compute the CRC-32 table. Borrowed from 
+ * gzip-1.0.3/makecrc.c.
+ */
+
+static void INIT
+makecrc(void)
+{
+/* Not copyrighted 1990 Mark Adler	*/
+
+    //...
+  crc_32_tab[0] = 0;
+    //...
+}
+
+
+//SECOND
+
+static void __init flush_window(void)
+{
+	ulg c = crc;         /* temporary variable */
+    //...
+	for (n = 0; n < outcnt; n++) {
+		ch = *in++;
+		c = crc_32_tab[((int)c ^ ch) & 0xff] ^ (c >> 8);    //HERE
+	}
+//...
+}
+
+//REASON lock_kernel() only holds lock on some paths
+
+
+****
+Possible race between access to:
+stop_backup_sync @ net/ipv4/ipvs/ip_vs_sync.c:627 and
+stop_backup_sync @ net/ipv4/ipvs/ip_vs_sync.c:627
+        Accessed at locs:
+        net/ipv4/ipvs/ip_vs_sync.c:739 and
+        net/ipv4/ipvs/ip_vs_sync.c:712
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: net/ipv4/ipvs/ip_vs_sync.c:824 w/ func: sync_thread
+        Th. 2 spawned: net/ipv4/ipvs/ip_vs_sync.c:824 w/ func: sync_thread
+
+
+//FIRST
+static void set_stop_sync(int sync_state, int set)
+{
+	if (sync_state == IP_VS_STATE_MASTER)
+		stop_master_sync = set;
+	else if (sync_state == IP_VS_STATE_BACKUP)
+		stop_backup_sync = set;                 //HERE
+	else {
+		stop_master_sync = set;
+		stop_backup_sync = set;                 //HERE
+	}
+}
+
+called by thread root "sync_thread"
+
+//SECOND
+static void sync_backup_loop(void)
+{
+    //...
+	for (;;) {
+    //...
+		if (stop_backup_sync)
+			break;
+		ssleep(1);
+	}
+    //...
+}
+
+called by thread root "sync_thread"... and stop_sync_thread... this is a flag
+to help kill running threads
+
+//REASON: RACE but value doesn't matter unless there's multiple threads
+
+
+****
+Possible race between access to:
+name_buf @ init/initramfs.c:156 and
+name_buf @ init/initramfs.c:156
+        Accessed at locs:
+        init/initramfs.c:422 and
+        init/initramfs.c:424
+
+LS for 1st access:
+        L+ = empty
+        made empty at: :-1
+LS for 2nd access:
+        L+ = empty
+        made empty at: :-1
+        Th. 1 spawned: init/main.c:394 w/ func: init
+        Th. 2 spawned: init/main.c:394 w/ func: init
+
+Different possible paths & LS (first 4):
+
+
+//FIRST AND SECOND
+static char * __init unpack_to_rootfs(char *buf, unsigned len, int check_only)
+{
+	int written;
+	dry_run = check_only;
+	header_buf = malloc(110);
+	symlink_buf = malloc(PATH_MAX + N_ALIGN(PATH_MAX) + 1);
+	name_buf = malloc(N_ALIGN(PATH_MAX));                       //HERE
+	window = malloc(WSIZE);
+	if (!window || !header_buf || !symlink_buf || !name_buf)    //HERE
+		panic("can't allocate buffers");
+    //...
+}
+
+called by init w/ lock_kernel()
+
+//REASON lock_kernel() only holds lock on some paths
+

@@ -41,9 +41,8 @@ let getCompDeclLoc ci =
          None -> 
            if compareLoc locUnknown fi.floc != 0 
            then Some fi.floc else None
-       | Some _ -> l) None ci.cfields in
+       | Some _ -> l) None (!Cil.getCfields ci) in
   match locWrap with None -> locUnknown | Some l -> l
-(* TODO: don't ditch the floc locations... *)
 
 
 let printFPLevels pctLevels =
@@ -78,7 +77,7 @@ let partitionFpStructs () =
               let unrolledType = unrollTypeNoAttrs finfo.ftype in
               if hitsFunptr unrolledType then
                 (fp + 1, nonfp) else (fp, nonfp + 1)
-           ) (0, 0) compinfo.cfields in
+           ) (0, 0) (!Cil.getCfields compinfo) in
        let pct = (float_of_int fpFields /.
                      float_of_int (fpFields + nonFPFields)) in
        pctFpToStruct := addPctStructBinding pct compinfo !pctFpToStruct
@@ -141,7 +140,7 @@ let passesSelf opStructs =
               | Some args ->
                   if List.exists (argReachesStructs reachesCi) args
                   then (y+1, n) else (y, n+1)
-           ) (0, 0) ci.cfields in
+           ) (0, 0) (!Cil.getCfields ci) in
          let pct = (float_of_int numYes /.
                       float_of_int (numYes + numNo)) in
          addPctStructBinding pct ci cur

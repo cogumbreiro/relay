@@ -1,4 +1,9 @@
 
+(** Tracks the sum of the amount of dataflow information per function.
+    TODO: Get something more like an average per line of the function?
+    At least average per context of a particular function to make
+    comparing context-sensitive against context-insensitive easier *)
+
 open Cil
 open Fstructs
 open Callg

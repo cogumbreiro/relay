@@ -86,32 +86,45 @@ module type ForwardsTransfer = sig
   
 end
 
-module ForwardsDataFlow (T : ForwardsTransfer) : sig
 
-  val compute: Cil.stmt list -> unit
-  (** Fill in the T.stmtStartData, given a number of initial statements to 
-   * start from. All of the initial statements must have some entry in 
-   * T.stmtStartData (i.e., the initial data should not be bottom) *)
+module type PPIn = sig
+  type t
+  val name : string
+end
 
-  val getDataBefore: prog_point -> T.t
-  (** Look up the data before a particular program point *)
+module type PPTrackType = sig
+
+  type t
+
+  val clearPPData : unit -> unit
+    (** Clear the per-program-point data flow info before running "compute" *)
+
+  val getDataBefore: prog_point -> t
+    (** Look up the data before a particular program point *)
 
 
-  val getDataAfter: prog_point -> T.t
+  val getDataAfter: prog_point -> t
     (** Look up the data after a particular program point.
         Currently only valid for instruction-based pps.
         What it means to be after a stmt is unclear when
         considering all the different kinds of stmts 
         (e.g., what's after a Return stmt?)... *)
   
-
-  val setDataBefore: prog_point -> T.t -> unit
+  val setDataBefore: prog_point -> t -> unit
     (** Replace the data available before a particular program point *)
     
-  val setDataAfter: prog_point -> T.t -> unit
+  val setDataAfter: prog_point -> t -> unit
     (** Replace the data available after a particular program point.
         Currently only valid for instruction-based pps *)
+end
 
+module ForwardsDataFlow (T : ForwardsTransfer) : sig
+  include PPTrackType with type t = T.t
+
+  val compute: Cil.stmt list -> unit
+  (** Fill in the T.stmtStartData, given a number of initial statements to 
+   * start from. All of the initial statements must have some entry in 
+   * T.stmtStartData (i.e., the initial data should not be bottom) *)
 
 end
 
@@ -136,6 +149,11 @@ module type BackwardsTransfer = sig
   val stmtStartData: t Inthash.t
   (** For each block id, the data at the start. This data structure must be 
    * initialized with the initial data for each block *)
+
+  val funcExitData: t
+  (** The data at function exit.  Used for statements with no successors.
+      This is usually bottom, since we'll also use doStmt on Return 
+      statements. *)
 
   val combineStmtStartData: Cil.stmt -> old:t -> t -> t option
   (** When the analysis reaches the start of a block, combine the old data 
@@ -169,6 +187,8 @@ module type BackwardsTransfer = sig
 end
 
 module BackwardsDataFlow (T : BackwardsTransfer) : sig
+  include PPTrackType with type t = T.t
+
   val compute: Cil.stmt list -> unit
   (** Fill in the T.stmtStartData, given a number of initial statements to 
    * start from (the sinks for the backwards data flow). All of the statements

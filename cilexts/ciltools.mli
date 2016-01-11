@@ -21,6 +21,8 @@ val compare_fundec : Cil.fundec -> Cil.fundec -> int
 
 val compare_compi : Cil.compinfo -> Cil.compinfo -> int
 
+val equal_type : Cil.typ -> Cil.typ -> bool
+
 val hash_exp : Cil.exp -> int
 
 val hash_lval : Cil.lval -> int

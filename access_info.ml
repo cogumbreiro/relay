@@ -52,17 +52,19 @@ let hcAccesses a =
 
 (** True if the given accesses infos are equal *)
 let eqAccesses (a:accessInfo) (b:accessInfo) =
-  Locs.equal a b
+  a == b || Locs.equal a b
 
 (** True if a location has as much info as other *)
 let locSubs l1 l2 =
-  if (l1 == Cil.locUnknown) then true
+  if l1 == l2 then true
+  else if (l1 == Cil.locUnknown) then true
   else if (l2 == Cil.locUnknown) then false
   else true (* neither are unknown, but don't compare the two *) 
 
 
 (** Merge two access infos *)
 let combineAccs a1 a2 =
-  Locs.union a1 a2
+  if a1 == a2 then a1
+  else Locs.union a1 a2
 
 

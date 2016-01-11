@@ -120,7 +120,7 @@ let rec sliceCompInfo (i : int) (cinfo : compinfo) : compinfo =
                  finfo.fattr, finfo.floc) :: rest
               else
                 rest)
-           cinfo.cfields [])
+           (!getCfields cinfo) [])
       cinfo.cattr
 
 and sliceTypeInfo (i : int) (tinfo : typeinfo) : typeinfo =
@@ -199,7 +199,7 @@ and sliceTypeAll (t : typ) : typ =
           [Attr ("var_type_sliced", [])]
     in
     let t' =
-      if List.length cinfo.cfields > 1 then
+      if List.length (!getCfields cinfo) > 1 then
         begin
         newGlobals := GCompTag (cinfo, !curLocation) :: !newGlobals;
         TComp (cinfo, [])

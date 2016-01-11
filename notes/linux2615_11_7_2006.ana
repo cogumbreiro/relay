@@ -1,0 +1,2292 @@
+================================================
+Possible race between access to:
+        per_cpu__runqueues.active and
+        per_cpu__runqueues.active
+        Accessed at locations:
+        kernel/sched.c:3055 and
+        kernel/sched.c:3049
+
+(0)
+        Locks held for first access:
+L+ = {per_cpu__runqueues.lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {..., per_cpu__runqueues.lock#tbd, ...}
+Th. 1 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+
+
+
+(1)
+        Locks held for first access:
+L+ = {per_cpu__runqueues.lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {..., per_cpu__runqueues.lock#tbd, ...}
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+Th. 2 at: net/ipv4/ipvs/ip_vs_sync.c:858 w/ : fork_sync_thread
+
+
+
+
+(2)
+        Locks held for first access:
+L+ = {per_cpu__runqueues.lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {..., per_cpu__runqueues.lock#tbd, ...}
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+
+
+--------------------------------------
+FIRST & SECOND in the same function...
+
+
+#define this_rq()		(&__get_cpu_var(runqueues))
+
+
+/*
+ * schedule() is the main scheduler function.
+ */
+asmlinkage void __sched schedule(void)
+{
+	long *switch_count;
+	task_t *prev, *next;
+	runqueue_t *rq;
+
+
+...
+	rq = this_rq();
+...	
+    spin_lock_irq(&rq->lock);          <<<<<< LOCK
+...
+
+	array = rq->active;                 <<<<<<<< SECOND?! where'd the lock go?
+	if (unlikely(!array->nr_active)) {
+		/*
+		 * Switch the active and expired arrays.
+		 */
+		schedstat_inc(rq, sched_switch);
+
+		rq->active = rq->expired;       <<<<<<<< FIRST
+
+
+		rq->expired = array;
+		array = rq->active;
+		rq->expired_timestamp = 0;
+		rq->best_expired_prio = MAX_PRIO;
+	}
+...
+	sched_info_switch(prev, next);
+	if (likely(prev != next)) {
+		next->timestamp = now;
+		rq->nr_switches++;
+		rq->curr = next;
+		++*switch_count;
+
+		prepare_task_switch(rq, next);
+		prev = context_switch(rq, prev, next);
+		barrier();
+		/*
+		 * this_rq must be evaluated again because prev may have moved
+		 * CPUs since it called schedule(), thus the 'rq' on its stack
+		 * frame will be invalid.
+		 */
+		finish_task_switch(this_rq(), prev);
+	} else
+		spin_unlock_irq(&rq->lock);     <<<<<<< UNLOCK
+...
+}
+
+
+HMMM... bug in my program?
+
+
+===============================================
+Possible race between access to:
+        ((_a137_406304_mempool->tk_client)->cl_xprt)->timer.base and
+        ((_a137_406304_mempool->tk_client)->cl_xprt)->timer.base
+        Accessed at locations:
+        kernel/timer.c:235 and
+        kernel/timer.c:192
+        Enum. of possible paths & locks held (first 3):
+
+(0)
+        Locks held for first access:
+L+ = {((_a137_406304_mempool->task.tk_client)->cl_xprt)->transport_lock#tbd, }
+        Second access:
+L+ = empty;
+L- = { ..., ((_a137_406304_mempool->task.tk_client)->cl_xprt)->transport_lock#tbd, ... }
+Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+
+(1)
+        Locks held for first access:
+L+ = {((_a137_406304_mempool->tk_client)->cl_xprt)->transport_lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = { ... that lock up there ... } 
+Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+
+------------
+FIRST:
+
+int __mod_timer(struct timer_list *timer, unsigned long expires)
+{
+	timer_base_t *base;
+	tvec_base_t *new_base;
+	unsigned long flags;
+	int ret = 0;
+
+	BUG_ON(!timer->function);
+
+	base = lock_timer_base(timer, &flags);
+
+	if (timer_pending(timer)) {
+		detach_timer(timer, 0);
+		ret = 1;
+	}
+
+	new_base = &__get_cpu_var(tvec_bases);
+
+	if (base != &new_base->t_base) {
+		/*
+		 * We are trying to schedule the timer on the local CPU.
+		 * However we can't change timer's base while it is running,
+		 * otherwise del_timer_sync() can't detect that the timer's
+		 * handler yet has not finished. This also guarantees that
+		 * the timer is serialized wrt itself.
+		 */
+		if (unlikely(base->running_timer == timer)) {
+			/* The timer remains on a former base */
+			new_base = container_of(base, tvec_base_t, t_base);
+		} else {
+			/* See the comment in lock_timer_base() */
+
+			timer->base = NULL;           <<<<< HERE!!!
+
+			spin_unlock(&base->lock);
+			spin_lock(&new_base->t_base.lock);
+			timer->base = &new_base->t_base;
+		}
+	}
+
+	timer->expires = expires;
+	internal_add_timer(new_base, timer);
+	spin_unlock_irqrestore(&new_base->t_base.lock, flags);
+
+	return ret;
+}
+
+
+------------
+SECOND
+
+
+/*
+ * We are using hashed locking: holding per_cpu(tvec_bases).t_base.lock
+ * means that all timers which are tied to this base via timer->base are
+ * locked, and the base itself is locked too.
+ *
+ * So __run_timers/migrate_timers can safely modify all timers which could
+ * be found on ->tvX lists.
+ *
+ * When the timer's base is locked, and the timer removed from list, it is
+ * possible to set timer->base = NULL and drop the lock: the timer remains
+ * locked.
+ */
+static timer_base_t *lock_timer_base(struct timer_list *timer,
+					unsigned long *flags)
+{
+	timer_base_t *base;
+
+	for (;;) {
+
+		base = timer->base;             <<<< HERE
+
+		if (likely(base != NULL)) {
+			spin_lock_irqsave(&base->lock, *flags);
+			if (likely(base == timer->base))
+				return base;
+			/* The timer has migrated to another CPU */
+			spin_unlock_irqrestore(&base->lock, *flags);
+		}
+		cpu_relax();
+	}
+}
+
+
+----------
+
+Race. Double-checked locking...
+
+why else would they do:
+
+void lock_base (list *y) {
+
+    base *x;
+
+    while (1) {
+        x = y->base;
+
+        if (x != null) {
+            lock (x->lock);
+            if (x == y->base)     
+                    <<<< only false if another cpu changed *y... 
+                    <<<< memory consistency?
+                return;
+            unlock (x->lock);
+        }
+    }
+}
+
+
+
+
+===============================================
+Possible race between access to:
+        pidmap_array[0].page and
+        pidmap_array[0].page
+        Accessed at locations:
+        kernel/pid.c:96 and
+        kernel/pid.c:86
+        Enum. of possible paths & locks held (first 3):
+
+(0)
+        Locks held for first access:
+L+ = {pidmap_lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {..., pidmap_lock#tbd, ... }
+
+Th. 1 at: net/ipv4/ipvs/ip_vs_sync.c:858 w/ initial function: fork_sync_thread
+Th. 2 at: net/ipv4/ipvs/ip_vs_sync.c:858 w/ : fork_sync_thread
+
+
+
+(1)
+        Locks held for first access:
+L+ = {pidmap_lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {..., pidmap_lock#tbd, ... }
+
+Th. 1 at: kernel/kmod.c:206 w/ initial function: wait_for_helper
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+
+
+---------------
+FIRST & SECOND
+
+
+int alloc_pidmap(void)
+{
+    ...
+	map = &pidmap_array[pid/BITS_PER_PAGE];
+	max_scan = (pid_max + BITS_PER_PAGE - 1)/BITS_PER_PAGE - !offset;
+	for (i = 0; i <= max_scan; ++i) {
+
+		if (unlikely(!map->page)) {   <<<< SECOND
+
+			unsigned long page = get_zeroed_page(GFP_KERNEL);
+			/*
+			 * Free the page if someone raced with us
+			 * installing it:
+			 */
+			spin_lock(&pidmap_lock);
+			if (map->page)            <<<< checked again though
+				free_page(page);
+			else
+
+				map->page = (void *)page;  <<<<<< FIRST
+
+
+			spin_unlock(&pidmap_lock);
+			if (unlikely(!map->page))
+				break;
+		}
+        ...
+	}
+	return -1;
+}
+
+
+--------
+Race. Another double-checked locking thing
+
+
+===============================================
+Possible race between access to:
+        swap_token_mm and
+        swap_token_mm
+        Accessed at locations:
+        mm/thrash.c:102 and
+        include/linux/swap.h:244
+        Enum. of possible paths & locks held (first 3):
+
+(0)
+        Locks held for first access:
+L+ = {swap_token_lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {..., swap_token_lock#tbd, ...}
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+
+-------
+FIRST
+
+/* Called on process exit. */
+void __put_swap_token(struct mm_struct *mm)
+{
+	spin_lock(&swap_token_lock);
+
+	if (likely(mm == swap_token_mm)) {  <<<<< Reads to re-check first read
+
+
+		mm->swap_token_time = jiffies + SWAP_TOKEN_CHECK_INTERVAL;
+
+		swap_token_mm = &init_mm;      <<<<< HERE
+
+		swap_token_check = jiffies;
+	}
+
+	spin_unlock(&swap_token_lock);
+}
+
+
+
+-------
+SECOND
+
+
+/* extern stuff actually in linux/mm/thrash.c */
+extern struct mm_struct * swap_token_mm;
+extern void __put_swap_token(struct mm_struct *);
+
+static inline int has_swap_token(struct mm_struct *mm)
+{
+	return (mm == swap_token_mm);    <<<<< READ HERE!!!
+}
+
+static inline void put_swap_token(struct mm_struct *mm)
+{
+	if (has_swap_token(mm))          <<<<< leads to above read
+		__put_swap_token(mm);        <<<<< FIRST access in here!
+}
+
+
+static inline void disable_swap_token(void)
+{
+	put_swap_token(swap_token_mm);   <<<<< HERE
+}
+
+
+-------
+
+
+Race. The read happens outside of the lock!!!  Double-checked locking though
+
+
+
+===============================================
+Possible race between access to:
+        rpc_buffer_mempool->curr_nr and
+        rpc_buffer_mempool->curr_nr
+        Accessed at locations:
+        mm/mempool.c:21 and
+        mm/mempool.c:262
+
+
+(0)
+        Locks held for first access:
+L+ = {rpc_buffer_mempool->lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {..., that thing, ...}
+
+
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+
+-------
+FIRST
+
+static void add_element(mempool_t *pool, void *element)
+{
+	BUG_ON(pool->curr_nr >= pool->min_nr);
+	pool->elements[pool->curr_nr++] = element;   <<< HERE
+}
+
+
+-------
+SECOND
+
+/**
+ * mempool_free - return an element to the pool.
+ * @element:   pool element pointer.
+ * @pool:      pointer to the memory pool which was allocated via
+ *             mempool_create().
+ *
+ * this function only sleeps if the free_fn() function sleeps.
+ */
+void mempool_free(void *element, mempool_t *pool)
+{
+	unsigned long flags;
+
+	smp_mb();
+	if (pool->curr_nr < pool->min_nr) {             <<< HERE
+		spin_lock_irqsave(&pool->lock, flags);
+		if (pool->curr_nr < pool->min_nr) {         <<< OK...
+			add_element(pool, element);
+			spin_unlock_irqrestore(&pool->lock, flags);
+			wake_up(&pool->wait);
+			return;
+		}
+		spin_unlock_irqrestore(&pool->lock, flags);
+	}
+	pool->free(element, pool->pool_data);
+}
+
+
+------
+
+Race, but double-checked locking strikes again!
+
+
+===============================================
+Possible race between access to:
+        mem_map->lru.prev and
+        mem_map->lru.prev
+        Accessed at locations:
+        mm/slab.c:584 and
+        include/linux/list.h:163
+
+
+        Locks held for first access:
+L+ = empty;
+        Second access:
+L+ = {(zone_table[0])->lru_lock#tbd, } (1)
+
+Th. 1 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+Th. 2 at: kernel/kthread.c:112 w/ : kthread
+
+Th. 1 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+Th. 1 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+Th. 2 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+
+--------
+FIRST
+
+static inline void page_set_slab(struct page *page, struct slab *slab)
+{
+	page->lru.prev = (struct list_head *)slab; <<<< HERE
+}
+
+--------
+SECOND
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = LIST_POISON1;
+	entry->prev = LIST_POISON2;  <<<< HERE
+}
+
+
+but who called this? Hmm...  huge ass call chain (need more intermediate
+nodes)
+
+where is zone_table declared?
+
+
+
+
+
+===============================================
+Possible race between access to:
+        (sigqueue_cachep->nodelists[0])->slabs_free.next and
+        (sigqueue_cachep->nodelists[0])->slabs_free.next
+        Accessed at locations:
+        include/linux/list.h:164 and
+        include/linux/list.h:67
+        Enum. of possible paths & locks held (first 3):
+
+(0)
+        Locks held for first access:
+L+ = {(sigqueue_cachep->nodelists[0])->list_lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {.. thing ... }
+
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+-------
+FIRST
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = LIST_POISON1;
+	entry->prev = LIST_POISON2;
+}
+
+
+
+
+--------
+SECOND
+
+static inline void list_add(struct list_head *new, struct list_head *head)
+{
+	__list_add(new, head, head->next);
+}
+
+
+
+REPORTS too deep -- call graph is crazy =(
+
+where is sigqueue_cachep declared?
+
+
+
+===============================================
+Possible race between access to:
+        (fs_bio_set->bvec_pools[0])->curr_nr and
+        (fs_bio_set->bvec_pools[0])->curr_nr
+        Accessed at locations:
+        mm/mempool.c:27 and
+        mm/mempool.c:225
+ 
+
+        Locks held for first access:
+L+ = {nfs_commit_mempool->lock#tbd, } (1)
+        Second access:
+L+ = empty;
+L- = {... thing ...}
+
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+----------
+FIRST
+
+static void *remove_element(mempool_t *pool)
+{
+	BUG_ON(pool->curr_nr <= 0);
+	return pool->elements[--pool->curr_nr];          <<<< HERE R/W
+}
+
+
+
+-----------
+SECOND
+
+void * mempool_alloc(mempool_t *pool, gfp_t gfp_mask)
+{
+    ...
+
+	spin_lock_irqsave(&pool->lock, flags);
+	if (likely(pool->curr_nr)) {                      <<<< HERE R
+		element = remove_element(pool);    <<<< calls other dude here w/ lock
+		spin_unlock_irqrestore(&pool->lock, flags);
+		return element;
+	}
+	spin_unlock_irqrestore(&pool->lock, flags);
+
+    ...
+}
+
+
+
+Other callers of remove_element are :
+
+free_pool & mempool_resize 
+
+(BUT ONLY OTHER PATH FROM "reclaimer" is through "mempool_alloc"?!)
+
+where does fs_bio come from?
+
+
+
+===============================================
+Possible race between access to:
+        ((vm_area_cachep->nodelists[0])->shared)->avail and
+        ((vm_area_cachep->nodelists[0])->shared)->avail
+        Accessed at locations:
+        mm/slab.c:2706 and
+        mm/slab.c:2699
+
+
+        Locks held for first access:
+L+ = {(filelock_cache->nodelists[0])->list_lock#tbd, } (1)
+        Second
+L+ = empty;
+L- = { thing }
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+
+        First access:
+L+ = empty
+        Second
+L+ = empty
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+
+L+ = empty
+L+ = empty
+
+        Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+        Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+---------------
+FIRST & SECOND
+
+static void cache_flusharray(kmem_cache_t *cachep, struct array_cache *ac)
+{
+	int batchcount;
+	struct kmem_list3 *l3;
+	int node = numa_node_id();
+
+	batchcount = ac->batchcount;
+#if DEBUG
+	BUG_ON(!batchcount || batchcount > ac->avail);
+#endif
+	check_irq_off();
+	l3 = cachep->nodelists[node];
+
+	spin_lock(&l3->list_lock);            <<<< LOCK
+
+	if (l3->shared) {
+
+		struct array_cache *shared_array = l3->shared;  <<<< get array
+
+		int max = shared_array->limit - shared_array->avail;   <<< 2nd HERE
+
+		if (max) {
+			if (batchcount > max)
+				batchcount = max;
+			memcpy(&(shared_array->entry[shared_array->avail]),
+					ac->entry,
+					sizeof(void*)*batchcount);
+
+			shared_array->avail += batchcount;    <<< 1st HERE
+
+			goto free_done;
+		}
+	}
+...
+
+	spin_unlock(&l3->list_lock);          <<<< UNLOCK
+    
+...
+
+}
+
+
+Hmm, the lock is on though? Somehow lock is getting killed higher up?
+
+
+Check paths leading to this?
+
+
+
+
+
+
+===============================================
+Possible race between access to:
+        nr_threads and
+        nr_threads
+        Accessed at locations:
+        kernel/fork.c:1139 and
+        kernel/fork.c:917
+        Enum. of possible paths & locks held (first 3):
+
+(0)
+        Locks held for first access:
+L+ = {tasklist_lock#tbd, } (1)
+        Second
+L+ = empty
+L- = {tasklist_lock...}
+
+
+Th. 1 at: net/ipv4/ipvs/ip_vs_sync.c:858 w/ : fork_sync_thread
+Th. 2 at: net/ipv4/ipvs/ip_vs_sync.c:858 w/ : fork_sync_thread
+
+Th. 1 at: kernel/kmod.c:206 w/ : wait_for_helper
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+
+-----------------
+FIRST and SECOND:
+
+
+/*
+ * This creates a new process as a copy of the old one,
+ * but does not actually start it yet.
+ *
+ * It copies the registers, and all the appropriate
+ * parts of the process environment (as per the clone
+ * flags). The actual kick-off is left to the caller.
+ */
+static task_t *copy_process(unsigned long clone_flags,
+				 unsigned long stack_start,
+				 struct pt_regs *regs,
+				 unsigned long stack_size,
+				 int __user *parent_tidptr,
+				 int __user *child_tidptr,
+				 int pid)
+{
+	int retval;
+	struct task_struct *p = NULL;
+    
+    ...
+
+	/*
+	 * If multiple threads are within copy_process(), then this check
+	 * triggers too late. This doesn't hurt, the check is only there
+	 * to stop root fork bombs.
+	 */
+	if (nr_threads >= max_threads)        <<<< SECOND (read)
+		goto bad_fork_cleanup_count;      <<<< no effects wrt to other access
+
+
+    ...
+
+	/* Need tasklist lock for parent etc handling! */
+	write_lock_irq(&tasklist_lock);
+
+    ...
+
+	nr_threads++;                         <<<< FIRST (read & write)
+	total_forks++;
+
+	write_unlock_irq(&tasklist_lock);
+
+    ...
+
+
+fork_out:
+	if (retval)
+		return ERR_PTR(retval);
+	return p;
+
+bad_fork_cleanup_namespace:
+	exit_namespace(p);
+bad_fork_cleanup_keys:
+	exit_keys(p);
+bad_fork_cleanup_mm:
+	if (p->mm)
+		mmput(p->mm);
+bad_fork_cleanup_signal:
+	exit_signal(p);
+bad_fork_cleanup_sighand:
+	exit_sighand(p);
+bad_fork_cleanup_fs:
+	exit_fs(p); /* blocking */
+bad_fork_cleanup_files:
+	exit_files(p); /* blocking */
+bad_fork_cleanup_semundo:
+	exit_sem(p);
+bad_fork_cleanup_audit:
+	audit_free(p);
+bad_fork_cleanup_security:
+	security_task_free(p);
+bad_fork_cleanup_policy:
+#ifdef CONFIG_NUMA
+	mpol_free(p->mempolicy);
+#endif
+bad_fork_cleanup:
+	if (p->binfmt)
+		module_put(p->binfmt->module);
+bad_fork_cleanup_put_domain:
+	module_put(task_thread_info(p)->exec_domain->module);
+bad_fork_cleanup_count:
+	put_group_info(p->group_info);
+	atomic_dec(&p->user->processes);
+	free_uid(p->user);
+bad_fork_free:
+	free_task(p);
+	goto fork_out;
+}
+
+
+
+Race. Like double-checked locking in that one access is a read with no effect
+
+
+
+===============================================
+Possible race between access to:
+        ((_a137_406304_mempool->tk_client)->cl_xprt)->shutdown and
+        ((_a137_406304_mempool->tk_client)->cl_xprt)->shutdown
+        Accessed at locations:
+        net/sunrpc/xprt.c:979 and
+        net/sunrpc/xprt.c:866
+ 
+       First access:
+L+ = empty;
+       Second access:
+L+ = {((_a137_406304_mempool->task.tk_client)->cl_xprt)->transport_lock }
+
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+(also another path w/ the same thread root)
+
+-------
+FIRST
+
+static void xprt_shutdown(struct rpc_xprt *xprt)
+{
+	xprt->shutdown = 1;                       <<<< HERE
+	rpc_wake_up(&xprt->sending);
+	rpc_wake_up(&xprt->resend);
+	xprt_wake_pending_tasks(xprt, -EIO);
+	rpc_wake_up(&xprt->backlog);
+	del_timer_sync(&xprt->timer);
+}
+
+
+-------
+SECOND
+
+/**
+ * xprt_release - release an RPC request slot
+ * @task: task which is finished with the slot
+ *
+ */
+void xprt_release(struct rpc_task *task)
+{
+	struct rpc_xprt	*xprt = task->tk_xprt;
+	struct rpc_rqst	*req;
+
+	if (!(req = task->tk_rqstp))
+		return;
+
+	spin_lock_bh(&xprt->transport_lock);
+
+    ...
+
+	if (list_empty(&xprt->recv) && !xprt->shutdown)     <<<< SECOND
+		mod_timer(&xprt->timer,
+				xprt->last_used + xprt->idle_timeout);
+
+	spin_unlock_bh(&xprt->transport_lock);
+
+    ...
+}
+
+Race, but maybe benign -- the shutdown flag (a one bit field of the struct) 
+is probably only set to 0 at first and then set to 1 once?
+
+
+One writer to the shutdown field (w/ no read before)?
+
+
+
+===============================================
+Possible race between access to:
+        mount_hashtable and
+        mount_hashtable
+        Accessed at locations:
+        include/linux/list.h:223 and
+        fs/namespace.c:172
+
+First access:
+L+ = empty;
+Second access:
+L+ = {vfsmount_lock#tbd, } (1)
+
+Th. 1 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+Th. 2 at: net/ipv4/ipvs/ip_vs_sync.c:858 w/ : fork_sync_thread
+
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+
+
+--------
+FIRST (in list.h)
+
+/// some other info
+static struct list_head *mount_hashtable; (in namespace.c)
+
+
+/// begin actual access
+
+#define INIT_LIST_HEAD(ptr) do { \
+	(ptr)->next = (ptr); (ptr)->prev = (ptr); \
+
+/**
+ * list_del_init - deletes entry from list and reinitialize it.
+ * @entry: the element to delete from the list.
+ */
+static inline void list_del_init(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	INIT_LIST_HEAD(entry);                    <<<< HERE?!
+}
+
+
+---- may be called from
+
+static void detach_mnt(struct vfsmount *mnt, struct nameidata *old_nd)
+{
+	old_nd->dentry = mnt->mnt_mountpoint;
+	old_nd->mnt = mnt->mnt_parent;
+	mnt->mnt_parent = mnt;
+	mnt->mnt_mountpoint = mnt->mnt_root;
+	list_del_init(&mnt->mnt_child); 
+	list_del_init(&mnt->mnt_hash);      <<<< CALL w/ lock from caller!
+	old_nd->dentry->d_mounted--;
+}
+
+or
+
+void release_mounts(struct list_head *head)
+{
+	struct vfsmount *mnt;
+	while(!list_empty(head)) {
+		mnt = list_entry(head->next, struct vfsmount, mnt_hash);
+
+		list_del_init(&mnt->mnt_hash);        <<<< CALL w/out lock for sure!
+
+		if (mnt->mnt_parent != mnt) {
+			struct dentry *dentry;
+			struct vfsmount *m;
+			spin_lock(&vfsmount_lock);
+
+            ...
+
+
+			spin_unlock(&vfsmount_lock);
+			dput(dentry);
+			mntput(m);
+		}
+		mntput(mnt);
+	}
+}
+
+or
+
+
+static int attach_recursive_mnt(struct vfsmount *source_mnt,
+			struct nameidata *nd, struct nameidata *parent_nd)
+{
+	LIST_HEAD(tree_list);
+	struct vfsmount *dest_mnt = nd->mnt;
+	struct dentry *dest_dentry = nd->dentry;
+	struct vfsmount *child, *p;
+
+    ...
+
+	spin_lock(&vfsmount_lock);
+    ...
+
+	list_for_each_entry_safe(child, p, &tree_list, mnt_hash) {
+
+		list_del_init(&child->mnt_hash);  <<<< CALL (has lock though)
+
+		commit_tree(child);
+	}
+
+	spin_unlock(&vfsmount_lock);
+	return 0;
+}
+
+
+
+---------
+SECOND
+
+static void attach_mnt(struct vfsmount *mnt, struct nameidata *nd)
+{
+	mnt_set_mountpoint(nd->mnt, nd->dentry, mnt);
+
+	list_add_tail(&mnt->mnt_hash, mount_hashtable +   <<<< HERE locked outside
+			hash(nd->mnt, nd->dentry));
+
+	list_add_tail(&mnt->mnt_child, &nd->mnt->mnt_mounts);
+}
+
+
+
+------
+
+Not sure if the value of the list head "mnt->mnt_hash" in the first access
+is the same as the list head "mount_hashtable" from the second access?
+
+It does call list_add_tail(&mnt->mnt_hash, mount_hashtable + hash(*)) though...
+
+/**
+ * list_add_tail - add a new entry
+ * @new: new entry to be added
+ * @head: list head to add it before
+ *
+ * Insert a new entry before the specified head.
+ * This is useful for implementing queues.
+ */
+static inline void list_add_tail(struct list_head *new, struct list_head *head)
+{
+   __list_add(new, head->prev, head);
+}
+
+
+mount_hashtable is probably an array of list_head sentinels, so they
+should never be the same value? On the other hand we're probably not
+worried about mount_hashtable itself, but the structure of each of the 
+mnt->mnt_hash lists?
+
+
+If so, the race is between the call in "release_mounts" and the other calls
+
+
+
+
+===============================================
+Possible race between access to:
+        ((mem_map->mapping)->host)->i_state : include/linux/mm.h:507 and
+        ((mem_map->mapping)->host)->i_state : include/linux/mm.h:507
+        Accessed at locs:
+        fs/fs-writeback.c:100 and
+        fs/fs-writeback.c:75
+
+
+(0)
+        Locks held for first access:
+L+ = {inode_lock#tbd, } (1)
+        Second access:
+L+ = empty;
+made empty at: fs/fs-writeback.c:118
+  
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+        Second access:
+        made empty at: mm/page_alloc.c:976
+
+Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+Th. 2 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+
+        Second access:
+        made empty at: fs/nfs/inode.c:1012
+
+Th. 1 spawned at: fs/nfs/nfs4state.c:755 w/ initial function: reclaimer
+Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+
+----------------
+FIRST AND SECOND
+
+
+
+/**
+ *	__mark_inode_dirty -	internal function
+ *	@inode: inode to mark
+ *	@flags: what kind of dirty (i.e. I_DIRTY_SYNC)
+ *	Mark an inode as dirty. Callers should use mark_inode_dirty or
+ *  	mark_inode_dirty_sync.
+ *
+ * ...
+ *
+ * This function *must* be atomic for the I_DIRTY_PAGES case -
+ * set_page_dirty() is called under spinlock in several places.
+ *
+ * Note that for blockdevs, inode->dirtied_when represents the dirtying time of
+ * the block-special inode (/dev/hda1) itself.  And the ->dirtied_when field of
+ * the kernel-internal blockdev inode represents the dirtying time of the
+ * blockdev's pages.  This is why for I_DIRTY_PAGES we always use
+ * page->mapping->host, so the page-dirtying time is recorded in the internal
+ * blockdev inode.
+ */
+void __mark_inode_dirty(struct inode *inode, int flags)
+{
+	struct super_block *sb = inode->i_sb;
+
+	/*
+	 * Don't do this for I_DIRTY_PAGES - that doesn't actually
+	 * dirty the inode itself
+	 */
+	if (flags & (I_DIRTY_SYNC | I_DIRTY_DATASYNC)) {
+		if (sb->s_op->dirty_inode)
+			sb->s_op->dirty_inode(inode);
+	}
+
+	/*
+	 * make sure that changes are seen by all cpus before we test i_state
+	 * -- mikulas
+	 */
+	smp_mb();   // memory barrier?
+
+	/* avoid the locking if we can */
+	if ((inode->i_state & flags) == flags)   <<<< SECOND
+		return;
+
+    ...
+
+	spin_lock(&inode_lock);
+	if ((inode->i_state & flags) != flags) {
+		const int was_dirty = inode->i_state & I_DIRTY;
+
+		inode->i_state |= flags;             <<<< FIRST
+
+		/*
+		 * If the inode is locked, just update its dirty state. 
+		 * The unlocker will place the inode on the appropriate
+		 * superblock list, based upon its state.
+		 */
+		if (inode->i_state & I_LOCK)
+			goto out;
+
+        ...
+
+		/*
+		 * If the inode was already on s_dirty or s_io, don't
+		 * reposition it (that would break s_dirty time-ordering).
+		 */
+		if (!was_dirty) {
+			inode->dirtied_when = jiffies;
+			list_move(&inode->i_list, &sb->s_dirty);
+		}
+	}
+out:
+	spin_unlock(&inode_lock);
+}
+
+
+Race, but seems intentional that the first read is outside of a critical sect.
+
+
+
+
+===============================================
+Possible race between access to:
+        per_cpu__mmu_gathers.fullmm : include/asm-generic/tlb.h:49 and
+        per_cpu__mmu_gathers.fullmm : include/asm-generic/tlb.h:49
+        Accessed at locations:
+        include/asm-generic/tlb.h:64 and
+        mm/memory.c:640
+
+        Locks held for first access:
+L+ = empty;
+        made empty at: fs/nfs/inode.c:1012
+        Second access:
+L+ = {(per_cpu__mmu_gathers.mm)->page_table_lock#tbd, } (1)
+
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+Th. 2 at: kernel/kmod.c:206 w/ : wait_for_helper
+
+        made empty at: fs/nfs/inode.c:1012
+
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+Th. 2 at: init/do_mounts_initrd.c:59 w/ : do_linuxrc
+
+        made empty at: fs/nfs/inode.c:1012
+
+Th. 1 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+Th. 2 at: fs/nfs/nfs4state.c:755 w/ : reclaimer
+
+
+------
+FIRST
+
+/* Users of the generic TLB shootdown code must declare this storage space. */
+DECLARE_PER_CPU(struct mmu_gather, mmu_gathers);
+
+
+/* tlb_gather_mmu
+ *	Return a pointer to an initialized struct mmu_gather.
+ */
+static inline struct mmu_gather *
+tlb_gather_mmu(struct mm_struct *mm, unsigned int full_mm_flush)
+{
+	struct mmu_gather *tlb = &get_cpu_var(mmu_gathers);
+
+	tlb->mm = mm;
+
+	/* Use fast mode if only one CPU is online */
+	tlb->nr = num_online_cpus() > 1 ? 0U : ~0U;
+
+
+
+	tlb->fullmm = full_mm_flush;     <<<< HERE
+
+
+
+	return tlb;
+}
+
+
+------
+SECOND
+
+static unsigned long zap_pte_range(struct mmu_gather *tlb,
+				struct vm_area_struct *vma, pmd_t *pmd,
+				unsigned long addr, unsigned long end,
+				long *zap_work, struct zap_details *details)
+{
+	struct mm_struct *mm = tlb->mm;
+	pte_t *pte;
+	spinlock_t *ptl;
+	int file_rss = 0;
+	int anon_rss = 0;
+
+	pte = pte_offset_map_lock(mm, pmd, addr, &ptl);   <<<< LOCKED
+
+	do {
+		pte_t ptent = *pte;
+		if (pte_none(ptent)) {
+			(*zap_work)--;
+			continue;
+		}
+		if (pte_present(ptent)) {
+			struct page *page;
+
+            ...
+
+			ptent = ptep_get_and_clear_full(mm, addr, pte,
+							tlb->fullmm);    <<<< HERE
+
+
+            ...
+
+			continue;
+		}
+
+        ...
+
+	} while (pte++, addr += PAGE_SIZE, (addr != end && *zap_work > 0));
+
+    ...
+	pte_unmap_unlock(pte - 1, ptl);
+
+	return addr;
+}
+
+
+static inline pte_t ptep_get_and_clear_full(struct mm_struct *mm, unsigned long addr, pte_t *ptep, int full)
+{
+	pte_t pte;
+	if (full) {              <<<< READ value is used here
+		pte = *ptep;
+		*ptep = __pte(0);
+	} else {
+		pte = ptep_get_and_clear(mm, addr, ptep);
+	}
+	return pte;
+}
+
+
+-----
+
+tlb info is per cpu... can a single cpu end up blocking & rescheduling?
+
+also, the read value isn't used directly for a subsequent write related
+to the tlb structure?
+
+
+
+
+===============================================
+Possible race between access to:
+        (dentry_cache->array[0])->entry[0] : fs/dcache.c:47 and
+        (dentry_cache->array[0])->entry[0] : fs/dcache.c:47
+        Accessed at locs:
+        mm/slab.c:2427 and
+        mm/slab.c:2534
+
+(0)
+        LS for 1st access:
+L+ = {(names_cachep->nodelists[0])->list_lock#tbd, } (1)
+        LS for 2nd access:
+L+ = empty;
+        made empty at: :-1
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+(1)
+        LS for 1st access:
+L+ = empty;
+        made empty at: fs/nfs/inode.c:1012
+        LS for 2nd access:
+L+ = empty;
+        made empty at: fs/nfs/inode.c:1012
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+(2)
+        LS for 1st access:
+L+ = empty;
+        made empty at: net/sunrpc/rpc_pipe.c:683
+        LS for 2nd access:
+L+ = empty;
+        made empty at: net/sunrpc/rpc_pipe.c:683
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+
+
+--------
+FIRST
+
+static inline struct array_cache *ac_data(kmem_cache_t *cachep)
+{
+	return cachep->array[smp_processor_id()];
+}
+
+
+static void *cache_alloc_refill(kmem_cache_t *cachep, gfp_t flags)
+{
+	int batchcount;
+	struct kmem_list3 *l3;
+	struct array_cache *ac;
+
+	check_irq_off();
+	ac = ac_data(cachep);
+retry:
+
+    ...
+
+	l3 = cachep->nodelists[numa_node_id()];
+
+	BUG_ON(ac->avail > 0 || !l3);
+	spin_lock(&l3->list_lock);
+
+    ...
+
+	while (batchcount > 0) {
+		struct list_head *entry;
+		struct slab *slabp;
+		/* Get slab alloc is to come from. */
+		entry = l3->slabs_partial.next;
+
+        ...
+
+		slabp = list_entry(entry, struct slab, list);
+        ...
+		while (slabp->inuse < cachep->num && batchcount--) {
+			...
+
+			/* get obj pointer */
+			ac->entry[ac->avail++] = slabp->s_mem +      <<<< HERE
+				slabp->free*cachep->objsize;
+
+            ...
+		}
+        ...
+
+		/* move slabp to correct slabp list: */
+		list_del(&slabp->list);
+		if (slabp->free == BUFCTL_END)
+			list_add(&slabp->list, &l3->slabs_full);
+		else
+			list_add(&slabp->list, &l3->slabs_partial);
+	}
+
+must_grow:
+	l3->free_objects -= ac->avail;
+alloc_done:
+	spin_unlock(&l3->list_lock);
+
+	if (unlikely(!ac->avail)) {
+		int x;
+		x = cache_grow(cachep, flags, numa_node_id());
+
+		// cache_grow can reenable interrupts, then ac could change.
+		ac = ac_data(cachep);
+		if (!x && ac->avail == 0)	// no objects in sight? abort
+			return NULL;
+
+		if (!ac->avail)		// objects refilled by interrupt?
+			goto retry;
+	}
+	ac->touched = 1;
+	return ac->entry[--ac->avail];
+}
+
+
+--------
+SECOND
+
+
+static inline void *____cache_alloc(kmem_cache_t *cachep, gfp_t flags)
+{
+	void* objp;
+	struct array_cache *ac;
+
+	check_irq_off();
+	ac = ac_data(cachep);
+	if (likely(ac->avail)) {
+		STATS_INC_ALLOCHIT(cachep);
+		ac->touched = 1;
+
+		objp = ac->entry[--ac->avail];            <<<< HERE
+
+	} else {
+		STATS_INC_ALLOCMISS(cachep);
+		objp = cache_alloc_refill(cachep, flags);
+	}
+	return objp;
+
+}
+
+
+Hmmm... lots of accesses to ac->avail outside of a critical section
+(one per cpu though)
+
+
+===============================================
+Possible race between access to:
+        _a137_406304_mempool->tk_timer.entry.next : mm/mempool.c:115 and
+        _a137_406304_mempool->tk_timer.entry.next : mm/mempool.c:115
+        Accessed at locs:
+        kernel/timer.c:158 and
+        kernel/timer.c:168
+
+
+(0)
+        LS for 1st access:
+L+ = empty;
+        made empty at: :-1
+        LS for 2nd access:
+L+ = {(_a137_406304_mempool->tk_timer.base)->lock#tbd, } (1)
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+--------
+FIRST
+
+void fastcall init_timer(struct timer_list *timer)
+{
+	timer->entry.next = NULL;
+	timer->base = &per_cpu(tvec_bases, raw_smp_processor_id()).t_base;
+}
+
+--------
+SECOND
+static inline void detach_timer(struct timer_list *timer,
+					int clear_pending)
+{
+	struct list_head *entry = &timer->entry;
+
+	__list_del(entry->prev, entry->next);
+	if (clear_pending)
+		entry->next = NULL;
+	entry->prev = LIST_POISON2;
+}
+
+
+
+
+Ok? Init vs later call?
+
+
+
+===============================================
+Possible race between access to:
+        swap_list.next : mm/swapfile.c:44 and
+        swap_list.next : mm/swapfile.c:44
+        Accessed at locs:
+        mm/swapfile.c:199 and
+        mm/swapfile.c:185
+
+(0)
+        LS for 1st access:
+L+ = empty;
+        made empty at: fs/nfs/inode.c:1012
+        LS for 2nd access:
+L+ = {swap_lock#tbd, } (1)
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: kernel/kmod.c:206 w/ func: wait_for_helper
+
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: init/do_mounts_initrd.c:59 w/ func: do_linuxrc
+
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+
+-----------------
+FIRST AND SECOND
+
+struct swap_list_t swap_list = {-1, -1};
+
+
+swp_entry_t get_swap_page(void)
+{
+	struct swap_info_struct *si;
+	pgoff_t offset;
+	int type, next;
+	int wrapped = 0;
+
+	spin_lock(&swap_lock);
+	if (nr_swap_pages <= 0)
+		goto noswap;
+	nr_swap_pages--;
+
+	for (type = swap_list.next; type >= 0 && wrapped < 2; type = next) {
+
+                ^^^^ 2nd HERE
+
+
+		si = swap_info + type;
+		next = si->next;
+
+        ...
+
+		swap_list.next = next;                  <<<< 1st HERE
+		offset = scan_swap_map(si);
+		if (offset) {
+			spin_unlock(&swap_lock);
+			return swp_entry(type, offset);
+		}
+		next = swap_list.next;
+
+	}
+
+	nr_swap_pages++;
+noswap:
+	spin_unlock(&swap_lock);
+	return (swp_entry_t) {0};
+}
+
+
+----
+
+Hmm... swap_lock should be held on both counts? The real 1st write access
+is probably somewhere else?
+
+
+says LS was made empty at (UPDATE: probably an unrelated lock removed?):
+
+void put_nfs_open_context(struct nfs_open_context *ctx)
+{
+	if (atomic_dec_and_test(&ctx->count)) {
+		if (!list_empty(&ctx->list)) {
+			struct inode *inode = ctx->dentry->d_inode;
+			spin_lock(&inode->i_lock);
+			list_del(&ctx->list);
+			spin_unlock(&inode->i_lock);
+		}
+		if (ctx->state != NULL)
+			nfs4_close_state(ctx->state, ctx->mode);
+		if (ctx->cred != NULL)
+			put_rpccred(ctx->cred);
+
+		dput(ctx->dentry);           <<<< HERE?!
+
+		kfree(ctx);
+	}
+}
+
+...
+
+/*
+ * dput - release a dentry
+ * @dentry: dentry to release 
+ *
+ * Release a dentry. This will drop the usage count and if appropriate
+ * call the dentry unlink method as well as removing it from the queues and
+ * releasing its resources. If the parent dentries were scheduled for release
+ * they too may now get deleted.
+ *
+ * no dcache lock, please.
+ */
+
+void dput(struct dentry *dentry)
+{
+	if (!dentry)
+		return;
+
+repeat:
+	if (atomic_read(&dentry->d_count) == 1)
+		might_sleep();
+	if (!atomic_dec_and_lock(&dentry->d_count, &dcache_lock))
+		return;
+
+	spin_lock(&dentry->d_lock);
+	if (atomic_read(&dentry->d_count)) {
+		spin_unlock(&dentry->d_lock);
+		spin_unlock(&dcache_lock);
+		return;
+	}
+
+	/*
+	 * AV: ->d_delete() is _NOT_ allowed to block now.
+	 */
+	if (dentry->d_op && dentry->d_op->d_delete) {
+		if (dentry->d_op->d_delete(dentry))
+			goto unhash_it;
+	}
+	/* Unreachable? Get rid of it */
+ 	if (d_unhashed(dentry))
+		goto kill_it;
+  	if (list_empty(&dentry->d_lru)) {
+  		dentry->d_flags |= DCACHE_REFERENCED;
+  		list_add(&dentry->d_lru, &dentry_unused);
+  		dentry_stat.nr_unused++;
+  	}
+ 	spin_unlock(&dentry->d_lock);
+	spin_unlock(&dcache_lock);
+	return;
+
+unhash_it:
+	__d_drop(dentry);
+
+kill_it: {
+		struct dentry *parent;
+
+		/* If dentry was on d_lru list
+		 * delete it from there
+		 */
+  		if (!list_empty(&dentry->d_lru)) {
+  			list_del(&dentry->d_lru);
+  			dentry_stat.nr_unused--;
+  		}
+  		list_del(&dentry->d_child);
+		dentry_stat.nr_dentry--;	/* For d_free, below */
+		/*drops the locks, at that point nobody can reach this dentry */
+		dentry_iput(dentry);
+		parent = dentry->d_parent;
+		d_free(dentry);
+		if (dentry == parent)
+			return;
+		dentry = parent;
+		goto repeat;
+	}
+}
+
+
+
+
+===============================================
+Possible race between access to:
+        rpc_mount : net/sunrpc/rpc_pipe.c:31 and
+        rpc_mount : net/sunrpc/rpc_pipe.c:31
+        Accessed at locs:
+        fs/libfs.c:435 and
+        fs/libfs.c:428
+
+(0)
+        LS for 1st access:
+L+ = {pin_fs_lock#tbd, } (1)
+        LS for 2nd access:
+L+ = empty;
+        made empty at: net/sunrpc/rpc_pipe.c:436
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+static struct vfsmount *rpc_mount __read_mostly;
+
+
+
+---------------
+FIRST & SECOND
+
+
+int simple_pin_fs(char *name, struct vfsmount **mount, int *count)
+{
+	struct vfsmount *mnt = NULL;
+	spin_lock(&pin_fs_lock);
+	if (unlikely(!*mount)) {           <<<< SECOND
+		spin_unlock(&pin_fs_lock);
+		mnt = do_kern_mount(name, 0, name, NULL);
+		if (IS_ERR(mnt))
+			return PTR_ERR(mnt);
+		spin_lock(&pin_fs_lock);
+		if (!*mount)
+			*mount = mnt;              <<<< FIRST
+	}
+	mntget(*mount);
+	++*count;
+	spin_unlock(&pin_fs_lock);
+	mntput(mnt);
+	return 0;
+}
+
+
+Hmmm... the real second access was somewhere else...
+
+Checking where the LS was made empty:
+
+static int
+rpc_lookup_parent(char *path, struct nameidata *nd)
+{
+	if (path[0] == '\0')
+		return -ENOENT;
+	if (rpc_get_mount()) {
+		printk(KERN_WARNING "%s: %s failed to mount "
+			       "pseudofilesystem \n", __FILE__, __FUNCTION__);
+		return -ENODEV;
+	}
+	nd->mnt = mntget(rpc_mount);               <<<< SECOND HERE
+	nd->dentry = dget(rpc_mount->mnt_root);
+	nd->last_type = LAST_ROOT;
+	nd->flags = LOOKUP_PARENT;
+	nd->depth = 0;
+
+	if (path_walk(path, nd)) {
+		printk(KERN_WARNING "%s: %s failed to find path %s\n",
+				__FILE__, __FUNCTION__, path);
+		rpc_put_mount();
+		return -ENOENT;
+	}
+	return 0;
+}
+
+AH! it was read as an argument there...
+
+now the question is
+
+is rpc_mount's addr passed to simple_pin_fs ? YES!
+
+static int
+rpc_get_mount(void)
+{
+
+	return simple_pin_fs("rpc_pipefs", &rpc_mount, &rpc_mount_count);
+                                        ^^^^ HERE
+
+}
+
+
+So this can be a Race, but there's no locking for rpc_mount elsewhere?
+
+
+===============================================
+Possible race between access to:
+        mount_hashtable : fs/namespace.c:45 and
+        mount_hashtable : fs/namespace.c:45
+        Accessed at locs:
+        include/linux/list.h:223 and
+        include/linux/list.h:164
+
+(0)
+        LS for 1st access:
+L+ = empty;
+        made empty at: fs/namei.c:1020
+        LS for 2nd access:
+L+ = {vfsmount_lock#tbd, } (1)
+        Th. 1 spawned: init/do_mounts_initrd.c:59 w/ func: do_linuxrc
+        Th. 2 spawned: net/ipv4/ipvs/ip_vs_sync.c:858 w/ func: fork_sync_thread
+
+        Th. 1 spawned: init/do_mounts_initrd.c:59 w/ func: do_linuxrc
+        Th. 2 spawned: kernel/kmod.c:206 w/ func: wait_for_helper
+
+
+--------
+FIRST (in list.h)
+
+/// some other info
+static struct list_head *mount_hashtable; (in namespace.c)
+/* spinlock for vfsmount related operations, inplace of dcache_lock */
+__cacheline_aligned_in_smp DEFINE_SPINLOCK(vfsmount_lock);
+
+
+/// begin actual access
+
+#define INIT_LIST_HEAD(ptr) do { \
+	(ptr)->next = (ptr); (ptr)->prev = (ptr); \
+
+/**
+ * list_del_init - deletes entry from list and reinitialize it.
+ * @entry: the element to delete from the list.
+ */
+static inline void list_del_init(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	INIT_LIST_HEAD(entry);                    <<<< HERE?!
+}
+
+-------
+SECOND
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = LIST_POISON1;
+	entry->prev = LIST_POISON2;
+}
+
+
+------
+Not sure where the actual second access is, but let's look at where
+the first access is made empty!
+
+static int __emul_lookup_dentry(const char *name, struct nameidata *nd)
+{
+	if (path_walk(name, nd))
+		return 0;		/* something went wrong... */
+
+	if (!nd->dentry->d_inode || S_ISDIR(nd->dentry->d_inode->i_mode)) {
+		struct dentry *old_dentry = nd->dentry;
+		struct vfsmount *old_mnt = nd->mnt;
+		struct qstr last = nd->last;
+		int last_type = nd->last_type;
+		/*
+		 * NAME was not found in alternate root or it's a directory.  Try to find
+		 * it in the normal root:
+		 */
+		nd->last_type = LAST_ROOT;
+		read_lock(&current->fs->lock);
+		nd->mnt = mntget(current->fs->rootmnt);
+		nd->dentry = dget(current->fs->root);
+		read_unlock(&current->fs->lock);
+		if (path_walk(name, nd) == 0) {           <<<< HERE?!
+			if (nd->dentry->d_inode) {
+				dput(old_dentry);
+				mntput(old_mnt);
+				return 1;
+			}
+			path_release(nd);
+		}
+		nd->dentry = old_dentry;
+		nd->mnt = old_mnt;
+		nd->last = last;
+		nd->last_type = last_type;
+	}
+	return 1;
+}
+
+
+Hmmm... seems unrelated
+
+
+
+===============================================
+Possible race between access to:
+        _a137_406304_mempool : mm/mempool.c:115 and
+        _a137_406304_mempool : mm/mempool.c:115
+        Accessed at locs:
+        fs/bio.c:141 and
+        net/sunrpc/sched.c:898
+
+(0)
+        LS for 1st access:
+L+ = empty;
+        made empty at: :-1   <<< It was always empty?
+        LS for 2nd access:
+L+ = {childq.lock#tbd, } (1)
+
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+
+-----------
+Allocation:
+
+
+/**
+ * mempool_resize - resize an existing memory pool
+ * @pool:       pointer to the memory pool which was allocated via
+ *              mempool_create().
+ * @new_min_nr: the new minimum number of elements guaranteed to be
+ *              allocated for this pool.
+ * @gfp_mask:   the usual allocation bitmask.
+ *
+ * This function shrinks/grows the pool. In the case of growing,
+ * it cannot be guaranteed that the pool will be grown to the new
+ * size immediately, but new mempool_free() calls will refill it.
+ *
+ * Note, the caller must guarantee that no mempool_destroy is called
+ * while this function is running. mempool_alloc() & mempool_free()
+ * might be called (eg. from IRQ contexts) while this function executes.
+ */
+int mempool_resize(mempool_t *pool, int new_min_nr, gfp_t gfp_mask)
+{
+	void *element;
+	void **new_elements;
+	unsigned long flags;
+
+	BUG_ON(new_min_nr <= 0);
+
+	spin_lock_irqsave(&pool->lock, flags);
+	if (new_min_nr <= pool->min_nr) {
+		while (new_min_nr < pool->curr_nr) {
+			element = remove_element(pool);
+			spin_unlock_irqrestore(&pool->lock, flags);
+			pool->free(element, pool->pool_data);
+			spin_lock_irqsave(&pool->lock, flags);
+		}
+		pool->min_nr = new_min_nr;
+		goto out_unlock;
+	}
+	spin_unlock_irqrestore(&pool->lock, flags);
+
+	/* Grow the pool */
+	new_elements = kmalloc(new_min_nr * sizeof(*new_elements), gfp_mask);
+
+                  ^^^ HERE
+
+
+	if (!new_elements)
+		return -ENOMEM;
+
+	spin_lock_irqsave(&pool->lock, flags);
+	if (unlikely(new_min_nr <= pool->min_nr)) {
+		/* Raced, other resize will do our work */
+		spin_unlock_irqrestore(&pool->lock, flags);
+		kfree(new_elements);
+		goto out;
+	}
+	memcpy(new_elements, pool->elements,
+			pool->curr_nr * sizeof(*new_elements));
+	kfree(pool->elements);
+	pool->elements = new_elements;
+	pool->min_nr = new_min_nr;
+
+	while (pool->curr_nr < pool->min_nr) {
+		spin_unlock_irqrestore(&pool->lock, flags);
+		element = pool->alloc(gfp_mask, pool->pool_data);
+		if (!element)
+			goto out;
+		spin_lock_irqsave(&pool->lock, flags);
+		if (pool->curr_nr < pool->min_nr) {
+			add_element(pool, element);
+		} else {
+			spin_unlock_irqrestore(&pool->lock, flags);
+			pool->free(element, pool->pool_data);	/* Raced */
+			goto out;
+		}
+	}
+out_unlock:
+	spin_unlock_irqrestore(&pool->lock, flags);
+out:
+	return 0;
+}
+EXPORT_SYMBOL(mempool_resize);
+
+
+------
+FIRST
+
+inline void bio_init(struct bio *bio)
+{
+	bio->bi_next = NULL;
+	bio->bi_flags = 1 << BIO_UPTODATE;
+	bio->bi_rw = 0;
+	bio->bi_vcnt = 0;
+	bio->bi_idx = 0;
+	bio->bi_phys_segments = 0;
+	bio->bi_hw_segments = 0;
+	bio->bi_hw_front_size = 0;
+	bio->bi_hw_back_size = 0;
+	bio->bi_size = 0;
+	bio->bi_max_vecs = 0;
+	bio->bi_end_io = NULL;
+	atomic_set(&bio->bi_cnt, 1);
+	bio->bi_private = NULL;           <<<< HERE?
+}
+
+
+------
+SECOND
+
+/**
+ * rpc_find_parent - find the parent of a child task.
+ * @child: child task
+ *
+ * Checks that the parent task is still sleeping on the
+ * queue 'childq'. If so returns a pointer to the parent.
+ * Upon failure returns NULL.
+ *
+ * Caller must hold childq.lock
+ */
+static inline struct rpc_task *rpc_find_parent(struct rpc_task *child)
+{
+	struct rpc_task	*task, *parent;
+	struct list_head *le;
+
+	parent = (struct rpc_task *) child->tk_calldata;   <<<< HERE?
+	task_for_each(task, le, &childq.tasks[0])
+		if (task == parent)
+			return parent;
+
+	return NULL;
+}
+
+
+------
+
+No idea how they are even related.. but at least the second access
+obeys the comment and holds childq.lock!
+
+
+
+
+===============================================
+Possible race between access to:
+((sigqueue_cachep->nodelists[0])->slabs_free.next)->inuse : kernel/signal.c:37
+((sigqueue_cachep->nodelists[0])->slabs_free.next)->inuse : kernel/signal.c:37
+        Accessed at locs:
+        mm/slab.c:2430 and
+        mm/slab.c:2723
+
+(0)
+        LS for 1st access:
+L+ = empty;
+        LS for 2nd access:
+L+ = empty;
+        made empty at: fs/nfs/inode.c:1012
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+(1)
+        LS for 1st access:
+L+ = empty;
+        made empty at: fs/nfs/inode.c:1012
+        LS for 2nd access:
+L+ = empty;
+        made empty at: fs/nfs/inode.c:1012
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+(2)
+        LS for 1st access:
+L+ = {(sigqueue_cachep->nodelists[0])->list_lock#tbd, } (1)
+        LS for 2nd access:
+L+ = empty;
+        made empty at: fs/nfs/nfs4state.c:950
+        Th. 1 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+        Th. 2 spawned: fs/nfs/nfs4state.c:755 w/ func: reclaimer
+
+/*
+ * SLAB caches for signal bits.
+ */
+
+static kmem_cache_t *sigqueue_cachep;
+
+
+------
+FIRST
+
+static void *cache_alloc_refill(kmem_cache_t *cachep, gfp_t flags)
+{
+    ...
+
+    ac = ac_data(cachep);
+	l3 = cachep->nodelists[numa_node_id()];
+
+	BUG_ON(ac->avail > 0 || !l3);
+	spin_lock(&l3->list_lock);
+
+    ...
+
+	while (batchcount > 0) {
+		struct list_head *entry;
+		struct slab *slabp;
+
+    ...
+
+		slabp = list_entry(entry, struct slab, list);
+		check_slabp(cachep, slabp);
+		check_spinlock_acquired(cachep);
+
+		while (slabp->inuse < cachep->num && batchcount--) {
+            ...
+
+			slabp->inuse++;                            <<<< HERE
+
+
+			next = slab_bufctl(slabp)[slabp->free];
+
+            ...
+		    slabp->free = next;
+		}
+		check_slabp(cachep, slabp);
+
+		/* move slabp to correct slabp list: */
+		list_del(&slabp->list);
+		if (slabp->free == BUFCTL_END)
+			list_add(&slabp->list, &l3->slabs_full);
+		else
+			list_add(&slabp->list, &l3->slabs_partial);
+	}
+
+must_grow:
+	l3->free_objects -= ac->avail;
+alloc_done:
+	spin_unlock(&l3->list_lock);
+
+    ...
+}
+
+
+------
+SECOND
+
+
+static void cache_flusharray(kmem_cache_t *cachep, struct array_cache *ac)
+{
+	int batchcount;
+	struct kmem_list3 *l3;
+	int node = numa_node_id();
+
+    ...
+
+	l3 = cachep->nodelists[node];
+	spin_lock(&l3->list_lock);
+	if (l3->shared) {
+	    ...
+	}
+
+	free_block(cachep, ac->entry, batchcount, node);
+free_done:
+#if STATS
+	{
+		int i = 0;
+		struct list_head *p;
+
+		p = l3->slabs_free.next;
+		while (p != &(l3->slabs_free)) {
+			struct slab *slabp;
+
+			slabp = list_entry(p, struct slab, list);
+			BUG_ON(slabp->inuse);                      <<<< HERE
+
+			i++;
+			p = p->next;
+		}
+		STATS_SET_FREEABLE(cachep, i);
+	}
+#endif
+
+	spin_unlock(&l3->list_lock);
+
+
+	ac->avail -= batchcount;
+	memmove(ac->entry, &(ac->entry[batchcount]),
+			sizeof(void*)*ac->avail);
+}
+
+
+------
+
+Lock is actually held at this second access, but let's look at where
+the LS was actually made empty, eh?
+
+The thread root:
+
+static int reclaimer(void *ptr)
+{
+	struct reclaimer_args *args = (struct reclaimer_args *)ptr;
+	struct nfs4_client *clp = args->clp;
+	struct nfs4_state_owner *sp;
+	struct nfs4_state_recovery_ops *ops;
+	int status = 0;
+
+	daemonize("%u.%u.%u.%u-reclaim", NIPQUAD(clp->cl_addr));
+	allow_signal(SIGKILL);
+
+	atomic_inc(&clp->cl_count);
+	complete(&args->complete);
+
+	/* Ensure exclusive access to NFSv4 state */
+	lock_kernel();
+	down_write(&clp->cl_sem);
+	/* Are there any NFS mounts out there? */
+	if (list_empty(&clp->cl_superblocks))
+		goto out;
+
+
+restart_loop:
+
+    ...
+
+	nfs_delegation_reap_unclaimed(clp);
+out:
+	set_bit(NFS4CLNT_OK, &clp->cl_state);
+	up_write(&clp->cl_sem);
+	unlock_kernel();
+	wake_up_all(&clp->cl_waitq);
+	rpc_wake_up(&clp->cl_rpcwaitq);
+	if (status == -NFS4ERR_CB_PATH_DOWN)
+		nfs_handle_cb_pathdown(clp);
+
+	nfs4_put_client(clp);                <<<< HERE
+
+	return 0;
+out_error:
+    ...
+	goto out;
+}
+
+which is a call to:
+
+void
+nfs4_put_client(struct nfs4_client *clp)
+{
+	if (!atomic_dec_and_lock(&clp->cl_count, &state_spinlock))
+		return;
+	list_del(&clp->cl_servers);
+	spin_unlock(&state_spinlock);
+	BUG_ON(!list_empty(&clp->cl_superblocks));
+	wake_up_all(&clp->cl_waitq);
+	rpc_wake_up(&clp->cl_rpcwaitq);
+	nfs4_kill_renewd(clp);
+	nfs4_free_client(clp);
+}
+
+
+Hmm... no clue where to go next... call chain is huge
+
+
+================
+
+And that's it for the one's w/ at least one lock held!
+
+(21 of them!)
+
+================
+
+Now the others...
+
+

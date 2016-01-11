@@ -11,7 +11,7 @@ module L = Logging
 
 module Make (I:Summarizeable) = struct
   
-  module Base = Make(I) (* Backed_summary's *)
+  module Base = Make(I) (* Backed_summary's Make *)
 
   type sum = I.t
 

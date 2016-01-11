@@ -81,13 +81,9 @@ let initCilIDs () =
       failwith "Need to load VID ranges first!"
     ;
     let maxVID = RangeMap.fold
-      (fun {r_upper = u;} _ curMax ->
-         max curMax u
-      ) !vidToFile (-1) in
+      (fun r _ curMax -> max curMax r.r_upper) !vidToFile (-1) in
     let maxCKey = RangeMap.fold
-      (fun {r_upper = u;} _ curMax ->
-         max curMax u
-      ) !ckeyToFile (-1) in
+      (fun r _ curMax -> max curMax r.r_upper) !ckeyToFile (-1) in
     Cil.setNextVID (maxVID + 1);
     Cil.setNextCKey (maxCKey + 1);
     cilIDsSet := true
@@ -98,8 +94,8 @@ let initCache cache ranges minSize =
      at least that big to avoid thrashing! TODO: also compare to largest 
      points-to-set size *)
   let maxRange = RangeMap.fold
-    (fun {r_lower = l; r_upper = u;} _ curMax ->
-       let range = u - l in
+    (fun r _ curMax ->
+       let range = r.r_upper - r.r_lower in
        max curMax range
     ) !ranges (-1) in
   if (maxRange <= minSize) then ()
@@ -118,30 +114,58 @@ let initVidCache () =
 let initCKeyCache () =
   initCache ckeyToCinfo ckeyToFile minCKCacheSize
 
-exception NoCilinfo of int
+exception NoVarinfo of int
+exception NoCompinfo of int
 
 let getInfo id cache distiller ranges fnameCache =
-  try
-    IDC.find cache id
+  if not !rangesLoaded then
+    failwith "getInfo before ranges are loaded?"
+  else try
+    Some (IDC.find cache id)
   with Not_found ->
+    let range = { r_lower = id; r_upper = id; } in
     try
-      let filename = RangeMap.find { r_lower = id;
-                                     r_upper = id; } !ranges in
+      let filename = RangeMap.find range !ranges in
       let index = !fnameCache#getFile filename in
       let info = Inthash.find index id in
       distiller info;
-      IDC.add cache id info;
-      info
-    with Not_found -> (* Translate exception just in case... *)
-      raise (NoCilinfo id)
+      ignore (IDC.add cache id info);
+      Some (info)
+    with Not_found -> 
+      if RangeMap.mem range !ranges then begin
+        let filename = RangeMap.find range !ranges in
+        logErrorF "Info for %d Not Found in file %s\n" id filename
+      end else begin
+        logError "Rangemap NF:";
+        RangeMap.iter 
+          (fun range file ->
+             logErrorF "[%d, %d] -> %s, " range.r_lower range.r_upper file
+          ) !ranges;
+        logError "";
+      end;
+      None
 
+let nopDistiller x = x
 
 (** get the varinfo matching the given vid *)
 let getVarinfo (id:int) : varinfo =
-  getInfo id vidToVar Cil_lvals.distillVar vidToFile DC.viFCache
+  match getInfo id vidToVar (* Cil_lvals.distillVar *) nopDistiller
+    vidToFile DC.viFCache with
+      Some vi -> vi
+    | None -> raise (NoVarinfo id)
 
 let getCinfo (id:int) : compinfo =
-  getInfo id ckeyToCinfo Cil_lvals.distillCompinfo ckeyToFile DC.ciFCache
+  match getInfo id ckeyToCinfo (* Cil_lvals.distillCompinfo *) nopDistiller
+    ckeyToFile DC.ciFCache with
+      Some ci -> ci
+    | None -> raise (NoCompinfo id)
+
+(** New versions of get fields that reference the standard version *)
+let getCompfields ci = 
+  let goldenCI = getCinfo ci.ckey in
+  goldenCI.cfields
+let setCompfields ci fields =
+  failwith "Shouldn't setSompfields once the structs are finalized"
   
 (** look for a global w/ the given name *)
 let varinfo_of_name (n:string) : varinfo option =
@@ -166,14 +190,22 @@ let varinfo_of_name (n:string) : varinfo option =
 
 (** Load the mapping between VID/Compinfo key ranges and source file *)
 let reloadRanges fname = begin
-  logStatus "Loading Cil Varinfo ID ranges for lookup tables";
-  let ids, cks = Id_fixer.loadRanges fname in
-  vidToFile := ids;
-  ckeyToFile := cks;
-  rangesLoaded := true;
-  initCilIDs ();
-  initVidCache ();
-  initCKeyCache ();
+  if !rangesLoaded then begin
+    logStatus "Ranges already loaded";
+  end else begin
+    logStatus "Loading Cil Varinfo ID ranges for lookup tables";
+    let ids, cks = Id_fixer.loadRanges fname in
+    vidToFile := ids;
+    ckeyToFile := cks;
+    rangesLoaded := true;
+    initCilIDs ();
+    initVidCache ();
+    initCKeyCache ();
+
+    (* Change the cfield getter/setters *)
+    Cil.getCfields := getCompfields;
+    Cil.setCfields := setCompfields;
+  end;
 end
 
 
@@ -232,7 +264,7 @@ let getFunc fKey deffile : fundec option =
       let oldLoc = !currentLoc in
       let cfg = getCFG fKey ast in (* may modify currentLoc *)
       currentLoc := oldLoc;
-      CFGC.add cfgCache fKey cfg;
+      ignore (CFGC.add cfgCache fKey cfg);
       cfg
   with FC.File_not_found fname ->
     logError ("getFunc/CFG: can't find " ^ fname);
@@ -244,13 +276,19 @@ let iterInfos (foo: 'a -> unit) ranges distiller fnameCache =
     (fun { r_lower = l; r_upper = r } file ->
        let index = !fnameCache#getFile file in
        for id = l to r do  
-         try 
-           let info = Inthash.find index id in
-           distiller info;
-           foo info
-         with Not_found -> () (* may catch Not_founds from foo too... *)
+         let infoOpt = 
+           try 
+             let info = Inthash.find index id in
+             distiller info;
+             Some info
+           with Not_found -> None
+         in
+         match infoOpt with
+           Some info -> foo info
+         | None -> ()
        done
     ) !ranges
 
 let iterCompinfos (foo: compinfo -> unit) =
-  iterInfos foo ckeyToFile Cil_lvals.distillCompinfo DC.ciFCache
+  iterInfos foo ckeyToFile (* Cil_lvals.distillCompinfo *) nopDistiller
+    DC.ciFCache

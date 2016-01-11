@@ -43,3 +43,15 @@ let sumKey_of_string str =
 let inputFreeSumKey fkey = wildCardkey fkey
 
 let fkey_of_sumKey ((fk, _):sumKey) = fk
+
+(** Convenient module for making funIDs out of sumKeys *)
+module FunIDSumKey = struct
+
+  type funID = sumKey
+  let compare a b = compareSumKey a b
+  let equal a b = compareSumKey a b == 0
+  let hash x = Hashtbl.hash x
+
+  let funIDToSumKey x = x
+
+end

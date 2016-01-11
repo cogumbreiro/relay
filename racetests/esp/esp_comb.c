@@ -1,31 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 typedef struct {
         unsigned long fds_bits [(1024/(8 * sizeof(unsigned long)))];
 } __kernel_fd_set;
-
-
 typedef void (*__kernel_sighandler_t)(int);
-
-
 typedef int __kernel_key_t;
 typedef int __kernel_mqd_t;
-
 typedef unsigned long __kernel_ino_t;
 typedef unsigned short __kernel_mode_t;
 typedef unsigned short __kernel_nlink_t;
@@ -48,71 +26,33 @@ typedef unsigned short __kernel_uid16_t;
 typedef unsigned short __kernel_gid16_t;
 typedef unsigned int __kernel_uid32_t;
 typedef unsigned int __kernel_gid32_t;
-
 typedef unsigned short __kernel_old_uid_t;
 typedef unsigned short __kernel_old_gid_t;
 typedef unsigned short __kernel_old_dev_t;
-
-
 typedef long long __kernel_loff_t;
-
-
 typedef struct {
-
-        int val[2];
-
-
-
+  int val[2];
 } __kernel_fsid_t;
-
-
-
-
-
 typedef unsigned short umode_t;
-
-
-
-
-
-
 typedef __signed__ char __s8;
 typedef unsigned char __u8;
-
 typedef __signed__ short __s16;
 typedef unsigned short __u16;
-
 typedef __signed__ int __s32;
 typedef unsigned int __u32;
-
-
 typedef __signed__ long long __s64;
 typedef unsigned long long __u64;
 typedef signed char s8;
 typedef unsigned char u8;
-
 typedef signed short s16;
 typedef unsigned short u16;
-
 typedef signed int s32;
 typedef unsigned int u32;
-
 typedef signed long long s64;
 typedef unsigned long long u64;
-
-
-
-
 typedef u64 dma_addr_t;
-
-
-
 typedef u64 dma64_addr_t;
-
-
-
 typedef __u32 __kernel_dev_t;
-
 typedef __kernel_fd_set fd_set;
 typedef __kernel_dev_t dev_t;
 typedef __kernel_ino_t ino_t;
@@ -126,43 +66,18 @@ typedef __kernel_suseconds_t suseconds_t;
 typedef __kernel_timer_t timer_t;
 typedef __kernel_clockid_t clockid_t;
 typedef __kernel_mqd_t mqd_t;
-
-
 typedef __kernel_uid32_t uid_t;
 typedef __kernel_gid32_t gid_t;
 typedef __kernel_uid16_t uid16_t;
 typedef __kernel_gid16_t gid16_t;
-
-
-
 typedef __kernel_old_uid_t old_uid_t;
 typedef __kernel_old_gid_t old_gid_t;
 typedef __kernel_loff_t loff_t;
 typedef __kernel_size_t size_t;
-
-
-
-
 typedef __kernel_ssize_t ssize_t;
-
-
-
-
 typedef __kernel_ptrdiff_t ptrdiff_t;
-
-
-
-
 typedef __kernel_time_t time_t;
-
-
-
-
 typedef __kernel_clock_t clock_t;
-
-
-
-
 typedef __kernel_caddr_t caddr_t;
 
 
@@ -206,12 +121,7 @@ typedef __u32 __be32;
 
 typedef __u64 __le64;
 typedef __u64 __be64;
-
-
-
 typedef unsigned gfp_t;
-
-
 struct ustat {
         __kernel_daddr_t f_tfree;
         __kernel_ino_t f_tinode;
@@ -228,88 +138,67 @@ typedef struct __user_cap_data_struct {
         __u32 permitted;
         __u32 inheritable;
 } *cap_user_data_t;
-
-
-
-
-
-
-
-
-
 struct restart_block {
         long (*fn)(struct restart_block *);
         unsigned long arg0, arg1, arg2, arg3;
 };
-
 extern long do_no_restart_syscall(struct restart_block *parm);
-
 static inline __attribute__((always_inline)) int generic_ffs(int x)
 {
-        int r = 1;
+  int r = 1;
 
-        if (!x)
-                return 0;
-        if (!(x & 0xffff)) {
-                x >>= 16;
-                r += 16;
-        }
-        if (!(x & 0xff)) {
-                x >>= 8;
-                r += 8;
-        }
-        if (!(x & 0xf)) {
-                x >>= 4;
-                r += 4;
-        }
-        if (!(x & 3)) {
-                x >>= 2;
-                r += 2;
-        }
-        if (!(x & 1)) {
-                x >>= 1;
-                r += 1;
-        }
-        return r;
+  if (!x)
+    return 0;
+  if (!(x & 0xffff)) {
+    x >>= 16;
+    r += 16;
+  }
+  if (!(x & 0xff)) {
+    x >>= 8;
+    r += 8;
+  }
+  if (!(x & 0xf)) {
+    x >>= 4;
+    r += 4;
+  }
+  if (!(x & 3)) {
+    x >>= 2;
+    r += 2;
+  }
+  if (!(x & 1)) {
+    x >>= 1;
+    r += 1;
+  }
+  return r;
 }
-
-
-
-
-
 static __inline__ __attribute__((always_inline)) int generic_fls(int x)
 {
-        int r = 32;
+  int r = 32;
 
-        if (!x)
-                return 0;
-        if (!(x & 0xffff0000u)) {
-                x <<= 16;
-                r -= 16;
-        }
-        if (!(x & 0xff000000u)) {
-                x <<= 8;
-                r -= 8;
-        }
-        if (!(x & 0xf0000000u)) {
-                x <<= 4;
-                r -= 4;
-        }
-        if (!(x & 0xc0000000u)) {
-                x <<= 2;
-                r -= 2;
-        }
-        if (!(x & 0x80000000u)) {
-                x <<= 1;
-                r -= 1;
-        }
-        return r;
+  if (!x)
+    return 0;
+  if (!(x & 0xffff0000u)) {
+    x <<= 16;
+    r -= 16;
+  }
+  if (!(x & 0xff000000u)) {
+    x <<= 8;
+    r -= 8;
+  }
+  if (!(x & 0xf0000000u)) {
+    x <<= 4;
+    r -= 4;
+  }
+  if (!(x & 0xc0000000u)) {
+    x <<= 2;
+    r -= 2;
+  }
+  if (!(x & 0x80000000u)) {
+    x <<= 1;
+    r -= 1;
+  }
+  return r;
 }
-
-
-
-
-
 static inline __attribute__((always_inline)) void set_bit(int nr, volatile unsigned long * addr)
 {
         __asm__ __volatile__( "lock ; "
@@ -393,8 +282,6 @@ static inline __attribute__((always_inline)) int __test_and_clear_bit(int nr, vo
                 :"Ir" (nr));
         return oldbit;
 }
-
-
 static inline __attribute__((always_inline)) int __test_and_change_bit(int nr, volatile unsigned long *addr)
 {
         int oldbit;
@@ -453,21 +340,7 @@ static inline __attribute__((always_inline)) int find_first_zero_bit(const unsig
                 :"1" ((size + 31) >> 5), "2" (addr), "b" (addr) : "memory");
         return res;
 }
-
-
-
-
-
-
-
 int find_next_zero_bit(const unsigned long *addr, int size, int offset);
-
-
-
-
-
-
-
 static inline __attribute__((always_inline)) unsigned long __ffs(unsigned long word)
 {
         __asm__("bsfl %1,%0"
@@ -487,11 +360,6 @@ static inline __attribute__((always_inline)) int find_first_bit(const unsigned l
         }
         return x;
 }
-
-
-
-
-
 
 
 int find_next_bit(const unsigned long *addr, int size, int offset);
@@ -670,12 +538,6 @@ struct vm86_struct {
         struct revectored_struct int_revectored;
         struct revectored_struct int21_revectored;
 };
-
-
-
-
-
-
 struct vm86plus_info_struct {
         unsigned long force_return_for_pic:1;
         unsigned long vm86dbg_active:1;
@@ -695,9 +557,6 @@ struct vm86plus_struct {
         struct vm86plus_info_struct vm86plus;
 };
 struct kernel_vm86_regs {
-
-
-
         long ebx;
         long ecx;
         long edx;
@@ -713,9 +572,6 @@ struct kernel_vm86_regs {
         long eflags;
         long esp;
         unsigned short ss, __ssh;
-
-
-
         unsigned short es, __esh;
         unsigned short ds, __dsh;
         unsigned short fs, __fsh;

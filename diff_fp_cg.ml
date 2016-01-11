@@ -195,7 +195,7 @@ module NormalDiff = struct
       sprint 80 doc
 
   let diffs_to_string cg diffs =
-    let doc = seq_to_doc (text "; ") List.iter
+    let doc = seq_to_doc (text ";\n") List.iter
       (fun callT ->
          match callT with
            CDirect (pp, fid) -> 

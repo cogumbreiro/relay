@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 #-- read the warnings file and count frequency of lvals, etc.
 

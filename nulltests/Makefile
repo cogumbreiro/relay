@@ -1,17 +1,14 @@
 RELAY_DIR := $(PWD)/..
-NULL_ALL := ./nullset.sh
-DUMPER = $(RELAY_DIR)/scripts/dump-with-stats.sh
-
-# re-run whenever the binaries change
-BINS := race_temp_anal.exe nullset_seq.exe nullset_race.exe nullset_adj_l.exe nullset_adj_nl.exe nullset_pess.exe
-
-# where to place results
+NULL_ALL := ./null_check.sh
+BINS := race_temp_anal.exe nullset_radar.exe nullset_race.exe
+CLEANER = make clean
+DUMPER = make
 OUT_DIR := out
 OLD_OUT := oldout
 START_DIR = $(PWD)
 
 # what to test
-SMALL_TESTS = caller_proves all_unlocks g i k l
+SMALL_TESTS = simple caller_proves all_unlocks all_unlocks2 g i k pldi_prod_cons pldi_prod_cons1 pldi_prod_cons2
 LARGE_TESTS = 
 
 ALL_TESTS = $(SMALL_TESTS) $(LARGE_TESTS)
@@ -31,6 +28,7 @@ diff_c:
 #---------------------------------------------------
 # Run the tests and make .out / .err logs
 
+
 # force output directory to exist
 init:
 	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
@@ -40,8 +38,8 @@ init:
 $(OUT_DIR)/%.out: %/ciltrees $(BINS:%=$(RELAY_DIR)/%)
 	@ echo "testing: " $(PWD)/$@
 	@ cd $(RELAY_DIR) ; \
-	   $(NULL_ALL) $(START_DIR)/$< > /dev/null 2>&1 ; \
-	   mv log $(START_DIR)/$@ 
+	   $(NULL_ALL) $(START_DIR)/$</ > /dev/null 2>&1 ; \
+	   cp $(START_DIR)/$</log_nullset_rad $(START_DIR)/$@ 
 
 
 # regenerate the ciltrees whenever the sources change
@@ -52,18 +50,16 @@ $(OUT_DIR)/%.out: %/ciltrees $(BINS:%=$(RELAY_DIR)/%)
 
 
 #---------------------------------------------------
-# Clean up... should it also delete the ciltrees?
+# Clean up individual test dirs (not the output dir)
 
 .PHONY: clean
 
 clean:
-	$(foreach dir,$(SMALL_TESTS),cd $(dir); make clean; cd ..;)
+	$(foreach dir,$(SMALL_TESTS),cd $(dir); $(CLEANER);cd ..;)
 
 renew_small:
-	$(foreach dir,$(SMALL_TESTS),rm -rf $(dir)/ciltrees; \
-	cd $(dir); $(DUMPER); cd ..)
+	$(foreach dir,$(SMALL_TESTS),cd $(dir); $(CLEANER); $(DUMPER);cd ..;)
 
 renew_large:
-	$(foreach dir,$(LARGE_TESTS),rm -rf $(dir)/ciltrees; \
-	cd $(dir); $(DUMPER); cd ..)
+	$(foreach dir,$(LARGE_TESTS),cd $(dir); $(CLEANER); $(DUMPER);cd ..;)
 

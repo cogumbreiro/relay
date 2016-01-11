@@ -1,4 +1,3 @@
-
 (*
   Copyright (c) 2006-2007, Regents of the University of California
 
@@ -72,6 +71,7 @@ class virtual aliasAnalyzer = object (self)
 
   (* Interface for Cil values *)
 
+  (* Deprecated: Use Callg module's functions w/ "current" program point *)
   method virtual deref_funptr : Cil.exp -> (fKey list)
 
   method virtual may_alias : Cil.exp -> Cil.exp -> bool
@@ -506,7 +506,7 @@ end
 (***** OIC Callgraph *****)
 
 class oicFPAnalysis = object (self)
-  inherit andersAnalyzer as super
+  inherit dummyAnalyzer as super
     
   initializer
     logStatus "Initializing OIC FP info"
@@ -520,7 +520,7 @@ end
 (***** DSA Callgraph *****)
 
 class dsaFPAnalysis = object (self)
-  inherit andersAnalyzer as super
+  inherit dummyAnalyzer as super
     
   initializer
     logStatus "Initializing DSA FP info"
@@ -533,7 +533,7 @@ end
 (***** AndersFS Callgraph *****)
 
 class andersFSFPAnalysis = object (self)
-  inherit andersAnalyzer as super
+  inherit dummyAnalyzer as super
     
   initializer
     logStatus "Initializing AndersFS FP info"

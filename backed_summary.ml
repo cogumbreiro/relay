@@ -47,6 +47,7 @@ open Statfs
 open Logging
 open Summary_keys
 open Callg 
+open Scc_cg
 
 (************************************************************
      Summary Storage Locations
@@ -413,12 +414,15 @@ class type dbManagement = object
       (e.g., the initial/bottom summaries) *)
   method locate : sumKey list -> (sumKey * dbToken) list
     
+  (** Given a fkey, return other summaries that this may depend on *)
+  method getDependentKeys : sumKey list -> (sumKey * dbManagement) list
+
   method sizeInMem : unit -> int
 
   method sizesOf : sumKey list -> (sumKey * int) list
 
   (** Initialize the summaries for special functions / external funcs *)
-  method initSummaries : Config.settings -> callG -> unit
+  method initSummaries : Config.settings -> callG -> sccGraph -> unit
 
 
 end
@@ -471,6 +475,100 @@ module type S  = sig
 
   (** Implementation for the database interface *)
   class data : sumType -> [sum] base
+
+end
+
+
+(************************************************************)
+(* Implementations *)
+
+let notSupported str =
+  failwith (str ^ " on NoneSummary")
+
+(** None-summary for intra-procedural analyses database *)
+class ['sum] noneSummary sumID : ['sum] base = object (self) 
+
+  val mutable initialized = false
+  val summs = SM.empty
+    
+  method find (sk: sumKey) : 'sum =
+    notSupported "Find"
+    
+  method addReplace (sk : sumKey) (s : 'sum) : unit =
+    notSupported "addReplace"
+        
+  method private addReplaceBase (sk : sumKey) (sstub : 'sum sumStub) : unit = 
+    notSupported "addReplaceBase"
+
+  method private willAdd (sk : sumKey) =
+    notSupported "willAdd"
+
+  method getFromFile (str:string) : 'sum =
+    notSupported "getFromFile"
+        
+  method private serialize (sk: sumKey) (s: 'sum) : dbToken =
+    notSupported "serialize"
+    
+  method private deserialize (sk: sumKey) (t: dbToken) : 'sum * dbToken =
+    notSupported "deserialize"
+
+  method private checkInit : unit =
+    notSupported "checkInit"
+    
+  method err (str: string) : unit =
+    notSupported "err"
+    
+  method fold : 'a. (sumKey -> 'sum -> 'a -> 'a) -> 'a -> 'a =
+    fun folder acc ->
+      notSupported "fold"
+
+  method foldOnKey : 'a. (sumKey -> 'sum -> 'a -> 'a) -> fKey -> 'a -> 'a =
+    fun folder key acc ->
+      notSupported "foldOnKey"
+
+  method sumTyp : sumType =
+    sumID
+
+  method cleanup () : unit =
+    ()
+
+  method serializeAndFlush : unit =
+    ()
+    
+  method evictSummaries : unit =
+    ()
+
+  method assumeComplete (keys : ((sumKey * dbToken) list)) : unit  =
+    ()
+      
+  method flushOne (sk : sumKey) : unit =
+    ()
+      
+  method evictOne (sk : sumKey) : unit =
+    ()
+
+  method locate (sks: sumKey list) : (sumKey * dbToken) list =
+    []
+
+  method getDependentKeys (sks: sumKey list) : (sumKey * dbManagement) list =
+    let selfDB = (self :> dbManagement) in
+    List.map (fun sk -> (sk, selfDB)) sks  (* reflexive dependency only *)
+
+  method sizeInMem (): int =
+    notSupported "sizeInMem"
+
+  method sizesOf (sks: sumKey list) : (sumKey * int) list =
+    notSupported "sizesOf"
+
+  method initSummaries (settings: Config.settings) (cg:callG) (sccCG: sccGraph) 
+    : unit =
+    (* set everything to final... *)
+    FMap.iter 
+      (fun k _ ->
+         let fkey = fid_to_fkey k in
+         let key = wildCardkey fkey in
+         setFinal key (self#sumTyp)
+      ) cg
 
 end
 
@@ -670,6 +768,10 @@ module Make (I:Summarizeable) = struct
            with Not_found -> res
         ) [] keys
 
+    method getDependentKeys (sks: sumKey list) : (sumKey * dbManagement) list =
+      let selfDB = (self :> dbManagement) in
+      List.map (fun sk -> (sk, selfDB)) sks  (* reflexive dependency only *)
+
     method fold : 'a. (sumKey -> sum -> 'a -> 'a) -> 'a -> 'a =
       fun foo accum ->
         SM.fold 
@@ -719,7 +821,7 @@ module Make (I:Summarizeable) = struct
 
 
     (** Initialize the summaries for special functions / external funcs *)
-    method initSummaries (settings:Config.settings) cg =
+    method initSummaries (settings:Config.settings) (cg:callG) (sccCG:sccGraph) =
       self#initSumBodyless cg;
       initialized <- true
 
@@ -856,20 +958,20 @@ let setPathSettings settings cgDir =
   else
     setPaths (makePaths cgDir)
 
-let initASummary settings cg sum =
+let initASummary settings cg sccCG sum =
   logStatus ("Initializing summary " ^ (string_of_sumType sum#sumTyp));
   flushStatus ();
   sum#cleanup ();
-  sum#initSummaries settings cg
+  sum#initSummaries settings cg sccCG
 
-let initAllSummaries settings cg =
-  List.iter (initASummary settings cg) !allSumDBs
+let initAllSummaries settings cg sccCG =
+  List.iter (initASummary settings cg sccCG) !allSumDBs
     (* not super efficient because of multiple cg traversals, but oh well *)
 
 (** Initialize summary manager based on parsed config file [settings] *)
-let init settings cgDir cg = begin
+let init settings cgDir cg sccCG = begin
   setPathSettings settings cgDir;
-  initAllSummaries settings cg
+  initAllSummaries settings cg sccCG
 end
 
 

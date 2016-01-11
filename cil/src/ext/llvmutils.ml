@@ -94,7 +94,7 @@ let fieldIndexOf (fi:fieldinfo) : int =
   | [] -> raise Bug
   | fi' :: _ when fi' == fi -> n
   | _ :: fields' -> indexLoop fields' (n + 1)
-  in indexLoop fi.fcomp.cfields 0
+  in indexLoop (!getCfields fi.fcomp) 0
 
 (* Reduce a constant expression to its integer value - fail if it isn't possible *)
 let intConstValue (e:exp) : int64 = 

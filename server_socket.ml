@@ -258,7 +258,7 @@ module SCCWorkList  = struct
 
   let sccsTotal = ref 0   (* progress tracking *)
   let sccsDone = ref 0
-
+  let initialized = ref false
 
   (** Prune what's not needed to analyze thread roots *)
   let pruneCG cg sccCG =
@@ -369,18 +369,21 @@ module SCCWorkList  = struct
 
 
   let init () =
-    logStatus "Callgraph, etc.";
-    logStatus "-----";
-    flushStatus ();
-    
-    let cgFile = Dumpcalls.getCallsFile !cgDir in
-    let cg = readCalls cgFile in
-    let sccCG = getSCCGraph cg in
-    initASTTable cg;
-    if !pruneUnreachable then
-      initSCCWork (pruneCG cg sccCG)
-    else 
-      initSCCWork sccCG ;
+    if not !initialized then begin
+      logStatus "Reading callgraph, initializing work";
+      logStatus "-----";
+      flushStatus ();
+      
+      let cgFile = Dumpcalls.getCallsFile !cgDir in
+      let cg = readCalls cgFile in
+      let sccCG = getSCCGraph cg in
+      initASTTable cg;
+      if !pruneUnreachable then
+        initSCCWork (pruneCG cg sccCG)
+      else 
+        initSCCWork sccCG ;
+      initialized := true;
+    end
       
 end
 
@@ -389,7 +392,6 @@ end
 ************************************************************)
 
 module Work = SCCWorkList
-(* TODO: make work w/ context-sensitive callgraph *)
 
 let sccRequests = Queue.create () (** queue of clients waiting for work *)
 let hasSCCWork = ref true (** true if not waiting on dependencies *)
@@ -575,7 +577,11 @@ let serv listenSock () =
   bind listenSock (ADDR_INET (inet_addr_any, !serverPort));
   while (true) do
     listen listenSock listenQueueLen;
-    
+    (* Want to be able to listen early, so Work.init has been moved
+       to happen later (here -- in a loop), and changed to only initialize
+       the first time *)
+    Work.init ();  
+   
     let (clientSock, clientAddr) = accept listenSock in
     (* single-threaded version *)
     let (sock_in,sock_out) = 
@@ -614,44 +620,39 @@ let writeMyIP () =
   output_string outF ip_string;
   close_out outF
 
+let printFinal () =
+  Stat.print Pervasives.stdout "STATS:\n";
+  printStatistics ();
+  flushStatus ()
 
 let main () =
-  try
-    Arg.parse argSpecs anonArgFun usageMsg;
+  Arg.parse argSpecs anonArgFun usageMsg;
+  
+  (* Didn't know how to require the -cg file, etc., so check manually *)
+  if (!cgDir = "" || !serverConfig = "" || !clientConfig ="") then begin
+    Arg.usage argSpecs usageMsg;
+    exit 1
+  end else begin
+    Logging.combineLogs ();
+    Pervasives.at_exit printFinal;
+    Cil.initCIL ();
+    setGCConfig ();
+    writeMyIP ();
     
-    (* Didn't know how to require the -cg file, etc., so check manually *)
-    if (!cgDir = "" || !serverConfig = "" || !clientConfig ="") then begin
-      Arg.usage argSpecs usageMsg;
-      exit 1
-    end else begin
-      Cil.initCIL ();
-      setGCConfig ();
-
-      writeMyIP ();
-
-      initSettings ();
-      
-      if (!restart) then begin
-        logStatus "trying to clear logs";
-        flushStatus ();
-        Dis.clearState !gen_num;
-      end;
-
-      Work.init ();
-      
-      logStatus "Starting server";
-      logStatus "-----";
+    initSettings ();
+    
+    if (!restart) then begin
+      logStatus "trying to clear logs";
       flushStatus ();
-      startServer ();
-      quit 0;
-    end
-  with e -> 
-    logStatus ("Exc. in Server: " ^
-                    (Printexc.to_string e)) ;
-    Stat.print Pervasives.stdout "STATS:\n";
-    printStatistics ();
+      Dis.clearState !gen_num;
+    end;
+
+    logStatus "Starting server";
+    logStatus "-----";
     flushStatus ();
-    raise e
+    startServer ();
+    quit 0;
+  end
 ;;
 main () ;;
 

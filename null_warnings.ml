@@ -154,11 +154,11 @@ let printDiffs datFile1 datFile2 : unit =
 (********** Delta Summary Info **********)
 
 let getFname fid =
-  try 
+(*  try *)
     let fk = fid_to_fkey fid in
     let varinfo = Cilinfos.getVarinfo fk in
     varinfo.vname
-  with Cilinfos.NoCilinfo _ -> "?"
+(*  with Cilinfos.NoVarinfo _ -> "?" *)
 
 module ChainHash = Hashtbl.Make(
   struct
@@ -403,11 +403,12 @@ class derefAnalyzer stMan (getRns : prog_point -> Rns.RS.st) curFkey curCG =
 object(self)
   inherit Pp_visitor.ppVisitor 
     
-  val confirmations = Buffer.create 16
-  val warnings = Buffer.create 16
+  val mutable confirmations = []
+  val mutable warnings = []
 
   val mutable numDerefsSafe = 0
   val mutable numDerefsWarn = 0
+  val mutable numDelayed = 0
 
   val localSafe = new WarnR.report ()
   val localUnsafe = new WarnR.report ()
@@ -418,41 +419,50 @@ object(self)
   method getWarnings = warnings
   method getNumSafe = numDerefsSafe
   method getNumWarn = numDerefsWarn
+  method getNumDelayed = numDelayed
     
   (* TODO: record the original lval that was dereferenced + the
      lval that was used to prove nullness (in the case that the check 
      was delayed). Otherwise, the error messages are confusing *)
 
   method private tagResult loc alv caption : string =
-    Printf.sprintf "%s <- %s %s %s\n"
-      (Cildump.string_of_loc loc) (Cildump.string_of_loc !currentLoc)
-      caption (Lvals.string_of_lval alv)
+    if compareLoc loc !currentLoc == 0 then
+      Printf.sprintf "%s %s %s"  (Cildump.string_of_loc loc)
+        caption (Lvals.string_of_lval alv)
+    else 
+      Printf.sprintf "%s <- %s %s %s"
+        (Cildump.string_of_loc loc) (Cildump.string_of_loc !currentLoc)
+        caption (Lvals.string_of_lval alv)
 
 
   method confirmDereference loc alv chain =
-    Buffer.add_string confirmations (self#tagResult loc alv 
-                                       ": pointer safe: ");
-    numDerefsSafe <- numDerefsSafe + 1;
-    ignore (localSafe#addWarning loc (dummyNullData alv))
+    match localSafe#addWarning loc (dummyNullData alv) with
+      None | Some WarnR.OldCluster -> 
+        confirmations <- (self#tagResult loc alv "(S)") :: confirmations;
+        numDerefsSafe <- numDerefsSafe + 1;
+    | Some WarnR.MaxWarnings | Some WarnR.DupeWarning -> () (* didn't record *)
 
   method generateWarning loc alv chain crumbs imprec = 
-    Buffer.add_string warnings (self#tagResult loc alv 
-                                  ": pointer may be null: ");
-    numDerefsWarn <- numDerefsWarn + 1;
     let w = { nullLval = alv;
               nullChain = chain;
               nullCrumbs = crumbs;
               nullImprec = imprec; } in
-    ignore (localUnsafe#addWarning loc w)
+    match localUnsafe#addWarning loc w with
+      None | Some WarnR.OldCluster ->
+        warnings <- (self#tagResult loc alv "(N)") :: warnings;
+        numDerefsWarn <- numDerefsWarn + 1;
+    | Some WarnR.MaxWarnings | Some WarnR.DupeWarning -> ()
 
   method delayCheck loc alv chain =
     let w = { nullLval = alv;
               nullChain = chain;
               nullCrumbs = Rns.emptyCrumbs;
-              nullImprec = NotShown; } in 
-    (* Just make a dummy imprec thing for now *)
-    ignore (delayedChecks#addWarning loc w)
-
+              nullImprec = NotShown; (* make a dummy imprec thing for now *)
+            } in
+    match delayedChecks#addWarning loc w with
+      None | Some WarnR.OldCluster ->
+        numDelayed <- numDelayed + 1;
+    | Some WarnR.MaxWarnings | Some WarnR.DupeWarning -> () (* hmm... hit max? *)
 
   method isInPlus rns alv : bool =
     Rns.RNS.S.mem alv (stMan#getPlus rns)
@@ -807,15 +817,17 @@ object (self)
       checker#summarize key cfg;
     let numDerefsSafe = checker#getNumSafe in
     let numDerefsWarn = checker#getNumWarn in
+    let numDelayed = checker#getNumDelayed in
     let confirmations = checker#getConfirmations in
     let warnings = checker#getWarnings in
     L.logStatus "Null Pointer Warnings";
-    L.logStatus ("pointer derefs for function (" ^ 
-                   (fid_to_string key) ^ ") -" 
-                 ^ " safe: " ^ string_of_int numDerefsSafe
-                 ^ ", unsafe: " ^ string_of_int numDerefsWarn);
-    L.logStatusB confirmations;
-    L.logStatusB warnings;
+    L.logStatusF 
+      "derefs for function (%s) - safe: %d, unsafe: %d, delayed %d\n" 
+      (cfg.svar.vname) numDerefsSafe numDerefsWarn numDelayed;
+    L.logStatus "Safe Pointer Derefs:";
+    List.iter (fun s -> L.logStatus s) confirmations;
+    L.logStatus "Possibly Null Pointer Derefs:";
+    List.iter (fun s -> L.logStatus s) warnings;
     safeCount := !safeCount + numDerefsSafe;
     unsafeCount := !unsafeCount + numDerefsWarn;
     false

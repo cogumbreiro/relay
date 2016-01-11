@@ -19079,7 +19079,15 @@ static void recv_packet() {
   plip_timer_bh(&dummydev);
 }
 
+
+/* JAN added locks to model non-concurrency of pre-spawn vs post-spawn */
+spinlock_t thread1Lock;
+spinlock_t thread2Lock;
+
 static void module_activity() {
+  // JAN
+  //_spin_lock(&thread1Lock);
+
   struct net_device_stats *stats;
 
   _spin_lock(&openlock);
@@ -19097,13 +19105,22 @@ static void module_activity() {
   _spin_lock(&statslock);
   stats = plip_get_stats(&dummydev);
   _spin_unlock(&statslock);
+
+  // JAN
+  //_spin_unlock(&thread1Lock);
 }
 
 static void dummy_interrupt() {
+  // JAN
+  //_spin_lock(&thread2Lock);
+
   // call interrupt handler when one exists
   while(1) {
     plip_interrupt(0,&dummydev,0);
   }
+
+  // JAN
+  //_spin_lock(&thread2Lock);
 }
 
 typedef int pthread_t;
@@ -19130,7 +19147,6 @@ int parport_register_driver(struct parport_driver *drv) {
   return 0;
 }
 
-
 int main() {
   pthread_t t;
   spin_lock_init(&openlock);
@@ -19138,9 +19154,22 @@ int main() {
   spin_lock_init(&dummydev.queue_lock);
   spin_lock_init(&dummydev.xmit_lock);
   spin_lock_init(&reglock);
+
+  /* JAN added prethread locks */
+  /* spin_lock_init(&thread1Lock); */
+  /* spin_lock_init(&thread2Lock); */
+
+  /* _spin_lock(&thread1Lock); */
+  /* _spin_lock(&thread2Lock); */
+
   plip_init();
   /* NOTE: I'm not calling wavelan_probe; I don't think it gets
      used when the driver is a module, but I'm not sure. */
+
+  /* JAN end */
+  /* _spin_unlock(&thread1Lock); */
+  /* _spin_unlock(&thread2Lock); */
+
   pthread_create(&t, (void*)0, module_activity, (void*)0);
   pthread_create(&t, (void*)0, dummy_interrupt, (void*)0);
   pthread_create(&t, (void*)0, module_activity, (void*)0);

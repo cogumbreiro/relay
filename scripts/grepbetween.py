@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Does a kind of grep that prints lines between two given regular expressions
 # (where between is inclusive)

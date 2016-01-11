@@ -405,10 +405,12 @@ char * __builtin_strcat(char *dest, const char *src) {
   return dest;
 }
 
-char * __builtin_strncat(char *dest, const char *src, size_t n) {
+/*
+char * __builtin_strncat(char *dest, const char *src, unsigned long n) {
   *dest = *src;
   return dest;
 }
+*/
 
 long double __builtin_fabsl(long double x) { return 0; }
 double __builtin_fabs(double x) { return 0; }

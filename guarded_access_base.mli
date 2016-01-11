@@ -4,6 +4,11 @@ open Fstructs
 open Lockset
 open Access_info
 
+(**** Associate locking, etc with an lval ****)
+
+type lv = Lvals.aLval
+
+module CMap : Mapset.S with type key = lv
 
 (*********** Track pseudo-access attributes here for now ***********)
 
@@ -13,11 +18,17 @@ type targetLvId = int
 
 type pseudoAttrib = Callg.funID * origLvId * targetLvId
 
-type lv = Lvals.aLval
-
-module CMap : Mapset.S with type key = lv
-
 module PAS : Set.S with type elt = pseudoAttrib
+
+type pseudoSet = PAS.t
+
+val combinePseudos : pseudoSet -> pseudoSet -> pseudoSet
+
+(************************************************************)
+
+val splitGlobalsFormalsBase : ('a -> bool) -> 'a CMap.t -> 'a CMap.t * 'a CMap.t
+
+(************)
 
 module type GUARDED_ACCESS = sig
 
@@ -66,6 +77,8 @@ module type GUARDED_ACCESS = sig
   val hasPseudo : correlation -> bool
 
   val printCorrMap : straintMap -> (fullLS -> unit) -> unit
+
+  val splitGlobalsFormals : straintMap -> straintMap * straintMap
 
 end
 

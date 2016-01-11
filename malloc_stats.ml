@@ -18,7 +18,7 @@ module VH = Hashtbl.Make
      let hash x = Hashtbl.hash_param 10 20 x
    end)
 
-let typEq x y = compare_type x y == 0
+let typEq x y = equal_type x y
 
 module TH = Hashtbl.Make
   (struct 

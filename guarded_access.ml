@@ -139,7 +139,7 @@ let combinePseudo a1 a2 =
   match a1, a2 with
     None, _ -> a2
   | _, None -> a1 (* Should this even happen? *)
-  | Some s1, Some s2 -> Some (PAS.union s1 s2)
+  | Some s1, Some s2 -> Some (combinePseudos s1 s2)
 
 
 (** Combine two correlations by intersection. Assumes lvals match *) 
@@ -268,7 +268,8 @@ let combineCM (a:straintMap) (b:straintMap) : straintMap =
     CMPH.add combineCMCache (a, b) result;
     result
   *)
-  uniqueCM (cmUnion a b)
+  if a == b then a
+  else uniqueCM (cmUnion a b)
 
 
 (*** All caches ***)
@@ -329,6 +330,19 @@ let scopeCorrelation curFunc scopeLocks
 let scopeStraintMap curFunc scopeLocks (cmap:straintMap) =
   CMap.fold (scopeCorrelation curFunc scopeLocks) cmap cmap
 
+let corrMentionsFormal corr =
+  let setHasFormal set = 
+    LS.LS.S.exists
+      (fun lv _ -> 
+         match Lvals.getScope lv with
+           Scope.SFormal _ -> true
+         | Scope.SGlobal | Scope.SFunc | Scope.STBD -> false) set
+  in
+  setHasFormal (LS.LS.getPlus corr.corrLocks) ||   
+    setHasFormal (LS.LS.getMinus corr.corrLocks)
+
+let splitGlobalsFormals cmap =
+  splitGlobalsFormalsBase corrMentionsFormal cmap
 
 (************** Race warnings stuff ****************)
 
@@ -354,8 +368,7 @@ let foreachPseudo2 foo corr1 corr2 =
   let unionThem cur corr =
     match corr.corrPseudo with
       None -> cur
-    | Some set ->
-        PAS.union cur set
+    | Some set -> combinePseudos cur set
   in
   let doThem ((fk, _, _) as pakey) =
     foo fk pakey

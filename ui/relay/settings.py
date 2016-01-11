@@ -11,8 +11,8 @@ MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'mysql' # 'mysql', 'postgresql_psycopg2', 'postgresql', 'sqlite3' or 'ado_mssql'.
 DATABASE_NAME = 'relaydb'   # Or path to database file if using sqlite3.
-DATABASE_USER = 'jan'             # Not used with sqlite3.
-DATABASE_PASSWORD = 'relap_p319'         # Not used with sqlite3.
+DATABASE_USER = 'youser'             # Not used with sqlite3.
+DATABASE_PASSWORD = 'notmypassword'         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
@@ -33,11 +33,11 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/jan/research/relay-race/ui/media/'
+MEDIA_ROOT = '/home/youser/relay/ui/media/'
 
 # URL that handles the media served from MEDIA_ROOT.
 # Example: "http://media.lawrence.com"
-MEDIA_URL = 'http://candide.ucsd.edu/media/'
+MEDIA_URL = 'http://yourserver.com/media/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.

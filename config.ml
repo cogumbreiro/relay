@@ -35,16 +35,12 @@
   
 *)
 
-(* TODO: support import... so that it's easy to customize
-   a config for a test case (add more thread creators?)
-   Or... just move that out of the config file altogether and
-   include in the test cases themselves? 
-
-   TODO: allow comments of the form "# comment"
-*)
+(* TODO: allow comments of the form "# comment" *)
 
 (** Parse a config file and give access to key -> value mappings. 
     Example of a well-formatted config file:
+
+    //Begin example
 
     SECTION_A {
     
@@ -60,13 +56,18 @@
     key2 : value2
     
     }
+
+    include(other.cfg)
     
-    End of example. Whitespace is tolerable (except for newlines in
+    //End of example. 
+
+    Whitespace is tolerable (except for newlines in
     the middle of a key/value pair). Should add a slash for escaping
     colons and for continuing a line... Section names can only
     be letters + the underscore (easy to change if needed). Should
-    also add comment indicators
+    also add comment indicators.
 
+    Includes are handled by running the m4 preprocessor first.
 *)
 
 module L = Logging
@@ -125,13 +126,16 @@ let handleGroup settings groupName groupSettings inFile =
     Hashtbl.replace settings groupName groupSettings;
     L.logStatus ("Finished parsing config group: " ^ groupName)
 
+let getOldGroup settings groupName =
+  try Hashtbl.find settings groupName
+  with Not_found -> Hashtbl.create 37
 
 let rec findGroups settings inFile =
   try while (true) do
     let line = input_line inFile in
     if(Str.string_match groupStart line 0) then
       let groupName = Str.matched_group 1 line in
-      let groupSettings = Hashtbl.create 37 in
+      let groupSettings = getOldGroup settings groupName in
       handleGroup settings groupName groupSettings inFile;
   done
   with End_of_file ->
@@ -141,11 +145,15 @@ let rec findGroups settings inFile =
 
 (***************** Interface *****************)
 
+(** Run the m4 preprocessor on the config file first *)
+let preprocess (configFile : string) : in_channel =
+  Unix.open_process_in ("m4 " ^ configFile)
+
 (** Create a settings table from the [configFile] (filename) *)
 let initSettings (configFile : string) : settings =
   try
     let settings = Hashtbl.create 37 in
-    let inFile = (open_in configFile) in
+    let inFile = preprocess configFile in
     findGroups settings inFile;
     close_in inFile;
     settings

@@ -375,6 +375,8 @@ struct __anonstruct_TCBWTREC_100 {
    int tchr ;
 };
 typedef struct __anonstruct_TCBWTREC_100 TCBWTREC;
+//JAN for locksmith
+typedef char _Bool;
 typedef __off_t off_t;
 typedef signed char int8_t;
 typedef unsigned int pthread_key_t;
@@ -1309,12 +1311,20 @@ extern  __attribute__((__nothrow__)) int __fpclassifyl(long double __value )  __
 __inline extern  __attribute__((__nothrow__)) int __signbitl(long double __x )  __attribute__((__const__)) ;
 char const   *tcversion ;
 void (*tcfatalfunc)(char const   *message ) ;
+
+/* JAN
 void *tcmalloc(size_t size ) ;
 void *tccalloc(size_t nmemb , size_t size ) ;
 void *tcrealloc(void *ptr , size_t size ) ;
+*/
+
 void *tcmemdup(void const   *ptr , size_t size ) ;
 char *tcstrdup(void const   *str ) ;
-void tcfree(void *ptr ) ;
+
+#define tcfree free
+/* JAN
+   void tcfree(void *ptr ) ; 
+*/
 TCXSTR *tcxstrnew(void) ;
 TCXSTR *tcxstrnew2(char const   *str ) ;
 TCXSTR *tcxstrnew3(int asiz ) ;
@@ -2670,6 +2680,7 @@ char *tcstrdup(void const   *str )
   return (p);
 }
 }
+/* JAN
 void tcfree(void *ptr ) 
 { 
 
@@ -2680,7 +2691,7 @@ void tcfree(void *ptr )
   }
   return;
 }
-}
+} */
 static void tcvxstrprintf(TCXSTR *xstr , char const   *format , va_list ap ) ;
 TCXSTR *tcxstrnew(void) 
 { TCXSTR *xstr ;
@@ -83938,7 +83949,7 @@ static void do_task(TTSOCK *sock , void *opq , TTREQ *req )
   char **tokens ;
   char **tmp___4 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_task)(void * ) ;
   void *__cancel_arg___0 ;
   int not_first_call___0 ;
   int tmp___5 ;
@@ -84170,14 +84181,14 @@ static void do_task(TTSOCK *sock , void *opq , TTREQ *req )
           tmp___4 = tokenize(line, & tnum);
           tokens = tmp___4;
           while (1) {
-            __cancel_routine___0 = & tcfree;
+            __cancel_routine___do_task = & tcfree;
             __cancel_arg___0 = (void *)tokens;
             tmp___5 = __sigsetjmp((struct __jmp_buf_tag *)((struct __jmp_buf_tag *)(__cancel_buf___0.__cancel_jmp_buf)),
                                   0);
             not_first_call___0 = tmp___5;
             tmp___6 = __builtin_expect((long )not_first_call___0, 0L);
             if (tmp___6) {
-              (*__cancel_routine___0)(__cancel_arg___0);
+              (*__cancel_routine___do_task)(__cancel_arg___0);
               __pthread_unwind_next(& __cancel_buf___0);
             }
             __pthread_register_cancel(& __cancel_buf___0);
@@ -84873,7 +84884,7 @@ static void do_task(TTSOCK *sock , void *opq , TTREQ *req )
               break;
             }
             __pthread_unregister_cancel(& __cancel_buf___0);
-            (*__cancel_routine___0)(__cancel_arg___0);
+            (*__cancel_routine___do_task)(__cancel_arg___0);
             break;
           }
           break;
@@ -85780,7 +85791,7 @@ static void do_get(TTSOCK *sock , TASKARG *arg , TTREQ *req )
   void *tmp___7 ;
   char *tmp___8 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_get)(void * ) ;
   void *__cancel_arg___0 ;
   char *tmp___9 ;
   int not_first_call___0 ;
@@ -85863,7 +85874,7 @@ static void do_get(TTSOCK *sock , TASKARG *arg , TTREQ *req )
             }
             rbuf = tmp___8;
             while (1) {
-              __cancel_routine___0 = & free;
+              __cancel_routine___do_get = & free;
               if ((unsigned int )rbuf == (unsigned int )(stack)) {
                 tmp___9 = (char *)((void *)0);
               } else {
@@ -85875,7 +85886,7 @@ static void do_get(TTSOCK *sock , TASKARG *arg , TTREQ *req )
               not_first_call___0 = tmp___10;
               tmp___11 = __builtin_expect((long )not_first_call___0, 0L);
               if (tmp___11) {
-                (*__cancel_routine___0)(__cancel_arg___0);
+                (*__cancel_routine___do_get)(__cancel_arg___0);
                 __pthread_unwind_next(& __cancel_buf___0);
               }
               __pthread_register_cancel(& __cancel_buf___0);
@@ -85896,7 +85907,7 @@ static void do_get(TTSOCK *sock , TASKARG *arg , TTREQ *req )
                 break;
               }
               __pthread_unregister_cancel(& __cancel_buf___0);
-              (*__cancel_routine___0)(__cancel_arg___0);
+              (*__cancel_routine___do_get)(__cancel_arg___0);
               break;
             }
           } else {
@@ -85944,7 +85955,7 @@ static void do_mget(TTSOCK *sock , TASKARG *arg , TTREQ *req )
   void *tmp___6 ;
   char *tmp___7 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_mget)(void * ) ;
   void *__cancel_arg___0 ;
   char *tmp___8 ;
   int not_first_call___0 ;
@@ -86035,7 +86046,7 @@ static void do_mget(TTSOCK *sock , TASKARG *arg , TTREQ *req )
         }
         buf = tmp___7;
         while (1) {
-          __cancel_routine___0 = & free;
+          __cancel_routine___do_mget = & free;
           if ((unsigned int )buf == (unsigned int )(stack)) {
             tmp___8 = (char *)((void *)0);
           } else {
@@ -86047,7 +86058,7 @@ static void do_mget(TTSOCK *sock , TASKARG *arg , TTREQ *req )
           not_first_call___0 = tmp___9;
           tmp___10 = __builtin_expect((long )not_first_call___0, 0L);
           if (tmp___10) {
-            (*__cancel_routine___0)(__cancel_arg___0);
+            (*__cancel_routine___do_mget)(__cancel_arg___0);
             __pthread_unwind_next(& __cancel_buf___0);
           }
           __pthread_register_cancel(& __cancel_buf___0);
@@ -86059,7 +86070,7 @@ static void do_mget(TTSOCK *sock , TASKARG *arg , TTREQ *req )
             break;
           }
           __pthread_unregister_cancel(& __cancel_buf___0);
-          (*__cancel_routine___0)(__cancel_arg___0);
+          (*__cancel_routine___do_mget)(__cancel_arg___0);
           break;
         }
         i ++;
@@ -86404,7 +86415,7 @@ static void do_fwmkeys(TTSOCK *sock , TASKARG *arg , TTREQ *req )
   TCLIST *keys ;
   TCLIST *tmp___7 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_fwmkeys)(void * ) ;
   void *__cancel_arg___0 ;
   int not_first_call___0 ;
   int tmp___8 ;
@@ -86489,14 +86500,14 @@ static void do_fwmkeys(TTSOCK *sock , TASKARG *arg , TTREQ *req )
           tmp___7 = tcadbfwmkeys(adb, (void const   *)buf, psiz, max);
           keys = tmp___7;
           while (1) {
-            __cancel_routine___0 = (void (*)(void * ))(& tclistdel);
+            __cancel_routine___do_fwmkeys = (void (*)(void * ))(& tclistdel);
             __cancel_arg___0 = (void *)keys;
             tmp___8 = __sigsetjmp((struct __jmp_buf_tag *)((struct __jmp_buf_tag *)(__cancel_buf___0.__cancel_jmp_buf)),
                                   0);
             not_first_call___0 = tmp___8;
             tmp___9 = __builtin_expect((long )not_first_call___0, 0L);
             if (tmp___9) {
-              (*__cancel_routine___0)(__cancel_arg___0);
+              (*__cancel_routine___do_fwmkeys)(__cancel_arg___0);
               __pthread_unwind_next(& __cancel_buf___0);
             }
             __pthread_register_cancel(& __cancel_buf___0);
@@ -86560,7 +86571,7 @@ static void do_fwmkeys(TTSOCK *sock , TASKARG *arg , TTREQ *req )
               break;
             }
             __pthread_unregister_cancel(& __cancel_buf___0);
-            (*__cancel_routine___0)(__cancel_arg___0);
+            (*__cancel_routine___do_fwmkeys)(__cancel_arg___0);
             break;
           }
         }
@@ -86895,7 +86906,7 @@ static void do_ext(TTSOCK *sock , TASKARG *arg , TTREQ *req )
   void *tmp___14 ;
   char *tmp___15 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_ext)(void * ) ;
   void *__cancel_arg___0 ;
   char *tmp___16 ;
   int not_first_call___0 ;
@@ -87061,7 +87072,7 @@ static void do_ext(TTSOCK *sock , TASKARG *arg , TTREQ *req )
             }
             rbuf = tmp___15;
             while (1) {
-              __cancel_routine___0 = & free;
+              __cancel_routine___do_ext = & free;
               if ((unsigned int )rbuf == (unsigned int )(stack)) {
                 tmp___16 = (char *)((void *)0);
               } else {
@@ -87073,7 +87084,7 @@ static void do_ext(TTSOCK *sock , TASKARG *arg , TTREQ *req )
               not_first_call___0 = tmp___17;
               tmp___18 = __builtin_expect((long )not_first_call___0, 0L);
               if (tmp___18) {
-                (*__cancel_routine___0)(__cancel_arg___0);
+                (*__cancel_routine___do_ext)(__cancel_arg___0);
                 __pthread_unwind_next(& __cancel_buf___0);
               }
               __pthread_register_cancel(& __cancel_buf___0);
@@ -87094,7 +87105,7 @@ static void do_ext(TTSOCK *sock , TASKARG *arg , TTREQ *req )
                 break;
               }
               __pthread_unregister_cancel(& __cancel_buf___0);
-              (*__cancel_routine___0)(__cancel_arg___0);
+              (*__cancel_routine___do_ext)(__cancel_arg___0);
               break;
             }
           } else {
@@ -87953,7 +87964,7 @@ static void do_misc(TTSOCK *sock , TASKARG *arg , TTREQ *req )
   void *tmp___10 ;
   char *tmp___11 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_misc)(void * ) ;
   void *__cancel_arg___0 ;
   char *tmp___12 ;
   int not_first_call___0 ;
@@ -88071,7 +88082,7 @@ static void do_misc(TTSOCK *sock , TASKARG *arg , TTREQ *req )
         }
         buf = tmp___11;
         while (1) {
-          __cancel_routine___0 = & free;
+          __cancel_routine___do_misc = & free;
           if ((unsigned int )buf == (unsigned int )(stack)) {
             tmp___12 = (char *)((void *)0);
           } else {
@@ -88083,7 +88094,7 @@ static void do_misc(TTSOCK *sock , TASKARG *arg , TTREQ *req )
           not_first_call___0 = tmp___13;
           tmp___14 = __builtin_expect((long )not_first_call___0, 0L);
           if (tmp___14) {
-            (*__cancel_routine___0)(__cancel_arg___0);
+            (*__cancel_routine___do_misc)(__cancel_arg___0);
             __pthread_unwind_next(& __cancel_buf___0);
           }
           __pthread_register_cancel(& __cancel_buf___0);
@@ -88095,7 +88106,7 @@ static void do_misc(TTSOCK *sock , TASKARG *arg , TTREQ *req )
             break;
           }
           __pthread_unregister_cancel(& __cancel_buf___0);
-          (*__cancel_routine___0)(__cancel_arg___0);
+          (*__cancel_routine___do_misc)(__cancel_arg___0);
           break;
         }
         i ++;
@@ -88222,7 +88233,7 @@ static void do_repl(TTSOCK *sock , TASKARG *arg , TTREQ *req )
   void *tmp___10 ;
   char *tmp___11 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_repl)(void * ) ;
   void *__cancel_arg___0 ;
   char *tmp___12 ;
   int not_first_call___0 ;
@@ -88356,7 +88367,7 @@ static void do_repl(TTSOCK *sock , TASKARG *arg , TTREQ *req )
             }
             mbuf = tmp___11;
             while (1) {
-              __cancel_routine___0 = & free;
+              __cancel_routine___do_repl = & free;
               if ((unsigned int )mbuf == (unsigned int )(stack)) {
                 tmp___12 = (char *)((void *)0);
               } else {
@@ -88368,7 +88379,7 @@ static void do_repl(TTSOCK *sock , TASKARG *arg , TTREQ *req )
               not_first_call___0 = tmp___13;
               tmp___14 = __builtin_expect((long )not_first_call___0, 0L);
               if (tmp___14) {
-                (*__cancel_routine___0)(__cancel_arg___0);
+                (*__cancel_routine___do_repl)(__cancel_arg___0);
                 __pthread_unwind_next(& __cancel_buf___0);
               }
               __pthread_register_cancel(& __cancel_buf___0);
@@ -88399,7 +88410,7 @@ static void do_repl(TTSOCK *sock , TASKARG *arg , TTREQ *req )
                 break;
               }
               __pthread_unregister_cancel(& __cancel_buf___0);
-              (*__cancel_routine___0)(__cancel_arg___0);
+              (*__cancel_routine___do_repl)(__cancel_arg___0);
               break;
             }
           }
@@ -89735,7 +89746,7 @@ static void do_http_get(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , cha
   TCXSTR *xstr ;
   TCXSTR *tmp___9 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_http_get)(void * ) ;
   void *__cancel_arg___0 ;
   int not_first_call___0 ;
   int tmp___10 ;
@@ -89815,14 +89826,14 @@ static void do_http_get(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , cha
       tmp___9 = tcxstrnew();
       xstr = tmp___9;
       while (1) {
-        __cancel_routine___0 = (void (*)(void * ))(& tcxstrdel);
+        __cancel_routine___do_http_get = (void (*)(void * ))(& tcxstrdel);
         __cancel_arg___0 = (void *)xstr;
         tmp___10 = __sigsetjmp((struct __jmp_buf_tag *)((struct __jmp_buf_tag *)(__cancel_buf___0.__cancel_jmp_buf)),
                                0);
         not_first_call___0 = tmp___10;
         tmp___11 = __builtin_expect((long )not_first_call___0, 0L);
         if (tmp___11) {
-          (*__cancel_routine___0)(__cancel_arg___0);
+          (*__cancel_routine___do_http_get)(__cancel_arg___0);
           __pthread_unwind_next(& __cancel_buf___0);
         }
         __pthread_register_cancel(& __cancel_buf___0);
@@ -89867,7 +89878,7 @@ static void do_http_get(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , cha
           break;
         }
         __pthread_unregister_cancel(& __cancel_buf___0);
-        (*__cancel_routine___0)(__cancel_arg___0);
+        (*__cancel_routine___do_http_get)(__cancel_arg___0);
         break;
       }
       break;
@@ -89903,7 +89914,7 @@ static void do_http_head(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , ch
   TCXSTR *xstr ;
   TCXSTR *tmp___9 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_http_head)(void * ) ;
   void *__cancel_arg___0 ;
   int not_first_call___0 ;
   int tmp___10 ;
@@ -89978,14 +89989,14 @@ static void do_http_head(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , ch
       tmp___9 = tcxstrnew();
       xstr = tmp___9;
       while (1) {
-        __cancel_routine___0 = (void (*)(void * ))(& tcxstrdel);
+        __cancel_routine___do_http_head = (void (*)(void * ))(& tcxstrdel);
         __cancel_arg___0 = (void *)xstr;
         tmp___10 = __sigsetjmp((struct __jmp_buf_tag *)((struct __jmp_buf_tag *)(__cancel_buf___0.__cancel_jmp_buf)),
                                0);
         not_first_call___0 = tmp___10;
         tmp___11 = __builtin_expect((long )not_first_call___0, 0L);
         if (tmp___11) {
-          (*__cancel_routine___0)(__cancel_arg___0);
+          (*__cancel_routine___do_http_head)(__cancel_arg___0);
           __pthread_unwind_next(& __cancel_buf___0);
         }
         __pthread_register_cancel(& __cancel_buf___0);
@@ -90018,7 +90029,7 @@ static void do_http_head(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , ch
           break;
         }
         __pthread_unregister_cancel(& __cancel_buf___0);
-        (*__cancel_routine___0)(__cancel_arg___0);
+        (*__cancel_routine___do_http_head)(__cancel_arg___0);
         break;
       }
       break;
@@ -90064,7 +90075,7 @@ static void do_http_put(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , cha
   void *tmp___13 ;
   char *tmp___14 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_http_put)(void * ) ;
   void *__cancel_arg___0 ;
   char *tmp___15 ;
   int not_first_call___0 ;
@@ -90186,7 +90197,7 @@ static void do_http_put(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , cha
       }
       vbuf = tmp___14;
       while (1) {
-        __cancel_routine___0 = & free;
+        __cancel_routine___do_http_put = & free;
         if ((unsigned int )vbuf == (unsigned int )(stack)) {
           tmp___15 = (char *)((void *)0);
         } else {
@@ -90198,7 +90209,7 @@ static void do_http_put(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , cha
         not_first_call___0 = tmp___16;
         tmp___17 = __builtin_expect((long )not_first_call___0, 0L);
         if (tmp___17) {
-          (*__cancel_routine___0)(__cancel_arg___0);
+          (*__cancel_routine___do_http_put)(__cancel_arg___0);
           __pthread_unwind_next(& __cancel_buf___0);
         }
         __pthread_register_cancel(& __cancel_buf___0);
@@ -90326,7 +90337,7 @@ static void do_http_put(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , cha
           break;
         }
         __pthread_unregister_cancel(& __cancel_buf___0);
-        (*__cancel_routine___0)(__cancel_arg___0);
+        (*__cancel_routine___do_http_put)(__cancel_arg___0);
         break;
       }
       break;
@@ -90373,7 +90384,7 @@ static void do_http_post(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , ch
   void *tmp___14 ;
   char *tmp___15 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_http_post)(void * ) ;
   void *__cancel_arg___0 ;
   char *tmp___16 ;
   int not_first_call___0 ;
@@ -90500,7 +90511,7 @@ static void do_http_post(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , ch
       }
       vbuf = tmp___15;
       while (1) {
-        __cancel_routine___0 = & free;
+        __cancel_routine___do_http_post = & free;
         if ((unsigned int )vbuf == (unsigned int )(stack)) {
           tmp___16 = (char *)((void *)0);
         } else {
@@ -90512,7 +90523,7 @@ static void do_http_post(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , ch
         not_first_call___0 = tmp___17;
         tmp___18 = __builtin_expect((long )not_first_call___0, 0L);
         if (tmp___18) {
-          (*__cancel_routine___0)(__cancel_arg___0);
+          (*__cancel_routine___do_http_post)(__cancel_arg___0);
           __pthread_unwind_next(& __cancel_buf___0);
         }
         __pthread_register_cancel(& __cancel_buf___0);
@@ -90649,7 +90660,7 @@ static void do_http_post(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , ch
           break;
         }
         __pthread_unregister_cancel(& __cancel_buf___0);
-        (*__cancel_routine___0)(__cancel_arg___0);
+        (*__cancel_routine___do_http_post)(__cancel_arg___0);
         break;
       }
       break;
@@ -90687,7 +90698,7 @@ static void do_http_delete(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , 
   TCXSTR *xstr ;
   TCXSTR *tmp___9 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___do_http_delete)(void * ) ;
   void *__cancel_arg___0 ;
   int not_first_call___0 ;
   int tmp___10 ;
@@ -90769,14 +90780,14 @@ static void do_http_delete(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , 
       tmp___9 = tcxstrnew();
       xstr = tmp___9;
       while (1) {
-        __cancel_routine___0 = (void (*)(void * ))(& tcxstrdel);
+        __cancel_routine___do_http_delete = (void (*)(void * ))(& tcxstrdel);
         __cancel_arg___0 = (void *)xstr;
         tmp___10 = __sigsetjmp((struct __jmp_buf_tag *)((struct __jmp_buf_tag *)(__cancel_buf___0.__cancel_jmp_buf)),
                                0);
         not_first_call___0 = tmp___10;
         tmp___11 = __builtin_expect((long )not_first_call___0, 0L);
         if (tmp___11) {
-          (*__cancel_routine___0)(__cancel_arg___0);
+          (*__cancel_routine___do_http_delete)(__cancel_arg___0);
           __pthread_unwind_next(& __cancel_buf___0);
         }
         __pthread_register_cancel(& __cancel_buf___0);
@@ -90821,7 +90832,7 @@ static void do_http_delete(TTSOCK *sock , TASKARG *arg , TTREQ *req , int ver , 
           break;
         }
         __pthread_unregister_cancel(& __cancel_buf___0);
-        (*__cancel_routine___0)(__cancel_arg___0);
+        (*__cancel_routine___do_http_delete)(__cancel_arg___0);
         break;
       }
       break;
@@ -92651,7 +92662,7 @@ int tthttpfetch(char const   *url , TCMAP *reqheads , TCMAP *resheads , TCXSTR *
   char addr[1024] ;
   int fd ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___tthttpfetch)(void * ) ;
   void *__cancel_arg___0 ;
   int not_first_call___0 ;
   int tmp___10 ;
@@ -92818,14 +92829,14 @@ int tthttpfetch(char const   *url , TCMAP *reqheads , TCMAP *resheads , TCXSTR *
               fd = ttopensock((char const   *)(addr), pnum);
               if (fd != -1) {
                 while (1) {
-                  __cancel_routine___0 = (void (*)(void * ))(& ttclosesock);
+                  __cancel_routine___tthttpfetch = (void (*)(void * ))(& ttclosesock);
                   __cancel_arg___0 = (void *)fd;
                   tmp___10 = __sigsetjmp((struct __jmp_buf_tag *)(__cancel_buf___0.__cancel_jmp_buf),
                                          0);
                   not_first_call___0 = tmp___10;
                   tmp___11 = __builtin_expect((long )not_first_call___0, 0L);
                   if (tmp___11) {
-                    (*__cancel_routine___0)(__cancel_arg___0);
+                    (*__cancel_routine___tthttpfetch)(__cancel_arg___0);
                     __pthread_unwind_next(& __cancel_buf___0);
                   }
                   __pthread_register_cancel(& __cancel_buf___0);
@@ -93272,7 +93283,7 @@ int tthttpfetch(char const   *url , TCMAP *reqheads , TCMAP *resheads , TCXSTR *
                     break;
                   }
                   __pthread_unregister_cancel(& __cancel_buf___0);
-                  (*__cancel_routine___0)(__cancel_arg___0);
+                  (*__cancel_routine___tthttpfetch)(__cancel_arg___0);
                   break;
                 }
               }
@@ -94080,7 +94091,7 @@ static void *ttservdeqtasks(void *argp )
   TTSOCK *sock ;
   TTSOCK *tmp___8 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___ttservdeqtasks)(void * ) ;
   void *__cancel_arg___0 ;
   int not_first_call___0 ;
   int tmp___9 ;
@@ -94172,14 +94183,14 @@ static void *ttservdeqtasks(void *argp )
                   tmp___8 = ttsocknew(cfd);
                   sock = tmp___8;
                   while (1) {
-                    __cancel_routine___0 = (void (*)(void * ))(& ttsockdel);
+                    __cancel_routine___ttservdeqtasks = (void (*)(void * ))(& ttsockdel);
                     __cancel_arg___0 = (void *)sock;
                     tmp___9 = __sigsetjmp((struct __jmp_buf_tag *)(__cancel_buf___0.__cancel_jmp_buf),
                                           0);
                     not_first_call___0 = tmp___9;
                     tmp___10 = __builtin_expect((long )not_first_call___0, 0L);
                     if (tmp___10) {
-                      (*__cancel_routine___0)(__cancel_arg___0);
+                      (*__cancel_routine___ttservdeqtasks)(__cancel_arg___0);
                       __pthread_unwind_next(& __cancel_buf___0);
                     }
                     __pthread_register_cancel(& __cancel_buf___0);
@@ -94206,7 +94217,7 @@ static void *ttservdeqtasks(void *argp )
                       break;
                     }
                     __pthread_unregister_cancel(& __cancel_buf___0);
-                    (*__cancel_routine___0)(__cancel_arg___0);
+                    (*__cancel_routine___ttservdeqtasks)(__cancel_arg___0);
                     break;
                   }
                   break;
@@ -94756,7 +94767,7 @@ _Bool tculogwrite(TCULOG *ulog , uint64_t ts , uint32_t sid , uint32_t mid , voi
   void *tmp___6 ;
   unsigned char *tmp___7 ;
   __pthread_unwind_buf_t __cancel_buf___0 ;
-  void (*__cancel_routine___0)(void * ) ;
+  void (*__cancel_routine___tculogwrite)(void * ) ;
   void *__cancel_arg___0 ;
   unsigned char *tmp___8 ;
   int not_first_call___0 ;
@@ -94839,7 +94850,7 @@ _Bool tculogwrite(TCULOG *ulog , uint64_t ts , uint32_t sid , uint32_t mid , voi
       }
       buf = tmp___7;
       while (1) {
-        __cancel_routine___0 = & free;
+        __cancel_routine___tculogwrite = & free;
         if ((unsigned int )buf == (unsigned int )(stack)) {
           tmp___8 = (unsigned char *)((void *)0);
         } else {
@@ -94851,7 +94862,7 @@ _Bool tculogwrite(TCULOG *ulog , uint64_t ts , uint32_t sid , uint32_t mid , voi
         not_first_call___0 = tmp___9;
         tmp___10 = __builtin_expect((long )not_first_call___0, 0L);
         if (tmp___10) {
-          (*__cancel_routine___0)(__cancel_arg___0);
+          (*__cancel_routine___tculogwrite)(__cancel_arg___0);
           __pthread_unwind_next(& __cancel_buf___0);
         }
         __pthread_register_cancel(& __cancel_buf___0);
@@ -94968,7 +94979,7 @@ _Bool tculogwrite(TCULOG *ulog , uint64_t ts , uint32_t sid , uint32_t mid , voi
           break;
         }
         __pthread_unregister_cancel(& __cancel_buf___0);
-        (*__cancel_routine___0)(__cancel_arg___0);
+        (*__cancel_routine___tculogwrite)(__cancel_arg___0);
         break;
       }
       break;

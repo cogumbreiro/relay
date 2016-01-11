@@ -48,10 +48,10 @@ open Cilfiles
 open Cilinfos
 
 module A = Alias
-module RS = Racesummary
 module SS = Symsummary
-module SPTA = Symstate2
 module Race = Racestate
+module RS = Race.RS
+module SPTA = Race.SPTA
 module Th = Threads
 module BS = Backed_summary  
 module Warn = Race_warnings
@@ -106,8 +106,9 @@ let initSettings () =
     (* Get Callgraph structures after initializing alias analysis *)
     let cgFile = Dumpcalls.getCallsFile !cgDir in
     let cg = Callg.readCalls cgFile in
+    let sccCG = Scc_cg.getSCCGraph cg in
 
-    let () = BS.init settings !cgDir cg in
+    let () = BS.init settings !cgDir cg sccCG in
     let _ = FS.init settings in (* ignore thread created *)
     SPTA.init settings cg (RS.sum :> Modsummaryi.absModSumm);
     Req.setUser !userName;

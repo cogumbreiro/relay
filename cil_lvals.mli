@@ -101,7 +101,7 @@ val distillLoc : Cil.location -> Cil.location
 
 val distillEnuminfo : Cil.enuminfo -> unit
 
-val distillCompinfo : Cil.compinfo -> unit
+val distillCompinfo : Cil.compinfo -> Cil.compinfo
 
 val distillVar : Cil.varinfo -> unit
 

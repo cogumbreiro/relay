@@ -6,6 +6,8 @@
     - properly terminate timer when timed function throws an exception
 *)
 
+open Pretty
+
 let doTime = ref false
 
 type t = { name : string;
@@ -25,8 +27,6 @@ let current : t list ref = ref [top]
 let reset = 
   top.sub <- [];
   top.time = 0.0
-
-(* TODO: make this work w/ my Logging module *)
   
 let print chn msg =
   if !doTime then begin
@@ -151,12 +151,20 @@ module IndexedTimer (I:IndexOps) = struct
     updateTime idx newTime;
     res
 
-  let printTime idx time =
-    print_string (I.prefix ^ I.to_string idx ^ 
-                    " : " ^ string_of_float time ^ "\n")
+  let printTime doc (idx, time) =
+    doc ++ text (I.to_string idx ^ " : " ^ string_of_float time ^ "\n")
 
   let printTimes () =
-    HI.iter printTime !times
+    print_string (I.prefix ^ "\n");
+    let listed = Stdutil.mapToList HI.fold !times in
+    (* Sort by time (longest first) *)
+    let sorted = List.sort (fun (a, t1) (b, t2) -> 
+                              compare (t2, b) (t1, a)) listed in
+    let doc = List.fold_left printTime nil sorted in
+    print_string (sprint 80 (indent 2 doc));
+    let total = List.fold_left (fun tot (_, t) -> tot +. t) 0.0 sorted in
+    Printf.printf "TOTAL: %f\n" total
+    
 
   let reset () = 
     times := HI.create 4

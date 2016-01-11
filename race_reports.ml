@@ -401,19 +401,21 @@ class racesXMLPrinter = object (self)
       (text "</race>" ++ line)
       
 
-  method pRaces () races =
-    let doc = text "<?xml version=\"1.0\"?>" ++ line ++ text "<run>" ++ line in
-    let doc = LocHash.fold
-      (fun (loc1, loc2) (id, rep) doc ->
-         doc ++ dprintf "<cluster id=\"%d\">" id ++ line ++
-           indent 1 (List.fold_left
-                       (fun doc riPair ->
-                          doc ++ self#pRaceInfo riPair
-                       ) nil rep) ++
-           text "</cluster>" ++ line
-      ) races doc
-    in
-    doc ++ text "</run>" ++ line ++ text "</xml>"
+  method pRaces oc races =
+    fprint oc 80 
+      (text "<?xml version=\"1.0\"?>" ++ line ++ text "<run>" ++ line);
+    LocHash.iter
+      (fun (loc1, loc2) (id, rep) ->
+         let doc = 
+           dprintf "<cluster id=\"%d\">" id ++ line ++
+             indent 1 (List.fold_left
+                         (fun doc riPair ->
+                            doc ++ self#pRaceInfo riPair
+                         ) nil rep) ++
+             text "</cluster>" ++ line in
+         fprint oc 80 doc
+      ) races;
+    fprint oc 80 (text "</run>" ++ line ++ text "</xml>")
 
 end
 
@@ -762,8 +764,7 @@ class raceReports ?(initial = LocHash.create 137) () = object (self : 'a)
 
   method saveToXML (fname:string) = 
     let doWrite oc =
-      let doc = xmlp#pRaces () curRaces in
-      fprint oc 80 doc;
+      xmlp#pRaces oc curRaces
     in
     Stdutil.open_out_for fname doWrite
 

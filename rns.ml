@@ -647,7 +647,7 @@ module NullTransfer = struct
       let newstate = ref inState in
       RNS.S.iter
         (fun lv _ ->
-
+           
            match self#checkPseudoAccessIsSafe lv ls with
              PaFound (_, true) ->
                logStatus ("racyPseudo false " ^ Lv.string_of_lval lv);
@@ -657,8 +657,8 @@ module NullTransfer = struct
                newstate := self#wrapDoMinusNormalized
                              ~crumbs:(BreadCrumbs.singleton crumb)
                              !newstate lv
-           | PaNotFound _ as crumb ->
-               logStatus ("racyPseudo ?? " ^ Lv.string_of_lval lv);
+           | PaNotFound _ ->
+               logError ("racyPseudo ?? " ^ Lv.string_of_lval lv);
                (* TODO carry along actual PaNotFound crumb *)
                let crumb = PaNotFoundPlaceHolder in
                newstate := self#wrapDoMinusA

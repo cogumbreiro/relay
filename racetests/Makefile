@@ -4,12 +4,13 @@ RELAY_DIR := $(PWD)/..
 RELAY := ./relay.sh    # can only execute if working dir is RELAY_DIR
 SERVER := ./server.sh
 BINS := race_anal.exe server.exe
+CLEANER = make clean
 DUMPER = make
 OUT_DIR := out
 OLD_OUT := oldout
 START_DIR = $(PWD)
 
-SMALL_TESTS = simpleone simplelock condlock fplock ptr_tests ptr_tests2 thread_tests aget knot esp ide-disk synclink plip
+SMALL_TESTS = simpleone simplelock condlock fplock fp_access ptr_tests ptr_tests2 thread_tests aget knot esp ide-disk synclink plip
 LARGE_TESTS = fresh_clam httpd_comb libdb sigtool 
 
 ALL_TESTS = $(SMALL_TESTS) $(LARGE_TESTS)
@@ -51,18 +52,16 @@ $(OUT_DIR)/%.out: %/ciltrees $(BINS:%=$(RELAY_DIR)/%)
 
 
 #---------------------------------------------------
-# Clean up... should it also delete the ciltrees?
+# Clean up individual test dirs (not the output dir)
 
 .PHONY: clean
 
 clean:
-	$(foreach dir,$(SMALL_TESTS),cd $(dir); make clean; cd ..;)
+	$(foreach dir,$(SMALL_TESTS),cd $(dir); $(CLEANER);cd ..;)
 
 renew_small:
-	$(foreach dir,$(SMALL_TESTS),rm -rf $(dir)/ciltrees; \
-	cd $(dir); $(DUMPER); cd ..)
+	$(foreach dir,$(SMALL_TESTS),cd $(dir); $(CLEANER); $(DUMPER);cd ..;)
 
 renew_large:
-	$(foreach dir,$(LARGE_TESTS),rm -rf $(dir)/ciltrees; \
-	cd $(dir); $(DUMPER); cd ..)
+	$(foreach dir,$(LARGE_TESTS),cd $(dir); $(CLEANER); $(DUMPER);cd ..;)
 

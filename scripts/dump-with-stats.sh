@@ -11,7 +11,6 @@ RELAYROOT=/home/jan/research/relay-race
 DUPPYROOT=$RELAYROOT/scripts
 CILLYROOT=$RELAYROOT/cil/bin
 LOG=$DUMPROOT/log.txt
-LOGANDERS=$DUMPROOT/log.anders.txt
 
 #gcc-log has "cd" and "duppy" commands on each line
 CMDS=$PWD/gcc-log.txt
@@ -81,7 +80,7 @@ cd $RELAYROOT; ./fix_id_cg.exe -cg $DUMPROOT -ng -su client.cfg.steens >> $LOG 2
 check_death "fixid"
 
 #now gen scc, etc. stats for other comparison points
-COMPARE_TO="steens anders noalias"
+COMPARE_TO="steens cil anders noalias"
 TIMEOUT_SECS=15000
 
 

@@ -53,9 +53,9 @@ module PPH = Ciltools.PPHash
 
 
 (** Parameters for lattice and context sensitivity *)
-module type RciStateAndKeys  = sig
+module type RciDfInfoAndKeys  = sig
     
-  type state (** The type of the data propagated from function to function. *)
+  type dfInfo (** The type of the data propagated from function to function. *)
 
   (** Give some flexibility for context sensitivity. 
       Functions w/ same funID will share the same dataflow tables *)
@@ -64,23 +64,22 @@ module type RciStateAndKeys  = sig
   val fkeyOfID : funID -> fKey
   val funIDToSumKey : funID -> Summary_keys.sumKey
 
-  val compareState : state -> state -> int
-    (** comparison function to detect duplicate states *)
+  val compareDfInfo : dfInfo -> dfInfo -> int
+    (** comparison function to detect duplicate dfInfos *)
 
-  val isBottom : state -> bool
+  val isBottom : dfInfo -> bool
     (** detect unreachable code *)
 
-  val combinePredecessors : fundec -> state -> state -> state option 
-    (** return [None] if the merge of the states would be no different,
-        or return [Some st] where [st] is the new state *)
+  val combinePredecessors : fundec -> dfInfo -> dfInfo -> dfInfo option 
+    (** return [None] if the merge of the dfInfos would be no different,
+        or return [Some st] where [st] is the new dfInfo *)
 
-  val diffState : state -> state -> state
+  val diffDfInfo : dfInfo -> dfInfo -> dfInfo
     (* Temporarily for debugging *)
 
-  val printState : state -> unit
+  val printDfInfo : dfInfo -> unit
 
-  val sumType : string
-    (** short string identifier to use as summary type *)
+  val sumType : string  (** short identifier to use as summary type *)
 
   val cacheSize : int
 
@@ -88,48 +87,48 @@ end
 
 (** Info needed by the inter-proc driver *)
 module type RciTransfer = sig
-  include RciStateAndKeys
+  include RciDfInfoAndKeys
 
-  val setFunc : fundec -> (funID * state) -> unit
+  val setFunc : fundec -> (funID * dfInfo) -> unit
     
   (****** Post functions ******)
 
-  val doAssign : lval -> exp -> location -> state -> 
-    (state * funID toNotify)
+  val doAssign : lval -> exp -> location -> dfInfo -> 
+    (dfInfo * funID toNotify)
 
   val doASM : attributes -> string list 
     -> (string option * string * lval) list 
     -> (string option * string * exp) list
-    -> string list -> location -> state -> (state * funID toNotify)
+    -> string list -> location -> dfInfo -> (dfInfo * funID toNotify)
 
-  val doCall : lval option -> exp -> exp list -> location -> state-> 
-    ((funID, state) callFlows * funID toNotify * state option)
+  val doCall : lval option -> exp -> exp list -> location -> dfInfo-> 
+    ((funID, dfInfo) callFlows * funID toNotify * dfInfo option)
       (** Return a flows into callee functions, as well as a flow
           to the next program point (if ready) *)
 
-  val doStmt : stmt -> state -> state 
-    (** Process a statement returning the new state and a list
-        of follow-up program points to propagate the state *)
+  val doStmt : stmt -> dfInfo -> dfInfo 
+    (** Process a dfInfoment returning the new dfInfo and a list
+        of follow-up program points to propagate the dfInfo *)
 
-  val doReturn : exp option ->  state -> funID toNotify
+  val doReturn : exp option ->  dfInfo -> funID toNotify
     (** Process a return stmt. Return true if there is a new summary 
         value to propagate to callers *)
 
-  val doGuard : exp -> state -> state Dataflow.guardaction
+  val doGuard : exp -> dfInfo -> dfInfo Dataflow.guardaction
    
   (***** Set up *****)
 
-  val initWork: string -> FSet.t -> callG -> (funID * state) list
-    (** Return an initial worklist w/ initial input states for functions,
+  val initWork: string -> FSet.t -> callG -> (funID * dfInfo) list
+    (** Return an initial worklist w/ initial input dfInfos for functions,
         given the root directory and a collection of functions (callG) *)
 
-  val moreWork: callG -> FSet.t -> (funID * state) list
-    (** Ask for more roots given that the worklist is empty while
-        only having analyzed the given functions *)
+  val moreWork: callG -> FSet.t -> (funID * dfInfo) list
+    (** Ask for more roots given that the worklist has emptied out
+        after having analyzed the given functions *)
 
   (***** Limiter *****)
     
-  val checkRestart: funID -> state -> (state * bool)
+  val checkRestart: funID -> dfInfo -> (dfInfo * bool)
     
 end
 
@@ -137,7 +136,7 @@ end
 (** Output interface of dataflow driver *)
 module type S = sig
 
-  type state
+  type dfInfo
   type funID
 
   (** Run the analysis on the entire program given:
@@ -145,14 +144,12 @@ module type S = sig
       (2) the root directory where ASTs are stored *)
   val compute : string -> callG -> unit
 
-  (**** Operations to query state after computation *)
+  (**** Operations to query dfInfo after computation *)
 
-  val getInfoFunID : funID -> state PPH.t 
+  val getInfoFunID : funID -> dfInfo PPH.t 
 
-  val foldOnFKey : ((funID * state PPH.t) -> 'a -> 'a) -> 
+  val foldOnFKey : ((funID * dfInfo PPH.t) -> 'a -> 'a) -> 
     fKey -> 'a -> 'a
-
-  val releaseInfo : funID * state PPH.t -> unit
 
 end
 
@@ -187,10 +184,10 @@ module CachedWorklist (T: RciTransfer) = struct
       let compare = compareCaller
     end )
 
-  type stateKind = 
-      FlowSens of T.state PPH.t
-    | FlowInsens of T.state
-    | Abandoned of stateKind 
+  type dfInfoKind = 
+      FlowSens of T.dfInfo PPH.t
+    | FlowInsens of T.dfInfo
+    | Abandoned of dfInfoKind 
         (* Decide not to analyze any more, but keep old kind around! *)
       
   let makeAbandonedSt oldKind =
@@ -199,9 +196,9 @@ module CachedWorklist (T: RciTransfer) = struct
     | _ -> Abandoned oldKind
   
   type funcData = {
-    mutable fState : stateKind;
+    mutable fDfInfo : dfInfoKind;
     fCallers : CSet.t;
-    mutable fInput : T.state option; (* evolving function input state *)
+    mutable fInput : T.dfInfo option; (* evolving function input dfInfo *)
   }
 
   module CompFuns = 
@@ -221,10 +218,10 @@ module CachedWorklist (T: RciTransfer) = struct
 
   (**** On-disk images of the function's dataflow information ****)
 
-  let dummyState = FlowSens (PPH.create 0)
+  let dummyDfInfo = FlowSens (PPH.create 0)
 
   let dummyFuncData = 
-    { fState = dummyState;
+    { fDfInfo = dummyDfInfo;
       fCallers = CSet.empty; 
       fInput = None; }
       
@@ -270,29 +267,29 @@ module CachedWorklist (T: RciTransfer) = struct
       match kind with
         FlowSens stTables ->
           PPH.iter (fun pp st ->
-                      logStatusF "State @ %s\n" (string_of_pp pp);
-                      T.printState st) stTables;
+                      logStatusF "DfInfo @ %s\n" (string_of_pp pp);
+                      T.printDfInfo st) stTables;
       | FlowInsens st ->
-          logStatus "FlowInsens state";
-          T.printState st
+          logStatus "FlowInsens dfInfo";
+          T.printDfInfo st
       | Abandoned oldStKind ->
-          logStatus "Abandoned!!! Pre-abandonment state is:";
+          logStatus "Abandoned!!! Pre-abandonment dfInfo is:";
           printKind oldStKind
     in
-    printKind fInfo.fState;
+    printKind fInfo.fDfInfo;
     logStatusD (d_callers fInfo)
       
 
   (************************************************************)
 
+  let evictFID funID fInfo =
+    let sumKey = T.funIDToSumKey funID in
+    (* Forcibly mark summary dirty too *)
+    fpinfoSums#addReplace sumKey fInfo
+
   (** Evict the entries in the funCache, saving the dataflow info *)
   let evictFunctions () =
-    FM.iter 
-      (fun funID fInfo ->
-         let sumKey = T.funIDToSumKey funID in
-         (* Forcibly mark summary dirty too *)
-         fpinfoSums#addReplace sumKey fInfo;
-      ) !funCache;
+    FM.iter evictFID !funCache;
     let () = fpinfoSums#serializeAndFlush in
     funCache := FM.empty
 
@@ -300,7 +297,7 @@ module CachedWorklist (T: RciTransfer) = struct
   (***** Worklist management ******)
 
   type workKind = 
-      WCall of T.state * CSet.t 
+      WCall of T.dfInfo * CSet.t 
         (* queue call w/ input and additional callers *)
     | WIntra of prog_point  (* next pp *)
     | WReturnTo of caller     (* The particular callsite to return to *)
@@ -320,7 +317,7 @@ module CachedWorklist (T: RciTransfer) = struct
         match a.wKind, b.wKind with
           (* Sort by prog point, so calls come first, then internal, then ret *)
           WCall (ist1, cs1), WCall (ist2, cs2) ->
-            let c = T.compareState ist1 ist2 in
+            let c = T.compareDfInfo ist1 ist2 in
             if c == 0 then CSet.compare cs1 cs2 
             else c
 
@@ -423,12 +420,12 @@ module CachedWorklist (T: RciTransfer) = struct
 
   let initializeFunInfo cfg wCall =
     match wCall.wKind with
-      WCall (inState, callers) ->
+      WCall (inDfInfo, callers) ->
         let dfInfo = PPH.create (List.length cfg.sallstmts) in
         (match cfg.sallstmts with
-           start :: _ -> PPH.add dfInfo (getStmtPP start) inState
+           start :: _ -> PPH.add dfInfo (getStmtPP start) inDfInfo
          | [] -> failwith "cfg has no statements?");
-        { fState = FlowSens dfInfo;
+        { fDfInfo = FlowSens dfInfo;
           fCallers = CSet.empty;  (* add callers when we start the call *)
           fInput = None;          (* add input when we start the call *)
         } 
@@ -472,12 +469,12 @@ module CachedWorklist (T: RciTransfer) = struct
     logStatusF "Abandoning %s\n" (string_of_funID funID);
     try 
       let info = FM.find funID !funCache in
-      let info = { info with fState = makeAbandonedSt info.fState; } in
+      let info = { info with fDfInfo = makeAbandonedSt info.fDfInfo; } in
       funCache := FM.add funID info !funCache;
     with Not_found ->
       let sumKey = T.funIDToSumKey funID in
       let info = fpinfoSums#find sumKey in
-      let info = { info with fState = makeAbandonedSt info.fState; } in
+      let info = { info with fDfInfo = makeAbandonedSt info.fDfInfo; } in
       fpinfoSums#addReplace sumKey info
 
 
@@ -496,7 +493,7 @@ module CachedWorklist (T: RciTransfer) = struct
              (match otherCall.wKind with
                 WCall (i2, cs2) ->
                   (* Require them to be the same for now... *)
-                  if T.compareState i i2 == 0 then
+                  if T.compareDfInfo i i2 == 0 then
                     if CSet.subset cs cs2 then oldQ 
                     else updateQueue i (CSet.union cs cs2) otherCall oldQ
                   else failwith "mergeWork given different inputs on Calls"
@@ -640,7 +637,8 @@ module CachedWorklist (T: RciTransfer) = struct
 end
 
 
-module IterStats (T:RciStateAndKeys) = struct
+(** Profile # of iterations and total time spent per function *)
+module IterStats (T:RciDfInfoAndKeys) = struct
 
   let totalIter = ref 0
   let perFuncIter = Distributions.makeDistro ()
@@ -688,7 +686,7 @@ module RciDataflow  (T: RciTransfer) = struct
 
   module IStats = IterStats(T)
 
-  type state = T.state
+  type dfInfo = T.dfInfo
   type funID = T.funID
     
   (****** Misc statistics *******)
@@ -697,44 +695,44 @@ module RciDataflow  (T: RciTransfer) = struct
 
   let inspecting = ref false
 
-  (****** Misc utils / state management ******)
+  (****** Misc utils / dfInfo management ******)
 
-  let notifyNewState oldSt st pp =
+  let notifyNewDfInfo oldSt st pp =
     if !inspecting then 
       (match oldSt with 
          Some oldSt -> 
-           logStatusF "New state (diff) at %s %s\n" 
+           logStatusF "New dfInfo (diff) at %s %s\n" 
              (string_of_loc !currentLoc) (string_of_pp pp);
-           T.printState (T.diffState oldSt st);
+           T.printDfInfo (T.diffDfInfo oldSt st);
        | None ->
-           logStatusF "New state at %s %s\n" 
+           logStatusF "New dfInfo at %s %s\n" 
              (string_of_loc !currentLoc) (string_of_pp pp);
-           T.printState st )
+           T.printDfInfo st )
     else
       if T.isBottom st then
-        (logStatusF "New state at %s %s\n" (string_of_loc !currentLoc) 
+        (logStatusF "New dfInfo at %s %s\n" (string_of_loc !currentLoc) 
            (string_of_pp pp);
-         T.printState st)
+         T.printDfInfo st)
 
 
-  let rec getState fState pp =
-    match fState with 
+  let rec getDfInfo fDfInfo pp =
+    match fDfInfo with 
       FlowSens stTables -> PPH.find stTables pp
     | FlowInsens st -> 
-        logError "grabbing state from flowInsens";
+        logError "grabbing dfInfo from flowInsens";
         st
     | Abandoned oldSt -> 
-        logError "grabbing state from abandoned func";
-        getState oldSt pp
+        logError "grabbing dfInfo from abandoned func";
+        getDfInfo oldSt pp
 
-  let updateState fInfo pp oldD d =
-    notifyNewState oldD d pp;
-    match fInfo.fState with
+  let updateDfInfo fInfo pp oldD d =
+    notifyNewDfInfo oldD d pp;
+    match fInfo.fDfInfo with
       FlowSens stTables ->
         PPH.replace stTables pp d
     | FlowInsens old ->
-        fInfo.fState <- FlowInsens (d)
-    | Abandoned _ -> failwith "updating state for abandoned func"
+        fInfo.fDfInfo <- FlowInsens (d)
+    | Abandoned _ -> failwith "updating dfInfo for abandoned func"
 
   let setCurrentLocation cfg funInfo pp =
     let parentStmt = lookupStmtCFG cfg pp in
@@ -761,15 +759,15 @@ module RciDataflow  (T: RciTransfer) = struct
   let getFirstPP cfg =
     getStmtPP (List.hd cfg.sallstmts)
 
-  let notifyStep state pp funID =
+  let notifyStep dfInfo pp funID =
     if !inspecting then begin
       logStatusF "step @ %s %s %s\n" (string_of_loc !currentLoc)
         (string_of_pp pp) (string_of_funID funID);
-      T.printState state
+      T.printDfInfo dfInfo
     end
 
-  let getStateFail pp fInfo =
-    logStatus "Can't find state for when finfo is:\n";
+  let getDfInfoFail pp fInfo =
+    logStatus "Can't find dfInfo for when finfo is:\n";
     printFpinfoSums fInfo;
     failwith "Death"
 
@@ -827,14 +825,14 @@ module RciDataflow  (T: RciTransfer) = struct
     notifyChange (descr ^ " Flow Insensitive") funID fInfo
 
   let makeFlowInsens fInfo funID newIn cfg =
-    match fInfo.fState with
+    match fInfo.fDfInfo with
         FlowInsens oldSt -> 
           (match T.combinePredecessors cfg oldSt newIn with
              None -> []
            | Some x -> 
                notifyFlowInsens "Redoing" funID fInfo;
                (* Just queue it up for now as "intraproc" work *)
-               fInfo.fState <- FlowInsens x;
+               fInfo.fDfInfo <- FlowInsens x;
                [makeIntraWork funID (getFirstPP cfg)]
           )
             
@@ -845,7 +843,7 @@ module RciDataflow  (T: RciTransfer) = struct
                (match T.combinePredecessors cfg cur st with
                   None -> cur
                 | Some x -> x) ) stTables newIn in
-          fInfo.fState <- FlowInsens combo;
+          fInfo.fDfInfo <- FlowInsens combo;
           (* Just queue it up for now as "intraproc" work *)
           [makeIntraWork funID (getFirstPP cfg)]
       | Abandoned _ ->
@@ -855,9 +853,9 @@ module RciDataflow  (T: RciTransfer) = struct
     match stmt.skind with
       Return _ -> true | _ -> false
          
-  (** Merge the [newState] w/ the successor's existing dataflow info.
+  (** Merge the [newDfInfo] w/ the successor's existing dataflow info.
       If new, add successor to worklist *)
-  let reachSuccessor cfg funID funInfo newState curWork (succ, succPP) =
+  let reachSuccessor cfg funID funInfo newDfInfo curWork (succ, succPP) =
     let addWork funID succ succPP curWork =
       if isReturnStmt succ 
       then makeReturnStmtWork funID succPP :: curWork
@@ -865,43 +863,43 @@ module RciDataflow  (T: RciTransfer) = struct
     in
     setCurrentLocation cfg funInfo succPP;
     try
-      let old = getState funInfo.fState succPP in
-      (match T.combinePredecessors cfg old newState with
+      let old = getDfInfo funInfo.fDfInfo succPP in
+      (match T.combinePredecessors cfg old newDfInfo with
          None -> curWork
        | Some x ->
-           updateState funInfo succPP (Some old) x;
+           updateDfInfo funInfo succPP (Some old) x;
            addWork funID succ succPP curWork)
     with Not_found ->
-      updateState funInfo succPP None newState;
+      updateDfInfo funInfo succPP None newDfInfo;
       addWork funID succ succPP curWork
 
-  (** Version of reachSuccessor that undoubtedly uses newState rather 
-      than try to combine newState w/ old. Must be sure that this is okay *)
-  let mustReach cfg funID funInfo newState curWork (succ, succPP) =
+  (** Version of reachSuccessor that undoubtedly uses newDfInfo rather 
+      than try to combine newDfInfo w/ old. Must be sure that this is okay *)
+  let mustReach cfg funID funInfo newDfInfo curWork (succ, succPP) =
     let addWork funID succ succPP curWork =
       if isReturnStmt succ 
       then makeReturnStmtWork funID succPP :: curWork
       else makeIntraWork funID succPP :: curWork
     in
     setCurrentLocation cfg funInfo succPP;
-    updateState funInfo succPP (Some newState) newState;
+    updateDfInfo funInfo succPP (Some newDfInfo) newDfInfo;
     addWork funID succ succPP curWork
 
   
-  let reachIfSuccs cfg funID fInfo state stmt ifExp =
+  let reachIfSuccs cfg funID fInfo dfInfo stmt ifExp =
     let not_e = UnOp(LNot, ifExp, intType) in
-    let thenGuard = T.doGuard ifExp state in
-    let elseGuard = T.doGuard not_e state in
+    let thenGuard = T.doGuard ifExp dfInfo in
+    let elseGuard = T.doGuard not_e dfInfo in
     if thenGuard = Dataflow.GDefault && elseGuard = Dataflow.GDefault then
       (* this is the common case *)
-      List.fold_left (reachSuccessor cfg funID fInfo state) [] 
+      List.fold_left (reachSuccessor cfg funID fInfo dfInfo) [] 
         (List.map getStmtAndPP stmt.succs)
     else begin
       let doBranch succ curWork guard =
         let succPP = getStmtPP succ in
         match guard with
           Dataflow.GDefault -> 
-            reachSuccessor cfg funID fInfo state curWork (succ, succPP)
+            reachSuccessor cfg funID fInfo dfInfo curWork (succ, succPP)
         | Dataflow.GUse d ->  
             reachSuccessor cfg funID fInfo d curWork (succ, succPP)
         | Dataflow.GUnreachable -> 
@@ -927,28 +925,28 @@ module RciDataflow  (T: RciTransfer) = struct
     Cil.setStmtLocation parentStmt; (* Must set this either way *)
     match lookupStmtInstr parentStmt pp with
       PPStmt stmt ->
-        let startState = 
-          try getState fInfo.fState pp 
-          with Not_found -> getStateFail pp fInfo
+        let startDfInfo = 
+          try getDfInfo fInfo.fDfInfo pp 
+          with Not_found -> getDfInfoFail pp fInfo
         in
-        let startState = T.doStmt stmt startState in
-        notifyStep startState pp funID;
+        let startDfInfo = T.doStmt stmt startDfInfo in
+        notifyStep startDfInfo pp funID;
         (match stmt.skind with
            Instr il -> 
              let succPP = getNextInstrPPs stmt stmtPP in
              assert (List.length succPP <= 1);
-             List.fold_left (reachSuccessor cfg funID fInfo startState) [] succPP
+             List.fold_left (reachSuccessor cfg funID fInfo startDfInfo) [] succPP
 
          | If (e, _, _, _) -> 
-             reachIfSuccs cfg funID fInfo startState stmt e 
+             reachIfSuccs cfg funID fInfo startDfInfo stmt e 
 
          | Goto _ | Break _ | Continue _
          | TryExcept _ | TryFinally _ | Switch _ | Loop _ | Block _ ->
-             List.fold_left (reachSuccessor cfg funID fInfo startState) [] 
+             List.fold_left (reachSuccessor cfg funID fInfo startDfInfo) [] 
                (List.map getStmtAndPP stmt.succs)
 
          | Return (exp, loc) ->
-             let toNotify = T.doReturn exp startState in
+             let toNotify = T.doReturn exp startDfInfo in
              let work = 
                if toNotify.notifyCaller 
                then reachCallers funID fInfo [] else [] in
@@ -958,15 +956,15 @@ module RciDataflow  (T: RciTransfer) = struct
 
     | PPInstr instr ->
         Cil.setInstrLocation instr pp.pp_instr;
-        let startState = 
-          try getState fInfo.fState pp 
-          with Not_found -> getStateFail pp fInfo
+        let startDfInfo = 
+          try getDfInfo fInfo.fDfInfo pp 
+          with Not_found -> getDfInfoFail pp fInfo
         in
-        notifyStep startState pp funID;
+        notifyStep startDfInfo pp funID;
         (match instr with
            (* TODO: make an instruction kind for the Block Assign? *)
            Set (lhs, rhs, loc) -> 
-             let outSt, toNotify = T.doAssign lhs rhs loc startState in
+             let outSt, toNotify = T.doAssign lhs rhs loc startDfInfo in
              let work = 
                if toNotify.notifyCaller 
                then reachCallers funID fInfo [] else [] in
@@ -977,7 +975,7 @@ module RciDataflow  (T: RciTransfer) = struct
              reachGlobalReaders toNotify.notifyPP work
                
          | Asm (a,b,c,d,e,f) -> 
-             let outSt, toNotify = T.doASM a b c d e f startState in
+             let outSt, toNotify = T.doASM a b c d e f startDfInfo in
              let nextPPs = getNextInstrPPs parentStmt pp in
              let work = 
                if toNotify.notifyCaller 
@@ -987,7 +985,7 @@ module RciDataflow  (T: RciTransfer) = struct
 
          | Call (lvopt, ce, args, loc) -> 
              let calleeFlows, toNotify, outSt = 
-               T.doCall lvopt ce args loc startState in
+               T.doCall lvopt ce args loc startDfInfo in
 
              let work = reachCallees funID pp calleeFlows.addCallees in
              List.iter abandonFunction calleeFlows.removeCallees;
@@ -1016,12 +1014,12 @@ module RciDataflow  (T: RciTransfer) = struct
        Some inSt -> T.setFunc cfg (funID, inSt)
      | None -> failwith "starting a func that had no input?");
 
-    let startState = match fInfo.fState with 
+    let startDfInfo = match fInfo.fDfInfo with 
         FlowInsens x -> x 
       | FlowSens _ | Abandoned _ -> 
           failwith "handleFlowInsIntra given non flow-insens" in
     
-    let comboState curSt nextSt =
+    let comboDfInfo curSt nextSt =
       match T.combinePredecessors cfg curSt nextSt with
         None -> curSt
       | Some x -> x 
@@ -1059,7 +1057,7 @@ module RciDataflow  (T: RciTransfer) = struct
                  (curSt, shouldRet || toNotify.notifyCaller,
                   List.rev_append toNotify.notifyPP globReads, 
                   List.rev_append moreCalls calls)) in
-      (comboState curSt nextSt, shouldRet, globReads, calls, instrIndex + 1)
+      (comboDfInfo curSt nextSt, shouldRet, globReads, calls, instrIndex + 1)
     in
     
     let finalSt, shouldReturn, globReads, calls =
@@ -1084,29 +1082,29 @@ module RciDataflow  (T: RciTransfer) = struct
             | TryExcept _ | TryFinally _ | Switch _ | Loop _ ->
                 (curSt, shouldReturn, globReads, calls)
            )
-        ) (startState, false, [], []) cfg.sallstmts in
+        ) (startDfInfo, false, [], []) cfg.sallstmts in
     
     let work = reachCallers funID fInfo [] in
     let work = List.rev_append calls work in
     let maybeOtherFuncWork = reachGlobalReaders globReads work in
-    match T.combinePredecessors cfg startState finalSt with
+    match T.combinePredecessors cfg startDfInfo finalSt with
       None -> 
         (* Just the inter-proc flows *)
         maybeOtherFuncWork 
     | Some newSt -> 
         (* Inter-proc flows plus one more round on self *)
         logStatusF "Iter flowInsensitive again: %s\n" (string_of_funID funID);
-        fInfo.fState <- FlowInsens newSt;
+        fInfo.fDfInfo <- FlowInsens newSt;
         makeIntraWork funID (getFirstPP cfg) :: maybeOtherFuncWork
 
  
-  let printCallers descr calleeID calleeCfg inState calleeInfo =
+  let printCallers descr calleeID calleeCfg inDfInfo calleeInfo =
     logStatusF "=============\n%s call for %s (%s)\n" 
       descr calleeCfg.svar.vname (string_of_funID calleeID);
     let doc = d_callers calleeInfo in
     logStatusD doc;
-    logStatus "Input state:";
-    T.printState inState
+    logStatus "Input dfInfo:";
+    T.printDfInfo inDfInfo
 
 
   (* Would this bookkeeping take too much space? 
@@ -1118,17 +1116,17 @@ module RciDataflow  (T: RciTransfer) = struct
     if CSet.is_empty fInfo.fCallers then begin
       logStatusF "Pausing context (no callers): %s\n" 
         (string_of_funID funID);
-      { fInfo with fState = makeAbandonedSt fInfo.fState; }
+      { fInfo with fDfInfo = makeAbandonedSt fInfo.fDfInfo; }
     end else fInfo
 
   (** If a context has more callers, and was paused, unpause it *)
   let checkToggleStartFunction funID fInfo =
     if not (CSet.is_empty fInfo.fCallers) then
-      (match fInfo.fState with
+      (match fInfo.fDfInfo with
          Abandoned oldSt -> 
            logStatusF "Unpausing context (more callers): %s\n" 
              (string_of_funID funID);
-           { fInfo with fState = oldSt; }
+           { fInfo with fDfInfo = oldSt; }
        | _ -> fInfo)
     else fInfo
 
@@ -1190,7 +1188,7 @@ module RciDataflow  (T: RciTransfer) = struct
     let fInfo = { fInfo with fInput = Some input; } in
     let fInfo = updateCallers funID fInfo newCallers in
     printCallers descr funID cfg input fInfo;
-    match fInfo.fState with
+    match fInfo.fDfInfo with
       FlowSens stTables ->
         let firstPP = getFirstPP cfg in
         PPH.add stTables firstPP input;
@@ -1208,20 +1206,20 @@ module RciDataflow  (T: RciTransfer) = struct
          if isReturnStmt stmt then
            let pp = getStmtPP stmt in
            (try (* Only queue if we've reached it before *)
-              let _ = getState fInfo.fState pp in               
+              let _ = getDfInfo fInfo.fDfInfo pp in               
               addWork { wFun = funID; wKind = WReturnStmt pp; }
             with Not_found -> ())
          else ()
       ) cfg.sallstmts
       
       
-  let startCall funID fInfo inState newCallers =
+  let startCall funID fInfo inDfInfo newCallers =
     let cfg = getCfg funID in
     match fInfo.fInput with
       None -> (* first call *)        
-        queueCall "Starting" funID newCallers fInfo inState cfg
+        queueCall "Starting" funID newCallers fInfo inDfInfo cfg
     | Some oldIn ->
-        (match T.combinePredecessors cfg oldIn inState with
+        (match T.combinePredecessors cfg oldIn inDfInfo with
            None -> 
              if CSet.subset newCallers fInfo.fCallers then []
              else begin
@@ -1231,7 +1229,7 @@ module RciDataflow  (T: RciTransfer) = struct
              end
          | Some newIn ->
              (* For now... keep the old guy, don't allow combining input
-                states, otherwise we can't detect duplicate contexts *)
+                dfInfos, otherwise we can't detect duplicate contexts *)
 (*
              let newIn, switch = T.checkRestart funID newIn in
              if not switch then begin
@@ -1249,8 +1247,8 @@ module RciDataflow  (T: RciTransfer) = struct
 *)
              logStatusF "Didn't restart: %s %s\n" cfg.svar.vname 
                (string_of_funID funID);
-             logStatus "Diff in input state:";
-             T.printState (T.diffState newIn oldIn);
+             logStatus "Diff in input dfInfo:";
+             T.printDfInfo (T.diffDfInfo newIn oldIn);
              if CSet.subset newCallers fInfo.fCallers then []
              else begin
                let fInfo = updateCallers funID fInfo newCallers in
@@ -1262,8 +1260,8 @@ module RciDataflow  (T: RciTransfer) = struct
 
   let stepFlowSensitive fInfo wEntry =
     match wEntry.wKind with
-      WCall (inState, newCallers) ->
-        startCall wEntry.wFun fInfo inState newCallers
+      WCall (inDfInfo, newCallers) ->
+        startCall wEntry.wFun fInfo inDfInfo newCallers
     | WIntra pp
     | WReturnTo (_, pp) (* it's returning to the call instruction... *)
     | WReturnStmt pp ->
@@ -1272,8 +1270,8 @@ module RciDataflow  (T: RciTransfer) = struct
 
   let stepFlowInsens fInfo wEntry =
     match wEntry.wKind with
-      WCall (inState, newCallers) ->
-        startCall wEntry.wFun fInfo inState newCallers
+      WCall (inDfInfo, newCallers) ->
+        startCall wEntry.wFun fInfo inDfInfo newCallers
     | WIntra _
     | WReturnTo (_, _) 
     | WReturnStmt _ ->
@@ -1299,12 +1297,12 @@ module RciDataflow  (T: RciTransfer) = struct
     logStatusF "Total: %d\n" (FSet.cardinal !touchedFuncs);
     logStatus "===================================="
 
-  let enqueueInitial stateKeys =
+  let enqueueInitial dfInfoKeys =
     List.iter 
       (fun (funID, st) -> 
          let work = { wFun = funID;
                       wKind = WCall (st, CSet.empty); } in
-         addWork work) stateKeys
+         addWork work) dfInfoKeys
 
   let mergeFlowInsWork fInfo wEntry =
     dropWork wEntry.wFun
@@ -1330,8 +1328,8 @@ module RciDataflow  (T: RciTransfer) = struct
         addTouchedFunc wEntry;
         let fInfo = FM.find wEntry.wFun !funCache in
 
-        let rec doWEntry (wEntry, fInfo, fState) =
-          match fState with
+        let rec doWEntry (wEntry, fInfo, fDfInfo) =
+          match fDfInfo with
             FlowSens _ -> stepFlowSensitive fInfo wEntry 
           | FlowInsens _ -> 
               mergeFlowInsWork fInfo wEntry;
@@ -1341,14 +1339,15 @@ module RciDataflow  (T: RciTransfer) = struct
               (match wEntry.wKind with
                  WCall _ -> doWEntry (wEntry, fInfo, oldSt)
                | _ -> 
-                   (* TODO: unsound because this drops work on the floor
-                      when it should actually keep it queued up until
+                   (* TODO: unsound if this function is later unabandoned,
+                      because this drops work on the floor.
+                      Should actually keep it queued up until
                       the next unpause... *)
                    [])
         in
 
         let toEnqueue, time = 
-          Stat.timethis doWEntry (wEntry, fInfo, fInfo.fState) in
+          Stat.timethis doWEntry (wEntry, fInfo, fInfo.fDfInfo) in
         updateSteps wEntry.wFun time;
         List.iter addWork toEnqueue
       with AllDone -> ()
@@ -1380,19 +1379,16 @@ module RciDataflow  (T: RciTransfer) = struct
 (*    printGlobalWorklist "final" *)
   end
 
-  (**** Operations to query state after computation *)
+  (**** Operations to query dfInfo after computation *)
 
   let getInfoFunID funID =
     let sumKey = T.funIDToSumKey funID in
     let fpInfo = fpinfoSums#find sumKey in
-    fpInfo.fState
-
-  let releaseInfo (funID, state) =
-    fpinfoSums#evictSummaries
+    fpInfo.fDfInfo
 
   let foldOnFKey foo fKey acc =
     fpinfoSums#foldOnKey 
-      (fun sumKey info acc -> foo sumKey info.fState acc) fKey acc
+      (fun sumKey info acc -> foo sumKey info.fDfInfo acc) fKey acc
 
 
 end

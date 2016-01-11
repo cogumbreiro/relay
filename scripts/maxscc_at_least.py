@@ -1,11 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-#-- read stdin and check that max scc size is >= MIN (where MIN is given)
-#-- or, if the total number of functions is approaching that bound and
-#   the max is still 70% of all the functions, allow it...
-#   i.e., MAX >= 0.7 * TOTAL && 
-#         let DIFF = TOTAL - MIN where
-#         DIFF >= 0 && DIFF <= 0.3 * MIN
+""" read stdin and check that max scc size is >= MIN (where MIN is given)
+    or, if the total number of functions is approaching that bound and
+    the max is still 70% of all the functions, allow it...
+    i.e., MAX >= 0.7 * TOTAL && 
+        let DIFF = TOTAL - MIN where
+        DIFF >= 0 && DIFF <= 0.3 * MIN 
+"""
 
 import sys
 import re

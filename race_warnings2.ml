@@ -45,28 +45,24 @@
 open Cil
 open Callg
 open Fstructs
-open Messages
 open Cilinfos
 open Warn_reports
 open Pretty
 open Cildump
+open Logging
 
 module RP = Race_reports
 
 module LS = Lockset
-module RS = Racesummary
 module Race = Racestate
+module RS = Race.RS
 module SPTA = Race.SPTA
-module Req = Request
-module L = Logging
 
 module Stat = Mystats
 
 module Lv = Lvals
 module Acc = Access_info
 
-module BS = Backed_summary
-(*module LP = Lockset_partitioner*)
 module PaKeyHeadHash = Pseudo_access.PaKeyHeadHash
 module PaKeySet = Guarded_access_base.PAS
 
@@ -136,11 +132,13 @@ let addRaceToPAs entry paIds =
     ) paIds
 
 let printGammaReport () =
-  let doc = ref (text "") in
-  let cat x = doc := !doc ++ (text x) ++ text "\n" in
+  let docs = ref [] in
   let paCount = ref 0 in
 
   PaKeyHeadHash.iter (fun pakh races ->
+
+    let doc = ref nil in
+    let cat x = doc := !doc ++ (text (x ^ "\n")) in
 
     let count = PaRaceSet.cardinal races in
     cat (" PA " ^ Pseudo_access.string_of_pakeyhead pakh
@@ -149,22 +147,23 @@ let printGammaReport () =
 
   PaRaceSet.iter (fun race ->
 
-    cat ("     lval: " ^ Lv.string_of_lval race.lval);
-    cat ("     locs: " ^ Acc.string_of_accesses race.access);
-    cat ("    locks: ");
+    cat ("     lval: " ^ Lv.string_of_lval race.lval ^ "\n" ^
+         "     locs: " ^ Acc.string_of_accesses race.access ^ "\n" ^
+         "    locks:");
     doc := !doc ++ (LS.d_fullLS () race.locks);
 
     let loc, fn, fk = race.threadRoot in
     cat ("     root: thread spawned at " ^ string_of_loc loc
-           ^ " w/ func " ^ fn);
-    cat "";
+           ^ " w/ func " ^ fn ^ "\n");
 
   ) races;
 
+     docs := !doc :: !docs
   ) paRaces;
 
-  L.logStatusF "\nGamma Report -- %d racy PAs\n\n" !paCount;
-  L.logStatusD (indent 2 !doc)
+  logStatusF "\nGamma Report -- %d racy PAs\n\n" !paCount;
+  List.iter (fun doc -> logStatusD (indent 2 doc)) (List.rev !docs);
+  flushStatus ()
 
 
 (**************** Map races to pseudo accesses ***************)
@@ -213,10 +212,10 @@ let loadR2PA filename =
             
 (* TODO: make this not hardcoded *)
 let hardCodedSumTypes () =
-  (*!BS.allTypes*)
-  BS.getDescriptors [RS.sum#sumTyp;
-                     SPTA.SS.sum#sumTyp;
-                    ]
+  (*!Backed_summary.allTypes*)
+  Backed_summary.getDescriptors [RS.sum#sumTyp;
+                                 SPTA.SS.sum#sumTyp;
+                                ]
 
 type pairCounts = {
   notBlob : Int64.t;
@@ -275,18 +274,18 @@ class warningChecker cg cgDir = object (self)
   method printPair caption count =
     let nb = !count.notBlob in
     let b = !count.blob in
-    L.logStatusF "%s:\t%Ld\t+ %Ld \t= %Ld\n" caption 
+    logStatusF "%s:\t%Ld\t+ %Ld \t= %Ld\n" caption 
       nb b (Int64.add nb b)
 
   method printAllPairCounts () =
-    L.logStatus "All CheckPair Counts";
+    logStatus "All CheckPair Counts";
     self#printPair "totalP" totalP;
     self#printPair "diffLvalP" diffLvalP;
     self#printPair "protectedP" protectedP;
     self#printPair "bothEmptyP" bothEmptyP;
     self#printPair "oneEmptyP" oneEmptyP;
     self#printPair "disjointP" disjointP;
-    L.logStatus "\nPA CheckPair Counts";
+    logStatus "\nPA CheckPair Counts";
     self#printPair "pa_totalP: " pa_totalP;
     self#printPair "pa_diffLvalP" pa_diffLvalP;
     self#printPair "pa_protectedP" pa_protectedP;
@@ -296,13 +295,13 @@ class warningChecker cg cgDir = object (self)
 
 
   method notifyDone =
-    L.logStatus "completed all thread pairs";
-    L.flushStatus ();
+    logStatus "completed all thread pairs";
+    flushStatus ();
     localRaces#printWarnings;  (* for local debugging *)
     try
-      Req.notifyRace localRaces#data
+      Request.notifyRace localRaces#data
     with e ->
-      L.logError ("Warnings notifyDone: " ^ (Printexc.to_string e));
+      logError ("Warnings notifyDone: " ^ (Printexc.to_string e));
       raise e
       
         
@@ -375,8 +374,10 @@ class warningChecker cg cgDir = object (self)
         | false -> !parNL
       in
       let markRacy pakey =
-        L.logStatus
+        (*
+        logStatus
           (Lv.string_of_lval lv1 ^ "/" ^ Lv.string_of_lval lv2);
+        *)
         Pseudo_access.markRacyAccess pardb pakey;
       in
       PaKeySet.iter markRacy paIds;
@@ -479,7 +480,7 @@ let flagRacesFromSumms cg cgDir =
   checker#printAllPairCounts ();
   Pseudo_access.sums#serializeAndFlush;
   let race2pakeyFile = (Filename.concat cgDir r2pakey_file) in
-  L.logStatusF "Writing race cluster_id to pakey bindings to %s\n" 
+  logStatusF "Writing race cluster_id to pakey bindings to %s\n" 
     race2pakeyFile;
   saveR2PA race2pakeyFile;
   

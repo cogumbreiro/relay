@@ -87,10 +87,10 @@ let emptyOutIndirect cg =
   FMap.map 
     (fun node -> 
        { node with
-           ccallees = List.filter
+           ccallees = List.map
            (fun call ->
               match call with 
-                CDirect _ -> true | CIndirect (pp, _) -> false
+                CDirect _ -> call | CIndirect (pp, _) -> CIndirect (pp, [])
            ) node.ccallees;
        }
     ) cg
@@ -125,8 +125,37 @@ let funStrsToFuns index callg (funStrs : string list) : (funID * Cil.typ) list =
          cur
     ) [] funStrs
 
-(* TODO: start from steens, dump all the indirect targets, then
-   populate with ONLY the indirect dudes... *)
+
+(** Estimate the coverage of the dynamic callgraph as
+    (#Funs w/ Indirect Covered / #Fun w/ Indirect) *)
+let measureCoverage dynamicCG =
+  let numCov, numIndir = 
+    FMap.fold 
+      (fun fkey call (numCov, numIndir) -> 
+         let hasCov, hasIndir = List.fold_left 
+           (fun (hasCov, hasIndir) callTarg ->
+              match callTarg with
+                CIndirect (_, l) -> 
+                  (hasCov || not (l = [])), true
+              | CDirect _ ->
+                  hasCov, hasIndir
+           ) (false, false) (calleeDetail call) in
+         if hasCov then begin
+           assert hasIndir;
+           (numCov + 1, numIndir + 1)
+         end else begin
+           if hasIndir then
+             (numCov, numIndir + 1)
+           else 
+             (numCov, numIndir)
+         end
+      ) dynamicCG (0, 0)
+  in
+  if numIndir <> 0 then
+    logStatusF "Coverage of Funs with Indirect Calls: %d / %d = %f\n" 
+      numCov numIndir ((float_of_int numCov) /. (float_of_int numIndir))
+  else 
+    logStatus "No indirect calls in benchmark!"
 
 
 (***************************************************)
@@ -315,7 +344,8 @@ and convertCG simplecg name_to_id oc =
     ) simplecg !builtCG in
   logStatus "DONE converting -- now writing!";
   writeSomeCalls oc finalCG;
-  logStatus "DONE writing!"
+  logStatus "DONE writing!";
+  measureCoverage finalCG
 
 
 (************************************************************)

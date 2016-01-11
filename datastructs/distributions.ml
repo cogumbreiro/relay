@@ -17,20 +17,16 @@ let makeDistro () =
 let distroAsList distro =
   Stdutil.mapToList H.fold distro 
 
-let lexicalCompare (a, a') (b, b') =
-  let c = compare a b in
-  if c == 0 then compare a' b'
-  else c
 
 let distroSortKey distro =
   let listed = distroAsList distro in
-  (List.sort lexicalCompare listed)
+  (List.sort compare listed)
 
 let distroSortFreq distro =
   let listed = distroAsList distro in
   (List.sort 
      (fun (a', a) (b', b) -> 
-        lexicalCompare (b, b') (a, a')) listed)
+        compare (b, b') (a, a')) listed)
 
 let printDistro distro string_of_key name =
   Printf.printf "Distribution of %s: \n" name;

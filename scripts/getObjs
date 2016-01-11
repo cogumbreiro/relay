@@ -1,6 +1,7 @@
-#!/usr/bin/python
-# creates a list of space separated .o files
-# useful as input to the cil merger?
+#!/usr/bin/env python
+
+""" creates a list of space separated .o files 
+    useful as input to the cil merger? """
 
 import os
 import sys

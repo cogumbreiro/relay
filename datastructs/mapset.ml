@@ -44,6 +44,7 @@ module type S =
 
     val mapCh: ('a -> 'a) -> 'a t -> 'a t
     val mapChI: (key -> 'a -> 'a) -> 'a t -> 'a t
+    val mapChK: (key -> key) -> 'a t -> 'a t
 
     val fold: (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 
@@ -69,6 +70,11 @@ module type S =
     val union: ('a -> 'a -> 'a) -> 'a t -> 'a t -> 'a t
     val inter: ('a -> 'a -> 'a) -> 'a t -> 'a t -> 'a t
     val diff: 'a t -> 'a t -> 'a t
+
+    (* Like intersect but drops elements if the combiner can't come up
+       with something *)
+    val interO: ('a -> 'a -> 'a option) -> 'a t -> 'a t -> 'a t
+
     (* New operation -- comb func should return differences in 
        arg1 vs arg2, or return arg2 if there is no difference *)
     val diffComb: ('a -> 'a -> 'a) -> 'a t -> 'a t -> 'a t
@@ -281,6 +287,16 @@ module Make(Ord: OrderedType) = struct
           let newR = mapChI f r in
           if d == newD && l == newL && r == newR then m
           else Node(newL, v, newD, newR, h)
+
+    let rec mapChK f m = 
+      match m with
+        Empty               -> m
+      | Node(l, v, d, r, h) -> 
+          let newV = f v in
+          let newL = mapChK f l in
+          let newR = mapChK f r in
+          if v == newV && l == newL && r == newR then m
+          else Node(newL, newV, d, newR, h)
 
 
     let rec fold f m accu =
@@ -496,6 +512,21 @@ module Make(Ord: OrderedType) = struct
           | (l2, Some(d), r2) ->
               let d' = combiner d d1 in
               join (inter combiner l1 l2) v1 d' (inter combiner r1 r2)
+
+    let rec interO combiner m1 m2 =
+      match (m1, m2) with
+        (Empty, t2) -> Empty
+      | (t1, Empty) -> Empty
+      | (Node(l1, v1, d1, r1, _), t2) ->
+          match split v1 t2 with
+            (l2, None, r2) ->
+              concat (interO combiner l1 l2) (interO combiner r1 r2)
+          | (l2, Some(d), r2) ->
+              match combiner d d1 with
+                Some d' ->
+                  join (interO combiner l1 l2) v1 d' (interO combiner r1 r2)
+              | None ->
+                  concat (interO combiner l1 l2) (interO combiner r1 r2)
 
     let rec diff m1 m2 =
       match (m1, m2) with

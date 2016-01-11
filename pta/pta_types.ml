@@ -37,11 +37,11 @@
 
 
 open Cil
+open Pretty
 open Cilinfos
+open Logging
 
 module HC = Simplehc
-module D = Cildump
-module L = Logging
 
 (**************** Basic types ************************)
 
@@ -174,23 +174,6 @@ let rec compatibleTypesNoUnroll t1 t2 =
   | _ -> false
 
 
-let rec compatibleFunSig callType targType =
-  match callType.HC.node, targType.HC.node with
-    PNamed (_, t1), _ -> compatibleFunSig t1 targType
-  | _, PNamed (_, t2) -> compatibleFunSig callType t2
-  | PFun (r1, a1, va1), PFun (r2, a2, va2) ->
-      (va1 = va2) && 
-        (match a1, a2 with 
-           None, _ | _, None -> true
-         | Some l1, Some l2 -> List.length l1 = List.length l2) &&
-        if isVoid r2 then
-          if isVoid r1 then true
-          else (* "return ignored" *) true
-        else not (isVoid r1)
-  | _, _ -> 
-      compatibleTypes callType targType
-
-
 let compareVarBase a b =
   match a, b with
     PGlobal (i1, t1) , PGlobal (i2, t2) -> 
@@ -262,8 +245,8 @@ and compareRvBase a b =
 (** Information from a call site *)
 type callInfo = {
   cexp  : ptaLv list;      (* list of expressions used to call function *)
-  ctype : ctyp;           (* type of func called *)
-  cloc  : Cil.location;
+  ctype : ctyp;          (* type of func called *)
+  cloc  : Cil.location;    (* location of callsite *)
 }
 
 (** Assignment *)
@@ -554,8 +537,35 @@ let rec ptype_to_cil_type ptyp =
       TNamed ({ tname = n; ttype = ptype_to_cil_type t; treferenced = true; },
               [])
 
+let rec compatibleFunSig callType targType =
+  let callFunSig = Type_utils.getFunSig (ptype_to_cil_type callType) in
+  let targFunSig = Type_utils.getFunSig (ptype_to_cil_type targType) in
+  match targFunSig, callFunSig with
+    Some fpSig, Some callSig -> 
+      Type_utils.funSigSubtype fpSig callSig
+  | None, _
+  | _, None -> false
+(*  
+  match callType.HC.node, targType.HC.node with
+    PNamed (_, t1), _ -> compatibleFunSig t1 targType
+  | _, PNamed (_, t2) -> compatibleFunSig callType t2
+  | PFun (r1, a1, va1), PFun (r2, a2, va2) ->
+      (va1 = va2) && 
+        (match a1, a2 with 
+           None, _ | _, None -> true
+         | Some l1, Some l2 -> List.length l1 = List.length l2) &&
+        if isVoid r2 then
+          if isVoid r1 then true
+          else (* "return ignored" *) true
+        else not (isVoid r1)
+  | _, _ -> 
+      compatibleTypes callType targType
+*)
+
+
+
 let makeType t =
-  (* SH.merge strings (D.string_of_ftype t) *)
+  (* SH.merge strings (Cildump.string_of_ftype t) *)
   rehashType t
 
 let bits_to_bytes bits = begin
@@ -571,7 +581,7 @@ let rec simplifyOff off =
       let simpleIE = if Cil.isInteger ie <> None 
       then ie 
       else (Printf.fprintf stderr "Simplified offset: %s\n" 
-              (D.string_of_exp ie);
+              (Cildump.string_of_exp ie);
             Cil.zero) in
       Cil.Index (simpleIE, simplifyOff moreOff)
 
@@ -594,7 +604,7 @@ let makeOff (hostType: Cil.typ) (o: Cil.offset) : ptaOff =
           Cil.bitsOffset hostType off 
         with Cil.SizeOfError (s, t) when s = "abstract type" ->
           Printf.fprintf stderr "makeOff -- empty struct: %s\n"
-            (D.string_of_type t);
+            (Cildump.string_of_type t);
           (0, 0)
       in
       let typ = Cil.typeOffset hostType off in
@@ -931,7 +941,7 @@ let name_of_id id =
   try
     (string_of_int id) ^ ":" ^ (getVarinfo id).vname
   with e ->
-    L.logError ("No varinfo for id? " ^ (Printexc.to_string e));
+    logError ("No varinfo for id? " ^ (Printexc.to_string e));
     string_of_int id
 
 let string_of_vinfo (vi:vinfo) =
@@ -999,15 +1009,20 @@ let printCallCons (cinfo, args) =
                print_string ("form #" ^ string_of_int index ^ " <- {" );
                List.iter (fun arg -> printPtaRv arg; print_string ", ") acts;
                print_string "}\n") args;
-  print_string ("at " ^  D.string_of_loc cinfo.cloc ^ "\n");
+  print_string ("at " ^  Cildump.string_of_loc cinfo.cloc ^ "\n");
   print_string "\n"
     
 let string_of_assign ({lhs = lhs; rhs = rhs; aloc = loc;} : ptaAssign) =
   string_of_ptaLv lhs ^ " = " ^ string_of_ptaRv rhs ^ " @ " ^
-    (D.string_of_loc loc)
+    (Cildump.string_of_loc loc)
 
 let printAssignment (assign: ptaAssign) =
   print_string (string_of_assign assign ^ "\n")
+
+let d_fun_formals funFormals = 
+  text "[" ++ seq_to_doc (text ", ") List.iter
+    (fun vinfo -> text (string_of_vinfo vinfo)) funFormals nil
+  ++ text "]"
 
 
 let printFunTypes funTable =
@@ -1017,10 +1032,8 @@ let printFunTypes funTable =
     (fun fid finfo ->
        let fname = name_of_id fid in
        print_string (fname ^ " : " ^ (string_of_type finfo.funType) ^ "\n");
-       print_string ("  args: [" ^ 
-         List.fold_left (fun cur vi -> cur  
-                           ^ string_of_vinfo vi ^ ", ") 
-         "" finfo.funFormals ^ "]\n")
+       print_string ("  args: " ^ (sprint 80 (d_fun_formals finfo.funFormals)) 
+                     ^ "\n");
     ) funTable;
   print_string "\n"
 

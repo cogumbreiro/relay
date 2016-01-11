@@ -49,7 +49,7 @@ exception UnknownOffset
 module OffConvCache = Cache.Make 
   (struct
      type t = typ
-     let equal a b = a == b || Ciltools.compare_type a b == 0
+     let equal a b = a == b || Ciltools.equal_type a b
      let hash t = Ciltools.hash_type t
    end)
 
@@ -76,7 +76,7 @@ let rec bitsToOffset (t:typ) (bits:int) : offset =
                (fun fi ->
                   let base, width = bitsOffset t (Field (fi, NoOffset)) in
                   (bits >= base) && (bits < base + width)
-               ) ci.cfields in
+               ) (!Cil.getCfields ci) in
              let base, width = bitsOffset t (Field (fi, NoOffset)) in
              Field (fi, if (bits == base) then NoOffset
                     else bitsToOffset fi.ftype (bits - base))
@@ -103,7 +103,7 @@ let rec bitsToOffsetNoWrap (t:typ) (bits:int) : offset =
                (fun fi ->
                   let base, width = bitsOffset t (Field (fi, NoOffset)) in
                   (bits >= base) && (bits < base + width)
-               ) ci.cfields in
+               ) (!Cil.getCfields ci) in
              let base, width = bitsOffset t (Field (fi, NoOffset)) in
              Field (fi, 
                     if (bits == base) then NoOffset
@@ -146,7 +146,7 @@ let rec bitsToOffsetAll (t:typ) (bits:int) : offset list =
                end
                else cur
              with SizeOfError _ -> cur
-          ) [] ci.cfields
+          ) [] (!Cil.getCfields ci)
     | _ ->
         raise UnknownOffset
 

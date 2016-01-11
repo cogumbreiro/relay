@@ -151,7 +151,7 @@ let isNullHost h =
 let d_addr addr =
   let host = hostOfAddr addr in
   let lval = (host, NoOffset) in
-  let str = "lval = " ^ (string_of_lval lval) in
+  let str = "lv = " ^ (string_of_lval lval) in
   let str = if addr.saSummary then str ^ "(sum)"
     else str in
   text str
@@ -185,14 +185,14 @@ let rec d_value v =
        dprintf "Vval: %s" (string_of_exp exp)
          
    | Vmustptr target -> 
-       text "Mustptr -> " ++  d_pointerTarg target
+       text "Mustptr (" ++  d_pointerTarg target ++ text ")"
 
    | Vmayptr (id, addrOffSet) ->
-       let header = text ("Mayptr (" ^ (string_of_int id) ^ "):\n") in
+       let header = text ("Mayptr (" ^ (string_of_int id) ^ "): ") in
        d_ptrSet header addrOffSet
          
    | Vextptr (id, addrOffSet) ->
-       let header = text ("Extptr (" ^ (string_of_int id) ^ "):\n") in
+       let header = text ("Extptr (" ^ (string_of_int id) ^ "): ") in
        d_ptrSet header addrOffSet
 
    | Vstruct offMap ->
@@ -209,8 +209,7 @@ let rec d_value v =
 let string_of_val v =
   sprint 80 (d_value v)
 
-let prefix = " -> "
+let prefix = " |-> "
 
 let printVal v =
-  L.logStatus prefix;
-  L.logStatus (string_of_val v)
+  L.logStatus (prefix ^ string_of_val v)

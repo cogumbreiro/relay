@@ -56,7 +56,7 @@ let rec containsArray (t:typ) : bool =  (* does this type contain an array? *)
   match unrollType t with
     TArray _ -> true
   | TComp(ci, _) -> (* look at the types of the fields *)
-      List.exists (fun fi -> containsArray fi.ftype) ci.cfields
+      List.exists (fun fi -> containsArray fi.ftype) (!getCfields ci)
   | _ -> 
     (* Ignore other types, including TInt and TPtr.  We don't care whether
        there are arrays in the base types of pointers; only about whether
@@ -160,14 +160,18 @@ let heapify (f : file) (alloc : exp) (free : exp)  =
   f
 
 (* heapify code ends here *)
+    
 
 let default_heapify (f : file) =
-  let alloc_fun = emptyFunction "malloc" in
-  let free_fun = emptyFunction "free" in
-  let alloc_exp = (Lval((Var(alloc_fun.svar)),NoOffset)) in
-  let free_exp = (Lval((Var(free_fun.svar)),NoOffset)) in
-  ignore (heapify f alloc_exp free_exp)
-
+(*  let alloc_fun = emptyFunction "malloc" in
+  let free_fun = emptyFunction "free" in *)
+  let alloc_type = TFun (voidPtrType, Some [("", uintType, [])], false, []) in  
+  let alloc_fun = findOrCreateFunc f "malloc" alloc_type in
+  let alloc_exp = (Lval((Var(alloc_fun)),NoOffset)) in
+  let free_type = TFun (voidType, Some [("", voidPtrType, [])], false, []) in
+  let free_fun = findOrCreateFunc f "free" free_type in
+  let free_exp = (Lval((Var(free_fun)),NoOffset)) in
+  ignore (heapify f alloc_exp free_exp)    
 
 let feature : featureDescr = 
   { fd_name = "heapify_sep";

@@ -42,11 +42,10 @@
 open Stdutil
 open Cil
 open Pretty
-
+open Logging
 
 module CLv = Cil_lvals
 module Lv = Lvals
-module L = Logging
 module Stat = Mystats
 
 module Lvs = Set.Make (Lvals.OrderedLval)
@@ -210,7 +209,7 @@ let string_of_addr (addr:symAddr) : string =
   sprint 80 (d_addr addr)
 
 let printAddr addr =
-  L.logStatus (string_of_addr addr)
+  logStatus (string_of_addr addr)
 
 let d_pointerTarg (addr, off) =
   d_offset (d_addr addr) () off
@@ -262,8 +261,8 @@ let string_of_val v =
 let prefix = " -> "
 
 let printVal v =
-  L.logStatus prefix;
-  L.logStatusD ((indent 2 (d_value v)) ++ line)
+  logStatus prefix;
+  logStatusD ((indent 2 (d_value v)) ++ line)
 
     
 (*********************************************************
@@ -380,7 +379,7 @@ let lookupValStore (s:symStore) baseType addr canonOff : symVal =
             Vtop
             
         | _ ->
-            L.logError 
+            logError 
               (Printf.sprintf "Field access %s on non-struct\n%s\n"
                  (Lv.string_of_lval (hostOfAddr addr, canonOff)) 
                  (string_of_val outerVal));
@@ -393,11 +392,11 @@ let lookupValStore (s:symStore) baseType addr canonOff : symVal =
     Assumes offset is canonicized. May raise Not_found *)
 let lookupVal (state:symState) baseType addr canonOff : symVal = 
   if isNullAddr addr then begin
-    L.logError "lookupVal: given null addr";
+    logError "lookupVal: given null addr";
     Vtop
   end 
   else if isAbsAddr addr then begin
-    L.logError "lookupVal: given abs addr";
+    logError "lookupVal: given abs addr";
     lookupValStore state.store baseType addr canonOff
   end
   else lookupValStore state.store baseType addr canonOff
@@ -540,11 +539,11 @@ let assignVarState oldState addr off v =
 (** returns a new state where 'addr.off' has been assigned 'v' *)
 let assignVar (oldState:symState) addr off v : symState =
   if isNullAddr addr then begin
-(*    L.logError "assignVar: given null addr"; *)
+(*    logError "assignVar: given null addr"; *)
     oldState
   end 
   else if isAbsAddr addr then begin
-    L.logError "assignVar: given abs addr";
+    logError "assignVar: given abs addr";
     let newStore = assignVarStore oldState.store addr off v in
     { oldState with store = newStore; }    
   end
@@ -732,8 +731,12 @@ module StrictLatticeOps = struct
         None
 
     | _, _ ->
-        L.logError "compareVals: addrs -> to different types of values";
+        logError "compareVals: addrs -> to different types of values";
         None
+
+  let equalVals v1 v2 =
+    match compareVals v1 v2 with Some 0 -> true | Some _ | None -> false
+      
 
   (** LUB of two values *)
   let rec combineVals v1 v2 =
@@ -811,7 +814,7 @@ module StrictLatticeOps = struct
 
     | _, _ ->
         (* could happen when ignoring casts, e.g., (x = (unsigned int)ptr) *)
-        L.logError "combineVals: unifying different vals";
+        logError "combineVals: unifying different vals";
         Vtop
 
 
@@ -826,6 +829,13 @@ module StrictLatticeOps = struct
       (* TODO: treat entries w/ no matched mapping and create initial val *)
       AddrMap.subset cmp store1 store2 &&
         ES.subset s1.usedSubexps s2.usedSubexps
+
+  let statesEqual (s1:symState) (s2:symState) : bool =
+    if(s1 == s2) then true
+    else 
+      AddrMap.equal equalVals s1.store s2.store &&
+        ES.equal s1.usedSubexps s2.usedSubexps
+
 
   (** LUB of the two states *) 
   let combineStates st1 st2 =
@@ -932,9 +942,12 @@ module LazyLatticeOps = struct
         None
 
     | _, _ ->
-        L.logError "compareVals: addrs -> to different types of values";
+        logError "compareVals: addrs -> to different types of values";
         None
 
+  let equalVals v1 v2 =
+    match compareVals v1 v2 with Some 0 -> true | Some _ | None -> false
+      
 
   (** LUB of two values *)
   let rec combineVals v1 v2 =
@@ -1009,7 +1022,7 @@ module LazyLatticeOps = struct
 
     | _, _ ->
         (* could happen when ignoring casts, e.g., (x = (unsigned int)ptr) *)
-        L.logError "combineVals: unifying different vals";
+        logError "combineVals: unifying different vals";
         Vtop
 
 
@@ -1025,6 +1038,12 @@ module LazyLatticeOps = struct
       AddrMap.subset cmp store1 store2 && 
         ES.subset s1.usedSubexps s2.usedSubexps
           (* TODO hmm... use something that matches the combine *)
+
+  let statesEqual (s1:symState) (s2:symState) : bool =
+    if(s1 == s2) then true
+    else 
+      AddrMap.equal equalVals s1.store s2.store &&
+        ES.equal s1.usedSubexps s2.usedSubexps
 
         
   (** LUB of the two states, assuming the stores lazily generate values *)  
@@ -1071,15 +1090,15 @@ end
 
 let printSymState ({store = st; assumptions = a;} as state) =
   if (isBottomState state) then
-    L.logStatus "State is $BOTTOM\n"
+    logStatus "State is $BOTTOM\n"
   else begin
-    L.logStatus "-------";
+    logStatus "-------";
     AddrMap.iter
       (fun addr v ->
          printAddr addr;
          printVal v;
       ) st;
-    L.logStatus "-------"
+    logStatus "-------"
   end
 
 

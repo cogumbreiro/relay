@@ -916,8 +916,20 @@ let comparePP a b =
   if c == 0 then a.pp_instr - b.pp_instr
   else c
 
+
 (** The current program point (only makes sense within CFGs) *)
 let curProgPoint = ref ppUnknown
+
+
+(** Interface to access cfields (can be overridden if cfields are
+    stored more compactly -- and retrieving / setting is more indirect) *)
+let defaultGetCfields ci =
+  ci.cfields
+let defaultSetCfields ci newFields =
+  ci.cfields <- newFields
+let getCfields = ref defaultGetCfields
+let setCfields = ref defaultSetCfields
+
 
 
 let argsToList : (string * typ * attributes) list option 
@@ -1687,7 +1699,7 @@ let mkCompInfo
             fbitfield = fb;
             fattr = fa;
             floc = fl}) (mkfspec comp) in
-   comp.cfields <- flds;
+   !setCfields comp flds;
    if flds <> [] then comp.cdefined <- true;
    comp
 
@@ -1697,7 +1709,8 @@ let copyCompInfo (ci: compinfo) (n: string) : compinfo =
                      ckey = !nextCompinfoKey; } in
   incr nextCompinfoKey;
   (* Copy the fields and set the new pointers to parents *)
-  ci'.cfields <- List.map (fun f -> {f with fcomp = ci'}) ci'.cfields;
+  !setCfields ci' 
+    (List.map (fun f -> {f with fcomp = ci'}) (!getCfields ci'));
   ci'
 
 (**** Utility functions ******)
@@ -2343,7 +2356,7 @@ let rec alignOf_int t =
           | f :: rest -> f :: dropZeros (f.fbitfield <> None) rest
           | [] -> []
         in
-        let fields = dropZeros false c.cfields in
+        let fields = dropZeros false (!getCfields c) in
         List.fold_left 
           (fun sofar f -> 
              (* Bitfields with zero width do not contribute to the alignment in 
@@ -2587,11 +2600,11 @@ and bitsSizeOf t =
   | TFloat(FDouble, _) -> 8 * !M.theMachine.M.sizeof_double
   | TFloat(FLongDouble, _) -> 8 * !M.theMachine.M.sizeof_longdouble
   | TFloat _ -> 8 * !M.theMachine.M.sizeof_float
-  | TEnum (ei, _) -> 8 * (bitsSizeOf (TInt(ei.ekind, [])))
+  | TEnum (ei, _) -> (bitsSizeOf (TInt(ei.ekind, [])))
   | TPtr _ -> 8 * !M.theMachine.M.sizeof_ptr
   | TBuiltin_va_list _ -> 8 * !M.theMachine.M.sizeof_ptr
   | TNamed (t, _) -> bitsSizeOf t.ttype
-  | TComp (comp, _) when comp.cfields == [] -> begin
+  | TComp (comp, _) when (!getCfields comp) == [] -> begin
       (* Empty structs are allowed in msvc mode *)
       if not comp.cdefined && not !msvcMode then
         raise (SizeOfError ("abstract type", t)) (*abstract type*)
@@ -2609,9 +2622,9 @@ and bitsSizeOf t =
         } in
       let lastoff = 
         List.fold_left (fun acc fi -> offsetOfFieldAcc ~fi ~sofar:acc) 
-          startAcc comp.cfields 
+          startAcc (!getCfields comp)
       in
-      if !msvcMode && lastoff.oaFirstFree = 0 && comp.cfields <> [] then
+      if !msvcMode && lastoff.oaFirstFree = 0 && (!getCfields comp) <> [] then
           (* On MSVC if we have just a zero-width bitfields then the length 
            * is 32 and is not padded  *)
         32
@@ -2635,7 +2648,7 @@ and bitsSizeOf t =
         List.fold_left (fun acc fi -> 
           let lastoff = offsetOfFieldAcc ~fi ~sofar:startAcc in
           if lastoff.oaFirstFree > acc then
-            lastoff.oaFirstFree else acc) 0 comp.cfields in
+            lastoff.oaFirstFree else acc) 0 (!getCfields comp) in
         (* Add trailing by simulating adding an extra field *)
       addTrailing max (8 * alignOf_int t)
 
@@ -2712,7 +2725,7 @@ and bitsOffset (baset: typ) (off: offset) : int * int =
                     fi'.fcomp.ckey == f.fcomp.ckey) -> [fi']
             | fi' :: rest -> fi' :: loop rest
           in
-          loop f.fcomp.cfields
+          loop (!getCfields f.fcomp)
         in
         let lastoff =
           List.fold_left (fun acc fi' -> offsetOfFieldAcc ~fi:fi' ~sofar:acc)
@@ -3595,8 +3608,8 @@ class defaultCilPrinterClass : cilPrinter = object (self)
             (* Print only for union when we do not initialize the first field *)
             match unrollType t, initl with
               TComp(ci, _), [(Field(f, NoOffset), _)] -> 
-                if not (ci.cstruct) && ci.cfields != [] && 
-                  (List.hd ci.cfields) != f then
+                if not (ci.cstruct) && (!getCfields ci != []) && 
+                  (List.hd (!getCfields ci)) != f then
                   true
                 else
                   false
@@ -4192,7 +4205,7 @@ class defaultCilPrinterClass : cilPrinter = object (self)
                          ++ text n
                          ++ text " {" ++ line
                          ++ ((docList ~sep:line (self#pFieldDecl ())) () 
-                               comp.cfields)
+                               (!getCfields comp))
                          ++ unalign)
           ++ line ++ text "}" ++
           (self#pAttrs () rest_attr) ++ text ";\n"
@@ -4800,7 +4813,7 @@ class plainCilPrinterClass =
            (if comp.cstruct then "struct" else "union") comp.cname
            (docList ~sep:(chr ',' ++ break) 
               (fun f -> dprintf "%s : %a" f.fname self#pOnlyType f.ftype)) 
-           comp.cfields
+           (!getCfields comp)
            self#pAttrs comp.cattr
            self#pAttrs a
        end
@@ -5621,7 +5634,7 @@ and childrenType (vis : cilVisitor) (t : typ) : typ =
       let a' = fAttr a in
       if t1' != t || e' != e  || a' != a then TArray(t1', Some e', a') else t
 
-      (* DON'T recurse into the compinfo, this is done in visitCilGlobal.
+  (* DON'T recurse into the compinfo, this is done in visitCilGlobal.
 	 User can iterate over cinfo.cfields manually, if desired.*)
   | TComp(cinfo, a) ->
       let a' = fAttr a in
@@ -5792,7 +5805,7 @@ and childrenGlobal (vis: cilVisitor) (g: global) : global =
         fi.ftype <- visitCilType vis fi.ftype;
         fi.fattr <- visitCilAttributes vis fi.fattr
       in
-      List.iter fieldVisit comp.cfields;
+      List.iter fieldVisit (!getCfields comp);
       comp.cattr <- visitCilAttributes vis comp.cattr;
       g
 
@@ -6350,8 +6363,7 @@ and isConstantOffset = function
 
 
 let getCompField (cinfo:compinfo) (fieldName:string) : fieldinfo =
-  (List.find (fun fi -> fi.fname = fieldName) cinfo.cfields)
-
+  List.find (fun fi -> fi.fname = fieldName) (!getCfields cinfo)
 
 let rec mkCastT ~(e: exp) ~(oldt: typ) ~(newt: typ) = 
   (* Do not remove old casts because they are conversions !!! *)
@@ -6399,7 +6411,7 @@ let existsType (f: typ -> existsAction) (t: typ) : bool =
       false
     else begin
       H.add memo c.ckey ();
-      List.exists (fun f -> loop f.ftype) c.cfields
+      List.exists (fun f -> loop f.ftype) (!getCfields c)
     end
   in
   loop t
@@ -6437,13 +6449,13 @@ let rec makeZeroInit (t: typ) : init =
               (Field(f, NoOffset), makeZeroInit f.ftype) :: acc
             else
               acc)
-          comp.cfields []
+          (!getCfields comp) []
       in
       CompoundInit (t', inits)
 
   | TComp (comp, _) when not comp.cstruct -> 
       let fstfield, rest = 
-        match comp.cfields with
+        match !getCfields comp with
           f :: rest -> f, rest
         | [] -> E.s (unimp "Cannot create init for empty union")
       in
@@ -6562,7 +6574,7 @@ let rec isCompleteType t =
   | TArray(t, None, _) -> false
   | TArray(t, Some z, _) when isZero z -> false
   | TComp (comp, _) -> (* Struct or union *)
-      List.for_all (fun fi -> isCompleteType fi.ftype) comp.cfields
+      List.for_all (fun fi -> isCompleteType fi.ftype) (!getCfields comp)
   | _ -> true
 
 

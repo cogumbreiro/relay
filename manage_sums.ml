@@ -50,7 +50,7 @@ module BS = Backed_summary
 (** Helper function to track where function summaries can be found. 
     Bookkeeping is to be stored in the given [dict]. 
     The given [sumTyp], [key], [tok] has just been discovered *)
-let trackSum dict sumTyp (key, tok) =
+let trackSum dict sumTyp (key, tok) : unit =
   let oldList = try Hashtbl.find dict sumTyp with Not_found -> [] in
   let newList = (key, tok) :: oldList in
   Hashtbl.replace dict sumTyp newList
@@ -72,6 +72,17 @@ let completeSums dict =
   Hashtbl.iter (fun sumT completed -> sumT#assumeComplete completed) dict
 
 
+(** Know that at least funs * sums are needed, but get any 
+    other dependencies that may be needed too. *)
+let getDependencies funs sums : ((sumKey * BS.dbManagement), unit) Hashtbl.t = 
+  let dependents = Hashtbl.create 17 in
+  List.iter
+    (fun sum ->
+       let moreDeps = sum#getDependentKeys funs in 
+       List.iter (fun (k, s) -> Hashtbl.replace dependents (k, s) ()) moreDeps
+    ) sums;
+  dependents
+
 (** Given a list of funs that need summaries. Acquire them 
     and mark them as ready for use. 
     @raise SummariesNotFound if some are not acquired -- 
@@ -91,17 +102,13 @@ let prepareSumms (funs : sumKey list) (sums : BS.dbManagement list) =
   let availSums = Hashtbl.create (List.length sums * 3) in
   (* Iter over funs to see what's available locally, 
      and what needs to be acquired *)
-  List.iter
-    (fun fkey ->
-       (* Iter over typs *)
-       List.iter
-         (fun sum ->
-            match BS.discover fkey sum#sumTyp
-              addToGet with
-                None -> ()
-              | Some tok -> trackSum availSums sum (fkey, tok)
-         ) sums
-    ) funs;
+  let depends = getDependencies funs sums in
+  Hashtbl.iter
+    (fun (fkey, sum) () ->
+       match BS.discover fkey sum#sumTyp addToGet with
+         None -> ()
+       | Some tok -> trackSum availSums sum (fkey, tok)
+    ) depends;
   (* DL the rest and track *)
   if (!toGet <> []) then begin
     let acquired = Request.requestSumm !toGet in

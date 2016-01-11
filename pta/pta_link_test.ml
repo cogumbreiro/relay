@@ -256,7 +256,7 @@ module CheckAnders = struct
   (********************)
 
   module Anders = Pta_fs_dir
-  module Arr = Anders.Arr
+  module Arr = GrowArray
   module Solver = Anders.Solver
   module NS = Solver.NS
 
@@ -1107,7 +1107,7 @@ module CheckAnders = struct
       result
     with Not_found ->
       let result = doExplainPtsTo goal target blacklist in
-      EPC.add explainCache (goalPtr, target, blacklist) result;
+      ignore (EPC.add explainCache (goalPtr, target, blacklist) result);
       result
 
   let doExplainMore ptr targ blacklist =
@@ -1327,7 +1327,7 @@ module CheckAndersShortest = struct
   (**** Utils to record Anders solver data ****)
 
   module Anders = Pta_fs_dir
-  module Arr = Anders.Arr
+  module Arr = GrowArray
   module Solver = Anders.Solver
   module NS = Solver.NS
 
@@ -1751,6 +1751,7 @@ module CheckAndersShortest = struct
         Hashtbl.hash (ck1, a1, ptr1, lv1)
 
     end)
+
   let compCache = Hashtbl.create 10
 
   (** Show how &src --flowsTo--> target w/ the fewest number of edges *)
@@ -1764,8 +1765,8 @@ module CheckAndersShortest = struct
       min
     in
     let addNode node =
-      logStatusF "add: %s, depth %d\n" (string_of_ptaLv node)
-        (List.length !stateStack); 
+(*      logStatusF "add: %s, depth %d\n" (string_of_ptaLv node)
+        (List.length !stateStack); *)
       fringe := NodeS.add node !fringe
     in
     let updateDist node newdist =

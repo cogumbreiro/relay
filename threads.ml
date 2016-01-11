@@ -241,20 +241,26 @@ let makeFakeActuals threadA arg =
 class virtual threadCreateVisitor (cg : callG) = object (self)
   inherit Pp_visitor.ppVisitor
 
+  val mutable curFkey = (-1, "") 
+
+  method vfunc fdec = 
+    curFkey <- (Summary_keys.inputFreeSumKey (funToKey fdec));
+    DoChildren
+
   (** handle given call to a thread creation function *)
   method handleThreadCreate i loc threadA actuals =
     let f = List.nth actuals threadA.tcFPIndex in
     let funs = A.funsFromAddr f in
     (* What to do if we don't know what the FP leads to? *)
     if (funs = []) then
-      logError ("unknown func ptr used as thread root: " 
-                ^ (string_of_exp f))
+      logErrorF "unknown func ptr used as thread root: %s @ %s\n" 
+        (string_of_exp f) (string_of_loc !currentLoc)
     else
       let arg = List.nth actuals threadA.tcArgIndex in
       let args = makeFakeActuals threadA arg in
       let fids = getMatchingIDs cg funs in
       self#handleThreadRoots i loc f fids args
-
+        
         
   (* handle thread creation at instruction i and location l, with 
      root function f (may be a list of funs if funptr) and its argument *)
@@ -283,9 +289,11 @@ class virtual threadCreateVisitor (cg : callG) = object (self)
 
       (* Indirect Call *)
       | Call(ret, Lval(Mem(ptrExp), NoOffset), actuals, loc) ->
-          (* Note: Do not conflate state from function pointer calls *)
-          let aliasedFuns = 
-            A.deref_funptr ptrExp in
+          (* TODO: handle context-sensitive CG here... *)
+          let pp = getCurrentPP () in
+          let aliasedFuns = callTargsAtPP cg curFkey pp in
+          let aliasedFuns = List.map Summary_keys.fkey_of_sumKey aliasedFuns in
+(*          let aliasedFuns = A.deref_funptr ptrExp in *)
           (* What to do if we don't know what the FP leads to? *)
           if (aliasedFuns = []) then
             logError ("Threads: No FP targets for: " ^ 

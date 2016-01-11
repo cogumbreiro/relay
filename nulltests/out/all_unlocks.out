@@ -1,0 +1,1415 @@
+Registered summary type: rs_scc
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rad_ss
+Registered summary type: lsp
+Registered summary type: au
+Args: 
+ ./race_temp_anal.exe -cg /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/ -r -u ravi
+Checking for data races
+-----
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.1.1
+using /tmp/relay_scratch to store acquired files
+using:  to track status
+Loading Cil Varinfo ID ranges for lookup tables
+Loading ranges from .vids_ckeys_fixed
+Setting Cil Varinfo ID ranges
+Initializing Steensgaard AA info
+Loading function info
+Loading tempVar info
+Using old PTA results
+Old PTA results loaded
+Initializing Andersen's AA info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_results.anders
+Old PTA results loaded
+Reached end of /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/calls.anders call graph file
+Num funcs: 7
+Scc_cg: Pruned 4 funcs w/out bodies for scc DAG
+summary database will use:
+	/home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/relay_sums
+Initializing summary au
+Checking leftover state: au
+Initializing summary lsp
+Checking leftover state: lsp
+Initializing summary rad_ss
+Checking leftover state: rad_ss
+Initializing summary ss
+Checking leftover state: ss
+Initializing summary rs
+BS: Not doing any post-reboot cleanup
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for _spin_unlock:3.f
+[Er]: Multiple lock summaries for _spin_lock:2.f
+Initializing summary rs_scc
+BS: Not doing any post-reboot cleanup
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: true
+file server will use: 14440
+[Er]: Request fault handler with Connection refused
+[Er]: Request retrying
+[Er]: retry succeeded!
+
+trying to clear old summaries / local srcs, etc.
+Starting bottomup analysis
+-----
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: func2(10.f):test.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+Prev GAPostCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+=================================
+Finished an SCC (1)
+=================================
+doing lockset partitions
+doing all-unlocks
+Summary for function: 10.f
+=======
+
+SUMS (nm, lo, un, wr, re):	func2	1	0	0	0	
+
+SS Sum:
+ |-> Vval: 0
+>>> PROGRESS 1/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: func1(13.f):test.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+Prev GAPostCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+=================================
+Finished an SCC (1)
+=================================
+doing lockset partitions
+doing all-unlocks
+Summary for function: 13.f
+=======
+
+SUMS (nm, lo, un, wr, re):	func1	0	0	4	0	
+
+SS Sum:
+ |-> Vval: 0
+>>> PROGRESS 2/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: main(18.f):test.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 3
+
+Prev GAPostCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+=================================
+Finished an SCC (1)
+=================================
+doing lockset partitions
+doing all-unlocks
+Summary for function: 18.f
+=======
+
+SUMS (nm, lo, un, wr, re):	main	0	0	0	0	
+
+SS Sum:
+ |-> Vval: 0
+>>> PROGRESS 3/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+done!
+Elapsed time (secs): 0.036002
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 1
+Collections -- minor: 11 major: 2 compactions: 0
+Bytes per word: 4
+==============
+PASS SEQ
+==============
+Thu Jan 28 20:27:31 PST 2010
+Registered summary type: rs_scc
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rad_ss
+Registered summary type: lsp
+Registered summary type: au
+Registered summary type: nul_seq
+Registered summary type: nul_adj_l
+Registered summary type: nul_adj_nl
+Registered summary type: nul_pess
+Registered summary type: nul_par_l
+Registered summary type: nul_par_nl
+Args: 
+ ./nullset_radar.exe -cg /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/ -u jan -mode seq
+About to do analysis
+-----
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.1.1
+using /tmp/relay_scratch to store acquired files
+using:  to track status
+Loading Cil Varinfo ID ranges for lookup tables
+Loading ranges from .vids_ckeys_fixed
+Setting Cil Varinfo ID ranges
+Initializing Steensgaard AA info
+Loading function info
+Loading tempVar info
+Using old PTA results
+Old PTA results loaded
+Initializing Andersen's AA info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_results.anders
+Old PTA results loaded
+Reached end of /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/calls.anders call graph file
+Num funcs: 7
+Scc_cg: Pruned 4 funcs w/out bodies for scc DAG
+summary database will use:
+	/home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/relay_sums
+Initializing summary nul_par_nl
+Checking leftover state: nul_par_nl
+Initializing summary nul_par_l
+Checking leftover state: nul_par_l
+Initializing summary nul_pess
+Checking leftover state: nul_pess
+Initializing summary nul_adj_nl
+Checking leftover state: nul_adj_nl
+Initializing summary nul_adj_l
+Checking leftover state: nul_adj_l
+Initializing summary nul_seq
+Checking leftover state: nul_seq
+Initializing summary au
+Checking leftover state: au
+Initializing summary lsp
+Checking leftover state: lsp
+Initializing summary rad_ss
+Checking leftover state: rad_ss
+Initializing summary ss
+Checking leftover state: ss
+Initializing summary rs
+BS: Not doing any post-reboot cleanup
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for _spin_unlock:3.f
+[Er]: Multiple lock summaries for _spin_lock:2.f
+Initializing summary rs_scc
+BS: Not doing any post-reboot cleanup
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: true
+file server will use: 14440
+[Er]: Request fault handler with Connection refused
+[Er]: Request retrying
+[Er]: retry succeeded!
+
+Before Dataflow
+-----
+rkcdebug: seqWarnDoBefore
+Registered summary type: nwarn1
+Checking leftover state: nwarn1
+Null warning summary set!
+
+Starting bottomup analysis
+-----
+getting next SCC from server
+rkcdebug: sccStart 1
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: func2(10.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: initialize SEQ
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=10.f
+rkcdebug: paVisitor initState 10.f
+SUMS (nm, lo, un, wr, re):	func2	1	0	0	0	
+
+PAR summary for key 10.f
+Null Pointer Warnings
+derefs for (func2) - safe: 0, unsafe: 0, delayed 0
+SEQ knowledge counter for fkey 10.f : 0
+>>> PROGRESS 1/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+rkcdebug: sccStart 0
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: func1(13.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: initialize SEQ
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=13.f
+rkcdebug: paVisitor initState 13.f
+SUMS (nm, lo, un, wr, re):	func1	0	0	4	2	
+
+PAR summary for key 13.f
+Lockset has reprloc test.c:28
+L+ = empty
+L- = empty
+tmp___0#[9] -> { tmp___0#[0] None }; tmp#[8] -> { tmp#[0] None }; 
+Lockset has reprloc test.c:21
+L+ = empty
+L- = {lock1#g:6} (1)
+tmp___0#[7] -> { tmp___0#[0] None }; p2#[5] -> { p2#[0] None }; tmp#[6] -> { tmp#[0] None }; p1#[4] -> { p1#[0] None }; 
+Lockset has reprloc test.c:15
+L+ = {lock1#g:6} (1)
+L- = empty
+p2#[3] -> { p2#[0] None }; tmp___0#[1] -> { tmp___0#[0] None }; p1#[2] -> { p1#[0] None }; tmp#[0] -> { tmp#[0] None }; 
+Null Pointer Warnings
+derefs for (func1) - safe: 2, unsafe: 0, delayed 0
+SEQ knowledge counter for fkey 13.f : 31
+>>> PROGRESS 2/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+rkcdebug: sccStart 2
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: main(18.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: initialize SEQ
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=18.f
+rkcdebug: paVisitor initState 18.f
+SUMS (nm, lo, un, wr, re):	main	0	0	0	0	
+
+PAR summary for key 18.f
+Lockset has reprloc test.c:38
+L+ = empty
+L- = empty
+thr1__heapify__0#[1] -> { thr1__heapify__0#[0] None }; thr2__heapify__1#[0] -> { thr2__heapify__1#[0] None }; 
+Null Pointer Warnings
+derefs for (main) - safe: 0, unsafe: 0, delayed 0
+SEQ knowledge counter for fkey 18.f : 19
+>>> PROGRESS 3/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+After Dataflow
+-----
+rkcdebug: seqWarnDoAfter
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+
+writeState: Not needed for Steens PTA
+Elapsed time (secs): 0.044002
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 2
+Collections -- minor: 14 major: 3 compactions: 0
+Bytes per word: 4
+==============
+PASS RACE
+==============
+Thu Jan 28 20:27:34 PST 2010
+Registered summary type: rs_scc
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rad_ss
+Registered summary type: lsp
+Registered summary type: au
+Registered summary type: nul_seq
+Registered summary type: nul_adj_l
+Registered summary type: nul_adj_nl
+Registered summary type: nul_pess
+Registered summary type: nul_par_l
+Registered summary type: nul_par_nl
+Checking for data races
+-----
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.1.1
+using /tmp/relay_scratch to store acquired files
+using:  to track status
+Loading Cil Varinfo ID ranges for lookup tables
+Loading ranges from .vids_ckeys_fixed
+Setting Cil Varinfo ID ranges
+Initializing Steensgaard AA info
+Loading function info
+Loading tempVar info
+Using old PTA results
+Old PTA results loaded
+Initializing Andersen's AA info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+Old PTA results loaded
+Reached end of /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/calls.anders call graph file
+Num funcs: 7
+Scc_cg: Pruned 4 funcs w/out bodies for scc DAG
+summary database will use:
+	/home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/relay_sums
+Initializing summary nul_par_nl
+Checking leftover state: nul_par_nl
+Initializing summary nul_par_l
+Checking leftover state: nul_par_l
+Initializing summary nul_pess
+Checking leftover state: nul_pess
+Initializing summary nul_adj_nl
+Checking leftover state: nul_adj_nl
+Initializing summary nul_adj_l
+Checking leftover state: nul_adj_l
+Initializing summary nul_seq
+Checking leftover state: nul_seq
+Initializing summary au
+Checking leftover state: au
+Initializing summary lsp
+Checking leftover state: lsp
+Initializing summary rad_ss
+Checking leftover state: rad_ss
+Initializing summary ss
+Checking leftover state: ss
+Initializing summary rs
+BS: Not doing any post-reboot cleanup
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for _spin_unlock:3.f
+[Er]: Multiple lock summaries for _spin_lock:2.f
+Initializing summary rs_scc
+BS: Not doing any post-reboot cleanup
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: true
+file server will use: 14440
+[Er]: Request fault handler with Connection refused
+[Er]: Request retrying
+[Er]: retry succeeded!
+
+Starting bottomup analysis
+-----
+getting next SCC from server
+Acquiring needed summaries
+Acquiring RS/SS summaries for current SCC
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: func2(10.f):test.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 0
+
+Prev GAPostCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: func2:10.f
+=======
+
+SUMS (nm, lo, un, wr, re):	func2	1	0	0	0	
+
+SS Sum:
+ |-> Vval: 0
+>>> PROGRESS 1/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+Acquiring RS/SS summaries for current SCC
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: func1(13.f):test.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 2
+
+Prev GAPostCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: func1:13.f
+=======
+
+SUMS (nm, lo, un, wr, re):	func1	0	0	4	2	
+
+SS Sum:
+ |-> Vval: 0
+>>> PROGRESS 2/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Acquiring needed summaries
+Acquiring RS/SS summaries for current SCC
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: main(18.f):test.c
+-----
+doing symstate
+Prev ldiffCache hits: 0	misses: 3
+
+Prev GAPostCache hits: 0	misses: 0
+
+doing lockset
+doing guarded access
+=================================
+Finished an SCC (1)
+=================================
+Summary for function: main:18.f
+=======
+
+SUMS (nm, lo, un, wr, re):	main	0	0	0	0	
+
+SS Sum:
+ |-> Vval: 0
+>>> PROGRESS 3/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+
+
+
+Beginning Thread Analysis:
+-----
+[Er]: rkcdebug: set Warn.parL to nul_par_l
+[Er]: rkcdebug: set Warn.parNL to nul_par_nl
+[Er]: No entry-points file!
+Expected # thread-creation site pairs: 3
+checking a thread-creation pair
+Prev ldiffCache hits: 2	misses: 2
+
+doing symstate
+Prev ldiffCache hits: 10	misses: 2
+
+doing symstate
+now checking thread roots: func1(13.f), func1(13.f)
+markRacyAccess (13.f,2,0)
+markRacyAccess (13.f,4,0)
+markRacyAccess (13.f,2,0)
+markRacyAccess (13.f,4,0)
+New race added to race reports
+markRacyAccess (13.f,3,0)
+markRacyAccess (13.f,5,0)
+markRacyAccess (13.f,3,0)
+markRacyAccess (13.f,5,0)
+New race added to race reports
+now checking thread roots: func1(13.f), func1(13.f)
+now checking thread roots: func1(13.f), func1(13.f)
+now checking thread roots: func1(13.f), func1(13.f)
+done with pair, sending notification
+checking a thread-creation pair
+Prev ldiffCache hits: 10	misses: 2
+
+doing symstate
+now checking thread roots: func1(13.f), main(18.f)
+now checking thread roots: func1(13.f), main(18.f)
+done with pair, sending notification
+checking a thread-creation pair
+now checking thread roots: main(18.f), main(18.f)
+done with pair, sending notification
+completed all thread pairs
+Sorting races
+
+Printing races
+
+****
+Possible race between access to:
+
+p1 @ test.c:11 and
+p1 @ test.c:11
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[test.c:15:(13.f)] and
+	[test.c:15:(13.f), test.c:21:(13.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {lock1#g:6} (1)
+LS for 2nd access:
+L+ = empty;
+	made empty at: test.c:28
+	Th. 1 spawned: test.c:40 63293 w/ func: func1
+	Th. 2 spawned: test.c:40 63293 w/ func: func1
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+	made empty at: test.c:28
+LS for 2nd access:
+L+ = {lock1#g:6} (1)
+	Th. 1 spawned: test.c:41 63349 w/ func: func1
+	Th. 2 spawned: test.c:40 63293 w/ func: func1
+(1)
+	Th. 1 spawned: test.c:41 63349 w/ func: func1
+	Th. 2 spawned: test.c:40 63293 w/ func: func1
+(2)
+	Th. 1 spawned: test.c:41 63349 w/ func: func1
+	Th. 2 spawned: test.c:41 63349 w/ func: func1
+****
+Possible race between access to:
+
+p2 @ test.c:11 and
+p2 @ test.c:11
+	Cluster ID: 1
+	Escapes? true / true 
+	Accessed at locs:
+	[test.c:16:(13.f)] and
+	[test.c:15:(13.f), test.c:21:(13.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = {lock1#g:6} (1)
+LS for 2nd access:
+L+ = empty;
+	made empty at: test.c:28
+	Th. 1 spawned: test.c:40 63293 w/ func: func1
+	Th. 2 spawned: test.c:40 63293 w/ func: func1
+
+Different possible paths & LS (first 4):
+
+(0)
+LS for 1st access:
+L+ = empty;
+	made empty at: test.c:28
+LS for 2nd access:
+L+ = {lock1#g:6} (1)
+	Th. 1 spawned: test.c:41 63349 w/ func: func1
+	Th. 2 spawned: test.c:40 63293 w/ func: func1
+(1)
+	Th. 1 spawned: test.c:41 63349 w/ func: func1
+	Th. 2 spawned: test.c:40 63293 w/ func: func1
+(2)
+	Th. 1 spawned: test.c:41 63349 w/ func: func1
+	Th. 2 spawned: test.c:41 63349 w/ func: func1
+
+
+$$$$$$
+Total Warnings: 2
+All CheckPair Counts
+totalP:	120	+ 8 	= 128
+diffLvalP:	96	+ 0 	= 96
+protectedP:	8	+ 8 	= 16
+bothEmptyP:	0	+ 0 	= 0
+oneEmptyP:	16	+ 0 	= 16
+disjointP:	0	+ 0 	= 0
+
+PA CheckPair Counts
+pa_totalP: :	64	+ 0 	= 64
+pa_diffLvalP:	48	+ 0 	= 48
+pa_protectedP:	0	+ 0 	= 0
+pa_bothEmptyP:	0	+ 0 	= 0
+pa_oneEmptyP:	16	+ 0 	= 16
+pa_disjointP:	0	+ 0 	= 0
+Writing race cluster_id to pakey bindings to /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/race_to_pakey.dat
+
+Gamma Report -- 4 racy PAs
+
+   PA (13.f,5) has 2 race entries
+
+       lval: p2
+       locs: [test.c:16:(13.f)]
+      locks:
+  L+ = {lock1#g:6} (1)
+  L- = empty
+       root: thread spawned at test.c:40 w/ func func1
+
+       lval: p2
+       locs: [test.c:16:(13.f)]
+      locks:
+  L+ = {lock1#g:6} (1)
+  L- = empty
+       root: thread spawned at test.c:41 w/ func func1
+
+   PA (13.f,3) has 2 race entries
+
+       lval: p2
+       locs: [test.c:16:(13.f)]
+      locks:
+  L+ = {lock1#g:6} (1)
+  L- = empty
+       root: thread spawned at test.c:40 w/ func func1
+
+       lval: p2
+       locs: [test.c:16:(13.f)]
+      locks:
+  L+ = {lock1#g:6} (1)
+  L- = empty
+       root: thread spawned at test.c:41 w/ func func1
+
+   PA (13.f,4) has 2 race entries
+
+       lval: p1
+       locs: [test.c:15:(13.f)]
+      locks:
+  L+ = {lock1#g:6} (1)
+  L- = empty
+       root: thread spawned at test.c:40 w/ func func1
+
+       lval: p1
+       locs: [test.c:15:(13.f)]
+      locks:
+  L+ = {lock1#g:6} (1)
+  L- = empty
+       root: thread spawned at test.c:41 w/ func func1
+
+   PA (13.f,2) has 2 race entries
+
+       lval: p1
+       locs: [test.c:15:(13.f)]
+      locks:
+  L+ = {lock1#g:6} (1)
+  L- = empty
+       root: thread spawned at test.c:40 w/ func func1
+
+       lval: p1
+       locs: [test.c:15:(13.f)]
+      locks:
+  L+ = {lock1#g:6} (1)
+  L- = empty
+       root: thread spawned at test.c:41 w/ func func1
+
+  
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+
+writeState: Not needed for Steens PTA
+Elapsed time (secs): 0.040001
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 2
+Collections -- minor: 14 major: 3 compactions: 0
+Bytes per word: 4
+==============
+PASS ADJ
+==============
+Thu Jan 28 20:27:37 PST 2010
+Registered summary type: rs_scc
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rad_ss
+Registered summary type: lsp
+Registered summary type: au
+Registered summary type: nul_seq
+Registered summary type: nul_adj_l
+Registered summary type: nul_adj_nl
+Registered summary type: nul_pess
+Registered summary type: nul_par_l
+Registered summary type: nul_par_nl
+Args: 
+ ./nullset_radar.exe -cg /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/ -u jan -mode adj
+About to do analysis
+-----
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.1.1
+using /tmp/relay_scratch to store acquired files
+using:  to track status
+Loading Cil Varinfo ID ranges for lookup tables
+Loading ranges from .vids_ckeys_fixed
+Setting Cil Varinfo ID ranges
+Initializing Steensgaard AA info
+Loading function info
+Loading tempVar info
+Using old PTA results
+Old PTA results loaded
+Initializing Andersen's AA info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+Old PTA results loaded
+Reached end of /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/calls.anders call graph file
+Num funcs: 7
+Scc_cg: Pruned 4 funcs w/out bodies for scc DAG
+summary database will use:
+	/home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/relay_sums
+Initializing summary nul_par_nl
+Checking leftover state: nul_par_nl
+Initializing summary nul_par_l
+Checking leftover state: nul_par_l
+Initializing summary nul_pess
+Checking leftover state: nul_pess
+Initializing summary nul_adj_nl
+Checking leftover state: nul_adj_nl
+Initializing summary nul_adj_l
+Checking leftover state: nul_adj_l
+Initializing summary nul_seq
+Checking leftover state: nul_seq
+Initializing summary au
+Checking leftover state: au
+Initializing summary lsp
+Checking leftover state: lsp
+Initializing summary rad_ss
+Checking leftover state: rad_ss
+Initializing summary ss
+Checking leftover state: ss
+Initializing summary rs
+BS: Not doing any post-reboot cleanup
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for _spin_unlock:3.f
+[Er]: Multiple lock summaries for _spin_lock:2.f
+Initializing summary rs_scc
+BS: Not doing any post-reboot cleanup
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: true
+file server will use: 14440
+[Er]: Request fault handler with Connection refused
+[Er]: Request retrying
+[Er]: retry succeeded!
+
+Before Dataflow
+-----
+rkcdebug: adjLocksWarnDoBefore
+Registered summary type: nwarn2
+Checking leftover state: nwarn2
+Null warning summary set!
+
+Starting bottomup analysis
+-----
+getting next SCC from server
+rkcdebug: sccStart 1
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: func2(10.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: loadPAInfo called with 10.f
+rkcdebug: loadPAInfo from nul_par_l
+ADJ Phase 2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=10.f
+Null Pointer Warnings
+derefs for (func2) - safe: 0, unsafe: 0, delayed 0
+RADAR knowledge counter for fkey 10.f : 0
+>>> PROGRESS 1/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+rkcdebug: sccStart 0
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: func1(13.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: loadPAInfo called with 13.f
+rkcdebug: loadPAInfo from nul_par_l
+ADJ Phase 2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=13.f
+Null Pointer Warnings
+derefs for (func1) - safe: 0, unsafe: 2, delayed 0
+RADAR knowledge counter for fkey 13.f : 23
+>>> PROGRESS 2/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+rkcdebug: sccStart 2
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: main(18.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: loadPAInfo called with 18.f
+rkcdebug: loadPAInfo from nul_par_l
+ADJ Phase 2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=18.f
+Null Pointer Warnings
+derefs for (main) - safe: 0, unsafe: 0, delayed 0
+RADAR knowledge counter for fkey 18.f : 19
+>>> PROGRESS 3/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+After Dataflow
+-----
+rkcdebug: adjLocksWarnDoAfter
+Delta Report -- 2 lvals at 2 locations in 1 functions
+   0 OnlyFirst, 2 OnlySecond, 0 BothDifferent
+   2 crumbs, 2 good 0 bad
+
+  Function 13.f func1
+
+       LVAL: p2#g:9
+      chain: < func1:13.f >
+     crumbs: (13.f,3) 
+     imprec: Syntactic
+       locs:
+             test.c:22
+  
+       LVAL: p1#g:8
+      chain: < func1:13.f >
+     crumbs: (13.f,2) 
+     imprec: Syntactic
+       locs:
+             test.c:20
+  
+
+
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+
+writeState: Not needed for Steens PTA
+Elapsed time (secs): 0.040002
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 2
+Collections -- minor: 14 major: 3 compactions: 0
+Bytes per word: 4
+==============
+PASS ADJ-NL
+==============
+Thu Jan 28 20:27:40 PST 2010
+Registered summary type: rs_scc
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rad_ss
+Registered summary type: lsp
+Registered summary type: au
+Registered summary type: nul_seq
+Registered summary type: nul_adj_l
+Registered summary type: nul_adj_nl
+Registered summary type: nul_pess
+Registered summary type: nul_par_l
+Registered summary type: nul_par_nl
+Args: 
+ ./nullset_radar.exe -cg /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/ -u jan -mode adjnl
+About to do analysis
+-----
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.1.1
+using /tmp/relay_scratch to store acquired files
+using:  to track status
+Loading Cil Varinfo ID ranges for lookup tables
+Loading ranges from .vids_ckeys_fixed
+Setting Cil Varinfo ID ranges
+Initializing Steensgaard AA info
+Loading function info
+Loading tempVar info
+Using old PTA results
+Old PTA results loaded
+Initializing Andersen's AA info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+Old PTA results loaded
+Reached end of /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/calls.anders call graph file
+Num funcs: 7
+Scc_cg: Pruned 4 funcs w/out bodies for scc DAG
+summary database will use:
+	/home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/relay_sums
+Initializing summary nul_par_nl
+Checking leftover state: nul_par_nl
+Initializing summary nul_par_l
+Checking leftover state: nul_par_l
+Initializing summary nul_pess
+Checking leftover state: nul_pess
+Initializing summary nul_adj_nl
+Checking leftover state: nul_adj_nl
+Initializing summary nul_adj_l
+Checking leftover state: nul_adj_l
+Initializing summary nul_seq
+Checking leftover state: nul_seq
+Initializing summary au
+Checking leftover state: au
+Initializing summary lsp
+Checking leftover state: lsp
+Initializing summary rad_ss
+Checking leftover state: rad_ss
+Initializing summary ss
+Checking leftover state: ss
+Initializing summary rs
+BS: Not doing any post-reboot cleanup
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for _spin_unlock:3.f
+[Er]: Multiple lock summaries for _spin_lock:2.f
+Initializing summary rs_scc
+BS: Not doing any post-reboot cleanup
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: true
+file server will use: 14440
+[Er]: Request fault handler with Connection refused
+[Er]: Request retrying
+[Er]: retry succeeded!
+
+Before Dataflow
+-----
+rkcdebug: adjNoLocksWarnDoBefore
+Registered summary type: nwarn3
+Checking leftover state: nwarn3
+Null warning summary set!
+
+Starting bottomup analysis
+-----
+getting next SCC from server
+rkcdebug: sccStart 1
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: func2(10.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: loadPAInfo called with 10.f
+rkcdebug: loadPAInfo from nul_par_nl
+ADJ Phase 2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=10.f
+Null Pointer Warnings
+derefs for (func2) - safe: 0, unsafe: 0, delayed 0
+RADAR-NL knowledge counter for fkey 10.f : 0
+>>> PROGRESS 1/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+rkcdebug: sccStart 0
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: func1(13.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: loadPAInfo called with 13.f
+rkcdebug: loadPAInfo from nul_par_nl
+ADJ Phase 2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=13.f
+Null Pointer Warnings
+derefs for (func1) - safe: 0, unsafe: 2, delayed 0
+RADAR-NL knowledge counter for fkey 13.f : 23
+>>> PROGRESS 2/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+rkcdebug: sccStart 2
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: main(18.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: loadPAInfo called with 18.f
+rkcdebug: loadPAInfo from nul_par_nl
+ADJ Phase 2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=18.f
+Null Pointer Warnings
+derefs for (main) - safe: 0, unsafe: 0, delayed 0
+RADAR-NL knowledge counter for fkey 18.f : 19
+>>> PROGRESS 3/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+After Dataflow
+-----
+rkcdebug: adjNoLocksWarnDoAfter
+Delta Report -- 2 lvals at 2 locations in 1 functions
+   0 OnlyFirst, 2 OnlySecond, 0 BothDifferent
+   2 crumbs, 2 good 0 bad
+
+  Function 13.f func1
+
+       LVAL: p2#g:9
+      chain: < func1:13.f >
+     crumbs: (13.f,3) 
+     imprec: Syntactic
+       locs:
+             test.c:22
+  
+       LVAL: p1#g:8
+      chain: < func1:13.f >
+     crumbs: (13.f,2) 
+     imprec: Syntactic
+       locs:
+             test.c:20
+  
+
+
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+
+writeState: Not needed for Steens PTA
+Elapsed time (secs): 0.040002
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 2
+Collections -- minor: 14 major: 3 compactions: 0
+Bytes per word: 4
+==============
+PASS PESS
+==============
+Thu Jan 28 20:27:43 PST 2010
+Registered summary type: rs_scc
+Registered summary type: rs
+Registered summary type: ss
+Registered summary type: rad_ss
+Registered summary type: lsp
+Registered summary type: au
+Registered summary type: nul_seq
+Registered summary type: nul_adj_l
+Registered summary type: nul_adj_nl
+Registered summary type: nul_pess
+Registered summary type: nul_par_l
+Registered summary type: nul_par_nl
+Args: 
+ ./nullset_radar.exe -cg /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/ -u jan -mode pess
+About to do analysis
+-----
+Finished parsing config group: SUMMARY_DB
+Finished parsing config group: REQUEST
+Finished parsing config group: DISTRIBUTED
+Finished parsing config group: FILE_SERVER
+Finished parsing config group: LOCK_FUNCS
+Finished parsing config group: THREAD_FUNCS
+Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: ENTRY_POINTS
+Finished parsing config group: SYM_EX
+Done reading config file
+myIP: 127.0.1.1
+using /tmp/relay_scratch to store acquired files
+using:  to track status
+Loading Cil Varinfo ID ranges for lookup tables
+Loading ranges from .vids_ckeys_fixed
+Setting Cil Varinfo ID ranges
+Initializing Steensgaard AA info
+Loading function info
+Loading tempVar info
+Using old PTA results
+Old PTA results loaded
+Initializing Andersen's AA info
+Loading tempVar info
+Using old PTA results: /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+Old PTA results loaded
+Reached end of /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/calls.anders call graph file
+Num funcs: 7
+Scc_cg: Pruned 4 funcs w/out bodies for scc DAG
+summary database will use:
+	/home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/relay_sums
+Initializing summary nul_par_nl
+Checking leftover state: nul_par_nl
+Initializing summary nul_par_l
+Checking leftover state: nul_par_l
+Initializing summary nul_pess
+Checking leftover state: nul_pess
+Initializing summary nul_adj_nl
+Checking leftover state: nul_adj_nl
+Initializing summary nul_adj_l
+Checking leftover state: nul_adj_l
+Initializing summary nul_seq
+Checking leftover state: nul_seq
+Initializing summary au
+Checking leftover state: au
+Initializing summary lsp
+Checking leftover state: lsp
+Initializing summary rad_ss
+Checking leftover state: rad_ss
+Initializing summary ss
+Checking leftover state: ss
+Initializing summary rs
+BS: Not doing any post-reboot cleanup
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for _spin_unlock:3.f
+[Er]: Multiple lock summaries for _spin_lock:2.f
+Initializing summary rs_scc
+BS: Not doing any post-reboot cleanup
+SH: initEscapeable found (0, 0) thread (acts, formals)
+
+Entry points use roots: true
+file server will use: 14440
+[Er]: Request fault handler with Connection refused
+[Er]: Request retrying
+[Er]: retry succeeded!
+
+Before Dataflow
+-----
+rkcdebug: pessWarnDoBefore
+Registered summary type: nwarn4
+Checking leftover state: nwarn4
+Null warning summary set!
+
+Starting bottomup analysis
+-----
+getting next SCC from server
+rkcdebug: sccStart 1
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #1
+=================================
+Summarizing function: func2(10.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: explicitPess set
+ADJ Phase 2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=10.f
+Null Pointer Warnings
+derefs for (func2) - safe: 0, unsafe: 0, delayed 0
+STEENS knowledge counter for fkey 10.f : 0
+>>> PROGRESS 1/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+rkcdebug: sccStart 0
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #0
+=================================
+Summarizing function: func1(13.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: explicitPess set
+ADJ Phase 2
+rkcdebug: racy kill true p1
+rkcdebug: racy kill true p2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=13.f
+Null Pointer Warnings
+derefs for (func1) - safe: 0, unsafe: 2, delayed 0
+STEENS knowledge counter for fkey 13.f : 23
+>>> PROGRESS 2/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+rkcdebug: sccStart 2
+Acquiring callee summaries
+Acquiring summaries for current SCC
+=================================
+Starting an SCC (1) #2
+=================================
+Summarizing function: main(18.f):test.c
+-----
+doing symstate
+doing dataflow analysis
+rkcdebug: loading in seq transfer func
+ADJ Phase 1
+rkcdebug: initializeSecondPhase, loading in adj transfer func
+rkcdebug: explicitPess set
+ADJ Phase 2
+=================================
+Finished an SCC (1)
+=================================
+rkcdebug: Run Nonfixpoint, prevFKey=18.f
+Null Pointer Warnings
+derefs for (main) - safe: 0, unsafe: 0, delayed 0
+STEENS knowledge counter for fkey 18.f : 19
+>>> PROGRESS 3/3 SCCs DONE!
+
+=================================
+getting next SCC from server
+Bottomup analysis complete
+-----
+After Dataflow
+-----
+rkcdebug: pessWarnDoAfter
+Delta Report -- 2 lvals at 2 locations in 1 functions
+   0 OnlyFirst, 2 OnlySecond, 0 BothDifferent
+   1 crumbs, 0 good 1 bad
+
+  Function 13.f func1
+
+       LVAL: p2#g:9
+      chain: < func1:13.f >
+     crumbs: ? 
+     imprec: Syntactic
+       locs:
+             test.c:22
+  
+       LVAL: p1#g:8
+      chain: < func1:13.f >
+     crumbs: ? 
+     imprec: Syntactic
+       locs:
+             test.c:20
+  
+
+
+
+
+writeState: writing new state for Andersen to /home/jan/research/relay-race/nulltests/all_unlocks/ciltrees/.pta_temp.anders
+
+writeState: Not needed for Steens PTA
+Elapsed time (secs): 0.044002
+Top heap size (MB): 0
+Current heap size (MB): 0
+Lifetime allocated bytes (MB): 2
+Collections -- minor: 14 major: 3 compactions: 0
+Bytes per word: 4
+==============
+DONE
+Thu Jan 28 20:27:46 PST 2010
+RADAR'ed in 18 seconds

@@ -9,22 +9,17 @@ open Cil
 open Pretty
 open Fstructs
 open Symex_base
-open Symex_types
 open Scope
+open Logging
+open Cildump
 
-module A = Alias
-module D = Cildump
-module CLv = Cil_lvals
-module Lv = Lvals
+open Symex_types
 
 module SS = Symex_sum
 module BS = Backed_summary
 
-module Stat = Mystats
-module L = Logging
-module I = Inspect
-module Intra = IntraDataflow
-
+(* Exposed alias *)
+type symSt = symState
 
 (************************************************************
             Access to mod information 
@@ -49,10 +44,19 @@ module NULL = SYMEX_NULL_GEN (NI)
 
 let combineVals = StrictLatticeOps.combineVals
 
-type symLatt = (symState, SS.sumval) Intra.stateLattice
+type symLatt = (symState, SS.sumval) IntraDataflow.stateLattice
+
+let statesSubset s1 s2 = 
+  StrictLatticeOps.statesSubset s1 s2
+
+let statesEqual s1 s2 = 
+  StrictLatticeOps.statesEqual s1 s2
+
+let combineStates s1 s2 =
+  StrictLatticeOps.combineStates s1 s2
 
 (** Package the state operations *)
-class symLattice : [symState, SS.sumval] Intra.stateLattice = object (self) 
+class symLattice : [symState, SS.sumval] IntraDataflow.stateLattice = object (self) 
 
   (* rkc: hack alert, to allow Radar to plug in seq or adj summary database *)
   val mutable thesums = SS.sum
@@ -63,10 +67,10 @@ class symLattice : [symState, SS.sumval] Intra.stateLattice = object (self)
     thesums <- newSum
 
   method stateSubset st1 st2 =
-    Stat.time "rad SS subset" (StrictLatticeOps.statesSubset st1) st2
+    Stat.time "rad SS subset" (statesSubset st1) st2
     
   method combineStates st1 st2 =
-    Stat.time "rad SS combine" (StrictLatticeOps.combineStates st1) st2
+    Stat.time "rad SS combine" (combineStates st1) st2
     
   method isBottom st =
     isBottomState st
@@ -248,7 +252,7 @@ let informNotConstantFolded op exp =
   (*  OK it should happen because eval could tell us X + 1 is a const 
       if X is const
 
-     L.logError ("eval helped const fold: " ^ op ^ " " ^ Lv.string_of_exp exp)
+     logError ("eval helped const fold: " ^ op ^ " " ^ Lv.string_of_exp exp)
   *)
   ()
     
@@ -269,7 +273,7 @@ let rec eval (s:symState) inExp (assumedTyp:Cil.typ option) :
       evalAddr s baseTyp addr newOff
 
   | Lv.CLval(Lv.AbsHost _ as host, off) ->
-      L.logError "Eval is reading value from an abshost";
+      logError "Eval is reading value from an abshost";
       let newOff, isSum = CLv.canonicizeOff off in
       let addr = getAddr host isSum in
       let baseTyp = TPtr (TVoid [], []) in
@@ -376,7 +380,7 @@ let rec eval (s:symState) inExp (assumedTyp:Cil.typ option) :
             in
             (doPtrArith expectedTyp ptrTyp (v1, v2), newSt)
           with NotPtrConstPair ->
-            L.logError "eval PlusA, not used as pointer arith";
+            logError "eval PlusA, not used as pointer arith";
             (Vval foldedExp, newSt)
     end
       
@@ -412,7 +416,7 @@ let rec eval (s:symState) inExp (assumedTyp:Cil.typ option) :
           (* There was one case where a guy cast a struct of two longs
              to a single long long, then negated that number... 
              why wasn't it caught by the Vval innerOperand case above? *)
-          L.logError ("eval: unop type error? " ^ (Lv.string_of_exp foldedExp));
+          logError ("eval: unop type error? " ^ (Lv.string_of_exp foldedExp));
           Vtop, newSt
     end
 
@@ -422,7 +426,7 @@ let rec eval (s:symState) inExp (assumedTyp:Cil.typ option) :
         (* Evaluate constant ops *)
         (PlusA, Vval (Lv.CConst(CInt64(i1,ik1,_))), 
          Vval (Lv.CConst(CInt64(i2,_,_)))) ->
-          L.logError "reached redundant condition?";
+          logError "reached redundant condition?";
           informNotConstantFolded "plusA" foldedExp;
           Vval (Lv.CConst(CInt64(Int64.add i1 i2, ik1, None))), newSt
 
@@ -443,7 +447,7 @@ let rec eval (s:symState) inExp (assumedTyp:Cil.typ option) :
             try
               Vval (Lv.CConst(CInt64(Int64.div i1 i2, ik1, None))), newSt
             with Division_by_zero ->
-              L.logError "SS: Hit div by zero";
+              logError "SS: Hit div by zero";
               Vbot, newSt
           end
       | (Mod, Vval (Lv.CConst(CInt64(i1,ik1,_))), 
@@ -453,7 +457,7 @@ let rec eval (s:symState) inExp (assumedTyp:Cil.typ option) :
             try
               Vval (Lv.CConst(CInt64(Int64.rem i1 i2, ik1, None))), newSt
             with Division_by_zero ->
-              L.logError "SS: Hit mod by zero";
+              logError "SS: Hit mod by zero";
               Vbot, newSt
           end
       | (Shiftlt, Vval (Lv.CConst(CInt64(i1,ik1,_))), 
@@ -533,7 +537,7 @@ let rec eval (s:symState) inExp (assumedTyp:Cil.typ option) :
           Vbot, newSt (* or return bottom state? *)
             
       | op, _, _ ->
-          L.logError (Printf.sprintf "eval bin op, non-Vval operands %s,  %s"
+          logError (Printf.sprintf "eval bin op, non-Vval operands %s,  %s"
                         (string_of_val v1) (string_of_val v2));
           (Vval foldedExp, newSt)
             (* TODO: Make sure this does not create expressions that
@@ -582,17 +586,17 @@ and derefPtrVal ptrExp outerOff baseTyp (s:symState) ptrVal
       lubOverTargets addrOffSet (evalPtrTarget outerOff baseTyp) s
 
   | Vstruct _ ->
-      L.logError ("eval: deref'ing a struct? " ^
+      logError ("eval: deref'ing a struct? " ^
                     (Lv.string_of_exp ptrExp));
       (Vtop, s)
 
   | Vbot ->
-      L.logError ~prior:3 ("eval: nullptr dereference! " ^ 
+      logError ~prior:3 ("eval: nullptr dereference! " ^ 
                       (Lv.string_of_exp ptrExp));
       (Vtop, s)
 
   | Vval e when isConst e ->
-      L.logError ~prior:3 ("eval: nullptr dereference! " ^ 
+      logError ~prior:3 ("eval: nullptr dereference! " ^ 
                       (Lv.string_of_exp ptrExp));
       (Vtop, s)
 
@@ -605,7 +609,7 @@ and derefPtrVal ptrExp outerOff baseTyp (s:symState) ptrVal
         let newPtrVal, newSt = castAsPointer s exp in
         derefPtrVal ptrExp outerOff baseTyp newSt newPtrVal
       with PointerCastError ->
-        L.logError ("derefPtrVal: Vval not treated as ptr: " ^ 
+        logError ("derefPtrVal: Vval not treated as ptr: " ^ 
                       (Lv.string_of_exp exp));
         (Vtop, s)
 
@@ -626,7 +630,7 @@ and castAsPointer (s:symState) exp : symVal * symState =
   | Lv.CStartOf(l) ->
       (* known to happen in linux 2.6.15's 
          __read_page_state : unsigned long (unsigned long ) *)
-      L.logError "AddrOf/StartOf found as part of Vval";
+      logError "AddrOf/StartOf found as part of Vval";
       resolveAddrOfLval s l
 
   | Lv.CCastE(_,e) -> 
@@ -694,7 +698,7 @@ and resolveAddrOfLval (s:symState) lval : symVal * symState =
         with 
           SizeOfError _
         | Errormsg.Error ->
-            L.logError ("resolveAddrOfLval: offsetOf calculation failed" ^ 
+            logError ("resolveAddrOfLval: offsetOf calculation failed" ^ 
                           (Lv.string_of_exp ptrExp));
             (Vtop, curState)
       end
@@ -702,7 +706,7 @@ and resolveAddrOfLval (s:symState) lval : symVal * symState =
 
     (* Shouldn't actually get Vstruct *)
     | Vstruct _, _ ->
-        L.logError ("resolveAddrOfLval: can't deref non-pointer val " ^
+        logError ("resolveAddrOfLval: can't deref non-pointer val " ^
                         (Lv.string_of_exp ptrExp));
         (Vtop, curState)
           
@@ -712,7 +716,7 @@ and resolveAddrOfLval (s:symState) lval : symVal * symState =
           let newPtrVal, newSt = castAsPointer curState exp in
           addOffToPointer ptrExp off newSt newPtrVal
         with PointerCastError ->
-          L.logError ("resolveAddrOfLval: Vval not treated as ptr: " ^ 
+          logError ("resolveAddrOfLval: Vval not treated as ptr: " ^ 
                           (Lv.string_of_exp ptrExp));
           (Vtop, curState)
       end
@@ -759,7 +763,7 @@ let rec lvalOfActual (exp:Cil.exp) : Cil.lval =
     Lval lv -> lv
   | CastE (_, e) -> lvalOfActual e
   | _ ->
-(*      L.logError ("substLval: actual not lval " ^ (D.string_of_exp exp)); *)
+(*      logError ("substLval: actual not lval " ^ (string_of_exp exp)); *)
       raise CLv.SubstInvalidArg
 
 let rec substExp (args:Cil.exp list) (expFromOtherPlanet:Lv.aExp) : Lv.aExp =
@@ -800,7 +804,7 @@ let rec substExp (args:Cil.exp list) (expFromOtherPlanet:Lv.aExp) : Lv.aExp =
               newExp1 (* allow omission of constant offset *)
           | _ ->
               let expStr = Lv.string_of_exp expFromOtherPlanet in 
-              L.logError
+              logError
                 ("substExp encountered unknown exp: " ^ expStr);
               raise e
          )
@@ -830,15 +834,15 @@ and substLval (args:Cil.exp list) (lvalFromOtherPlanet:Lv.aLval) : Lv.aLval =
           try Lv.attachOffset h (Cil.addOffset formOff o)
           with
             CLv.OffsetMismatch om ->
-              L.logError ("substLval: " ^ CLv.string_of_offsetMiss om ^ " 1");
+              logError ("substLval: " ^ CLv.string_of_offsetMiss om ^ " 1");
               raise CLv.SubstInvalidArg
           | Failure s ->
-              L.logError ("substLval: failure " ^ s);
+              logError ("substLval: failure " ^ s);
               raise CLv.SubstInvalidArg
         end
       | _ ->
           (* It was local var of the other function -- can't substitute. *)
-          L.logError ("substLval: local variable " ^ (Lv.var_of_abs vi).vname
+          logError ("substLval: local variable " ^ (Lv.var_of_abs vi).vname
             ^ " stayed in summary?");
           raise CLv.SubstInvalidArg
     end
@@ -855,11 +859,11 @@ and substLval (args:Cil.exp list) (lvalFromOtherPlanet:Lv.aLval) : Lv.aLval =
             Lv.mkMemChecked actual outerOff
           with 
             CLv.OffsetMismatch om ->
-              L.logError ("substLval: " ^ CLv.string_of_offsetMiss om ^ " 2");
+              logError ("substLval: " ^ CLv.string_of_offsetMiss om ^ " 2");
               raise CLv.SubstInvalidArg
         end
       | _ ->
-          L.logError ("substLval: local variable " ^ (Lv.var_of_abs vi).vname
+          logError ("substLval: local variable " ^ (Lv.var_of_abs vi).vname
                       ^ " stayed in summary?");
           raise CLv.SubstInvalidArg
     end
@@ -870,7 +874,7 @@ and substLval (args:Cil.exp list) (lvalFromOtherPlanet:Lv.aLval) : Lv.aLval =
         Lv.mkMemChecked newExp outerOff
       with 
         CLv.OffsetMismatch om ->
-          L.logError ("substLval: " ^ CLv.string_of_offsetMiss om ^ " 3");
+          logError ("substLval: " ^ CLv.string_of_offsetMiss om ^ " 3");
           raise CLv.SubstInvalidArg
 
 let rec substValue state (args:Cil.exp list) (valFromOtherPlanet:symVal) :
@@ -932,8 +936,8 @@ let concretizePointerTo ptrTarget =
     pointer expression *)
 let rec ptrExpToAbs ptrExp =
   (try Lv.deref_absExp ptrExp
-   with A.UnknownLoc -> 
-     L.logError ("mainAliases -- Vtop: unable to deref: " ^
+   with Alias.UnknownLoc -> 
+     logError ("mainAliases -- Vtop: unable to deref: " ^
                    (Lv.string_of_exp ptrExp));
      []
   )
@@ -1034,7 +1038,7 @@ let getAliasesLval state lval : (bool * (Lv.aExp list)) =
              List_utils.addOnceP expEqual cur (Lv.CLval (simpleH, simpleO))
            with
              CLv.OffsetMismatch om ->
-               L.logError ("getAliasesLval: " ^ CLv.string_of_offsetMiss om);
+               logError ("getAliasesLval: " ^ CLv.string_of_offsetMiss om);
                cur
         ) [] aliases in
       (mustAlias, results)
@@ -1050,21 +1054,21 @@ let substActForm state actuals lvalWithFormal : bool * Lv.aExp list =
          let substituted = substLval actuals lvalWithFormal in
          let mustAlias, results = getAliasesLval state substituted in
          if results = [] then
-           L.logError ~prior:3 ("substActForm returned 0 results for: " ^
+           logError ~prior:3 ("substActForm returned 0 results for: " ^
                                   (Lv.string_of_lvscope lvalWithFormal))
          ;
          (mustAlias, results)
        with CLv.SubstInvalidArg -> begin
          let arg = List.nth actuals n in
-         L.logError ~prior:3 ("substActForm unsubstitutable arg: " ^
-                                (D.string_of_exp arg) ^ " formal: " ^ 
+         logError ~prior:3 ("substActForm unsubstitutable arg: " ^
+                                (string_of_exp arg) ^ " formal: " ^ 
                                 (Lv.string_of_lval lvalWithFormal));
          (true, [])
        end
       ) 
   | _ -> 
       (* It was local var of the other function -- can't substitute. *)
-      L.logError ("substActForm: local variable " ^ 
+      logError ("substActForm: local variable " ^ 
                     (Lv.string_of_lval lvalWithFormal) 
                   ^ " stayed in summary?");
       (true, [])
@@ -1086,7 +1090,7 @@ let lvalsOfExps exps =
 module TopPtrHash = struct
   type t = Cil.typ * Cil.exp * Cil.offset
   let equal (t1, e1, o1) (t2, e2, o2) =
-    Ciltools.compare_type t1 t2 == 0 &&
+    Ciltools.equal_type t1 t2 &&
       Ciltools.compare_exp e1 e2 == 0 &&
       Ciltools.compare_offset o1 o2 == 0
   let hash (t1, e1, o1) =
@@ -1103,7 +1107,7 @@ module CLVS = Set.Make(struct
 end)
 
 let compareReps (p1, o1, t1) (p2, o2, t2) = 
-  let c = A.Abs.compare p1 p2 in
+  let c = Alias.Abs.compare p1 p2 in
   if c == 0 then
     let c = Ciltools.compare_offset o1 o2 in
     if c == 0 then
@@ -1122,12 +1126,11 @@ module ROH = Cache.Make(
     type t = Alias_types.ptaNode * Cil.offset * Cil.typ
     let equal a b = compareReps a b == 0
     let hash (p, o, t) = 
-      A.Abs.hash p lxor Ciltools.hash_offset o lxor Ciltools.hash_type t
+      Alias.Abs.hash p lxor Ciltools.hash_offset o lxor Ciltools.hash_type t
   end)
     
 let compatibleType t1 t2 =
-  isVoidType t1 ||
-    (Ciltools.compare_type t1 t2 == 0) 
+  isVoidType t1 || (Ciltools.equal_type t1 t2)
 
 exception LhsTop of (Cil.exp * Cil.offset * Cil.typ)
 
@@ -1137,31 +1140,31 @@ let printROS caption ros =
   if len == 0 then ()
   else let doc = 
     text caption ++ text "{" ++
-      L.seq_to_doc (Pretty.text ", ") 
+      seq_to_doc (Pretty.text ", ") 
       ROS.iter
       (fun (ptNode, off, typ) -> 
-         text (A.Abs.string_of ptNode ^ 
+         text (Alias.Abs.string_of ptNode ^ 
                  sprint 80 (d_offset nil () off) ^ ":" ^
-                 D.string_of_type typ))
+                 string_of_type typ))
       ros nil ++ dprintf "} (%d)\n" len in
-  L.logStatusD doc
+  logStatusD doc
 
 let printAddrs caption targets =
   let len = List.length targets in
   if len == 0 then ()
   else let doc = 
     text caption ++ text "{" ++
-      L.seq_to_doc (Pretty.text ", ") 
+      seq_to_doc (Pretty.text ", ") 
       List.iter
       (fun (addr, off) -> 
          d_pointerTarg (addr, off))
       targets nil ++ dprintf "} (%d)\n\n" len in
-  L.logStatusD doc
+  logStatusD doc
 
-class symTransFunc (stLat: (symState, SS.sumval) Intra.stateLattice) = 
+class symTransFunc (stLat: (symState, SS.sumval) IntraDataflow.stateLattice) = 
 object (self)
-  inherit [symState] Intra.idTransFunc stLat as superT
-  inherit [symState] Intra.inspectorGadget stLat "Rad SS: "
+  inherit [symState] IntraDataflow.idTransFunc stLat as superT
+  inherit [symState] IntraDataflow.inspectorGadget stLat "Rad SS: "
 
   (* TODO: make this available from library? *)
   val mutable firstPP = ppUnknown
@@ -1212,7 +1215,7 @@ object (self)
       else curResults
     with 
       CLv.OffsetMismatch om ->
-      (*  L.logError ("aLvMgType: " ^ CLv.string_of_offsetMiss om); *)
+      (*  logError ("aLvMgType: " ^ CLv.string_of_offsetMiss om); *)
         curResults
     | Errormsg.Error
     | Failure _ ->
@@ -1221,11 +1224,11 @@ object (self)
 
   method private collectTargetRep ptrExp outerOff baseType curSet =
     try
-      let ps = A.Abs.deref_exp ptrExp in
+      let ps = Alias.Abs.deref_exp ptrExp in
       List.fold_left 
         (fun cur p -> ROS.add (p, outerOff, baseType) cur) curSet ps
-    with A.UnknownLoc ->
-      L.logError ("collectTargetRep: unknown " ^ D.string_of_exp ptrExp);
+    with Alias.UnknownLoc ->
+      logError ("collectTargetRep: unknown " ^ string_of_exp ptrExp);
       curSet
 
 
@@ -1234,7 +1237,7 @@ object (self)
     try
       ROH.find ptNodeCache key
     with Not_found ->
-      let targets = A.Abs.represents ptNode in
+      let targets = Alias.Abs.represents ptNode in
       let results = 
         List.fold_left 
           (fun cur clv ->
@@ -1246,7 +1249,7 @@ object (self)
           ) [] targets in
       let results = 
         List.map (fun (host, off) -> getAddr host false, off) results in
-      ROH.add ptNodeCache key results;
+      ignore (ROH.add ptNodeCache key results);
       results
         
   method private havocPtNodes ptNode off baseType state =
@@ -1265,7 +1268,7 @@ object (self)
   (** Get a list of lvals corresponding targets of given ptr (w/ TOP val) *) 
   method private topPtrDerefLval baseType ptrExp outerOff =
     try
-      let targets = A.deref_exp ptrExp in
+      let targets = Alias.deref_exp ptrExp in
       let results = 
         List.fold_left 
           (fun cur vi ->
@@ -1274,8 +1277,8 @@ object (self)
                (Lv.hostOfVar vi, NoOffset)
           ) [] targets in
       List.map (fun (host, off) -> getAddr host false, off) results
-    with A.UnknownLoc ->
-      L.logError ("topPtrDerefLval: unknown " ^ D.string_of_exp ptrExp);
+    with Alias.UnknownLoc ->
+      logError ("topPtrDerefLval: unknown " ^ string_of_exp ptrExp);
       []
       
       
@@ -1285,7 +1288,7 @@ object (self)
     try TPH.find topPtrCache key
     with Not_found ->
       let result = self#topPtrDerefLval typ ptrExp outerOff in
-      TPH.add topPtrCache key result;
+      ignore (TPH.add topPtrCache key result);
       result
 
             
@@ -1349,18 +1352,18 @@ object (self)
           raise (LhsTop (ptrExp, off, baseTyp))
 
       | Vval e when isConst e ->
-          L.logError ~prior:3 ("handleAssign: nullptr deref " ^
-                                 (D.string_of_exp ptrExp));
+          logError ~prior:3 ("handleAssign: nullptr deref " ^
+                                 (string_of_exp ptrExp));
           curState (* not bottomSymState *)
 
       | Vbot -> 
-          L.logError ~prior:3 ("handleAssign: nullptr deref " ^
-                                 (D.string_of_exp ptrExp));
+          logError ~prior:3 ("handleAssign: nullptr deref " ^
+                                 (string_of_exp ptrExp));
           curState (* not bottomSymState *)
 
       | Vstruct _ ->
-          L.logError ("handleAssign: trying to store to a non-ptr: " ^
-                        (D.string_of_exp ptrExp));
+          logError ("handleAssign: trying to store to a non-ptr: " ^
+                        (string_of_exp ptrExp));
           curState
 
       | Vval exp ->
@@ -1369,8 +1372,8 @@ object (self)
             let newPtrVal, newState = castAsPointer curState exp in
             assignToPointerTarget ptrExp off baseTyp newPtrVal newState
           with PointerCastError ->
-            L.logError ("handleAssign: Vval not treated as ptr: " ^ 
-                          (D.string_of_exp ptrExp));
+            logError ("handleAssign: Vval not treated as ptr: " ^ 
+                          (string_of_exp ptrExp));
             curState
 
     in
@@ -1508,7 +1511,7 @@ object (self)
         (* All summaries should be initialized *)
         failwith "SS: modSumms#get returned Not_found"
     | Modsummaryi.BottomSummary ->
-        L.logError ("SS: modSumm is BOTTOM: " ^ (Callg.fid_to_string key));
+        logError ("SS: modSumm is BOTTOM: " ^ (Callg.fid_to_string key));
         bottomSymState
           
           
@@ -1582,8 +1585,8 @@ let init settings cg modSum =
   seqTrans#setCG cg
 
 
-class symSummarizer (stLat : (symState, SS.sumval) Intra.stateLattice) 
-  (sums : SS.sumval BS.base) : [SS.sumval, symState] Intra.summarizer 
+class symSummarizer (stLat : (symState, SS.sumval) IntraDataflow.stateLattice) 
+  (sums : SS.sumval BS.base) : [symState, SS.sumval] IntraDataflow.summarizer 
   = object (self)
   
   val mutable inspect = false
@@ -1652,22 +1655,26 @@ module SymStateDF = struct
 
   type sum = SS.sumval
 
-  let stMan = (fullLattice :> (st, sum) Intra.stateLattice)
+  let stMan = (fullLattice :> (st, sum) IntraDataflow.stateLattice)
 
-  let transF = ref (seqTrans :> st Intra.transFunc)
+  let transF = ref (seqTrans :> st IntraDataflow.transFunc)
     
 end
 
 
-module SymStateFwd = Intra.FlowSensitive (SymStateDF)
+module SymStateFwd = IntraDataflow.FlowSensForward (SymStateDF)
 
+let getSymstate pp = 
+  SymStateFwd.getDataBefore pp
 
+let getFISymstate () =
+  failwith "TODO getFISymstate"
 
 (** Initialize the symbolic state before analzying the given func
     and initialize the dataflow facts *)
 let initState funID (func:Cil.fundec) : unit = begin
   curPtrID := 0;
-  SymStateFwd.initialize funID func SymStateDF.stMan#initialState
+  SymStateFwd.initialize funID func SymStateDF.stMan#initialState;
 end
 
 
@@ -1691,13 +1698,13 @@ class symexAnalysis = object (self)
     sumIsFinal key
       
   method compute funID cfg =
-    L.logStatus "doing symstate";
-    L.flushStatus ();
+    logStatus "doing symstate";
+    flushStatus ();
     Stat.time "Computing rad_symstate DF: " (doSymState funID) cfg
       
   method summarize key cfg =
     if self#isFinal key then false
-    else summarizer#summarize key cfg SymStateFwd.getDataBefore
+    else summarizer#summarize key cfg getSymstate
         (* In other phases, can override to not summarize! *)
       
   method flushSummaries () =
@@ -1713,7 +1720,7 @@ end
 let combRetStates func =
   let combineSt s cur =
     let pp = getStmtPP s in
-    let state = SymStateFwd.getDataBefore pp in
+    let state = getSymstate pp in
     SymStateDF.stMan#combineStates cur state
   in
   List.fold_left
@@ -1767,15 +1774,15 @@ let derefALvalAt (pp:prog_point) (lv:Lv.aLval) : (bool * (Lv.aLval list)) =
         (try
            let nodes = Lv.deref_absExp ptrExp in
            (true, List.map (fun node -> (Lv.AbsHost node, outerOff)) nodes)
-         with A.UnknownLoc ->
-           L.logError ("derefLvalHelper: Vtop has no targets " ^ 
+         with Alias.UnknownLoc ->
+           logError ("derefLvalHelper: Vtop has no targets " ^ 
                          Lv.string_of_exp ptrExp);
            (true, [])
         )
 
     | Vval (Lv.CConst _)
     | Vbot -> 
-        L.logError ~prior:3 ("derefLvalHelper: deref a nullptr " ^
+        logError ~prior:3 ("derefLvalHelper: deref a nullptr " ^
                         (Lv.string_of_exp ptrExp));
         (true, [])
           
@@ -1785,18 +1792,18 @@ let derefALvalAt (pp:prog_point) (lv:Lv.aLval) : (bool * (Lv.aLval list)) =
           let newPtrVal, newState = castAsPointer curState exp in
           derefLvalHelper ptrExp outerOff newState newPtrVal
         with PointerCastError ->
-          L.logError ("derefLvalHelper: Vval not treated as ptr: " ^ 
+          logError ("derefLvalHelper: Vval not treated as ptr: " ^ 
                           (Lv.string_of_exp ptrExp));
           (true, [])
       end
     | Vstruct _ ->
-        L.logError ("derefLvalHelper: eval returned non-ptr for ptrexp " ^
+        logError ("derefLvalHelper: eval returned non-ptr for ptrexp " ^
                         (Lv.string_of_exp ptrExp));
         (true, [])
   in
   match lv with
     (Lv.CMem(ptrExp), outerOff) ->
-      let state = SymStateFwd.getDataBefore pp in
+      let state = getSymstate pp in
       let ptrVal, newSt = eval state ptrExp None in
       let newOff, _ = CLv.canonicizeOff outerOff in
       let must, lvals = derefLvalHelper ptrExp newOff newSt ptrVal in
@@ -1808,8 +1815,9 @@ let derefLvalAt (pp:prog_point) (lv:Cil.lval) : (bool * (Lv.aLval list)) =
   derefALvalAt pp (Lv.abs_of_lval lv)
 
 let getAliasesAt (pp:prog_point) (lv:Lv.aLval) : (bool * (Lv.aExp list)) =
-  let state = SymStateFwd.getDataBefore pp in
+  let state = getSymstate pp in
   getAliasesLval state lv
+
 
 (**************** New substitution functions *************)
 
@@ -1819,10 +1827,14 @@ let getAliasesAt (pp:prog_point) (lv:Lv.aLval) : (bool * (Lv.aExp list)) =
     result in terms of formals and globals (or other "main aliases").
     Expect lvals returned. *)
 let substActForm2 pp actuals lvalWithFormal : bool * Lv.aLval list =
-  let state = SymStateFwd.getDataBefore pp in
+  let state = getSymstate pp in
   let mustAlias, results = substActForm state actuals lvalWithFormal in
   (mustAlias, lvalsOfExps results)
 
+let substActForm2FI actuals lvalWithFormal : bool * Lv.aLval list =
+  let state = getFISymstate () in
+  let mustAlias, results = substActForm state actuals lvalWithFormal in
+  (mustAlias, lvalsOfExps results)
 
 
 (** Substitute the formals in lvalWithFormal w/ the actuals,
@@ -1837,13 +1849,13 @@ let substActForm3 pp actuals lvalWithFormal : Lv.aLval list =
          [substituted]
        with CLv.SubstInvalidArg ->
          let arg = List.nth actuals n in
-         L.logError ("substActForm3 unsubstitutable arg: " ^
-                       (D.string_of_exp arg));
+         logError ("substActForm3 unsubstitutable arg: " ^
+                       (string_of_exp arg));
          []
        )
   | _ -> 
       (* It was local var of the other function -- can't substitute. *)
-      L.logError ("substActForm3: local variable " ^ 
+      logError ("substActForm3: local variable " ^ 
                     (Lv.string_of_lval lvalWithFormal) 
                   ^ " stayed in summary?");
       []

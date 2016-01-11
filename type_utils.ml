@@ -91,17 +91,29 @@ let rec structSubtype t1 t2 =
     | TArray (t, _, _), _ ->
         (* funky modulo array thing *)
         not (isImpreciseMalloc t1) && structSubtype t t2
-    | TInt _, TInt _ -> true (* don't care what kind of const for now... *)
+
+    | TInt _, TInt _ 
+    | TVoid _, TVoid _
+    | TFun _, TFun _ 
+    | TBuiltin_va_list _, TBuiltin_va_list _ 
+    | TFloat _, TFloat _ -> 
+        (* don't care what kind of scalar as long as it's the same kind... *)
+        true 
+    | TEnum _, TInt _ | TInt _, TEnum _ -> true (* also allow enum and int *)
+
     | TPtr (tt1, _), TPtr (tt2, _) ->
         (* Hmm... in ML tt1 :> tt2 and tt2 :> tt1 *)
         structSubtype tt1 tt2 && structSubtype tt2 tt1
     | TComp (ci1, _), TComp (ci2, _) ->
-        hasPrefix ci1.cfields ci2.cfields
+        ci1.ckey == ci2.ckey ||
+          hasPrefix (!Cil.getCfields ci1) (!Cil.getCfields ci2)
     | TComp (ci, _), _ ->
-        (match ci.cfields with
+        (match (!Cil.getCfields ci) with
            h :: _ -> structSubtype h.ftype t2
          | [] -> false)
-    | _, _ ->
+
+
+    | _, _ -> (* already established that they weren't equal types *)
         false
           
 and hasPrefix fields1 fields2 =
@@ -118,9 +130,9 @@ and hasPrefix fields1 fields2 =
         (* Check for embedded records *)
         (match ty1, ty2 with
            TComp (ci, _), _ ->
-             hasPrefix (ci.cfields @ t1) fields2
+             hasPrefix ((!Cil.getCfields ci) @ t1) fields2
          | _, TComp (ci, _) ->
-             hasPrefix fields1 (ci.cfields @ t2)
+             hasPrefix fields1 ((!Cil.getCfields ci) @ t2)
          | _, _ -> false)
 
 let pickWidest t1 t2 : Cil.typ =
@@ -152,8 +164,10 @@ let pickWidest t1 t2 : Cil.typ =
     | _, TNamed (ti2, _) -> pickHelper t1 ti2.ttype
     | TPtr _, TInt _ -> 1 (* Int may be wider, but we care about ptrs more *)
     | TInt _, TPtr _ -> 2
-    (* Prefer functions over others *)
+    (* Prefer functions over other scalars, not structs *)
     | TFun (_, Some _, _, _), TFun (_, Some _, _, _) -> breakTies t1 t2
+    | TFun _, TComp _ -> 2
+    | TComp _, TFun _ -> 1
     | TFun (_, None, _, _), _ -> 1 (* Prefer None args *)
     | _, TFun (_, None, _, _) -> 2 
     | TFun _, _ -> 1
@@ -165,24 +179,101 @@ let pickWidest t1 t2 : Cil.typ =
 
 (************************************************************)
 
+(** ty2 is the type from the calling expression, ty1 is the target func *)
+let rec argTypesCompatible ty1 ty2 =
+  match ty1, ty2 with
+    TNamed (ti1, _), _ ->
+      argTypesCompatible ti1.ttype ty2
+  | _, TNamed (ti2, _) ->
+      argTypesCompatible ty1 ti2.ttype
+  (* Assume different enums disjoint *)
+  | TEnum (ei1, _), TEnum (ei2, _) ->
+      ei1.ename = ei2.ename
+  | TEnum _, TInt _ | TInt _, TEnum _ -> 
+      (* but allow enums and ints to be interchangeable *)
+      true
+  | TEnum _, _ | _, TEnum _ ->
+      (* Don't allow enums to be interchangeable w/ structs, arrays, ptrs *)
+      false
+
+
+  (* Add some amount of physical subtype checking, but allow void * etc  *)
+  | TPtr(TNamed (ti1, _), a), _ ->
+      argTypesCompatible (TPtr (ti1.ttype, a)) ty2
+  | _, TPtr(TNamed (ti2, _), a) ->
+      argTypesCompatible ty1 (TPtr (ti2.ttype, a))
+
+  | TPtr(TPtr _ as t1, _), TPtr(TPtr _ as t2, _) ->
+      argTypesCompatible t1 t2
+
+(*
+  | TPtr(TComp _ as t1, _), TPtr(TComp _ as t2, _) ->
+      structSubtype t2 t1 (* actual <ST formal *)
+*)
+
+  (* try the actual <ST formal thing again *)
+  | TPtr(t1, _), TPtr (t2, _) -> 
+      (* allow void * to override *)
+      if Type_reach.isPoly ty1 || Type_reach.isPoly ty2 then true
+      else 
+        structSubtype t2 t1 
+          (* actual <ST formal -- 
+             assumes that the ptr is used for reads only so we
+             don't for subtyping in the other direction... *)
+
+(*      let polyTarg = Type_reach.isPoly ty1 in
+      if polyTarg then true
+      else 
+        let polyCaller = Type_reach.isPoly ty2 in
+        polyCaller
+*)
+
+  | TPtr _, TInt _ | TInt _, TPtr _ -> 
+      (* Disallow this for function calls -- actual must have been
+         cast to an int if it is to be used that way (e.g., for hash) *)
+      false
+
+  | _, _ ->
+      (* Size of t2 should be at most size of the t1 (function target),
+         otherwise, there is truncation? 
+         Don't bother to check if pointers have this same property
+         because ty1 might be (char * ) while ty2 is (int * ) and clearly
+         sizeof char < sizeof int, but the two pointers can still be cast  *)
+      bitsSizeOf ty1 >= bitsSizeOf ty2
+
+
+(** l2 is the type from the calling expression, l1 is the target func *)
+let rec argsListCompatible l1 l2 =
+  match l1, l2 with
+    [], [] -> true
+  | _, [] -> false
+  | [], _ -> false (* may want to allow callers to pass extra args *)
+  | (_, ty1, _) :: tl1, (_, ty2, _) :: tl2 ->
+      argTypesCompatible ty1 ty2 && argsListCompatible tl1 tl2
+
+(** Args2 is the type from the calling expression, args1 is the target func *)
 let argsCompatible args1 args2 =
   match args1, args2 with
     None, _ 
-  | _, None -> true
-  | Some l1, Some l2 -> List.length l1 == List.length l2
+  | _, None -> true (* The "None" cases are where # args is unknown *)
+  | Some l1, Some l2 ->
+      argsListCompatible l1 l2 
+
+let retCompatible targRet callerRet =
+  if isVoidType callerRet then
+    if isVoidType targRet then true
+    else 
+      (logErrorF "return ignored @ %s\n" (string_of_loc !currentLoc); 
+       true)
+  else 
+    structSubtype targRet callerRet
 
 
 (** Assume sig2 is the calling expression, and sig1 is the target.
     Therefore, we allow NO return val in the callExp even if the 
     target returns something (funky, but it happens...) *)
 let funSigSubtype (rt1, args1, va1) (rt2, args2, va2) =
-  (va1 == va2) && argsCompatible args1 args2 &&
-    let rt1Void = isVoidType rt1 in
-    let rt2Void = isVoidType rt2 in
-    if rt2Void then
-      if rt1Void then true
-      else (logErrorF "return ignored @ %s\n" (string_of_loc !currentLoc); true)
-    else (not rt1Void)
+  (va1 == va2) && argsCompatible args1 args2 && retCompatible rt1 rt2 
 
 let getFunSig typ = 
   match Cil_lvals.unrollTypeNoAttrs typ with

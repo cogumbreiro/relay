@@ -50,6 +50,7 @@ module Intra = IntraDataflow
 module BS = Backed_summary
 module SPTA1 = Symstate2
 module SPTA2 = Symex
+module RS = Racestate.RS
 
 module FC = Filecache
 module L = Logging
@@ -99,11 +100,12 @@ let initSettings () =
     A.initSettings settings !cgDir;
     let cgFile = Dumpcalls.getCallsFile !cgDir in
     let cg = readCalls cgFile in
+    let sccCG = Scc_cg.getSCCGraph cg in
 
-    let () = Backed_summary.init settings !cgDir cg in
+    let () = Backed_summary.init settings !cgDir cg sccCG in
 
-    SPTA1.init settings cg (Racesummary.sum :> Modsummaryi.absModSumm);
-    SPTA2.init settings cg (Racesummary.sum :> Modsummaryi.absModSumm);
+    SPTA1.init settings cg (RS.sum :> Modsummaryi.absModSumm);
+    SPTA2.init settings cg (RS.sum :> Modsummaryi.absModSumm);
 
     Distributed.init settings !cgDir;
     Entry_points.initSettings settings;

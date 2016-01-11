@@ -99,28 +99,46 @@ module ModSum = Safer_sum.Make (ModSumType)
 
 (*** Tack on the required getMods method ***)
 
-let listMods lvs =
-  Lvs.fold 
-    (fun lval cur ->
-       let scope = Lvals.getScope lval in
-       (lval, scope) :: cur
-    ) lvs []
-
 let iterMods = Lvs.iter
-
 
 
 class modSummary sumID = object (self)
   inherit ModSum.data sumID
 
-  method getMods fkey = 
+  method findTestSum fkey =
     let sum = self#find fkey in
     if isBottom sum then
       raise Modsummaryi.BottomSummary
-    else
-      let outSt = sum in
-      listMods outSt
+    else sum
+
+  method getMods fkey = 
+    let sum = self#findTestSum fkey in
+    Lvs.fold 
+      (fun lval cur ->
+         let scope = Lvals.getScope lval in
+         (lval, scope) :: cur
+      ) sums []
         
+  method getGlobalMods fkey =
+    let sum = self#findTestSum fkey in
+    Lvs.filter
+      (fun lval ->
+         match Lvals.getScope lval with
+           SGlobal _ -> true | _ -> false) sum
+
+  method getLocalMods fkey = 
+    let sum = self#findTestSum fkey in
+    Lvs.fold
+      (fun lval cur ->
+         let scope = Lvals.getScope lval in
+         match scope with
+           SFormal _ -> (lval, scope) :: cur
+         | SGlobal _ 
+         | STBD | SFunc -> cur) sums []
+
+  method evictSummaries =
+    self#evictSummaries
+      
 end
 
 let sums = new modSummary (Backed_summary.makeSumType "mods")

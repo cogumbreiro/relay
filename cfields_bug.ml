@@ -26,7 +26,7 @@ let printEmptyCfields () =
   printf "Structs with empty cfields:\n";
   Cilinfos.iterCompinfos 
     (fun compinfo ->
-       if compinfo.cfields = [] then
+       if (!Cil.getCfields compinfo = []) then
          (incr count;
           printf "%s\n" compinfo.cname)
     );

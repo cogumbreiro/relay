@@ -44,13 +44,12 @@ open Pretty
 open Fstructs
 open Stdutil
 open Callg
-
+open Logging
 open Lvals
 
-module RS = Racesummary
+module RS = Racestate.RS
 module SS = Symsummary
 module ST = Sym_types
-module L = Logging
 module DC = Default_cache
 module A = Alias
 module LP = Lockset_partitioner
@@ -164,7 +163,7 @@ let p_au_sizeInfo au =
        doc ++ text (string_of_lval lv ^ ":\n") ++
          indent 2 (d_lval_sizeInfo lv) ++ line
     ) au nil in
-  L.logStatusD doc
+  logStatusD doc
 
 
 let printSum cg (fname:string) = begin
@@ -174,72 +173,73 @@ let printSum cg (fname:string) = begin
       let fnode = FMap.find fkey cg in
       fnode.name
     with Not_found -> "???" in
-  L.logStatusF "Summaries for %s(%s) are:\n\n" funcName fname;
+  logStatusF "Summaries for [%s] from %s:\n\n" funcName fname;
   (try
-     let resultSumm = RS.deserializeFromFile fname in
-     L.logStatus ("Lock Summary: "); 
+     Manage_sums.prepareSumms [fkey] (BS.getDescriptors [RS.sum#sumTyp]);
+     let resultSumm = RS.sum#find fkey in
+     logStatus ("Lock Summary: "); 
      RS.printState (RS.summOutstate resultSumm);
    with e ->
-     L.logStatus ("Lock Summary: Unreadable " ^ (Printexc.to_string e))
+     logStatus ("Lock Summary: Unreadable " ^ (Printexc.to_string e))
   );
- (try
+  (try
      let returnVal = SS.sum#getFromFile fname in
-     L.logStatus ("Return value:");
+     logStatus ("Return value:");
      ST.printVal returnVal;
    with e -> 
-     L.logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
+     logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
   );
   (try
      let au = BS.deserializeFromFile fname "au" in
-     L.logStatus "";
-     L.logStatus "AllUnlocks Summary:";
+     logStatus "";
+     logStatus "AllUnlocks Summary:";
      let fullLS = Lockset.LS.composeNew (Lockset.LS.S.empty) au in
      RS.printLockset fullLS;
      
      (* Check out sizing *)
      p_au_sizeInfo au
    with e ->
-     L.logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
+     logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
   );
   (try
      let sum = BS.deserializeFromFile fname "lsp" in
-     L.logStatus "";
-     L.logStatus "LSP Summary:";
+     logStatus "";
+     logStatus "LSP Summary:";
      LP.printSumm (-1) sum
    with e ->
-     L.logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
+     logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
   );
   (try
      let sum = BS.deserializeFromFile fname "par" in
-     L.logStatus "";
-     L.logStatus "PAR Summary:";
+     logStatus "";
+     logStatus "PAR Summary:";
      Par.printSumm sum fkey
    with e ->
-     L.logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
+     logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
   );
 
   (try
      let sum = BS.deserializeFromFile fname "nwarn1" in
-     L.logStatus "";
-     L.logStatus "Null Warn 1 (delayed) summary:";
+     logStatus "";
+     logStatus "Null Warn 1 (delayed) summary:";
      let doc = NW.pReport sum.NW.nDelayed in
-     L.logStatusD doc;
-     L.logStatus "";
+     logStatusD doc;
+     logStatus "";
 
-     L.logStatus "";
-     L.logStatus "Null Warn 1 (safe) summary:";
+     logStatus "";
+     logStatus "Null Warn 1 (safe) summary:";
      let doc = NW.pReport sum.NW.nSafe in
-     L.logStatusD doc;
-     L.logStatus "";
+     logStatusD doc;
+     logStatus "";
 
-     L.logStatus "";
-     L.logStatus "Null Warn 1 (unsafe) summary:";
+     logStatus "";
+     logStatus "Null Warn 1 (unsafe) summary:";
      let doc = NW.pReport sum.NW.nUnsafe in
-     L.logStatusD doc;
-     L.logStatus "";
+     logStatusD doc;
+     logStatus "";
 
    with e ->
-     L.logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
+     logStatus ("Return value: Unreadable " ^ (Printexc.to_string e))
   )
 
 end
@@ -268,6 +268,8 @@ let initSettings () =
     DC.makeLCaches (!cgDir);
     let cgFile = Dumpcalls.getCallsFile !cgDir in
     let cg = readCalls cgFile in
+    let sccCG = Scc_cg.getSCCGraph cg in
+    BS.init settings !cgDir cg sccCG;
     cg
   with e -> Printf.printf "Exc. in initSettings: %s\n"
     (Printexc.to_string e) ; raise e
@@ -300,7 +302,7 @@ let main () =
         exit 0;
       end
   with e -> 
-    L.logError ("Exc. in PrintSummary: " ^ (Printexc.to_string e));
+    logError ("Exc. in PrintSummary: " ^ (Printexc.to_string e));
     raise e
 ;;
 main () ;;

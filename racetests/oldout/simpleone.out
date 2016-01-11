@@ -1,52 +1,67 @@
-Mon Oct 12 14:20:34 PDT 2009
-reserved status file: /tmp/temp.KV5hAF
+Tue Jan 19 22:00:54 PST 2010
+reserved status file: /tmp/temp.QIfq47
 running analysis on /home/jan/research/relay-race/racetests/simpleone/ciltrees
+Registered summary type: rs_scc
 Registered summary type: rs
 Registered summary type: ss
 Registered summary type: rss
 Args: 
- ./race_anal.exe -cg /home/jan/research/relay-race/racetests/simpleone/ciltrees -r -u jan -st /tmp/temp.KV5hAF
+ ./race_anal.exe -cg /home/jan/research/relay-race/racetests/simpleone/ciltrees -r -u jan -st /tmp/temp.QIfq47
 Checking for data races
 -----
 Loading Cil Varinfo ID ranges for lookup tables
+Loading ranges from .vids_ckeys_fixed
 Setting Cil Varinfo ID ranges
-Finished parsing config group: ALIAS_ANALYSIS
 Finished parsing config group: SUMMARY_DB
 Finished parsing config group: REQUEST
 Finished parsing config group: DISTRIBUTED
 Finished parsing config group: FILE_SERVER
-Finished parsing config group: ENTRY_POINTS
 Finished parsing config group: LOCK_FUNCS
 Finished parsing config group: THREAD_FUNCS
 Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: ENTRY_POINTS
 Finished parsing config group: SYM_EX
 Done reading config file
-myIP: 127.0.0.1
+myIP: 127.0.1.1
 using /tmp/relay_scratch to store acquired files
-using: /tmp/temp.KV5hAF to track status
-Initializing Andersen's AA info
+using: /tmp/temp.QIfq47 to track status
+Initializing Steensgaard AA info
 Loading function info
+Loading tempVar info
+Using old PTA results
+Old PTA results loaded
+Initializing Andersen's AA info
 Loading tempVar info
 Using old PTA results: /home/jan/research/relay-race/racetests/simpleone/ciltrees/.pta_results.anders
 Old PTA results loaded
 Reached end of /home/jan/research/relay-race/racetests/simpleone/ciltrees/calls.anders call graph file
 Num funcs: 4
+Scc_cg: Pruned 3 funcs w/out bodies for scc DAG
 summary database will use:
 	/home/jan/research/relay-race/racetests/simpleone/ciltrees/relay_sums
 Initializing summary rss
 Checking leftover state: rss
+[Er]: Checkpoint: No left-over status file
 Initializing summary ss
 Checking leftover state: ss
+[Er]: Checkpoint: No left-over status file
 Initializing summary rs
-Checking leftover state: rs
+BS: Not doing any post-reboot cleanup
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for _spin_unlock:3.f
+[Er]: Multiple lock summaries for _spin_lock:2.f
+Initializing summary rs_scc
+BS: Not doing any post-reboot cleanup
 SH: initEscapeable found (0, 0) thread (acts, formals)
 
 Entry points use roots: true
 file server will use: 14440
 trying to clear old summaries / local srcs, etc.
-Scc_cg: Pruned 3 funcs w/out bodies for scc DAG
 Starting bottomup analysis
 -----
+[Er]: Checkpoint: No left-over status file
 getting next SCC from server
 Acquiring needed summaries
 =================================
@@ -57,14 +72,14 @@ Summarizing function: main : one.c
 doing symstate
 Prev ldiffCache hits: 0	misses: 0
 
+Prev GAPostCache hits: 0	misses: 0
+
 doing lockset
 doing guarded access
-TIMES : SCC:0 : 0.0018138885498
-TIMES : FUN:253.f : 0.00180506706238
 =================================
 Finished an SCC (1)
 =================================
-Summary for function: main:253.f
+Summary for function: main:8.f
 =======
 
 SUMS (nm, lo, un, wr, re):	main	0	1	3	0	
@@ -72,7 +87,7 @@ SUMS (nm, lo, un, wr, re):	main	0	1	3	0
 SS Sum:
  -> 
 Vval: 0
-SIZES: 253.f : 190
+SIZES: 8.f : 44
 >>> PROGRESS 1/1 SCCs DONE!
 
 =================================
@@ -84,6 +99,7 @@ Bottomup analysis complete
 
 Beginning Thread Analysis:
 -----
+[Er]: No entry-points file!
 Expected # thread-creation site pairs: 0
 completed all thread pairs
 Sorting races
@@ -102,14 +118,15 @@ Printing Alias assumptions used by warnings
 
 writeState: writing new state for Andersen to /home/jan/research/relay-race/racetests/simpleone/ciltrees/.pta_temp.anders
 
-Elapsed time (secs): 0.020000
+writeState: Not needed for Steens PTA
+Elapsed time (secs): 0.028001
 Top heap size (MB): 0
 Current heap size (MB): 0
-Lifetime allocated bytes (MB): 2
-Collections -- minor: 10 major: 2 compactions: 0
+Lifetime allocated bytes (MB): 1
+Collections -- minor: 11 major: 2 compactions: 0
 Bytes per word: 4
 Exhausted tries: 1
 return value is 0
 ran 1 times
-cleared status file: /tmp/temp.KV5hAF
-Mon Oct 12 14:20:34 PDT 2009
+cleared status file: /tmp/temp.QIfq47
+Tue Jan 19 22:00:54 PST 2010

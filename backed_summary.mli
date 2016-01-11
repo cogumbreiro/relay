@@ -10,7 +10,7 @@ val dummyToken : dbToken
 val string_of_token : dbToken -> string
 val token_of_string : string -> dbToken
 
-val init : Config.settings -> string -> Callg.callG -> unit 
+val init : Config.settings -> string -> Callg.callG -> Scc_cg.sccGraph -> unit 
 
 val getBasename : sumKey -> sumType -> string
 
@@ -115,12 +115,14 @@ class type dbManagement = object
 
   method locate : sumKey list -> (sumKey * dbToken) list
     
+  method getDependentKeys : sumKey list -> (sumKey * dbManagement) list
+
   method sizeInMem : unit -> int
 
   method sizesOf : sumKey list -> (sumKey * int) list
 
   (** Initialize the summaries for special functions / external funcs *)
-  method initSummaries : Config.settings -> Callg.callG -> unit
+  method initSummaries : Config.settings -> Callg.callG -> Scc_cg.sccGraph -> unit
 
 end
   
@@ -176,6 +178,8 @@ end
 
 module Make (I:Summarizeable) : S with type sum = I.t
 
+
+class ['sum] noneSummary : sumType -> ['sum] base
 
 (************************************************************
  Operations on all known summary DBs

@@ -103,7 +103,7 @@ end
 
 module SS = Safer_sum.Make (SymSum)
 
-let sum = new SS.data (BS.makeSumType "rss")
+let sum = new SS.data (BS.makeSumType "rad_ss")
 let _ = BS.registerType sum (* For the old version to run *)
 
 type sumdb = SS.data

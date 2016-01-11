@@ -3,8 +3,6 @@
  * Augment the standard library
  ***************************************************)
 
-val quit : int -> 'a
-
 val getUsageString : string -> string
 
 val printCmdline : unit -> unit
@@ -23,6 +21,7 @@ val seqToString : (('a -> unit) -> 'b -> unit) -> 'b ->
 val mapToList : (('a -> 'b -> ('a * 'b) list -> ('a * 'b) list) -> 
                    'c -> ('a * 'b) list -> ('a * 'b) list) ->
   'c -> ('a * 'b) list
+
     
 (***************************************************
  * File / resource functions

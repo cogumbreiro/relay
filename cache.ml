@@ -52,12 +52,14 @@ sig
   val clear : 'a t -> unit
 
   (** Replace an entry in the cache, adding it if no binding existed
-      before and evicting an item if needed *)
-  val replace : 'a t -> key -> 'a -> unit
+      before and evicting an item if needed.
+      Return the evicted key if anything is evicted *)
+  val replace : 'a t -> key -> 'a -> key option
 
   (** Add new entry to the cache, evicting an item if needed. 
-      If the binding already existed, no change is made *)
-  val add : 'a t -> key -> 'a -> unit 
+      If the binding already existed, no change is made.
+      Return the evicted key if anything is evicted *)
+  val add : 'a t -> key -> 'a -> key option
 
   (** Get an entry from the cache, may raise Not_found *)
   val find : 'a t -> key -> 'a
@@ -94,41 +96,45 @@ struct
     Hash.clear cache.table;
     Queue.clear cache.fifo
 
+  let enforceSize (cache : 'a t) : key option = 
+    (* Prepare to add the object, possibly making room *)
+    let curSize = Queue.length cache.fifo in
+    if (curSize >= cache.maxSize) then begin
+      let kickK = Queue.take cache.fifo in
+      Hash.remove cache.table kickK;
+      Some kickK
+    end else 
+      None
     
   (** Add new entry to the cache, evicting an item if needed. 
       If the binding already existed, no change is made *)
-  let add (cache: 'a t) (key: key) (value: 'a) : unit =
+  let add (cache: 'a t) (key: key) (value: 'a) : key option =
     (* Check if object is already in the cache *)
     if (Hash.mem cache.table key) then
       (* Since the replacement policy is just FIFO, do nothing *)
-      ()
+      None
     else
       (* Add the object, possibly making room *)
-      let curSize = Queue.length cache.fifo in
-      if (curSize >= cache.maxSize) then begin
-        let kickK = Queue.take cache.fifo in
-        Hash.remove cache.table kickK
-      end;
+      let kicked = enforceSize cache in
       Hash.add cache.table key value;
-      Queue.add key cache.fifo
+      Queue.add key cache.fifo;
+      kicked
 
 
   (** Replace an entry in the cache, adding it if no binding existed
       before and evicting an item if needed *)
-  let replace (cache: 'a t) (key: key) (value: 'a) : unit =
+  let replace (cache: 'a t) (key: key) (value: 'a) : key option =
     (* Check if object is already in the cache *)
-    if (Hash.mem cache.table key) then
+    if (Hash.mem cache.table key) then begin
       (* Since the replacement policy is just FIFO, do nothing *)
-      Hash.replace cache.table key value
-    else
+      Hash.replace cache.table key value;
+      None
+    end else
       (* Add the object, possibly making room *)
-      let curSize = Queue.length cache.fifo in
-      if (curSize >= cache.maxSize) then begin
-        let kickK = Queue.take cache.fifo in
-        Hash.remove cache.table kickK
-      end;
+      let kicked = enforceSize cache in
       Hash.add cache.table key value;
-      Queue.add key cache.fifo
+      Queue.add key cache.fifo;
+      kicked
         
         
   (** Get an entry from the cache, may raise Not_found *)

@@ -247,7 +247,7 @@ let rec llvmTypeOf (v:llvmValue) : llvmType = match v with
 	  match unrollType t with
 	  | TArray (t, _, _) -> t
 	  | TComp (ci, _) ->
-	      let field = nth ci.cfields (Int64.to_int i) in
+	      let field = nth (!getCfields ci) (Int64.to_int i) in
 	      field.ftype
 	  | _ -> raise Bug
       end

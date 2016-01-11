@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Take a set of files w/ a common prefix (e.g., "pre_0, pre_1, ...")
 # and reduces that set to its uniq representatives 

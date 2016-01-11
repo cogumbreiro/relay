@@ -56,8 +56,8 @@ open Cilinfos
 
 module A = Alias
 module Intra = IntraDataflow
-module RS = Racesummary
 module Race = Racestate
+module RS = Race.RS
 module SPTA = Race.SPTA
 module Du = Cildump
 module Th = Threads
@@ -113,7 +113,7 @@ let usageMsg = getUsageString "-cg fname -u username [options]\n"
 
 (** Initialize function summaries, and watchlist of special 
     functions (e.g., pthread_create) *)
-let initSettings (cg) =
+let initSettings () =
   try
     let settings = Config.initSettings !configFile in
     Req.init settings;
@@ -121,12 +121,13 @@ let initSettings (cg) =
     Th.initSettings settings;
     Cilinfos.reloadRanges !cgDir;
     A.initSettings settings !cgDir;
-    let () = BS.init settings !cgDir cg in
+    let cg = readCalls !cgFile in
+    let sccCG = Scc_cg.getSCCGraph cg in 
+    let () = BS.init settings !cgDir cg sccCG in
     Dis.init settings !cgDir;
     Req.setUser !userName;
     SPTA.init settings cg (RS.sum :> Modsummaryi.absModSumm);
-    (* Don't communicate w/ server or anything *)
-
+    (cg, sccCG);
   with e -> Printf.printf "Exc. in initSettings: %s\n"
     (Printexc.to_string e) ; raise e
 
@@ -156,25 +157,22 @@ end
 
 
 (** Initiate analysis *)
-let doRaceAnal () : unit =
+let doRaceAnal () : unit = begin
   (* Get Callgraph structures *)
-  let cg = readCalls !cgFile in
-  let sccCG = Scc_cg.getSCCGraph cg in 
-  begin
-    initSettings cg;
-    
-    (* Then do a bottom-up analysis *)
-    Race.RaceBUTransfer.initStats cg sccCG ;
+  let cg, sccCG = initSettings () in
+  
+  (* Then do a bottom-up analysis *)
+  Race.RaceBUTransfer.initStats cg sccCG ;
 
-    L.logStatus "Inspecting:";
-    L.logStatus "-----";
-    L.flushStatus ();
+  L.logStatus "Inspecting:";
+  L.logStatus "-----";
+  L.flushStatus ();
 
-    Inspect.inspector#iter (inspectFun cg sccCG);
+  Inspect.inspector#iter (inspectFun cg sccCG);
 
-    L.logStatus "Inspection complete";
-    L.logStatus "-----";
-  end
+  L.logStatus "Inspection complete";
+  L.logStatus "-----";
+end
 
 
 (** Entry point *)

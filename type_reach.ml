@@ -40,7 +40,7 @@ let rec hasImmediateFP t =
       hasImmediateFP t
   | TFun _ -> true
   | TComp (ci, _) ->
-      List.exists (fun fi -> hasImmediateFP fi.ftype) ci.cfields
+      List.exists (fun fi -> hasImmediateFP fi.ftype) (!Cil.getCfields ci)
   | TFloat _ | TInt _ | TEnum _ | TVoid _ | TBuiltin_va_list _ -> false
   | TNamed (ti, _) -> hasImmediateFP ti.ttype
 
@@ -63,11 +63,11 @@ let isPoly curType =
     TPtr (t, _) ->
       (match unrollTypeNoAttrs t with
          TVoid _ -> true
-       | TComp (ci, _) -> ci.cfields = []
+       | TComp (ci, _) -> (!Cil.getCfields ci) = []
        | TInt _ -> !intPoly
        | _ -> false )
   | TVoid _ -> true
-  | TComp (ci, _) -> ci.cfields = []
+  | TComp (ci, _) -> (!Cil.getCfields ci) = []
   | _ -> false
 
 let isPolyInt curType =
@@ -75,12 +75,12 @@ let isPolyInt curType =
     TPtr (t, _) ->
       (match unrollTypeNoAttrs t with
          TVoid _ -> true
-       | TComp (ci, _) -> ci.cfields = []
+       | TComp (ci, _) -> (!Cil.getCfields ci) = []
        | TInt _ -> true
        | _ -> false )
   | TVoid _ -> true
   | TInt _ -> true
-  | TComp (ci, _) -> ci.cfields = []
+  | TComp (ci, _) -> (!Cil.getCfields ci) = []
   | _ -> false
 
 let rec hitsFunptrDeepHelper curType visited =
@@ -99,7 +99,7 @@ let rec hitsFunptrDeepHelper curType visited =
         List.exists 
           (fun fi -> 
              hitsFunptrDeepHelper (unrollTypeNoAttrs fi.ftype) visited
-          ) ci.cfields
+          ) (!Cil.getCfields ci)
       end
   | TFun _ -> false (* straight-up function, not funptr *)      
   | TFloat _ | TInt _ | TEnum _ | TVoid _ | TBuiltin_va_list _ -> false
@@ -113,7 +113,7 @@ let hitsFunptrDeep curType =
 let rec fwdReachesStructHelper targetCi curCi visited =
   curCi.ckey == targetCi.ckey || 
     List.exists (fun fi -> fwdReachesStructTypeHelper targetCi fi.ftype visited) 
-    curCi.cfields
+    (!Cil.getCfields curCi)
     
 and fwdReachesStructTypeHelper targetCi curType visited =
   let curType = unrollTypeNoAttrs curType in
@@ -193,7 +193,7 @@ let getEmbeddingRelation () =
             match unrolled with
               TComp (child, _) -> addRelation parent child finfo
             | _ -> ()
-         ) parent.cfields
+         ) (!Cil.getCfields parent)
     );
   embeds
 

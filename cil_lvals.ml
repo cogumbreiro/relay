@@ -221,10 +221,10 @@ let rec typeOffsetUnsafe basetyp =
           TArray (t, _, _) ->
 	        typeOffsetUnsafe t o
         | TPtr (t, _) ->
-            logError "typeOffsetUnsafe: Index offset on a pointer\n";
+            logError ~prior:3 "typeOffsetUnsafe: Index offset on a pointer";
             typeOffsetUnsafe t o
 	    | t -> 
-            logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
+            logError ~prior:3 "typeOffsetUnsafe: Index on a non-array/non-ptr";
             typeOffsetUnsafe t o
       end 
     | Field (fi, o) ->
@@ -330,23 +330,24 @@ and typeOfLvalNoUnroll = function
         end
     end
       
-and typeOffsetNoUnroll basetyp =
-  function
-      NoOffset -> basetyp
-    | Index (_, o) -> begin
-        match unrollTypeNoAttrs basetyp with
-          TArray (t, _, _) ->
-	        typeOffsetNoUnroll t o
-        | TPtr (t, _) ->
-            logError "typeOffsetUnsafe: Index offset on a pointer\n";
-            typeOffsetNoUnroll basetyp o
-	    | t -> 
-            logError "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
-            typeOffsetNoUnroll basetyp o
-      end 
-    | Field (fi, o) ->
-        typeOffsetNoUnroll fi.ftype o
-          
+and typeOffsetNoUnroll basetyp o =
+  match o with 
+    NoOffset -> basetyp
+  | Index (_, o') -> begin
+      match unrollTypeNoAttrs basetyp with
+        TArray (t, _, _) ->
+	      typeOffsetNoUnroll t o'
+      | TPtr (t, _) ->
+          logError "typeOffsetUnsafe: Index offset on a pointer\n";
+          typeOffsetNoUnroll basetyp o'
+	  | t -> 
+          logError ~prior:3 
+            "typeOffsetUnsafe: Index on a non-array/non-ptr\n";
+          typeOffsetNoUnroll basetyp o'
+    end 
+  | Field (fi, o') ->
+      typeOffsetNoUnroll fi.ftype o'
+
 
 
 (** "Compatiblity" checking *)
@@ -365,10 +366,10 @@ let string_of_type t =
 
 let fieldMatchesComp fi ci =
   List.exists 
-    (fun otherFi -> otherFi.fname = fi.fname && 
-        Ciltools.compare_type otherFi.ftype fi.ftype == 0
-    ) ci.cfields
-      
+    (fun otherFi -> 
+       otherFi.fname = fi.fname && Ciltools.equal_type otherFi.ftype fi.ftype
+    ) (!Cil.getCfields ci)
+    
 let string_of_offsetMiss oMiss =
   "offset mismatch " ^ 
     (match oMiss with
@@ -537,7 +538,7 @@ let rec doSimplifyLv (lv:Cil.lval) :
       try 
         let (_, simplerLv) = List.find 
           (fun (seenTyp, _) -> 
-             ((Ciltools.compare_type curTyp seenTyp) == 0)
+             Ciltools.equal_type curTyp seenTyp
           ) seenTypes in
         if (Cil.isVoidType curTyp) then
           (simplerLv, seenTypes, true) (* TODO limit the number of void *)
@@ -573,10 +574,17 @@ and doSimplifyExp (exp:Cil.exp) :
   | CastE (_, e) ->
       doSimplifyExp e
 
-  | _ ->
-      logError ("doSimplifyExp: Shouldn't see this type of exp: "
-                    ^ (Cildump.string_of_exp exp));
+  | AddrOf lv -> 
+      let simplerLv, seenTypes, changed = doSimplifyLv lv in
+      AddrOf simplerLv, seenTypes, changed
+
+  | StartOf lv -> 
+      let simplerLv, seenTypes, changed = doSimplifyLv lv in
+      StartOf simplerLv, seenTypes, changed
+
+  | Const _ | SizeOf _ | SizeOfStr _ | AlignOf _ | SizeOfE _ | AlignOfE _ ->
       (exp, [], false)
+
 
 (** May eliminate redundant parts of lval access path. 
     Returns the simplified lval and a flag indicating whether a change
@@ -773,7 +781,7 @@ module LvHash = Weak.Make(HashedLval)
 module HashedTyp = struct
   type t = Cil.typ
   let equal a b = 
-    (* Ciltools.compare_type a b == 0  *)
+    (* Ciltools.equal_type a b *)
     let s1 = Cildump.string_of_type a in
     let s2 = Cildump.string_of_type b in
     s1 = s2
@@ -785,19 +793,9 @@ end
 
 module TyHash = Weak.Make (HashedTyp)
 
-module CIHash = Weak.Make(
-  struct
-    type t = Cil.compinfo
-    let equal a b = a.ckey = b.ckey
-    let hash a = Hashtbl.hash a.ckey
-  end
-)
-
 let goldenLvals = LvHash.create 173
 
 let goldenTypes = TyHash.create 173
-
-let goldenCompinfos = CIHash.create 173
 
 let locIsUnknown loc =
   loc == Cil.locUnknown || Cil.compareLoc loc Cil.locUnknown == 0
@@ -807,15 +805,23 @@ let distillLoc loc =
   else loc
 
 
-(** Try to reduce the memory footprint of lvals. *)
-let rec distillLval = function
+(** Try to reduce the memory footprint of lvals by removing "unneeded" 
+    parts of the CIL AST / sharing equivalent parts *)
+let rec distillLval lv = 
+  match lv with
     Var(vi) as v, off ->
       distillVar vi;
-      v, distillOff off
+      let newOff = distillOff off in 
+      if off == newOff then lv
+      else (v, newOff)
 
   | Mem(exp), off ->
-      Mem (distillExp exp), distillOff off
-
+      let newExp = distillExp exp in
+      let newOff = distillOff off in
+      if exp == newExp && off == newOff 
+      then lv
+      else (Mem newExp, newOff)
+        
 and distillVar vi =
   vi.vtype <- mergeType vi.vtype;
   vi.vdecl <- distillLoc vi.vdecl  
@@ -824,64 +830,107 @@ and distillExp e =
   match e with 
     Const (CEnum (ce, name, ei)) ->
       distillEnuminfo ei;
-      Const (CEnum (distillExp ce, name, ei))
+      let newCE = distillExp ce in
+      if ce == newCE 
+      then e
+      else Const (CEnum (newCE, name, ei))
 
-  | SizeOfE (e) ->
-      SizeOfE (distillExp e)
+  | SizeOfE (exp) ->
+      let newE = distillExp exp in
+      if newE == exp 
+      then e
+      else SizeOfE newE
 
-  | AlignOfE (e) ->
-      AlignOfE (distillExp e)
+  | AlignOfE (exp) ->
+      let newE = distillExp exp in
+      if newE == exp 
+      then e
+      else AlignOfE newE
 
   | Const _
-  | SizeOfStr _ ->
-      e
+  | SizeOfStr _ -> e
       
   | Lval (l) ->
-      Lval (mergeLv  l)
+      let newL = mergeLv l in
+      if newL == l 
+      then e
+      else Lval newL
 
   | AddrOf(l) ->
-      AddrOf (mergeLv l)
+      let newL = mergeLv l in
+      if newL == l 
+      then e
+      else AddrOf newL
 
   | StartOf(l) -> 
-      StartOf (mergeLv l)
+      let newL = mergeLv l in
+      if newL == l 
+      then e
+      else StartOf newL
 
   | SizeOf (t) ->
-      SizeOf (mergeType t)
+      let newT = mergeType t in
+      if t == newT 
+      then e
+      else SizeOf newT
+
   | AlignOf (t) -> 
-      AlignOf (mergeType t)
+      let newT = mergeType t in
+      if t == newT 
+      then e
+      else AlignOf newT
 
-  | CastE (t, e) ->
-      CastE (mergeType t, distillExp e)
+  | CastE (t, exp) ->
+      let newE = distillExp exp in
+      let newT = mergeType t in
+      if t == newT && exp == newE 
+      then e
+      else CastE (newT, newE)
 
-  | UnOp(op, e, t) ->
-      UnOp(op, distillExp e, mergeType t)
+  | UnOp(op, exp, t) ->
+      let newE = distillExp exp in
+      let newT = mergeType t in
+      if t == newT && exp == newE 
+      then e
+      else UnOp(op, newE, newT)
 
   | BinOp(op, e1, e2, t) ->
-      BinOp(op, distillExp e1, distillExp e2, mergeType t)
+      let newE1 = distillExp e1 in
+      let newE2 = distillExp e2 in
+      let newT = mergeType t in
+      if t == newT && e1 == newE1 && e2 == newE2
+      then e
+      else BinOp(op, newE1, newE2, newT)
 
 and distillOff o =
   match o with
-    NoOffset ->
-      o
+    NoOffset -> o
   | Field (fi, moreO) ->
       fi.floc <- locUnknown; (* ignore compinfo and its other fields *)
       fi.fattr <- [];
-(*      fi.ftype <- mergeType fi.ftype; *)
-      Field (fi, distillOff moreO)
+      fi.fcomp <- distillCompinfo fi.fcomp;
+      fi.ftype <- mergeType fi.ftype;
+      let moreOff = distillOff moreO in
+      if moreO == moreOff 
+      then o
+      else Field (fi, moreOff)
 
   | Index (e, moreO) ->
-      Index (distillExp e, distillOff moreO)
+      let newE = distillExp e in
+      let newO = distillOff moreO in
+      if moreO == newO && newE == e 
+      then o
+      else Index (newE, newO)
 
 and distillType t =
   match t with
-    TVoid _ 
-  | TInt _
-  | TFloat _
-  | TBuiltin_va_list _ ->
-      t
+    TVoid _ | TInt _ | TFloat _ | TBuiltin_va_list _ -> t
 
   | TFun (rt, None, vargP, atts) ->
-      TFun (mergeType rt, None, vargP, atts)
+      let newRT = mergeType rt in
+      if newRT == rt 
+      then t
+      else TFun (newRT, None, vargP, atts)
 
   | TFun (rt, Some (args), vargP, atts) ->
       TFun (mergeType rt, 
@@ -894,32 +943,42 @@ and distillType t =
       t
 
   | TPtr (ptT, atts) ->
-      TPtr (mergeType ptT, atts)
+      let newPT = mergeType ptT in
+      if ptT == newPT 
+      then t
+      else TPtr (newPT, atts)
  
   | TArray (eltT, None, atts) ->
-      TArray (mergeType eltT, None, atts)
+      let newET = mergeType eltT in
+      if eltT == newET 
+      then t
+      else TArray (newET, None, atts)
 
   | TArray (eltT, Some(e), atts) ->
-      TArray (mergeType eltT, Some (distillExp e), atts)
-      
+      let newE = distillExp e in
+      let newET = mergeType eltT in
+      if eltT == newET && newE == e 
+      then t
+      else TArray (newET, Some (newE), atts)
+        
   | TNamed (tinfo, _) ->
       tinfo.ttype <- mergeType tinfo.ttype;
       t
 
-  | TComp (ci, _) ->(*
-      TComp(mergeCompinfo ci, [])
-                    *)
-      distillCompinfo ci;
-      t
+  | TComp (ci, atts) ->
+      (*  TComp(mergeCompinfo ci, []) *)
+      let newCI = distillCompinfo ci in
+      if ci == newCI 
+      then t
+      else TComp (newCI, atts)
 
-and distillCompinfo ci =
-  ci.cattr <- [];
-  List.iter (fun fi ->
-               fi.floc <- locUnknown;
-(*               fi.ftype <- mergeType fi.ftype; *)
-(*               fi.fcomp <- ci; *)
-            ) ci.cfields
-      
+and distillCompinfo ci =    
+    (* Can drop cfields because we have that recorded elsewhere *)
+    let ci = if ci.cfields = [] 
+    then ci
+    else { ci with cfields = []; } in
+    ci.cattr <- [];
+    ci
 
 and distillEnuminfo einfo =
   (* only hash-cons the strings that describe the location for now *)
@@ -947,23 +1006,11 @@ and mergeLv lv =
     LvHash.add goldenLvals newLv;
     newLv
 
-and mergeCompinfo ci = 
-  try 
-    CIHash.find goldenCompinfos ci
-  with Not_found ->
-    (* make sure it finds the dude to terminate loops *)
-    CIHash.add goldenCompinfos ci; 
-    distillCompinfo ci;
-    ci
-
 let printHashStats () =
   let hashStats = Stdutil.string_of_hashstats LvHash.stats 
     goldenLvals "Golden lvals" in
   logStatus hashStats;
   let hashStats = Stdutil.string_of_hashstats TyHash.stats 
     goldenTypes "Golden types" in
-  logStatus hashStats;
-  let hashStats = Stdutil.string_of_hashstats CIHash.stats 
-    goldenCompinfos "Golden compInfos" in
   logStatus hashStats
   

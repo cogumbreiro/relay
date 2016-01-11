@@ -54,8 +54,13 @@ class funcInspector = object
     Hashtbl.mem inspect fname
 
   method iter foo =
-    Hashtbl.iter (fun k v -> foo k) inspect
+    Hashtbl.iter (fun k () -> foo k) inspect
 
+  (** Sanity check inspected functions. 
+      Return true if all asked-to-inspect funs are actually known functions *)
+  method checkInspectFuns (knownFuns : string list) =
+    Hashtbl.fold (fun k () cur -> cur && List.mem k knownFuns) inspect true
+      
 end
 
 let inspector = new funcInspector

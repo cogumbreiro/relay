@@ -37,8 +37,10 @@ module SYMEX_NULL_GEN : functor (S : SYMEX_NULL_GEN_INPUT) -> (SYMEX_NULL)
 (** Actual Symex *)
 module type SYMEX = sig
   
-  open Fstructs
-  open Callg
+  (** Expose symex DF type for optimizations... *)
+  type symSt
+  val getSymstate : Cil.prog_point -> symSt
+  val statesEqual : symSt -> symSt -> bool
 
   (** Basic requirements of summary used by the Symex *)
   module SS : sig
@@ -54,7 +56,7 @@ module type SYMEX = sig
 
   end
 
-  val init : Config.settings -> callG -> Modsummaryi.modSum -> unit
+  val init : Config.settings -> Callg.callG -> Modsummaryi.modSum -> unit
 
   val printExitState : unit -> unit
 
@@ -68,6 +70,9 @@ module type SYMEX = sig
     (bool * (Lvals.aExp list))
 
   val substActForm2 : Cil.prog_point -> Cil.exp list -> Lvals.aLval ->
+    (bool * (Lvals.aLval list))
+
+  val substActForm2FI : Cil.exp list -> Lvals.aLval ->
     (bool * (Lvals.aLval list))
 
   val substActForm3 : Cil.prog_point -> Cil.exp list -> Lvals.aLval -> (Lvals.aLval list)

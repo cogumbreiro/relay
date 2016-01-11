@@ -112,13 +112,15 @@ let unionBits int1 int2 =
   int1 lor int2
 
 let union b1 b2 =
-  IS.union unionBits b1 b2
-
+  if b1 == b2 then b1
+  else IS.union unionBits b1 b2
+    
 let interBits int1 int2 =
   int1 land int2
 
 let inter b1 b2 =
-  IS.inter interBits b1 b2
+  if b1 == b2 then b1
+  else IS.inter interBits b1 b2
 
 (* Bit is set if set in int1, but not in int2... 
    return int2 if the result is that nothing is set... 

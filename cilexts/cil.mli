@@ -1117,6 +1117,11 @@ val curProgPoint : prog_point ref
 
 val comparePP : prog_point -> prog_point -> int
 
+(** Interface to access cfields (can be overridden if cfields are
+    stored more compactly -- and retrieving / setting is more indirect) *)
+val getCfields : (compinfo -> fieldinfo list) ref
+val setCfields : (compinfo -> fieldinfo list -> unit) ref
+
 type ppKind =
     PPStmt of stmt
   | PPInstr of instr

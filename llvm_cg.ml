@@ -113,7 +113,7 @@ let funStrsToFuns index callg (funStrs : string list) : (funID * typ) list =
        try
          let fid, fnode = funOfName index callg funName in
          let fvar = Cilinfos.getVarinfo (fid_to_fkey fid) in
-         (fid, fvar.vtype) :: cur
+         List_utils.addOnce cur (fid, fvar.vtype)
        with Not_found ->
          logErrorF "Can't find info for %s\n" funName;
          cur
@@ -193,6 +193,8 @@ let addIndirectCall cg callerID callerNode lpp callees =
         (fun oldCall newCall ->
            match oldCall, newCall with
              CIndirect (pp1, callees1), CIndirect (pp2, callees2) ->
+               assert (pp1 = pp2);
+               assert (lpp.lppPP = pp1);
                CIndirect (pp1, mergeIndirectTargs callees1 callees2)
            | _, _ -> failwith "addIndirectCall given direct calls")
         newCall callerNode.ccallees in

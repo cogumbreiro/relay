@@ -1,0 +1,2772 @@
+"cil/src/frontc/frontc.ml" 44 1748 1752 "cil/src/frontc/frontc.ml" 44 1748 1755
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 44 1748 1783 "cil/src/frontc/frontc.ml" 44 1748 1786
+type(
+  out_channel option -> out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 44 1748 1787 "cil/src/frontc/frontc.ml" 44 1748 1791
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 44 1748 1783 "cil/src/frontc/frontc.ml" 44 1748 1791
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 44 1748 1783 "cil/src/frontc/frontc.ml" 44 1748 1791
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 45 1792 1796 "cil/src/frontc/frontc.ml" 45 1792 1804
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 45 1792 1807 "cil/src/frontc/frontc.ml" 45 1792 1810
+type(
+  bool -> bool ref
+)
+"cil/src/frontc/frontc.ml" 45 1792 1811 "cil/src/frontc/frontc.ml" 45 1792 1816
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 45 1792 1807 "cil/src/frontc/frontc.ml" 45 1792 1816
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 47 1818 1822 "cil/src/frontc/frontc.ml" 47 1818 1834
+type(
+  'a -> unit
+)
+"cil/src/frontc/frontc.ml" 47 1818 1835 "cil/src/frontc/frontc.ml" 47 1818 1836
+type(
+  'a
+)
+"cil/src/frontc/frontc.ml" 48 1839 1847 "cil/src/frontc/frontc.ml" 48 1839 1848
+type(
+  out_channel option ref -> out_channel option
+)
+"cil/src/frontc/frontc.ml" 48 1839 1848 "cil/src/frontc/frontc.ml" 48 1839 1851
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 48 1839 1847 "cil/src/frontc/frontc.ml" 48 1839 1851
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 49 1857 1861 "cil/src/frontc/frontc.ml" 49 1857 1865
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 49 1857 1869 "cil/src/frontc/frontc.ml" 49 1857 1871
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 50 1872 1881 "cil/src/frontc/frontc.ml" 50 1872 1882
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 50 1872 1876 "cil/src/frontc/frontc.ml" 50 1872 1882
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 51 1892 1898 "cil/src/frontc/frontc.ml" 51 1892 1903
+type(
+  out_channel -> unit
+)
+"cil/src/frontc/frontc.ml" 51 1892 1904 "cil/src/frontc/frontc.ml" 51 1892 1905
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 51 1892 1898 "cil/src/frontc/frontc.ml" 51 1892 1905
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 52 1907 1916 "cil/src/frontc/frontc.ml" 52 1907 1917
+type(
+  bool ref -> bool
+)
+"cil/src/frontc/frontc.ml" 52 1907 1917 "cil/src/frontc/frontc.ml" 52 1907 1925
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 52 1907 1916 "cil/src/frontc/frontc.ml" 52 1907 1925
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 52 1907 1931 "cil/src/frontc/frontc.ml" 52 1907 1940
+type(
+  out_channel -> unit
+)
+"cil/src/frontc/frontc.ml" 52 1907 1941 "cil/src/frontc/frontc.ml" 52 1907 1942
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 52 1907 1931 "cil/src/frontc/frontc.ml" 52 1907 1942
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 52 1907 1948 "cil/src/frontc/frontc.ml" 52 1907 1950
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 52 1907 1913 "cil/src/frontc/frontc.ml" 52 1907 1950
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 53 1952 1958 "cil/src/frontc/frontc.ml" 53 1952 1966
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 53 1952 1967 "cil/src/frontc/frontc.ml" 53 1952 1969
+type(
+  bool ref -> bool -> unit
+)
+"cil/src/frontc/frontc.ml" 53 1952 1970 "cil/src/frontc/frontc.ml" 53 1952 1975
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 53 1952 1958 "cil/src/frontc/frontc.ml" 53 1952 1975
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 52 1907 1913 "cil/src/frontc/frontc.ml" 53 1952 1975
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 50 1872 1886 "cil/src/frontc/frontc.ml" 54 1976 1981
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 48 1839 1841 "cil/src/frontc/frontc.ml" 54 1976 1981
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 56 1983 1987 "cil/src/frontc/frontc.ml" 56 1983 1997
+type(
+  string -> unit
+)
+"cil/src/frontc/frontc.ml" 56 1983 1998 "cil/src/frontc/frontc.ml" 56 1983 2006
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 57 2009 2011 "cil/src/frontc/frontc.ml" 57 2009 2023
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 57 2009 2024 "cil/src/frontc/frontc.ml" 57 2009 2026
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 57 2009 2011 "cil/src/frontc/frontc.ml" 57 2009 2026
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 58 2028 2034 "cil/src/frontc/frontc.ml" 58 2028 2042
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 58 2028 2049 "cil/src/frontc/frontc.ml" 58 2028 2057
+type(
+  string -> out_channel
+)
+"cil/src/frontc/frontc.ml" 58 2028 2058 "cil/src/frontc/frontc.ml" 58 2028 2066
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 58 2028 2049 "cil/src/frontc/frontc.ml" 58 2028 2066
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 59 2068 2087 "cil/src/frontc/frontc.ml" 59 2068 2090
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 59 2068 2077 "cil/src/frontc/frontc.ml" 59 2068 2090
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 60 2095 2100 "cil/src/frontc/frontc.ml" 60 2095 2113
+type(
+  out_channel -> string -> unit
+)
+"cil/src/frontc/frontc.ml" 60 2095 2114 "cil/src/frontc/frontc.ml" 60 2095 2120
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 60 2095 2122 "cil/src/frontc/frontc.ml" 60 2095 2152
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 60 2095 2153 "cil/src/frontc/frontc.ml" 60 2095 2154
+type(
+  string -> string -> string
+)
+"cil/src/frontc/frontc.ml" 60 2095 2155 "cil/src/frontc/frontc.ml" 60 2095 2158
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 60 2095 2121 "cil/src/frontc/frontc.ml" 60 2095 2159
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 60 2095 2100 "cil/src/frontc/frontc.ml" 60 2095 2159
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 60 2095 2161 "cil/src/frontc/frontc.ml" 60 2095 2165
+type(
+  int -> out_channel
+)
+"cil/src/frontc/frontc.ml" 60 2095 2166 "cil/src/frontc/frontc.ml" 60 2095 2167
+type(
+  int
+)
+"cil/src/frontc/frontc.ml" 60 2095 2161 "cil/src/frontc/frontc.ml" 60 2095 2167
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 60 2095 2099 "cil/src/frontc/frontc.ml" 60 2095 2168
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 58 2028 2045 "cil/src/frontc/frontc.ml" 60 2095 2168
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 61 2172 2174 "cil/src/frontc/frontc.ml" 61 2172 2177
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 61 2172 2178 "cil/src/frontc/frontc.ml" 61 2172 2180
+type(
+  out_channel option ref -> out_channel option -> unit
+)
+"cil/src/frontc/frontc.ml" 61 2172 2186 "cil/src/frontc/frontc.ml" 61 2172 2194
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 61 2172 2181 "cil/src/frontc/frontc.ml" 61 2172 2194
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 61 2172 2174 "cil/src/frontc/frontc.ml" 61 2172 2194
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 62 2196 2198 "cil/src/frontc/frontc.ml" 62 2196 2218
+type(
+  out_channel -> unit
+)
+"cil/src/frontc/frontc.ml" 62 2196 2219 "cil/src/frontc/frontc.ml" 62 2196 2227
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 62 2196 2198 "cil/src/frontc/frontc.ml" 62 2196 2227
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 63 2229 2231 "cil/src/frontc/frontc.ml" 63 2229 2239
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 63 2229 2240 "cil/src/frontc/frontc.ml" 63 2229 2242
+type(
+  bool ref -> bool -> unit
+)
+"cil/src/frontc/frontc.ml" 63 2229 2243 "cil/src/frontc/frontc.ml" 63 2229 2247
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 63 2229 2231 "cil/src/frontc/frontc.ml" 63 2229 2247
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 62 2196 2198 "cil/src/frontc/frontc.ml" 63 2229 2247
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 61 2172 2174 "cil/src/frontc/frontc.ml" 63 2229 2247
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 58 2028 2030 "cil/src/frontc/frontc.ml" 63 2229 2247
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 57 2009 2011 "cil/src/frontc/frontc.ml" 63 2229 2247
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 66 2291 2295 "cil/src/frontc/frontc.ml" 66 2291 2306
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 66 2291 2307 "cil/src/frontc/frontc.ml" 66 2291 2309
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 67 2312 2314 "cil/src/frontc/frontc.ml" 67 2312 2329
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 67 2312 2330 "cil/src/frontc/frontc.ml" 67 2312 2332
+type(
+  bool ref -> bool -> unit
+)
+"cil/src/frontc/frontc.ml" 67 2312 2333 "cil/src/frontc/frontc.ml" 67 2312 2337
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 67 2312 2314 "cil/src/frontc/frontc.ml" 67 2312 2337
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 70 2367 2371 "cil/src/frontc/frontc.ml" 70 2367 2384
+type(
+  string ref
+)
+"cil/src/frontc/frontc.ml" 70 2367 2400 "cil/src/frontc/frontc.ml" 70 2367 2403
+type(
+  string -> string ref
+)
+"cil/src/frontc/frontc.ml" 70 2367 2404 "cil/src/frontc/frontc.ml" 70 2367 2406
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 70 2367 2400 "cil/src/frontc/frontc.ml" 70 2367 2406
+type(
+  string ref
+)
+"cil/src/frontc/frontc.ml" 70 2367 2400 "cil/src/frontc/frontc.ml" 70 2367 2406
+type(
+  string ref
+)
+"cil/src/frontc/frontc.ml" 73 2474 2478 "cil/src/frontc/frontc.ml" 73 2474 2487
+type(
+  Cabs.file option ref
+)
+"cil/src/frontc/frontc.ml" 73 2474 2513 "cil/src/frontc/frontc.ml" 73 2474 2516
+type(
+  Cabs.file option -> Cabs.file option ref
+)
+"cil/src/frontc/frontc.ml" 73 2474 2517 "cil/src/frontc/frontc.ml" 73 2474 2521
+type(
+  Cabs.file option
+)
+"cil/src/frontc/frontc.ml" 73 2474 2513 "cil/src/frontc/frontc.ml" 73 2474 2521
+type(
+  Cabs.file option ref
+)
+"cil/src/frontc/frontc.ml" 73 2474 2513 "cil/src/frontc/frontc.ml" 73 2474 2521
+type(
+  Cabs.file option ref
+)
+"cil/src/frontc/frontc.ml" 76 2569 2573 "cil/src/frontc/frontc.ml" 76 2569 2590
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 76 2569 2604 "cil/src/frontc/frontc.ml" 76 2569 2607
+type(
+  bool -> bool ref
+)
+"cil/src/frontc/frontc.ml" 76 2569 2608 "cil/src/frontc/frontc.ml" 76 2569 2613
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 76 2569 2604 "cil/src/frontc/frontc.ml" 76 2569 2613
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 76 2569 2604 "cil/src/frontc/frontc.ml" 76 2569 2613
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 79 2673 2677 "cil/src/frontc/frontc.ml" 79 2673 2690
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 79 2673 2704 "cil/src/frontc/frontc.ml" 79 2673 2707
+type(
+  bool -> bool ref
+)
+"cil/src/frontc/frontc.ml" 79 2673 2708 "cil/src/frontc/frontc.ml" 79 2673 2713
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 79 2673 2704 "cil/src/frontc/frontc.ml" 79 2673 2713
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 79 2673 2704 "cil/src/frontc/frontc.ml" 79 2673 2713
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 82 2773 2777 "cil/src/frontc/frontc.ml" 82 2773 2783
+type(
+  'a option -> bool
+)
+"cil/src/frontc/frontc.ml" 82 2773 2785 "cil/src/frontc/frontc.ml" 82 2773 2786
+type(
+  'a option
+)
+"cil/src/frontc/frontc.ml" 84 2815 2823 "cil/src/frontc/frontc.ml" 84 2815 2824
+type(
+  'a option
+)
+"cil/src/frontc/frontc.ml" 85 2830 2839 "cil/src/frontc/frontc.ml" 85 2830 2840
+type(
+  'a
+)
+"cil/src/frontc/frontc.ml" 85 2830 2834 "cil/src/frontc/frontc.ml" 85 2830 2840
+type(
+  'a option
+)
+"cil/src/frontc/frontc.ml" 85 2830 2844 "cil/src/frontc/frontc.ml" 85 2830 2849
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 86 2850 2854 "cil/src/frontc/frontc.ml" 86 2850 2858
+type(
+  'a option
+)
+"cil/src/frontc/frontc.ml" 86 2850 2862 "cil/src/frontc/frontc.ml" 86 2850 2866
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 83 2809 2809 "cil/src/frontc/frontc.ml" 87 2867 2870
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 83 2809 2809 "cil/src/frontc/frontc.ml" 87 2867 2870
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 89 2872 2876 "cil/src/frontc/frontc.ml" 89 2872 2887
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 89 2872 2890 "cil/src/frontc/frontc.ml" 89 2872 2893
+type(
+  bool -> bool ref
+)
+"cil/src/frontc/frontc.ml" 89 2872 2894 "cil/src/frontc/frontc.ml" 89 2872 2899
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 89 2872 2890 "cil/src/frontc/frontc.ml" 89 2872 2899
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 94 2930 2934 "cil/src/frontc/frontc.ml" 94 2930 2938
+type(
+  (string * Arg.spec * string) list
+)
+"cil/src/frontc/frontc.ml" 96 2979 2981 "cil/src/frontc/frontc.ml" 96 2979 2993
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 96 2979 3006 "cil/src/frontc/frontc.ml" 96 2979 3016
+type(
+  string -> unit
+)
+"cil/src/frontc/frontc.ml" 96 2979 2995 "cil/src/frontc/frontc.ml" 96 2979 3016
+type(
+  Arg.spec
+)
+"cil/src/frontc/frontc.ml" 96 2979 3018 "cil/src/frontc/frontc.ml" 96 2979 3049
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 96 2979 2981 "cil/src/frontc/frontc.ml" 96 2979 3049
+type(
+  string * Arg.spec * string
+)
+"cil/src/frontc/frontc.ml" 97 3051 3053 "cil/src/frontc/frontc.ml" 97 3051 3070
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 97 3051 3086 "cil/src/frontc/frontc.ml" 97 3051 3087
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 97 3051 3091 "cil/src/frontc/frontc.ml" 97 3051 3111
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 97 3051 3112 "cil/src/frontc/frontc.ml" 97 3051 3114
+type(
+  bool ref -> bool -> unit
+)
+"cil/src/frontc/frontc.ml" 97 3051 3115 "cil/src/frontc/frontc.ml" 97 3051 3119
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 97 3051 3091 "cil/src/frontc/frontc.ml" 97 3051 3119
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 97 3051 3081 "cil/src/frontc/frontc.ml" 97 3051 3120
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 97 3051 3072 "cil/src/frontc/frontc.ml" 97 3051 3120
+type(
+  Arg.spec
+)
+"cil/src/frontc/frontc.ml" 98 3122 3135 "cil/src/frontc/frontc.ml" 98 3122 3190
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 97 3051 3053 "cil/src/frontc/frontc.ml" 98 3122 3190
+type(
+  string * Arg.spec * string
+)
+"cil/src/frontc/frontc.ml" 99 3192 3194 "cil/src/frontc/frontc.ml" 99 3192 3207
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 99 3192 3225 "cil/src/frontc/frontc.ml" 99 3192 3227
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 99 3192 3231 "cil/src/frontc/frontc.ml" 99 3192 3244
+type(
+  string ref
+)
+"cil/src/frontc/frontc.ml" 99 3192 3245 "cil/src/frontc/frontc.ml" 99 3192 3247
+type(
+  string ref -> string -> unit
+)
+"cil/src/frontc/frontc.ml" 99 3192 3248 "cil/src/frontc/frontc.ml" 99 3192 3250
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 99 3192 3231 "cil/src/frontc/frontc.ml" 99 3192 3250
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 99 3192 3220 "cil/src/frontc/frontc.ml" 99 3192 3251
+type(
+  string -> unit
+)
+"cil/src/frontc/frontc.ml" 99 3192 3209 "cil/src/frontc/frontc.ml" 99 3192 3251
+type(
+  Arg.spec
+)
+"cil/src/frontc/frontc.ml" 100 3253 3266 "cil/src/frontc/frontc.ml" 100 3253 3325
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 99 3192 3194 "cil/src/frontc/frontc.ml" 100 3253 3325
+type(
+  string * Arg.spec * string
+)
+"cil/src/frontc/frontc.ml" 101 3327 3329 "cil/src/frontc/frontc.ml" 101 3327 3345
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 101 3327 3361 "cil/src/frontc/frontc.ml" 101 3327 3362
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 101 3327 3366 "cil/src/frontc/frontc.ml" 101 3327 3383
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 101 3327 3384 "cil/src/frontc/frontc.ml" 101 3327 3386
+type(
+  bool ref -> bool -> unit
+)
+"cil/src/frontc/frontc.ml" 101 3327 3387 "cil/src/frontc/frontc.ml" 101 3327 3391
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 101 3327 3366 "cil/src/frontc/frontc.ml" 101 3327 3391
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 101 3327 3356 "cil/src/frontc/frontc.ml" 101 3327 3392
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 101 3327 3347 "cil/src/frontc/frontc.ml" 101 3327 3392
+type(
+  Arg.spec
+)
+"cil/src/frontc/frontc.ml" 102 3394 3407 "cil/src/frontc/frontc.ml" 102 3394 3463
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 101 3327 3329 "cil/src/frontc/frontc.ml" 102 3394 3463
+type(
+  string * Arg.spec * string
+)
+"cil/src/frontc/frontc.ml" 103 3465 3467 "cil/src/frontc/frontc.ml" 103 3465 3482
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 103 3465 3498 "cil/src/frontc/frontc.ml" 103 3465 3499
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 103 3465 3503 "cil/src/frontc/frontc.ml" 103 3465 3516
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 103 3465 3517 "cil/src/frontc/frontc.ml" 103 3465 3519
+type(
+  bool ref -> bool -> unit
+)
+"cil/src/frontc/frontc.ml" 103 3465 3520 "cil/src/frontc/frontc.ml" 103 3465 3524
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 103 3465 3503 "cil/src/frontc/frontc.ml" 103 3465 3524
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 103 3465 3493 "cil/src/frontc/frontc.ml" 103 3465 3525
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 103 3465 3484 "cil/src/frontc/frontc.ml" 103 3465 3525
+type(
+  Arg.spec
+)
+"cil/src/frontc/frontc.ml" 104 3527 3540 "cil/src/frontc/frontc.ml" 104 3527 3590
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 103 3465 3467 "cil/src/frontc/frontc.ml" 104 3527 3590
+type(
+  string * Arg.spec * string
+)
+"cil/src/frontc/frontc.ml" 105 3592 3594 "cil/src/frontc/frontc.ml" 105 3592 3609
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 105 3592 3619 "cil/src/frontc/frontc.ml" 105 3592 3630
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 105 3592 3611 "cil/src/frontc/frontc.ml" 105 3592 3630
+type(
+  Arg.spec
+)
+"cil/src/frontc/frontc.ml" 106 3632 3645 "cil/src/frontc/frontc.ml" 106 3632 3690
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 105 3592 3594 "cil/src/frontc/frontc.ml" 106 3632 3690
+type(
+  string * Arg.spec * string
+)
+"cil/src/frontc/frontc.ml" 95 2977 2977 "cil/src/frontc/frontc.ml" 107 3692 3693
+type(
+  (string * Arg.spec * string) list
+)
+"cil/src/frontc/frontc.ml" 95 2977 2977 "cil/src/frontc/frontc.ml" 107 3692 3693
+type(
+  (string * Arg.spec * string) list
+)
+"cil/src/frontc/frontc.ml" 113 3778 3786 "cil/src/frontc/frontc.ml" 113 3778 3799
+type(
+  string -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 113 3778 3800 "cil/src/frontc/frontc.ml" 113 3778 3805
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 116 3870 3877 "cil/src/frontc/frontc.ml" 116 3870 3878
+type(
+  string ref -> string
+)
+"cil/src/frontc/frontc.ml" 116 3870 3878 "cil/src/frontc/frontc.ml" 116 3870 3891
+type(
+  string ref
+)
+"cil/src/frontc/frontc.ml" 116 3870 3877 "cil/src/frontc/frontc.ml" 116 3870 3891
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 116 3870 3892 "cil/src/frontc/frontc.ml" 116 3870 3894
+type(
+  string -> string -> bool
+)
+"cil/src/frontc/frontc.ml" 116 3870 3895 "cil/src/frontc/frontc.ml" 116 3870 3897
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 116 3870 3876 "cil/src/frontc/frontc.ml" 116 3870 3898
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 116 3870 3899 "cil/src/frontc/frontc.ml" 116 3870 3901
+type(
+  bool -> bool -> bool
+)
+"cil/src/frontc/frontc.ml" 116 3870 3903 "cil/src/frontc/frontc.ml" 116 3870 3909
+type(
+  Cabs.file option -> bool
+)
+"cil/src/frontc/frontc.ml" 116 3870 3910 "cil/src/frontc/frontc.ml" 116 3870 3911
+type(
+  Cabs.file option ref -> Cabs.file option
+)
+"cil/src/frontc/frontc.ml" 116 3870 3911 "cil/src/frontc/frontc.ml" 116 3870 3920
+type(
+  Cabs.file option ref
+)
+"cil/src/frontc/frontc.ml" 116 3870 3910 "cil/src/frontc/frontc.ml" 116 3870 3920
+type(
+  Cabs.file option
+)
+"cil/src/frontc/frontc.ml" 116 3870 3902 "cil/src/frontc/frontc.ml" 116 3870 3921
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 116 3870 3875 "cil/src/frontc/frontc.ml" 116 3870 3922
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 118 3961 3965 "cil/src/frontc/frontc.ml" 118 3961 3974
+type(
+  Cabs.file option ref
+)
+"cil/src/frontc/frontc.ml" 118 3961 3975 "cil/src/frontc/frontc.ml" 118 3961 3977
+type(
+  Cabs.file option ref -> Cabs.file option -> unit
+)
+"cil/src/frontc/frontc.ml" 118 3961 3983 "cil/src/frontc/frontc.ml" 118 3961 4002
+type(
+  string -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 118 3961 4003 "cil/src/frontc/frontc.ml" 118 3961 4004
+type(
+  string ref -> string
+)
+"cil/src/frontc/frontc.ml" 118 3961 4004 "cil/src/frontc/frontc.ml" 118 3961 4017
+type(
+  string ref
+)
+"cil/src/frontc/frontc.ml" 118 3961 4003 "cil/src/frontc/frontc.ml" 118 3961 4017
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 118 3961 3982 "cil/src/frontc/frontc.ml" 118 3961 4018
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 118 3961 3978 "cil/src/frontc/frontc.ml" 118 3961 4018
+type(
+  Cabs.file option
+)
+"cil/src/frontc/frontc.ml" 118 3961 3965 "cil/src/frontc/frontc.ml" 118 3961 4018
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 119 4020 4027 "cil/src/frontc/frontc.ml" 119 4020 4028
+type(
+  bool ref -> bool
+)
+"cil/src/frontc/frontc.ml" 119 4020 4028 "cil/src/frontc/frontc.ml" 119 4020 4039
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 119 4020 4027 "cil/src/frontc/frontc.ml" 119 4020 4039
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 120 4045 4052 "cil/src/frontc/frontc.ml" 120 4045 4060
+type(
+  string -> unit
+)
+"cil/src/frontc/frontc.ml" 120 4045 4061 "cil/src/frontc/frontc.ml" 120 4045 4106
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 120 4045 4051 "cil/src/frontc/frontc.ml" 120 4045 4107
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 119 4020 4024 "cil/src/frontc/frontc.ml" 120 4045 4107
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 116 3870 3928 "cil/src/frontc/frontc.ml" 121 4108 4111
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 116 3870 3872 "cil/src/frontc/frontc.ml" 121 4108 4111
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 124 4163 4169 "cil/src/frontc/frontc.ml" 124 4163 4173
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 124 4163 4176 "cil/src/frontc/frontc.ml" 124 4163 4195
+type(
+  string -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 124 4163 4196 "cil/src/frontc/frontc.ml" 124 4163 4201
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 124 4163 4176 "cil/src/frontc/frontc.ml" 124 4163 4201
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 125 4205 4210 "cil/src/frontc/frontc.ml" 125 4205 4211
+type(
+  bool ref -> bool
+)
+"cil/src/frontc/frontc.ml" 125 4205 4211 "cil/src/frontc/frontc.ml" 125 4205 4222
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 125 4205 4210 "cil/src/frontc/frontc.ml" 125 4205 4222
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 126 4229 4233 "cil/src/frontc/frontc.ml" 126 4229 4236
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 126 4229 4238 "cil/src/frontc/frontc.ml" 126 4229 4245
+type(
+  (string -> unit, unit, Pretty.doc, unit) format4 -> string -> unit
+)
+"cil/src/frontc/frontc.ml" 126 4229 4246 "cil/src/frontc/frontc.ml" 126 4229 4279
+type(
+  (string -> unit, unit, Pretty.doc, unit) format4
+)
+"cil/src/frontc/frontc.ml" 126 4229 4280 "cil/src/frontc/frontc.ml" 126 4229 4285
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 126 4229 4237 "cil/src/frontc/frontc.ml" 126 4229 4286
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 126 4229 4233 "cil/src/frontc/frontc.ml" 126 4229 4286
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 125 4205 4207 "cil/src/frontc/frontc.ml" 126 4229 4286
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 129 4347 4353 "cil/src/frontc/frontc.ml" 129 4347 4360
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 129 4347 4369 "cil/src/frontc/frontc.ml" 129 4347 4370
+type(
+  Cabs.file option ref -> Cabs.file option
+)
+"cil/src/frontc/frontc.ml" 129 4347 4370 "cil/src/frontc/frontc.ml" 129 4347 4379
+type(
+  Cabs.file option ref
+)
+"cil/src/frontc/frontc.ml" 129 4347 4369 "cil/src/frontc/frontc.ml" 129 4347 4379
+type(
+  Cabs.file option
+)
+"cil/src/frontc/frontc.ml" 131 4386 4396 "cil/src/frontc/frontc.ml" 131 4386 4400
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 131 4386 4392 "cil/src/frontc/frontc.ml" 131 4386 4400
+type(
+  Cabs.file option
+)
+"cil/src/frontc/frontc.ml" 133 4488 4500 "cil/src/frontc/frontc.ml" 133 4488 4506
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 133 4488 4509 "cil/src/frontc/frontc.ml" 133 4488 4510
+type(
+  out_channel option ref -> out_channel option
+)
+"cil/src/frontc/frontc.ml" 133 4488 4510 "cil/src/frontc/frontc.ml" 133 4488 4513
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 133 4488 4509 "cil/src/frontc/frontc.ml" 133 4488 4513
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 136 4588 4596 "cil/src/frontc/frontc.ml" 136 4588 4599
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 136 4588 4600 "cil/src/frontc/frontc.ml" 136 4588 4602
+type(
+  out_channel option ref -> out_channel option -> unit
+)
+"cil/src/frontc/frontc.ml" 136 4588 4603 "cil/src/frontc/frontc.ml" 136 4588 4607
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 136 4588 4596 "cil/src/frontc/frontc.ml" 136 4588 4607
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 138 4610 4619 "cil/src/frontc/frontc.ml" 138 4610 4624
+type(
+  string -> Pretty.doc -> unit
+)
+"cil/src/frontc/frontc.ml" 138 4610 4625 "cil/src/frontc/frontc.ml" 138 4610 4632
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 138 4610 4634 "cil/src/frontc/frontc.ml" 138 4610 4641
+type(
+  (string -> Pretty.doc, unit, Pretty.doc, Pretty.doc) format4 ->
+  string -> Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 138 4610 4642 "cil/src/frontc/frontc.ml" 138 4610 4660
+type(
+  (string -> Pretty.doc, unit, Pretty.doc, Pretty.doc) format4
+)
+"cil/src/frontc/frontc.ml" 138 4610 4661 "cil/src/frontc/frontc.ml" 138 4610 4666
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 138 4610 4633 "cil/src/frontc/frontc.ml" 138 4610 4667
+type(
+  Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 138 4610 4618 "cil/src/frontc/frontc.ml" 138 4610 4668
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 139 4670 4682 "cil/src/frontc/frontc.ml" 139 4670 4688
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 139 4670 4692 "cil/src/frontc/frontc.ml" 139 4670 4702
+type(
+  string -> (Cabs.file -> Cabs.file) -> Cabs.file -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 139 4670 4703 "cil/src/frontc/frontc.ml" 139 4670 4713
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 139 4670 4715 "cil/src/frontc/frontc.ml" 139 4670 4731
+type(
+  Cabs.file -> Cabs.file -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 139 4670 4732 "cil/src/frontc/frontc.ml" 139 4670 4734
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 139 4670 4714 "cil/src/frontc/frontc.ml" 139 4670 4735
+type(
+  Cabs.file -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 139 4670 4736 "cil/src/frontc/frontc.ml" 139 4670 4740
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 139 4670 4691 "cil/src/frontc/frontc.ml" 139 4670 4741
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 141 4746 4758 "cil/src/frontc/frontc.ml" 141 4746 4759
+type(
+  bool ref -> bool
+)
+"cil/src/frontc/frontc.ml" 141 4746 4759 "cil/src/frontc/frontc.ml" 141 4746 4776
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 141 4746 4757 "cil/src/frontc/frontc.ml" 141 4746 4777
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 142 4819 4833 "cil/src/frontc/frontc.ml" 142 4819 4841
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 142 4819 4851 "cil/src/frontc/frontc.ml" 142 4819 4856
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 142 4819 4857 "cil/src/frontc/frontc.ml" 142 4819 4858
+type(
+  string -> string -> string
+)
+"cil/src/frontc/frontc.ml" 142 4819 4859 "cil/src/frontc/frontc.ml" 142 4819 4869
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 142 4819 4851 "cil/src/frontc/frontc.ml" 142 4819 4869
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 142 4819 4851 "cil/src/frontc/frontc.ml" 142 4819 4869
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 143 4873 4884 "cil/src/frontc/frontc.ml" 143 4873 4889
+type(
+  string -> Pretty.doc -> unit
+)
+"cil/src/frontc/frontc.ml" 143 4873 4890 "cil/src/frontc/frontc.ml" 143 4873 4897
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 143 4873 4899 "cil/src/frontc/frontc.ml" 143 4873 4906
+type(
+  (string -> string -> Pretty.doc, unit, Pretty.doc, Pretty.doc) format4 ->
+  string -> string -> Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 143 4873 4907 "cil/src/frontc/frontc.ml" 143 4873 4947
+type(
+  (string -> string -> Pretty.doc, unit, Pretty.doc, Pretty.doc) format4
+)
+"cil/src/frontc/frontc.ml" 144 4948 4982 "cil/src/frontc/frontc.ml" 144 4948 4987
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 144 4948 4988 "cil/src/frontc/frontc.ml" 144 4948 4996
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 143 4873 4898 "cil/src/frontc/frontc.ml" 144 4948 4997
+type(
+  Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 143 4873 4883 "cil/src/frontc/frontc.ml" 144 4948 4998
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 145 5000 5014 "cil/src/frontc/frontc.ml" 145 5000 5015
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 145 5000 5019 "cil/src/frontc/frontc.ml" 145 5000 5027
+type(
+  string -> out_channel
+)
+"cil/src/frontc/frontc.ml" 145 5000 5028 "cil/src/frontc/frontc.ml" 145 5000 5036
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 145 5000 5018 "cil/src/frontc/frontc.ml" 145 5000 5037
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 146 5041 5052 "cil/src/frontc/frontc.ml" 146 5041 5068
+type(
+  out_channel -> Cabs.file -> unit
+)
+"cil/src/frontc/frontc.ml" 146 5041 5069 "cil/src/frontc/frontc.ml" 146 5041 5070
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 146 5041 5071 "cil/src/frontc/frontc.ml" 146 5041 5077
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 146 5041 5051 "cil/src/frontc/frontc.ml" 146 5041 5078
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 147 5080 5091 "cil/src/frontc/frontc.ml" 147 5080 5100
+type(
+  out_channel -> unit
+)
+"cil/src/frontc/frontc.ml" 147 5080 5101 "cil/src/frontc/frontc.ml" 147 5080 5102
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 147 5080 5090 "cil/src/frontc/frontc.ml" 147 5080 5103
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 146 5041 5051 "cil/src/frontc/frontc.ml" 147 5080 5103
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 145 5000 5010 "cil/src/frontc/frontc.ml" 147 5080 5103
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 143 4873 4883 "cil/src/frontc/frontc.ml" 147 5080 5103
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 141 4746 4783 "cil/src/frontc/frontc.ml" 148 5104 5115
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 141 4746 4754 "cil/src/frontc/frontc.ml" 148 5104 5115
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 151 5144 5152 "cil/src/frontc/frontc.ml" 151 5144 5164
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 151 5144 5165 "cil/src/frontc/frontc.ml" 151 5144 5167
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 151 5144 5152 "cil/src/frontc/frontc.ml" 151 5144 5167
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 152 5169 5177 "cil/src/frontc/frontc.ml" 152 5169 5180
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 152 5169 5181 "cil/src/frontc/frontc.ml" 152 5169 5183
+type(
+  out_channel option ref -> out_channel option -> unit
+)
+"cil/src/frontc/frontc.ml" 152 5169 5184 "cil/src/frontc/frontc.ml" 152 5169 5190
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 152 5169 5177 "cil/src/frontc/frontc.ml" 152 5169 5190
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 154 5193 5201 "cil/src/frontc/frontc.ml" 154 5193 5207
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 152 5169 5177 "cil/src/frontc/frontc.ml" 154 5193 5207
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 151 5144 5152 "cil/src/frontc/frontc.ml" 154 5193 5207
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 141 4746 4754 "cil/src/frontc/frontc.ml" 154 5193 5207
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 139 4670 4678 "cil/src/frontc/frontc.ml" 154 5193 5207
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 138 4610 4618 "cil/src/frontc/frontc.ml" 154 5193 5207
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 136 4588 4596 "cil/src/frontc/frontc.ml" 154 5193 5207
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 131 4386 4404 "cil/src/frontc/frontc.ml" 155 5208 5215
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 156 5216 5222 "cil/src/frontc/frontc.ml" 156 5216 5226
+type(
+  Cabs.file option
+)
+"cil/src/frontc/frontc.ml" 156 5216 5230 "cil/src/frontc/frontc.ml" 156 5216 5234
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 129 4347 4363 "cil/src/frontc/frontc.ml" 156 5216 5234
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 160 5262 5271 "cil/src/frontc/frontc.ml" 160 5262 5272
+type(
+  out_channel option ref -> out_channel option
+)
+"cil/src/frontc/frontc.ml" 160 5262 5272 "cil/src/frontc/frontc.ml" 160 5262 5275
+type(
+  out_channel option ref
+)
+"cil/src/frontc/frontc.ml" 160 5262 5271 "cil/src/frontc/frontc.ml" 160 5262 5275
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 161 5281 5290 "cil/src/frontc/frontc.ml" 161 5281 5291
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 161 5281 5285 "cil/src/frontc/frontc.ml" 161 5281 5291
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 162 5301 5308 "cil/src/frontc/frontc.ml" 162 5301 5313
+type(
+  string -> Pretty.doc -> unit
+)
+"cil/src/frontc/frontc.ml" 162 5301 5314 "cil/src/frontc/frontc.ml" 162 5301 5318
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 162 5301 5320 "cil/src/frontc/frontc.ml" 162 5301 5327
+type(
+  (Pretty.doc, unit, Pretty.doc, Pretty.doc) format4 -> Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 162 5301 5328 "cil/src/frontc/frontc.ml" 162 5301 5355
+type(
+  (Pretty.doc, unit, Pretty.doc, Pretty.doc) format4
+)
+"cil/src/frontc/frontc.ml" 162 5301 5319 "cil/src/frontc/frontc.ml" 162 5301 5356
+type(
+  Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 162 5301 5307 "cil/src/frontc/frontc.ml" 162 5301 5357
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 163 5359 5368 "cil/src/frontc/frontc.ml" 163 5359 5369
+type(
+  bool ref -> bool
+)
+"cil/src/frontc/frontc.ml" 163 5359 5369 "cil/src/frontc/frontc.ml" 163 5359 5380
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 163 5359 5368 "cil/src/frontc/frontc.ml" 163 5359 5380
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 163 5359 5386 "cil/src/frontc/frontc.ml" 163 5359 5399
+type(
+  out_channel -> string -> unit
+)
+"cil/src/frontc/frontc.ml" 163 5359 5400 "cil/src/frontc/frontc.ml" 163 5359 5401
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 163 5359 5402 "cil/src/frontc/frontc.ml" 163 5359 5433
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 163 5359 5386 "cil/src/frontc/frontc.ml" 163 5359 5433
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 163 5359 5365 "cil/src/frontc/frontc.ml" 163 5359 5433
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 164 5435 5441 "cil/src/frontc/frontc.ml" 164 5435 5451
+type(
+  string -> (Cabs.file -> unit) -> Cabs.file -> unit
+)
+"cil/src/frontc/frontc.ml" 164 5435 5452 "cil/src/frontc/frontc.ml" 164 5435 5463
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 164 5435 5465 "cil/src/frontc/frontc.ml" 164 5435 5481
+type(
+  out_channel -> Cabs.file -> unit
+)
+"cil/src/frontc/frontc.ml" 164 5435 5482 "cil/src/frontc/frontc.ml" 164 5435 5483
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 164 5435 5464 "cil/src/frontc/frontc.ml" 164 5435 5484
+type(
+  Cabs.file -> unit
+)
+"cil/src/frontc/frontc.ml" 164 5435 5485 "cil/src/frontc/frontc.ml" 164 5435 5492
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 164 5435 5441 "cil/src/frontc/frontc.ml" 164 5435 5492
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 165 5494 5500 "cil/src/frontc/frontc.ml" 165 5494 5512
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 165 5494 5513 "cil/src/frontc/frontc.ml" 165 5494 5515
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 165 5494 5500 "cil/src/frontc/frontc.ml" 165 5494 5515
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 166 5517 5523 "cil/src/frontc/frontc.ml" 166 5517 5528
+type(
+  exn -> unit
+)
+"cil/src/frontc/frontc.ml" 166 5517 5529 "cil/src/frontc/frontc.ml" 166 5517 5537
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 166 5517 5523 "cil/src/frontc/frontc.ml" 166 5517 5537
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 165 5494 5500 "cil/src/frontc/frontc.ml" 166 5517 5537
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 164 5435 5441 "cil/src/frontc/frontc.ml" 166 5517 5537
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 163 5359 5365 "cil/src/frontc/frontc.ml" 166 5517 5537
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 161 5281 5295 "cil/src/frontc/frontc.ml" 167 5538 5545
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 168 5546 5550 "cil/src/frontc/frontc.ml" 168 5546 5554
+type(
+  out_channel option
+)
+"cil/src/frontc/frontc.ml" 168 5546 5558 "cil/src/frontc/frontc.ml" 168 5546 5560
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 160 5262 5264 "cil/src/frontc/frontc.ml" 168 5546 5561
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 169 5563 5568 "cil/src/frontc/frontc.ml" 169 5563 5569
+type(
+  bool ref -> bool
+)
+"cil/src/frontc/frontc.ml" 169 5563 5569 "cil/src/frontc/frontc.ml" 169 5563 5580
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 169 5563 5568 "cil/src/frontc/frontc.ml" 169 5563 5580
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 170 5586 5590 "cil/src/frontc/frontc.ml" 170 5586 5595
+type(
+  exn -> unit
+)
+"cil/src/frontc/frontc.ml" 170 5586 5596 "cil/src/frontc/frontc.ml" 170 5586 5615
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 170 5586 5590 "cil/src/frontc/frontc.ml" 170 5586 5615
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 169 5563 5565 "cil/src/frontc/frontc.ml" 170 5586 5615
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 173 5656 5658 "cil/src/frontc/frontc.ml" 173 5656 5665
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 169 5563 5565 "cil/src/frontc/frontc.ml" 173 5656 5665
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 160 5262 5264 "cil/src/frontc/frontc.ml" 173 5656 5665
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 129 4347 4349 "cil/src/frontc/frontc.ml" 173 5656 5665
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 125 4205 4207 "cil/src/frontc/frontc.ml" 173 5656 5665
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 124 4163 4165 "cil/src/frontc/frontc.ml" 173 5656 5665
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 114 3808 3808 "cil/src/frontc/frontc.ml" 174 5666 5669
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 176 5671 5675 "cil/src/frontc/frontc.ml" 176 5671 5681
+type(
+  Lexing.lexbuf -> string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 176 5671 5682 "cil/src/frontc/frontc.ml" 176 5671 5688
+type(
+  Lexing.lexbuf
+)
+"cil/src/frontc/frontc.ml" 177 5691 5695 "cil/src/frontc/frontc.ml" 177 5691 5713
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 177 5691 5714 "cil/src/frontc/frontc.ml" 177 5691 5716
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 177 5691 5695 "cil/src/frontc/frontc.ml" 177 5691 5716
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 178 5718 5722 "cil/src/frontc/frontc.ml" 178 5718 5741
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 178 5718 5742 "cil/src/frontc/frontc.ml" 178 5718 5744
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 178 5718 5722 "cil/src/frontc/frontc.ml" 178 5718 5744
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 179 5746 5754 "cil/src/frontc/frontc.ml" 179 5746 5759
+type(
+  Cparser.token
+)
+"cil/src/frontc/frontc.ml" 179 5746 5762 "cil/src/frontc/frontc.ml" 179 5746 5776
+type(
+  Lexing.lexbuf -> Cparser.token
+)
+"cil/src/frontc/frontc.ml" 179 5746 5777 "cil/src/frontc/frontc.ml" 179 5746 5783
+type(
+  Lexing.lexbuf
+)
+"cil/src/frontc/frontc.ml" 179 5746 5762 "cil/src/frontc/frontc.ml" 179 5746 5783
+type(
+  Cparser.token
+)
+"cil/src/frontc/frontc.ml" 180 5787 5795 "cil/src/frontc/frontc.ml" 180 5787 5800
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 180 5787 5803 "cil/src/frontc/frontc.ml" 180 5787 5819
+type(
+  unit -> string
+)
+"cil/src/frontc/frontc.ml" 180 5787 5820 "cil/src/frontc/frontc.ml" 180 5787 5822
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 180 5787 5803 "cil/src/frontc/frontc.ml" 180 5787 5822
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 181 5826 5834 "cil/src/frontc/frontc.ml" 181 5826 5841
+type(
+  Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 181 5826 5844 "cil/src/frontc/frontc.ml" 181 5826 5861
+type(
+  unit -> Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 181 5826 5862 "cil/src/frontc/frontc.ml" 181 5826 5864
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 181 5826 5844 "cil/src/frontc/frontc.ml" 181 5826 5864
+type(
+  Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 182 5868 5876 "cil/src/frontc/frontc.ml" 182 5868 5882
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 182 5868 5885 "cil/src/frontc/frontc.ml" 182 5868 5908
+type(
+  unit -> string
+)
+"cil/src/frontc/frontc.ml" 182 5868 5909 "cil/src/frontc/frontc.ml" 182 5868 5911
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 182 5868 5885 "cil/src/frontc/frontc.ml" 182 5868 5911
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 182 5868 5912 "cil/src/frontc/frontc.ml" 182 5868 5913
+type(
+  string -> string -> string
+)
+"cil/src/frontc/frontc.ml" 182 5868 5914 "cil/src/frontc/frontc.ml" 182 5868 5927
+type(
+  Lexing.lexbuf -> string
+)
+"cil/src/frontc/frontc.ml" 182 5868 5928 "cil/src/frontc/frontc.ml" 182 5868 5934
+type(
+  Lexing.lexbuf
+)
+"cil/src/frontc/frontc.ml" 182 5868 5914 "cil/src/frontc/frontc.ml" 182 5868 5934
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 182 5868 5885 "cil/src/frontc/frontc.ml" 182 5868 5934
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 183 5938 5942 "cil/src/frontc/frontc.ml" 183 5938 5947
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 183 5938 5948 "cil/src/frontc/frontc.ml" 183 5938 5954
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 183 5938 5955 "cil/src/frontc/frontc.ml" 183 5938 5960
+type(
+  Cparser.token
+)
+"cil/src/frontc/frontc.ml" 183 5938 5961 "cil/src/frontc/frontc.ml" 183 5938 5968
+type(
+  Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 183 5938 5942 "cil/src/frontc/frontc.ml" 183 5938 5968
+type(
+  string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 182 5868 5872 "cil/src/frontc/frontc.ml" 183 5938 5968
+type(
+  string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 181 5826 5830 "cil/src/frontc/frontc.ml" 183 5938 5968
+type(
+  string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 180 5787 5791 "cil/src/frontc/frontc.ml" 183 5938 5968
+type(
+  string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 179 5746 5750 "cil/src/frontc/frontc.ml" 183 5938 5968
+type(
+  string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 178 5718 5722 "cil/src/frontc/frontc.ml" 183 5938 5968
+type(
+  string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 177 5691 5695 "cil/src/frontc/frontc.ml" 183 5938 5968
+type(
+  string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 186 5987 5991 "cil/src/frontc/frontc.ml" 186 5987 6010
+type(
+  string -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 186 5987 6012 "cil/src/frontc/frontc.ml" 186 5987 6017
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 188 6036 6043 "cil/src/frontc/frontc.ml" 188 6036 6044
+type(
+  bool ref -> bool
+)
+"cil/src/frontc/frontc.ml" 188 6036 6044 "cil/src/frontc/frontc.ml" 188 6036 6057
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 188 6036 6043 "cil/src/frontc/frontc.ml" 188 6036 6057
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 188 6036 6063 "cil/src/frontc/frontc.ml" 188 6036 6069
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 188 6036 6071 "cil/src/frontc/frontc.ml" 188 6036 6076
+type(
+  (string -> unit, unit, Pretty.doc, unit) format4 -> string -> unit
+)
+"cil/src/frontc/frontc.ml" 188 6036 6077 "cil/src/frontc/frontc.ml" 188 6036 6101
+type(
+  (string -> unit, unit, Pretty.doc, unit) format4
+)
+"cil/src/frontc/frontc.ml" 188 6036 6102 "cil/src/frontc/frontc.ml" 188 6036 6107
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 188 6036 6070 "cil/src/frontc/frontc.ml" 188 6036 6108
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 188 6036 6063 "cil/src/frontc/frontc.ml" 188 6036 6108
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 188 6036 6040 "cil/src/frontc/frontc.ml" 188 6036 6108
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 189 6110 6114 "cil/src/frontc/frontc.ml" 189 6110 6119
+type(
+  out_channel -> unit
+)
+"cil/src/frontc/frontc.ml" 189 6110 6120 "cil/src/frontc/frontc.ml" 189 6110 6121
+type(
+  out_channel ref -> out_channel
+)
+"cil/src/frontc/frontc.ml" 189 6110 6121 "cil/src/frontc/frontc.ml" 189 6110 6133
+type(
+  out_channel ref
+)
+"cil/src/frontc/frontc.ml" 189 6110 6120 "cil/src/frontc/frontc.ml" 189 6110 6133
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 189 6110 6114 "cil/src/frontc/frontc.ml" 189 6110 6133
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 190 6135 6143 "cil/src/frontc/frontc.ml" 190 6135 6149
+type(
+  Lexing.lexbuf
+)
+"cil/src/frontc/frontc.ml" 190 6135 6152 "cil/src/frontc/frontc.ml" 190 6135 6163
+type(
+  filename:string -> Lexing.lexbuf
+)
+"cil/src/frontc/frontc.ml" 190 6135 6164 "cil/src/frontc/frontc.ml" 190 6135 6169
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 190 6135 6152 "cil/src/frontc/frontc.ml" 190 6135 6169
+type(
+  Lexing.lexbuf
+)
+"cil/src/frontc/frontc.ml" 191 6173 6181 "cil/src/frontc/frontc.ml" 191 6173 6185
+type(
+  Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 191 6173 6188 "cil/src/frontc/frontc.ml" 191 6173 6198
+type(
+  string ->
+  (Lexing.lexbuf -> Cabs.definition list) ->
+  Lexing.lexbuf -> Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 191 6173 6199 "cil/src/frontc/frontc.ml" 191 6173 6206
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 191 6173 6208 "cil/src/frontc/frontc.ml" 191 6173 6225
+type(
+  (Lexing.lexbuf -> Cparser.token) -> Lexing.lexbuf -> Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 191 6173 6227 "cil/src/frontc/frontc.ml" 191 6173 6247
+type(
+  (Lexing.lexbuf -> string * string * Cparser.token * Cabs.cabsloc) ->
+  Lexing.lexbuf -> Cparser.token
+)
+"cil/src/frontc/frontc.ml" 191 6173 6248 "cil/src/frontc/frontc.ml" 191 6173 6254
+type(
+  Lexing.lexbuf -> string * string * Cparser.token * Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 191 6173 6226 "cil/src/frontc/frontc.ml" 191 6173 6255
+type(
+  Lexing.lexbuf -> Cparser.token
+)
+"cil/src/frontc/frontc.ml" 191 6173 6207 "cil/src/frontc/frontc.ml" 191 6173 6256
+type(
+  Lexing.lexbuf -> Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 191 6173 6257 "cil/src/frontc/frontc.ml" 191 6173 6263
+type(
+  Lexing.lexbuf
+)
+"cil/src/frontc/frontc.ml" 191 6173 6188 "cil/src/frontc/frontc.ml" 191 6173 6263
+type(
+  Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 192 6267 6271 "cil/src/frontc/frontc.ml" 192 6267 6295
+type(
+  string -> unit
+)
+"cil/src/frontc/frontc.ml" 192 6267 6297 "cil/src/frontc/frontc.ml" 192 6267 6313
+type(
+  unit -> string
+)
+"cil/src/frontc/frontc.ml" 192 6267 6314 "cil/src/frontc/frontc.ml" 192 6267 6316
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 192 6267 6296 "cil/src/frontc/frontc.ml" 192 6267 6317
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 192 6267 6271 "cil/src/frontc/frontc.ml" 192 6267 6317
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 193 6319 6323 "cil/src/frontc/frontc.ml" 193 6319 6336
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 193 6319 6337 "cil/src/frontc/frontc.ml" 193 6319 6339
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 193 6319 6323 "cil/src/frontc/frontc.ml" 193 6319 6339
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 194 6341 6346 "cil/src/frontc/frontc.ml" 194 6341 6351
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 194 6341 6353 "cil/src/frontc/frontc.ml" 194 6341 6357
+type(
+  Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 194 6341 6345 "cil/src/frontc/frontc.ml" 194 6341 6358
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 193 6319 6323 "cil/src/frontc/frontc.ml" 194 6341 6358
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 192 6267 6271 "cil/src/frontc/frontc.ml" 194 6341 6358
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 191 6173 6177 "cil/src/frontc/frontc.ml" 194 6341 6358
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 190 6135 6139 "cil/src/frontc/frontc.ml" 194 6341 6358
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 189 6110 6114 "cil/src/frontc/frontc.ml" 194 6341 6358
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 188 6036 6040 "cil/src/frontc/frontc.ml" 194 6341 6358
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 195 6359 6377 "cil/src/frontc/frontc.ml" 195 6359 6380
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 195 6359 6366 "cil/src/frontc/frontc.ml" 195 6359 6381
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 196 6391 6395 "cil/src/frontc/frontc.ml" 196 6391 6401
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 196 6391 6403 "cil/src/frontc/frontc.ml" 196 6391 6408
+type(
+  (string -> string -> unit, unit, Pretty.doc, unit) format4 ->
+  string -> string -> unit
+)
+"cil/src/frontc/frontc.ml" 196 6391 6409 "cil/src/frontc/frontc.ml" 196 6391 6432
+type(
+  (string -> string -> unit, unit, Pretty.doc, unit) format4
+)
+"cil/src/frontc/frontc.ml" 196 6391 6433 "cil/src/frontc/frontc.ml" 196 6391 6438
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 196 6391 6439 "cil/src/frontc/frontc.ml" 196 6391 6442
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 196 6391 6402 "cil/src/frontc/frontc.ml" 196 6391 6443
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 196 6391 6395 "cil/src/frontc/frontc.ml" 196 6391 6443
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 197 6445 6449 "cil/src/frontc/frontc.ml" 197 6445 6462
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 197 6445 6463 "cil/src/frontc/frontc.ml" 197 6445 6465
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 197 6445 6449 "cil/src/frontc/frontc.ml" 197 6445 6465
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 198 6467 6471 "cil/src/frontc/frontc.ml" 198 6467 6483
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 198 6467 6484 "cil/src/frontc/frontc.ml" 198 6467 6486
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 198 6467 6471 "cil/src/frontc/frontc.ml" 198 6467 6486
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 199 6488 6492 "cil/src/frontc/frontc.ml" 199 6488 6497
+type(
+  exn -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 199 6488 6510 "cil/src/frontc/frontc.ml" 199 6488 6524
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6525 "cil/src/frontc/frontc.ml" 199 6488 6526
+type(
+  string -> string -> string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6527 "cil/src/frontc/frontc.ml" 199 6488 6532
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6533 "cil/src/frontc/frontc.ml" 199 6488 6534
+type(
+  string -> string -> string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6535 "cil/src/frontc/frontc.ml" 199 6488 6539
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6540 "cil/src/frontc/frontc.ml" 199 6488 6541
+type(
+  string -> string -> string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6542 "cil/src/frontc/frontc.ml" 199 6488 6545
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6546 "cil/src/frontc/frontc.ml" 199 6488 6547
+type(
+  string -> string -> string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6548 "cil/src/frontc/frontc.ml" 199 6488 6552
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6542 "cil/src/frontc/frontc.ml" 199 6488 6552
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6535 "cil/src/frontc/frontc.ml" 199 6488 6552
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6527 "cil/src/frontc/frontc.ml" 199 6488 6552
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6509 "cil/src/frontc/frontc.ml" 199 6488 6553
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 199 6488 6498 "cil/src/frontc/frontc.ml" 199 6488 6554
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 199 6488 6492 "cil/src/frontc/frontc.ml" 199 6488 6554
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 198 6467 6471 "cil/src/frontc/frontc.ml" 199 6488 6554
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 197 6445 6449 "cil/src/frontc/frontc.ml" 199 6488 6554
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 195 6359 6385 "cil/src/frontc/frontc.ml" 200 6555 6560
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 201 6561 6565 "cil/src/frontc/frontc.ml" 201 6561 6584
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 202 6594 6600 "cil/src/frontc/frontc.ml" 202 6594 6606
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 202 6594 6608 "cil/src/frontc/frontc.ml" 202 6594 6613
+type(
+  (unit, unit, Pretty.doc, unit) format4 -> unit
+)
+"cil/src/frontc/frontc.ml" 202 6594 6614 "cil/src/frontc/frontc.ml" 202 6594 6629
+type(
+  (unit, unit, Pretty.doc, unit) format4
+)
+"cil/src/frontc/frontc.ml" 202 6594 6607 "cil/src/frontc/frontc.ml" 202 6594 6630
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 202 6594 6600 "cil/src/frontc/frontc.ml" 202 6594 6630
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 203 6632 6638 "cil/src/frontc/frontc.ml" 203 6632 6651
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 203 6632 6652 "cil/src/frontc/frontc.ml" 203 6632 6654
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 203 6632 6638 "cil/src/frontc/frontc.ml" 203 6632 6654
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 204 6656 6662 "cil/src/frontc/frontc.ml" 204 6656 6674
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 204 6656 6675 "cil/src/frontc/frontc.ml" 204 6656 6677
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 204 6656 6662 "cil/src/frontc/frontc.ml" 204 6656 6677
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 205 6679 6685 "cil/src/frontc/frontc.ml" 205 6679 6690
+type(
+  exn -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 205 6679 6702 "cil/src/frontc/frontc.ml" 205 6679 6717
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 205 6679 6691 "cil/src/frontc/frontc.ml" 205 6679 6718
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 205 6679 6685 "cil/src/frontc/frontc.ml" 205 6679 6718
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 204 6656 6662 "cil/src/frontc/frontc.ml" 205 6679 6718
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 203 6632 6638 "cil/src/frontc/frontc.ml" 205 6679 6718
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 201 6561 6588 "cil/src/frontc/frontc.ml" 206 6719 6724
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 207 6725 6729 "cil/src/frontc/frontc.ml" 207 6725 6730
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 208 6740 6746 "cil/src/frontc/frontc.ml" 208 6740 6752
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 208 6740 6754 "cil/src/frontc/frontc.ml" 208 6740 6759
+type(
+  (string -> unit, unit, Pretty.doc, unit) format4 -> string -> unit
+)
+"cil/src/frontc/frontc.ml" 208 6740 6760 "cil/src/frontc/frontc.ml" 208 6740 6787
+type(
+  (string -> unit, unit, Pretty.doc, unit) format4
+)
+"cil/src/frontc/frontc.ml" 208 6740 6789 "cil/src/frontc/frontc.ml" 208 6740 6807
+type(
+  exn -> string
+)
+"cil/src/frontc/frontc.ml" 208 6740 6808 "cil/src/frontc/frontc.ml" 208 6740 6809
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 208 6740 6788 "cil/src/frontc/frontc.ml" 208 6740 6810
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 208 6740 6753 "cil/src/frontc/frontc.ml" 208 6740 6811
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 208 6740 6746 "cil/src/frontc/frontc.ml" 208 6740 6811
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 209 6813 6819 "cil/src/frontc/frontc.ml" 209 6813 6832
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 209 6813 6833 "cil/src/frontc/frontc.ml" 209 6813 6835
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 209 6813 6819 "cil/src/frontc/frontc.ml" 209 6813 6835
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 210 6837 6843 "cil/src/frontc/frontc.ml" 210 6837 6848
+type(
+  exn -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 210 6837 6849 "cil/src/frontc/frontc.ml" 210 6837 6850
+type(
+  exn
+)
+"cil/src/frontc/frontc.ml" 210 6837 6843 "cil/src/frontc/frontc.ml" 210 6837 6850
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 209 6813 6819 "cil/src/frontc/frontc.ml" 210 6837 6850
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 207 6725 6734 "cil/src/frontc/frontc.ml" 211 6851 6856
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 187 6030 6032 "cil/src/frontc/frontc.ml" 211 6851 6856
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 215 6939 6943 "cil/src/frontc/frontc.ml" 215 6939 6958
+type(
+  Cabs.file -> unit
+)
+"cil/src/frontc/frontc.ml" 215 6939 6961 "cil/src/frontc/frontc.ml" 215 6939 6966
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 215 6939 6968 "cil/src/frontc/frontc.ml" 215 6939 6972
+type(
+  Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 215 6939 6960 "cil/src/frontc/frontc.ml" 215 6939 6973
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 219 7066 7072 "cil/src/frontc/frontc.ml" 219 7066 7076
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 219 7066 7079 "cil/src/frontc/frontc.ml" 219 7066 7087
+type(
+  string -> out_channel
+)
+"cil/src/frontc/frontc.ml" 219 7066 7088 "cil/src/frontc/frontc.ml" 219 7066 7103
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 219 7066 7079 "cil/src/frontc/frontc.ml" 219 7066 7103
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 220 7107 7109 "cil/src/frontc/frontc.ml" 220 7107 7115
+type(
+  Pretty.doc -> unit
+)
+"cil/src/frontc/frontc.ml" 220 7107 7117 "cil/src/frontc/frontc.ml" 220 7107 7124
+type(
+  out_channel ->
+  (int -> Pretty.doc, unit, Pretty.doc) format -> int -> Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 220 7107 7125 "cil/src/frontc/frontc.ml" 220 7107 7129
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 220 7107 7130 "cil/src/frontc/frontc.ml" 220 7107 7174
+type(
+  (int -> Pretty.doc, unit, Pretty.doc) format
+)
+"cil/src/frontc/frontc.ml" 220 7107 7176 "cil/src/frontc/frontc.ml" 220 7107 7187
+type(
+  Cabs.definition list -> int
+)
+"cil/src/frontc/frontc.ml" 220 7107 7188 "cil/src/frontc/frontc.ml" 220 7107 7192
+type(
+  Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 220 7107 7175 "cil/src/frontc/frontc.ml" 220 7107 7193
+type(
+  int
+)
+"cil/src/frontc/frontc.ml" 220 7107 7116 "cil/src/frontc/frontc.ml" 220 7107 7194
+type(
+  Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 220 7107 7109 "cil/src/frontc/frontc.ml" 220 7107 7194
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 221 7196 7198 "cil/src/frontc/frontc.ml" 221 7196 7208
+type(
+  out_channel ref
+)
+"cil/src/frontc/frontc.ml" 221 7196 7209 "cil/src/frontc/frontc.ml" 221 7196 7211
+type(
+  out_channel ref -> out_channel -> unit
+)
+"cil/src/frontc/frontc.ml" 221 7196 7212 "cil/src/frontc/frontc.ml" 221 7196 7216
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 221 7196 7198 "cil/src/frontc/frontc.ml" 221 7196 7216
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 223 7219 7225 "cil/src/frontc/frontc.ml" 223 7219 7232
+type(
+  int ref
+)
+"cil/src/frontc/frontc.ml" 223 7219 7245 "cil/src/frontc/frontc.ml" 223 7219 7248
+type(
+  int -> int ref
+)
+"cil/src/frontc/frontc.ml" 223 7219 7249 "cil/src/frontc/frontc.ml" 223 7219 7250
+type(
+  int
+)
+"cil/src/frontc/frontc.ml" 223 7219 7245 "cil/src/frontc/frontc.ml" 223 7219 7250
+type(
+  int ref
+)
+"cil/src/frontc/frontc.ml" 223 7219 7245 "cil/src/frontc/frontc.ml" 223 7219 7250
+type(
+  int ref
+)
+"cil/src/frontc/frontc.ml" 225 7255 7265 "cil/src/frontc/frontc.ml" 225 7255 7269
+type(
+  Cabs.definition -> unit
+)
+"cil/src/frontc/frontc.ml" 225 7255 7271 "cil/src/frontc/frontc.ml" 225 7255 7272
+type(
+  Cabs.definition
+)
+"cil/src/frontc/frontc.ml" 226 7300 7310 "cil/src/frontc/frontc.ml" 226 7300 7311
+type(
+  Cabs.definition
+)
+"cil/src/frontc/frontc.ml" 227 7317 7335 "cil/src/frontc/frontc.ml" 227 7317 7339
+type(
+  Cabs.single_name
+)
+"cil/src/frontc/frontc.ml" 227 7317 7341 "cil/src/frontc/frontc.ml" 227 7317 7342
+type(
+  Cabs.block
+)
+"cil/src/frontc/frontc.ml" 227 7317 7344 "cil/src/frontc/frontc.ml" 227 7317 7347
+type(
+  Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 227 7317 7349 "cil/src/frontc/frontc.ml" 227 7317 7350
+type(
+  Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 227 7317 7323 "cil/src/frontc/frontc.ml" 227 7317 7351
+type(
+  Cabs.definition
+)
+"cil/src/frontc/frontc.ml" 228 7357 7371 "cil/src/frontc/frontc.ml" 228 7357 7375
+type(
+  Cabs.single_name
+)
+"cil/src/frontc/frontc.ml" 229 7381 7392 "cil/src/frontc/frontc.ml" 229 7381 7393
+type(
+  Cabs.specifier
+)
+"cil/src/frontc/frontc.ml" 229 7381 7396 "cil/src/frontc/frontc.ml" 229 7381 7404
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 229 7381 7417 "cil/src/frontc/frontc.ml" 229 7381 7418
+type(
+  Cabs.decl_type
+)
+"cil/src/frontc/frontc.ml" 229 7381 7419 "cil/src/frontc/frontc.ml" 229 7381 7420
+type(
+  Cabs.single_name list
+)
+"cil/src/frontc/frontc.ml" 229 7381 7421 "cil/src/frontc/frontc.ml" 229 7381 7422
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 229 7381 7406 "cil/src/frontc/frontc.ml" 229 7381 7423
+type(
+  Cabs.decl_type
+)
+"cil/src/frontc/frontc.ml" 229 7381 7425 "cil/src/frontc/frontc.ml" 229 7381 7426
+type(
+  Cabs.attribute list
+)
+"cil/src/frontc/frontc.ml" 229 7381 7428 "cil/src/frontc/frontc.ml" 229 7381 7429
+type(
+  Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 229 7381 7395 "cil/src/frontc/frontc.ml" 229 7381 7430
+type(
+  Cabs.name
+)
+"cil/src/frontc/frontc.ml" 229 7381 7391 "cil/src/frontc/frontc.ml" 229 7381 7431
+type(
+  Cabs.single_name
+)
+"cil/src/frontc/frontc.ml" 230 7437 7449 "cil/src/frontc/frontc.ml" 230 7437 7453
+type(
+  int ref -> unit
+)
+"cil/src/frontc/frontc.ml" 230 7437 7454 "cil/src/frontc/frontc.ml" 230 7437 7461
+type(
+  int ref
+)
+"cil/src/frontc/frontc.ml" 230 7437 7449 "cil/src/frontc/frontc.ml" 230 7437 7461
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 231 7473 7485 "cil/src/frontc/frontc.ml" 231 7473 7491
+type(
+  Pretty.doc -> unit
+)
+"cil/src/frontc/frontc.ml" 231 7473 7493 "cil/src/frontc/frontc.ml" 231 7473 7500
+type(
+  out_channel ->
+  (string -> string -> int -> Pretty.doc, unit, Pretty.doc) format ->
+  string -> string -> int -> Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 231 7473 7501 "cil/src/frontc/frontc.ml" 231 7473 7505
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 231 7473 7506 "cil/src/frontc/frontc.ml" 231 7473 7531
+type(
+  (string -> string -> int -> Pretty.doc, unit, Pretty.doc) format
+)
+"cil/src/frontc/frontc.ml" 232 7532 7565 "cil/src/frontc/frontc.ml" 232 7532 7573
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 232 7532 7574 "cil/src/frontc/frontc.ml" 232 7532 7577
+type(
+  Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 232 7532 7574 "cil/src/frontc/frontc.ml" 232 7532 7591
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 232 7532 7592 "cil/src/frontc/frontc.ml" 232 7532 7595
+type(
+  Cabs.cabsloc
+)
+"cil/src/frontc/frontc.ml" 232 7532 7592 "cil/src/frontc/frontc.ml" 232 7532 7607
+type(
+  int
+)
+"cil/src/frontc/frontc.ml" 231 7473 7492 "cil/src/frontc/frontc.ml" 232 7532 7608
+type(
+  Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 231 7473 7485 "cil/src/frontc/frontc.ml" 232 7532 7608
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 233 7610 7622 "cil/src/frontc/frontc.ml" 233 7610 7627
+type(
+  out_channel -> unit
+)
+"cil/src/frontc/frontc.ml" 233 7610 7628 "cil/src/frontc/frontc.ml" 233 7610 7632
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 233 7610 7622 "cil/src/frontc/frontc.ml" 233 7610 7632
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 234 7634 7646 "cil/src/frontc/frontc.ml" 234 7634 7670
+type(
+  Cabs.single_name -> unit
+)
+"cil/src/frontc/frontc.ml" 234 7634 7671 "cil/src/frontc/frontc.ml" 234 7634 7675
+type(
+  Cabs.single_name
+)
+"cil/src/frontc/frontc.ml" 234 7634 7646 "cil/src/frontc/frontc.ml" 234 7634 7675
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 235 7677 7689 "cil/src/frontc/frontc.ml" 235 7677 7718
+type(
+  string -> unit
+)
+"cil/src/frontc/frontc.ml" 235 7677 7719 "cil/src/frontc/frontc.ml" 235 7677 7722
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 235 7677 7689 "cil/src/frontc/frontc.ml" 235 7677 7722
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 236 7724 7736 "cil/src/frontc/frontc.ml" 236 7724 7757
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 236 7724 7758 "cil/src/frontc/frontc.ml" 236 7724 7760
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 236 7724 7736 "cil/src/frontc/frontc.ml" 236 7724 7760
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 237 7762 7774 "cil/src/frontc/frontc.ml" 237 7762 7786
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 237 7762 7787 "cil/src/frontc/frontc.ml" 237 7762 7789
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 237 7762 7774 "cil/src/frontc/frontc.ml" 237 7762 7789
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 236 7724 7736 "cil/src/frontc/frontc.ml" 237 7762 7789
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 235 7677 7689 "cil/src/frontc/frontc.ml" 237 7762 7789
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 234 7634 7646 "cil/src/frontc/frontc.ml" 237 7762 7789
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 233 7610 7622 "cil/src/frontc/frontc.ml" 237 7762 7789
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 231 7473 7485 "cil/src/frontc/frontc.ml" 237 7762 7789
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 229 7381 7435 "cil/src/frontc/frontc.ml" 238 7790 7801
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 239 7802 7812 "cil/src/frontc/frontc.ml" 239 7802 7813
+type(
+  Cabs.single_name
+)
+"cil/src/frontc/frontc.ml" 239 7802 7817 "cil/src/frontc/frontc.ml" 239 7802 7819
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 227 7317 7355 "cil/src/frontc/frontc.ml" 240 7820 7827
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 242 7829 7835 "cil/src/frontc/frontc.ml" 242 7829 7836
+type(
+  Cabs.definition
+)
+"cil/src/frontc/frontc.ml" 242 7829 7840 "cil/src/frontc/frontc.ml" 242 7829 7842
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 225 7255 7294 "cil/src/frontc/frontc.ml" 243 7843 7848
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 244 7852 7855 "cil/src/frontc/frontc.ml" 244 7852 7864
+type(
+  (Cabs.definition -> unit) -> Cabs.definition list -> unit
+)
+"cil/src/frontc/frontc.ml" 244 7852 7865 "cil/src/frontc/frontc.ml" 244 7852 7869
+type(
+  Cabs.definition -> unit
+)
+"cil/src/frontc/frontc.ml" 244 7852 7870 "cil/src/frontc/frontc.ml" 244 7852 7874
+type(
+  Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 244 7852 7854 "cil/src/frontc/frontc.ml" 244 7852 7875
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 246 7878 7880 "cil/src/frontc/frontc.ml" 246 7878 7886
+type(
+  Pretty.doc -> unit
+)
+"cil/src/frontc/frontc.ml" 246 7878 7888 "cil/src/frontc/frontc.ml" 246 7878 7895
+type(
+  out_channel ->
+  (int -> Pretty.doc, unit, Pretty.doc) format -> int -> Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 246 7878 7896 "cil/src/frontc/frontc.ml" 246 7878 7900
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 246 7878 7901 "cil/src/frontc/frontc.ml" 246 7878 7932
+type(
+  (int -> Pretty.doc, unit, Pretty.doc) format
+)
+"cil/src/frontc/frontc.ml" 246 7878 7933 "cil/src/frontc/frontc.ml" 246 7878 7934
+type(
+  int ref -> int
+)
+"cil/src/frontc/frontc.ml" 246 7878 7934 "cil/src/frontc/frontc.ml" 246 7878 7941
+type(
+  int ref
+)
+"cil/src/frontc/frontc.ml" 246 7878 7933 "cil/src/frontc/frontc.ml" 246 7878 7941
+type(
+  int
+)
+"cil/src/frontc/frontc.ml" 246 7878 7887 "cil/src/frontc/frontc.ml" 246 7878 7942
+type(
+  Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 246 7878 7880 "cil/src/frontc/frontc.ml" 246 7878 7942
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 247 7944 7946 "cil/src/frontc/frontc.ml" 247 7944 7955
+type(
+  out_channel -> unit
+)
+"cil/src/frontc/frontc.ml" 247 7944 7956 "cil/src/frontc/frontc.ml" 247 7944 7960
+type(
+  out_channel
+)
+"cil/src/frontc/frontc.ml" 247 7944 7946 "cil/src/frontc/frontc.ml" 247 7944 7960
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 248 7962 7964 "cil/src/frontc/frontc.ml" 248 7962 7970
+type(
+  unit -> unit
+)
+"cil/src/frontc/frontc.ml" 248 7962 7972 "cil/src/frontc/frontc.ml" 248 7962 7977
+type(
+  (int -> int -> unit, unit, Pretty.doc, unit) format4 -> int -> int -> unit
+)
+"cil/src/frontc/frontc.ml" 248 7962 7978 "cil/src/frontc/frontc.ml" 248 7962 8034
+type(
+  (int -> int -> unit, unit, Pretty.doc, unit) format4
+)
+"cil/src/frontc/frontc.ml" 249 8035 8051 "cil/src/frontc/frontc.ml" 249 8035 8052
+type(
+  int ref -> int
+)
+"cil/src/frontc/frontc.ml" 249 8035 8052 "cil/src/frontc/frontc.ml" 249 8035 8059
+type(
+  int ref
+)
+"cil/src/frontc/frontc.ml" 249 8035 8051 "cil/src/frontc/frontc.ml" 249 8035 8059
+type(
+  int
+)
+"cil/src/frontc/frontc.ml" 249 8035 8061 "cil/src/frontc/frontc.ml" 249 8035 8072
+type(
+  Cabs.definition list -> int
+)
+"cil/src/frontc/frontc.ml" 249 8035 8073 "cil/src/frontc/frontc.ml" 249 8035 8077
+type(
+  Cabs.definition list
+)
+"cil/src/frontc/frontc.ml" 249 8035 8060 "cil/src/frontc/frontc.ml" 249 8035 8078
+type(
+  int
+)
+"cil/src/frontc/frontc.ml" 248 7962 7971 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 248 7962 7964 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 247 7944 7946 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 246 7878 7880 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 244 7852 7854 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 225 7255 7257 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 223 7219 7221 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 221 7196 7198 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 220 7107 7109 "cil/src/frontc/frontc.ml" 249 8035 8079
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 216 6996 6996 "cil/src/frontc/frontc.ml" 250 8080 8083
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 216 6996 6996 "cil/src/frontc/frontc.ml" 250 8080 8083
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 254 8087 8091 "cil/src/frontc/frontc.ml" 254 8087 8103
+type(
+  string -> 'a -> Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 254 8087 8104 "cil/src/frontc/frontc.ml" 254 8087 8109
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 255 8112 8115 "cil/src/frontc/frontc.ml" 255 8112 8120
+type(
+  string -> Pretty.doc -> unit
+)
+"cil/src/frontc/frontc.ml" 255 8112 8121 "cil/src/frontc/frontc.ml" 255 8112 8125
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 255 8112 8127 "cil/src/frontc/frontc.ml" 255 8112 8134
+type(
+  (string -> Pretty.doc, unit, Pretty.doc, Pretty.doc) format4 ->
+  string -> Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 255 8112 8135 "cil/src/frontc/frontc.ml" 255 8112 8157
+type(
+  (string -> Pretty.doc, unit, Pretty.doc, Pretty.doc) format4
+)
+"cil/src/frontc/frontc.ml" 255 8112 8158 "cil/src/frontc/frontc.ml" 255 8112 8163
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 255 8112 8126 "cil/src/frontc/frontc.ml" 255 8112 8164
+type(
+  Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 255 8112 8114 "cil/src/frontc/frontc.ml" 255 8112 8165
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 256 8167 8173 "cil/src/frontc/frontc.ml" 256 8167 8177
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 256 8167 8180 "cil/src/frontc/frontc.ml" 256 8167 8193
+type(
+  string -> Cabs.file
+)
+"cil/src/frontc/frontc.ml" 256 8167 8194 "cil/src/frontc/frontc.ml" 256 8167 8199
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 256 8167 8180 "cil/src/frontc/frontc.ml" 256 8167 8199
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 258 8260 8266 "cil/src/frontc/frontc.ml" 258 8260 8267
+type(
+  'a
+)
+"cil/src/frontc/frontc.ml" 259 8271 8276 "cil/src/frontc/frontc.ml" 259 8271 8281
+type(
+  string -> Pretty.doc -> unit
+)
+"cil/src/frontc/frontc.ml" 259 8271 8282 "cil/src/frontc/frontc.ml" 259 8271 8286
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 259 8271 8288 "cil/src/frontc/frontc.ml" 259 8271 8295
+type(
+  (string -> Pretty.doc, unit, Pretty.doc, Pretty.doc) format4 ->
+  string -> Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 259 8271 8296 "cil/src/frontc/frontc.ml" 259 8271 8330
+type(
+  (string -> Pretty.doc, unit, Pretty.doc, Pretty.doc) format4
+)
+"cil/src/frontc/frontc.ml" 259 8271 8331 "cil/src/frontc/frontc.ml" 259 8271 8336
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 259 8271 8287 "cil/src/frontc/frontc.ml" 259 8271 8337
+type(
+  Pretty.doc
+)
+"cil/src/frontc/frontc.ml" 259 8271 8275 "cil/src/frontc/frontc.ml" 259 8271 8338
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 260 8340 8348 "cil/src/frontc/frontc.ml" 260 8340 8351
+type(
+  Cil.file
+)
+"cil/src/frontc/frontc.ml" 260 8340 8354 "cil/src/frontc/frontc.ml" 260 8340 8364
+type(
+  string -> (Cabs.file -> Cil.file) -> Cabs.file -> Cil.file
+)
+"cil/src/frontc/frontc.ml" 260 8340 8365 "cil/src/frontc/frontc.ml" 260 8340 8381
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 260 8340 8382 "cil/src/frontc/frontc.ml" 260 8340 8399
+type(
+  Cabs.file -> Cil.file
+)
+"cil/src/frontc/frontc.ml" 260 8340 8400 "cil/src/frontc/frontc.ml" 260 8340 8404
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 260 8340 8354 "cil/src/frontc/frontc.ml" 260 8340 8404
+type(
+  Cil.file
+)
+"cil/src/frontc/frontc.ml" 261 8408 8415 "cil/src/frontc/frontc.ml" 261 8408 8416
+type(
+  bool ref -> bool
+)
+"cil/src/frontc/frontc.ml" 261 8408 8416 "cil/src/frontc/frontc.ml" 261 8408 8429
+type(
+  bool ref
+)
+"cil/src/frontc/frontc.ml" 261 8408 8415 "cil/src/frontc/frontc.ml" 261 8408 8429
+type(
+  bool
+)
+"cil/src/frontc/frontc.ml" 261 8408 8436 "cil/src/frontc/frontc.ml" 261 8408 8451
+type(
+  Cabs.file -> unit
+)
+"cil/src/frontc/frontc.ml" 261 8408 8452 "cil/src/frontc/frontc.ml" 261 8408 8456
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 261 8408 8435 "cil/src/frontc/frontc.ml" 261 8408 8457
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 261 8408 8412 "cil/src/frontc/frontc.ml" 261 8408 8457
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 262 8459 8463 "cil/src/frontc/frontc.ml" 262 8459 8467
+type(
+  Cabs.file
+)
+"cil/src/frontc/frontc.ml" 262 8459 8469 "cil/src/frontc/frontc.ml" 262 8459 8472
+type(
+  Cil.file
+)
+"cil/src/frontc/frontc.ml" 262 8459 8463 "cil/src/frontc/frontc.ml" 262 8459 8472
+type(
+  Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 261 8408 8412 "cil/src/frontc/frontc.ml" 262 8459 8472
+type(
+  Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 260 8340 8344 "cil/src/frontc/frontc.ml" 262 8459 8472
+type(
+  Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 259 8271 8275 "cil/src/frontc/frontc.ml" 262 8459 8472
+type(
+  Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 258 8260 8262 "cil/src/frontc/frontc.ml" 262 8459 8472
+type(
+  'a -> Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 256 8167 8169 "cil/src/frontc/frontc.ml" 262 8459 8472
+type(
+  'a -> Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 255 8112 8114 "cil/src/frontc/frontc.ml" 262 8459 8472
+type(
+  'a -> Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 264 8474 8478 "cil/src/frontc/frontc.ml" 264 8474 8483
+type(
+  string -> unit -> Cil.file
+)
+"cil/src/frontc/frontc.ml" 264 8474 8484 "cil/src/frontc/frontc.ml" 264 8474 8489
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 264 8474 8497 "cil/src/frontc/frontc.ml" 264 8474 8499
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 264 8474 8503 "cil/src/frontc/frontc.ml" 264 8474 8506
+type(
+  Cabs.file * Cil.file -> Cil.file
+)
+"cil/src/frontc/frontc.ml" 264 8474 8507 "cil/src/frontc/frontc.ml" 264 8474 8519
+type(
+  string -> unit -> Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 264 8474 8520 "cil/src/frontc/frontc.ml" 264 8474 8525
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 264 8474 8526 "cil/src/frontc/frontc.ml" 264 8474 8528
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 264 8474 8506 "cil/src/frontc/frontc.ml" 264 8474 8529
+type(
+  Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 264 8474 8503 "cil/src/frontc/frontc.ml" 264 8474 8529
+type(
+  Cil.file
+)
+"cil/src/frontc/frontc.ml" 264 8474 8492 "cil/src/frontc/frontc.ml" 264 8474 8530
+type(
+  unit -> Cil.file
+)
+"cil/src/frontc/frontc.ml" 266 8532 8536 "cil/src/frontc/frontc.ml" 266 8532 8551
+type(
+  string -> unit -> Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 266 8532 8552 "cil/src/frontc/frontc.ml" 266 8532 8557
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 266 8532 8565 "cil/src/frontc/frontc.ml" 266 8532 8567
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 266 8532 8571 "cil/src/frontc/frontc.ml" 266 8532 8583
+type(
+  string -> unit -> Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 266 8532 8584 "cil/src/frontc/frontc.ml" 266 8532 8589
+type(
+  string
+)
+"cil/src/frontc/frontc.ml" 266 8532 8590 "cil/src/frontc/frontc.ml" 266 8532 8592
+type(
+  unit
+)
+"cil/src/frontc/frontc.ml" 266 8532 8571 "cil/src/frontc/frontc.ml" 266 8532 8592
+type(
+  Cabs.file * Cil.file
+)
+"cil/src/frontc/frontc.ml" 266 8532 8560 "cil/src/frontc/frontc.ml" 266 8532 8593
+type(
+  unit -> Cabs.file * Cil.file
+)

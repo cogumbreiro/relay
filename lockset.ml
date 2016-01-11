@@ -256,7 +256,7 @@ struct
     (* assume all given locksets are the main copy *)
     (f1 == f2 && s1 == s2)
   let hash (f, s) = 
-    (LS.hash f) lxor ((LS.hash s) lsl 1)
+    (LS.hash f) lxor ((LS.hash s) lsl 3)
 end
 
 (* Commuting hash *)

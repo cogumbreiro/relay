@@ -1,0 +1,14 @@
+TARGETS := ciltrees
+all: $(TARGETS)
+DUMPER=../../scripts/dump-with-stats.sh
+
+ciltrees: 
+	$(DUMPER)
+
+.PHONY: clean
+clean:
+	rm -rf $(TARGETS)
+	rm -f *.o
+	rm -f *.*~
+	rm -f $(LIBS)/*.o
+	rm -f $(LIBS)/*.*~

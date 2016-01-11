@@ -5,7 +5,7 @@ open Cil
 open Fstructs
 open Logging
 
-module RS = Racesummary
+module RS = Racestate.RS
 module LS = Lockset
 
 (* AllUnlocks summary info *)

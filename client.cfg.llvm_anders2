@@ -1,0 +1,22 @@
+include(client.cfg.basic)
+
+ALIAS_ANALYSIS {
+
+FUNPTRS : andersFS
+EXPS : fi_ci_eq
+LVALS : fi_ci_eq
+MAY_ALIAS : fi_ci_eq
+
+}
+
+ENTRY_POINTS {
+
+USE_ROOTS : false
+
+}
+
+SYM_EX {
+
+ADJUST : true
+
+}

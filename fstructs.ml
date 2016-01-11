@@ -36,10 +36,7 @@
 *)
 
 
-(** Simple Set/Map/Hashtbl modules for storing function information.
-    Also includes data structure modules for basic CIL expressions
-    and lvals... for some reason.
- **)
+(** Simple Set/Map/Hashtbl modules for storing function keys. *)
 
 open Cil
 

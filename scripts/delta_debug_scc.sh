@@ -44,7 +44,7 @@ scc_test () {
         echo "CHECKING steens size"
         # check steens size as safety net?
         (cd $CG_STUFF; \
-            ./scc_stats.exe -cg $CURDIR/ciltrees/calls.steens | \
+            ./scc_stats.exe -su client.cfg.steens -cg $CURDIR/ciltrees/calls.steens | \
             $CG_STUFF/scripts/maxscc_at_least.py $SCC_LIMIT)
         MAXSCCSTEENS=$?
         return $MAXSCCSTEENS
@@ -52,7 +52,7 @@ scc_test () {
 
     echo "CHECKING anders size"
     (cd $CG_STUFF; \
-        ./scc_stats.exe -cg $CURDIR/ciltrees/calls.anders | \
+        ./scc_stats.exe -su client.cfg.anders -cg $CURDIR/ciltrees/calls.anders | \
         $CG_STUFF/scripts/maxscc_at_least.py $SCC_LIMIT)
     MAXSCCANDERS=$?
     return $MAXSCCANDERS

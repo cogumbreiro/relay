@@ -1,40 +1,45 @@
-Mon Oct 12 14:20:40 PDT 2009
+Tue Jan 19 22:00:58 PST 2010
 incrementing generation number
 incrementing value in gen_num.txt
 
 running server on /home/jan/research/relay-race/racetests/knot/ciltrees
+Registered summary type: rs_scc
 Registered summary type: rs
-Server ip is: 127.0.0.1
+Server ip is: 127.0.1.1
 Loading Cil Varinfo ID ranges for lookup tables
+Loading ranges from .vids_ckeys_fixed
 Setting Cil Varinfo ID ranges
 Finished parsing config group: DISTRIBUTED
 Finished parsing config group: SERVER
 Done reading config file
-Finished parsing config group: ALIAS_ANALYSIS
 Finished parsing config group: SUMMARY_DB
 Finished parsing config group: REQUEST
 Finished parsing config group: DISTRIBUTED
 Finished parsing config group: FILE_SERVER
-Finished parsing config group: ENTRY_POINTS
 Finished parsing config group: LOCK_FUNCS
 Finished parsing config group: THREAD_FUNCS
 Finished parsing config group: EXIT_FUNCS
+Finished parsing config group: ALIAS_ANALYSIS
+Finished parsing config group: ENTRY_POINTS
 Finished parsing config group: SYM_EX
 Done reading config file
-Initializing Andersen's AA info
+Initializing Steensgaard AA info
 Loading function info
 Loading tempVar info
-Using old PTA results: /home/jan/research/relay-race/racetests/knot/ciltrees/.pta_temp.anders
+Using old PTA results
+Old PTA results loaded
+Initializing Andersen's AA info
+Using old PTA results: /home/jan/research/relay-race/racetests/knot/ciltrees/.pta_results.anders
 Old PTA results loaded
 Entry points use roots: true
 trying to clear logs
-Callgraph, etc.
------
-Reached end of /home/jan/research/relay-race/racetests/knot/ciltrees/calls.anders call graph file
-Num funcs: 121
-Scc_cg: Pruned 32 funcs w/out bodies for scc DAG
 Starting server
 -----
+Reading callgraph, initializing work
+-----
+Reached end of /home/jan/research/relay-race/racetests/knot/ciltrees/calls.anders call graph file
+Num funcs: 120
+Scc_cg: Pruned 31 funcs w/out bodies for scc DAG
 >>> PROGRESS 1/89 SCCs DONE!
 
 >>> PROGRESS 2/89 SCCs DONE!
@@ -222,558 +227,153 @@ Printing races
 ****
 Possible race between access to:
 
-g_cache_hits @ knot_comb.c:764 and
-g_cache_hits @ knot_comb.c:764
-	Cluster ID: 16
+g_cache_hits @ knot_comb.c:769 and
+g_cache_hits @ knot_comb.c:769
+	Cluster ID: 53
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:487:(173.f)] and
-	[knot_comb.c:1251:(404.f)]
+	[knot_comb.c:487:(22.f)] and
+	[knot_comb.c:1256:(255.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
-L+ = {g_cache_mutex#g:184} (1)
+L+ = {g_cache_mutex#g:33} (1)
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 (1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 ****
 Possible race between access to:
 
-g_cache_hits @ knot_comb.c:764 and
-g_cache_hits @ knot_comb.c:764
-	Cluster ID: 11
+g_cache_hits @ knot_comb.c:769 and
+g_cache_hits @ knot_comb.c:769
+	Cluster ID: 38
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:487:(173.f)] and
-	[knot_comb.c:1252:(404.f)]
+	[knot_comb.c:487:(22.f)] and
+	[knot_comb.c:1257:(255.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
-L+ = {g_cache_mutex#g:184} (1)
+L+ = {g_cache_mutex#g:33} (1)
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 (1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 ****
 Possible race between access to:
 
-g_cache_misses @ knot_comb.c:765 and
-g_cache_misses @ knot_comb.c:765
-	Cluster ID: 15
+g_cache_misses @ knot_comb.c:770 and
+g_cache_misses @ knot_comb.c:770
+	Cluster ID: 48
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:490:(173.f)] and
-	[knot_comb.c:1253:(404.f)]
+	[knot_comb.c:490:(22.f)] and
+	[knot_comb.c:1258:(255.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
-L+ = {g_cache_mutex#g:184} (1)
+L+ = {g_cache_mutex#g:33} (1)
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 (1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 ****
 Possible race between access to:
 
-g_cache_misses @ knot_comb.c:765 and
-g_cache_misses @ knot_comb.c:765
-	Cluster ID: 10
+g_cache_misses @ knot_comb.c:770 and
+g_cache_misses @ knot_comb.c:770
+	Cluster ID: 44
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:490:(173.f)] and
-	[knot_comb.c:1254:(404.f)]
+	[knot_comb.c:490:(22.f)] and
+	[knot_comb.c:1259:(255.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
-L+ = {g_cache_mutex#g:184} (1)
+L+ = {g_cache_mutex#g:33} (1)
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 (1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 ****
 Possible race between access to:
 
 g_hash @ knot_comb.c:263 and
 g_hash @ knot_comb.c:263
-	Cluster ID: 14
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:372:(217.f), knot_comb.c:423:(220.f), knot_comb.c:446:(227.f)] and
-	[knot_comb.c:472:(172.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = {g_cache_mutex#g:184} (1)
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-g_spawn_on_demand @ knot_comb.c:756 and
-g_spawn_on_demand @ knot_comb.c:756
-	Cluster ID: 23
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1080:(375.f)] and
-	[knot_comb.c:1184:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-g_conn_open @ knot_comb.c:760 and
-g_conn_open @ knot_comb.c:760
-	Cluster ID: 8
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1072:(375.f)] and
-	[knot_comb.c:1072:(375.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-
-g_conn_open @ knot_comb.c:760 and
-g_conn_open @ knot_comb.c:760
-	Cluster ID: 25
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1072:(375.f)] and
-	[knot_comb.c:1244:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-g_conn_open @ knot_comb.c:760 and
-g_conn_open @ knot_comb.c:760
-	Cluster ID: 17
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1072:(375.f)] and
-	[knot_comb.c:1245:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-g_conn_fail @ knot_comb.c:761 and
-g_conn_fail @ knot_comb.c:761
-	Cluster ID: 7
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1012:(361.f), knot_comb.c:1035:(361.f), knot_comb.c:1092:(375.f)] and
-	[knot_comb.c:1012:(361.f), knot_comb.c:1035:(361.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-
-g_conn_fail @ knot_comb.c:761 and
-g_conn_fail @ knot_comb.c:761
-	Cluster ID: 21
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1012:(361.f), knot_comb.c:1035:(361.f)] and
-	[knot_comb.c:1248:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-g_conn_fail @ knot_comb.c:761 and
-g_conn_fail @ knot_comb.c:761
-	Cluster ID: 22
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1012:(361.f), knot_comb.c:1035:(361.f)] and
-	[knot_comb.c:1249:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-g_conn_succeed @ knot_comb.c:762 and
-g_conn_succeed @ knot_comb.c:762
-	Cluster ID: 6
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1010:(361.f)] and
-	[knot_comb.c:1010:(361.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-(1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-
-g_conn_succeed @ knot_comb.c:762 and
-g_conn_succeed @ knot_comb.c:762
-	Cluster ID: 24
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1010:(361.f)] and
-	[knot_comb.c:1246:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-g_conn_succeed @ knot_comb.c:762 and
-g_conn_succeed @ knot_comb.c:762
-	Cluster ID: 20
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1010:(361.f)] and
-	[knot_comb.c:1247:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-g_conn_active @ knot_comb.c:763 and
-g_conn_active @ knot_comb.c:763
-	Cluster ID: 0
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1045:(372.f)] and
-	[knot_comb.c:1045:(372.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-****
-Possible race between access to:
-
-g_conn_active @ knot_comb.c:763 and
-g_conn_active @ knot_comb.c:763
-	Cluster ID: 9
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1045:(372.f)] and
-	[knot_comb.c:1250:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-****
-Possible race between access to:
-
-g_conn_active @ knot_comb.c:763 and
-g_conn_active @ knot_comb.c:763
-	Cluster ID: 27
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1073:(375.f), knot_comb.c:1093:(375.f), knot_comb.c:1099:(375.f)] and
-	[knot_comb.c:1045:(372.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-****
-Possible race between access to:
-
-g_conn_active @ knot_comb.c:763 and
-g_conn_active @ knot_comb.c:763
-	Cluster ID: 5
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1073:(375.f), knot_comb.c:1093:(375.f), knot_comb.c:1099:(375.f)] and
-	[knot_comb.c:1073:(375.f), knot_comb.c:1093:(375.f), knot_comb.c:1099:(375.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-
-g_conn_active @ knot_comb.c:763 and
-g_conn_active @ knot_comb.c:763
 	Cluster ID: 26
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:1073:(375.f), knot_comb.c:1093:(375.f), knot_comb.c:1099:(375.f)] and
-	[knot_comb.c:1250:(404.f)]
+	[knot_comb.c:372:(65.f), knot_comb.c:423:(68.f), knot_comb.c:446:(75.f)] and
+	[knot_comb.c:472:(21.f)]
 
 	Confidence: Syntactic
 
 LS for 1st access:
-L+ = empty;
+L+ = {g_cache_mutex#g:33} (1)
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 	Th. 2 spawned: #entry_point:0 0 w/ func: main
 ****
 Possible race between access to:
 
-g_bytes_sent @ knot_comb.c:766 and
-g_bytes_sent @ knot_comb.c:766
-	Cluster ID: 4
+_a296_8660_knot_comb_1 @ knot_comb.c:268 and
+_a296_8660_knot_comb_1 @ knot_comb.c:268
+	Cluster ID: 20
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:901:(330.f), knot_comb.c:958:(348.f), knot_comb.c:1022:(361.f)] and
-	[knot_comb.c:901:(330.f), knot_comb.c:958:(348.f), knot_comb.c:1022:(361.f)]
+	[lib.c:366:(11.f), lib.c:173:(20.f)] and
+	[lib.c:366:(11.f), lib.c:173:(20.f)]
 
 	Confidence: Syntactic
 
@@ -781,33 +381,33 @@ LS for 1st access:
 L+ = empty;
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 (1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 ****
 Possible race between access to:
 
-g_bytes_sent @ knot_comb.c:766 and
-g_bytes_sent @ knot_comb.c:766
-	Cluster ID: 13
+_a567_17365_knot_comb_1 @ knot_comb.c:567 and
+_a567_17365_knot_comb_1 @ knot_comb.c:567
+	Cluster ID: 46
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:901:(330.f), knot_comb.c:958:(348.f), knot_comb.c:1022:(361.f)] and
-	[knot_comb.c:1242:(404.f)]
+	[lib.c:299:(7.f)] and
+	[knot_comb.c:598:(96.f)]
 
 	Confidence: Syntactic
 
@@ -815,55 +415,33 @@ LS for 1st access:
 L+ = empty;
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 ****
 Possible race between access to:
 
-g_bytes_sent @ knot_comb.c:766 and
-g_bytes_sent @ knot_comb.c:766
-	Cluster ID: 12
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:901:(330.f), knot_comb.c:958:(348.f), knot_comb.c:1022:(361.f)] and
-	[knot_comb.c:1243:(404.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: #entry_point:0 0 w/ func: main
-****
-Possible race between access to:
-
-attr_init_done @ knot_comb.c:1051 and
-attr_init_done @ knot_comb.c:1051
+_a567_17365_knot_comb_1.buf[0] @ knot_comb.c:567 and
+_a567_17365_knot_comb_1.buf[0] @ knot_comb.c:567
 	Cluster ID: 19
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:1087:(375.f)] and
-	[knot_comb.c:1081:(375.f)]
+	[lib.c:173:(20.f), knot_comb.c:694:(94.f), knot_comb.c:698:(94.f)] and
+	[lib.c:173:(20.f), knot_comb.c:694:(94.f), knot_comb.c:698:(94.f)]
 
 	Confidence: Syntactic
 
@@ -871,164 +449,1457 @@ LS for 1st access:
 L+ = empty;
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 (1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 ****
 Possible race between access to:
 
-attr_init_done @ knot_comb.c:1051 and
-attr_init_done @ knot_comb.c:1051
-	Cluster ID: 3
-	Escapes? true / true 
-	Accessed at locs:
-	[knot_comb.c:1087:(375.f)] and
-	[knot_comb.c:1087:(375.f)]
-
-	Confidence: Syntactic
-
-LS for 1st access:
-L+ = empty;
-LS for 2nd access:
-L+ = empty;
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-
-Different possible paths & LS (first 4):
-
-(0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-(1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-****
-Possible race between access to:
-
-REP:[641] and
-REP:[641]
+_a567_17365_knot_comb_1.socket @ knot_comb.c:567 and
+_a567_17365_knot_comb_1.socket @ knot_comb.c:567
 	Cluster ID: 18
 	Escapes? true / true 
 	Accessed at locs:
-	[lib.c:299:(158.f), knot_comb.c:605:(249.f), knot_comb.c:610:(249.f), knot_comb.c:632:(249.f)] and
-	[lib.c:190:(161.f), lib.c:317:(245.f), lib.c:168:(296.f), knot_comb.c:971:(348.f), knot_comb.c:973:(348.f)]
+	[knot_comb.c:669:(93.f)] and
+	[knot_comb.c:669:(93.f)]
 
-	Confidence: used PTA nodes lblSet(0, 0)
+	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: knot_comb.c:918
 LS for 2nd access:
 L+ = empty;
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 (1)
-	made empty at: knot_comb.c:918
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 ****
 Possible race between access to:
 
-REP:[641] and
-REP:[641]
-	Cluster ID: 2
+_a567_17365_knot_comb_1.socket @ knot_comb.c:567 and
+_a567_17365_knot_comb_1.socket @ knot_comb.c:567
+	Cluster ID: 27
 	Escapes? true / true 
 	Accessed at locs:
-	[lib.c:299:(158.f), knot_comb.c:605:(249.f), knot_comb.c:610:(249.f), knot_comb.c:632:(249.f)] and
-	[lib.c:299:(158.f), knot_comb.c:605:(249.f), knot_comb.c:610:(249.f), knot_comb.c:632:(249.f)]
+	[knot_comb.c:669:(93.f)] and
+	[knot_comb.c:709:(94.f)]
 
-	Confidence: used PTA nodes lblSet(0, 0)
+	Confidence: Syntactic
 
 LS for 1st access:
 L+ = empty;
-	made empty at: knot_comb.c:918
 LS for 2nd access:
 L+ = empty;
-	made empty at: knot_comb.c:918
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1089 31213 w/ func: thread_process_client
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (1)
-	Th. 1 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 ****
 Possible race between access to:
 
-REP:[641].refs and
-REP:[641].refs
+_a567_17365_knot_comb_1.used @ knot_comb.c:567 and
+_a567_17365_knot_comb_1.used @ knot_comb.c:567
+	Cluster ID: 17
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:667:(93.f), knot_comb.c:701:(94.f), knot_comb.c:703:(94.f), knot_comb.c:722:(94.f)] and
+	[knot_comb.c:667:(93.f), knot_comb.c:701:(94.f), knot_comb.c:703:(94.f), knot_comb.c:722:(94.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a567_17365_knot_comb_1.used @ knot_comb.c:567 and
+_a567_17365_knot_comb_1.used @ knot_comb.c:567
+	Cluster ID: 49
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:667:(93.f), knot_comb.c:701:(94.f), knot_comb.c:703:(94.f), knot_comb.c:722:(94.f)] and
+	[knot_comb.c:685:(94.f), knot_comb.c:688:(94.f), knot_comb.c:702:(94.f), knot_comb.c:718:(94.f), knot_comb.c:719:(94.f), knot_comb.c:721:(94.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a567_17365_knot_comb_1.valid @ knot_comb.c:567 and
+_a567_17365_knot_comb_1.valid @ knot_comb.c:567
+	Cluster ID: 16
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:668:(93.f), knot_comb.c:704:(94.f), knot_comb.c:715:(94.f), knot_comb.c:721:(94.f)] and
+	[knot_comb.c:668:(93.f), knot_comb.c:704:(94.f), knot_comb.c:715:(94.f), knot_comb.c:721:(94.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a567_17365_knot_comb_1.valid @ knot_comb.c:567 and
+_a567_17365_knot_comb_1.valid @ knot_comb.c:567
+	Cluster ID: 41
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:668:(93.f), knot_comb.c:704:(94.f), knot_comb.c:715:(94.f), knot_comb.c:721:(94.f)] and
+	[knot_comb.c:688:(94.f), knot_comb.c:691:(94.f), knot_comb.c:702:(94.f), knot_comb.c:707:(94.f), knot_comb.c:709:(94.f), knot_comb.c:715:(94.f), knot_comb.c:719:(94.f), knot_comb.c:721:(94.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+g_spawn_on_demand @ knot_comb.c:761 and
+g_spawn_on_demand @ knot_comb.c:761
+	Cluster ID: 33
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1085:(226.f)] and
+	[knot_comb.c:1189:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_open @ knot_comb.c:765 and
+g_conn_open @ knot_comb.c:765
+	Cluster ID: 15
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1077:(226.f)] and
+	[knot_comb.c:1077:(226.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+g_conn_open @ knot_comb.c:765 and
+g_conn_open @ knot_comb.c:765
+	Cluster ID: 50
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1077:(226.f)] and
+	[knot_comb.c:1249:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_open @ knot_comb.c:765 and
+g_conn_open @ knot_comb.c:765
+	Cluster ID: 51
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1077:(226.f)] and
+	[knot_comb.c:1250:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_fail @ knot_comb.c:766 and
+g_conn_fail @ knot_comb.c:766
+	Cluster ID: 14
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1017:(212.f), knot_comb.c:1040:(212.f), knot_comb.c:1097:(226.f)] and
+	[knot_comb.c:1017:(212.f), knot_comb.c:1040:(212.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+g_conn_fail @ knot_comb.c:766 and
+g_conn_fail @ knot_comb.c:766
+	Cluster ID: 32
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1017:(212.f), knot_comb.c:1040:(212.f)] and
+	[knot_comb.c:1253:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_fail @ knot_comb.c:766 and
+g_conn_fail @ knot_comb.c:766
+	Cluster ID: 43
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1017:(212.f), knot_comb.c:1040:(212.f)] and
+	[knot_comb.c:1254:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_succeed @ knot_comb.c:767 and
+g_conn_succeed @ knot_comb.c:767
+	Cluster ID: 13
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1015:(212.f)] and
+	[knot_comb.c:1015:(212.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+g_conn_succeed @ knot_comb.c:767 and
+g_conn_succeed @ knot_comb.c:767
+	Cluster ID: 39
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1015:(212.f)] and
+	[knot_comb.c:1251:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_succeed @ knot_comb.c:767 and
+g_conn_succeed @ knot_comb.c:767
+	Cluster ID: 35
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1015:(212.f)] and
+	[knot_comb.c:1252:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_conn_active @ knot_comb.c:768 and
+g_conn_active @ knot_comb.c:768
+	Cluster ID: 0
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1050:(223.f)] and
+	[knot_comb.c:1050:(223.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+g_conn_active @ knot_comb.c:768 and
+g_conn_active @ knot_comb.c:768
+	Cluster ID: 28
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1050:(223.f)] and
+	[knot_comb.c:1255:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+g_conn_active @ knot_comb.c:768 and
+g_conn_active @ knot_comb.c:768
+	Cluster ID: 47
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1078:(226.f), knot_comb.c:1098:(226.f), knot_comb.c:1104:(226.f)] and
+	[knot_comb.c:1050:(223.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+****
+Possible race between access to:
+
+g_conn_active @ knot_comb.c:768 and
+g_conn_active @ knot_comb.c:768
+	Cluster ID: 12
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1078:(226.f), knot_comb.c:1098:(226.f), knot_comb.c:1104:(226.f)] and
+	[knot_comb.c:1078:(226.f), knot_comb.c:1098:(226.f), knot_comb.c:1104:(226.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+g_conn_active @ knot_comb.c:768 and
+g_conn_active @ knot_comb.c:768
+	Cluster ID: 22
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1078:(226.f), knot_comb.c:1098:(226.f), knot_comb.c:1104:(226.f)] and
+	[knot_comb.c:1255:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_bytes_sent @ knot_comb.c:771 and
+g_bytes_sent @ knot_comb.c:771
+	Cluster ID: 11
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:906:(181.f), knot_comb.c:963:(199.f), knot_comb.c:1027:(212.f)] and
+	[knot_comb.c:906:(181.f), knot_comb.c:963:(199.f), knot_comb.c:1027:(212.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+g_bytes_sent @ knot_comb.c:771 and
+g_bytes_sent @ knot_comb.c:771
+	Cluster ID: 30
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:906:(181.f), knot_comb.c:963:(199.f), knot_comb.c:1027:(212.f)] and
+	[knot_comb.c:1247:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+g_bytes_sent @ knot_comb.c:771 and
+g_bytes_sent @ knot_comb.c:771
+	Cluster ID: 23
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:906:(181.f), knot_comb.c:963:(199.f), knot_comb.c:1027:(212.f)] and
+	[knot_comb.c:1248:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+****
+Possible race between access to:
+
+_a863_25945_knot_comb_1 @ knot_comb.c:863 and
+_a863_25945_knot_comb_1 @ knot_comb.c:863
+	Cluster ID: 25
+	Escapes? true / true 
+	Accessed at locs:
+	[lib.c:168:(146.f)] and
+	[lib.c:299:(7.f), lib.c:173:(20.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	made empty at: knot_comb.c:990
+	lval 1: [REP: 1]
+	lval 2: [REP: 1]
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	made empty at: knot_comb.c:990
+	lval 1: [REP: 1]
+	lval 2: [REP: 1]
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1 @ knot_comb.c:994 and
+_a994_28837_knot_comb_1 @ knot_comb.c:994
+	Cluster ID: 36
+	Escapes? true / true 
+	Accessed at locs:
+	[lib.c:299:(7.f)] and
+	[knot_comb.c:781:(163.f), knot_comb.c:786:(163.f), knot_comb.c:792:(163.f), knot_comb.c:793:(163.f), knot_comb.c:798:(163.f), knot_comb.c:799:(163.f), knot_comb.c:804:(163.f), knot_comb.c:805:(163.f), knot_comb.c:810:(163.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1 @ knot_comb.c:994 and
+_a994_28837_knot_comb_1 @ knot_comb.c:994
+	Cluster ID: 21
+	Escapes? true / true 
+	Accessed at locs:
+	[lib.c:299:(7.f)] and
+	[lib.c:299:(7.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+
+Different possible paths & LS (first 4):
+
+(0)
+	lval 1: _a944_27650_knot_comb_1
+	lval 2: _a944_27650_knot_comb_1
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+(1)
+	lval 1: _a863_25945_knot_comb_1
+	lval 2: _a863_25945_knot_comb_1
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+(2)
+	lval 1: _a567_17365_knot_comb_1
+	lval 2: _a567_17365_knot_comb_1
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+(3)
+	lval 1: _a268_7952_knot_comb_1
+	lval 2: _a268_7952_knot_comb_1
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1.closed @ knot_comb.c:994 and
+_a994_28837_knot_comb_1.closed @ knot_comb.c:994
+	Cluster ID: 10
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:562:(95.f), knot_comb.c:594:(96.f)] and
+	[knot_comb.c:562:(95.f), knot_comb.c:594:(96.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1.closed @ knot_comb.c:994 and
+_a994_28837_knot_comb_1.closed @ knot_comb.c:994
+	Cluster ID: 40
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:562:(95.f), knot_comb.c:594:(96.f)] and
+	[knot_comb.c:836:(170.f), knot_comb.c:1021:(212.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1.socket @ knot_comb.c:994 and
+_a994_28837_knot_comb_1.socket @ knot_comb.c:994
+	Cluster ID: 9
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:563:(95.f)] and
+	[knot_comb.c:563:(95.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1.socket @ knot_comb.c:994 and
+_a994_28837_knot_comb_1.socket @ knot_comb.c:994
+	Cluster ID: 29
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:563:(95.f)] and
+	[knot_comb.c:587:(96.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1.url[0] @ knot_comb.c:994 and
+_a994_28837_knot_comb_1.url[0] @ knot_comb.c:994
+	Cluster ID: 8
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:560:(95.f), knot_comb.c:588:(96.f)] and
+	[knot_comb.c:560:(95.f), knot_comb.c:588:(96.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1.url[0] @ knot_comb.c:994 and
+_a994_28837_knot_comb_1.url[0] @ knot_comb.c:994
+	Cluster ID: 24
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:560:(95.f), knot_comb.c:588:(96.f)] and
+	[knot_comb.c:599:(96.f), knot_comb.c:602:(96.f), knot_comb.c:644:(96.f), knot_comb.c:837:(170.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1.version @ knot_comb.c:994 and
+_a994_28837_knot_comb_1.version @ knot_comb.c:994
+	Cluster ID: 7
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:561:(95.f), knot_comb.c:589:(96.f), knot_comb.c:647:(96.f)] and
+	[knot_comb.c:561:(95.f), knot_comb.c:589:(96.f), knot_comb.c:647:(96.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a994_28837_knot_comb_1.version @ knot_comb.c:994 and
+_a994_28837_knot_comb_1.version @ knot_comb.c:994
+	Cluster ID: 42
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:561:(95.f), knot_comb.c:589:(96.f), knot_comb.c:647:(96.f)] and
+	[knot_comb.c:1034:(212.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+attr_init_done @ knot_comb.c:1056 and
+attr_init_done @ knot_comb.c:1056
+	Cluster ID: 52
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1092:(226.f)] and
+	[knot_comb.c:1086:(226.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+attr_init_done @ knot_comb.c:1056 and
+attr_init_done @ knot_comb.c:1056
+	Cluster ID: 6
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1092:(226.f)] and
+	[knot_comb.c:1092:(226.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a1059_30241_knot_comb_1 @ knot_comb.c:1059 and
+_a1059_30241_knot_comb_1 @ knot_comb.c:1059
+	Cluster ID: 5
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1079:(226.f)] and
+	[knot_comb.c:1079:(226.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a1059_30241_knot_comb_2 @ knot_comb.c:1059 and
+_a1059_30241_knot_comb_2 @ knot_comb.c:1059
+	Cluster ID: 4
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1069:(226.f)] and
+	[knot_comb.c:1069:(226.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+_a1227_34524_knot_comb_1.id @ knot_comb.c:1132 and
+_a1227_34524_knot_comb_1.id @ knot_comb.c:1132
+	Cluster ID: 45
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1125:(245.f)] and
+	[knot_comb.c:1231:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+_a1227_34524_knot_comb_1.s @ knot_comb.c:1132 and
+_a1227_34524_knot_comb_1.s @ knot_comb.c:1132
+	Cluster ID: 37
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:1126:(245.f)] and
+	[knot_comb.c:1232:(255.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: #entry_point:0 0 w/ func: main
+
+Different possible paths & LS (first 4):
+
+****
+Possible race between access to:
+
+_a180_4071_lib_1 @ lib.c:179 and
+_a180_4071_lib_1 @ lib.c:179
+	Cluster ID: 3
+	Escapes? true / true 
+	Accessed at locs:
+	[lib.c:181:(13.f)] and
+	[lib.c:181:(13.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+(1)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+$NULL @ :-1 and
+$NULL @ :-1
+	Cluster ID: 34
+	Escapes? true / true 
+	Accessed at locs:
+	[lib.c:299:(7.f), lib.c:366:(11.f), lib.c:173:(20.f)] and
+	[lib.c:158:(5.f), lib.c:181:(13.f)]
+
+	Confidence: Syntactic
+
+LS for 1st access:
+L+ = empty;
+	made empty at: knot_comb.c:494
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	made empty at: knot_comb.c:494
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+[REP: 12] and
+[REP: 12]
 	Cluster ID: 1
 	Escapes? true / true 
 	Accessed at locs:
-	[knot_comb.c:511:(174.f), knot_comb.c:525:(175.f), knot_comb.c:526:(175.f)] and
-	[knot_comb.c:511:(174.f), knot_comb.c:525:(175.f)]
+	[knot_comb.c:610:(96.f), knot_comb.c:615:(96.f), knot_comb.c:637:(96.f)] and
+	[knot_comb.c:610:(96.f), knot_comb.c:615:(96.f), knot_comb.c:637:(96.f)]
 
 	Confidence: used PTA nodes lblSet(0, 0)
 
 LS for 1st access:
 L+ = empty;
-	made empty at: knot_comb.c:985
 LS for 2nd access:
 L+ = empty;
-	made empty at: knot_comb.c:985
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 
 Different possible paths & LS (first 4):
 
 (0)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
 (1)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1212 34156 w/ func: thread_main_autospawn
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (2)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
 (3)
-	Th. 1 spawned: knot_comb.c:1228 34853 w/ func: thread_main
-	Th. 2 spawned: knot_comb.c:1228 34853 w/ func: thread_main
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+[REP: 12] and
+[REP: 12]
+	Cluster ID: 31
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:610:(96.f), knot_comb.c:615:(96.f), knot_comb.c:637:(96.f)] and
+	[lib.c:317:(92.f)]
+
+	Confidence: used PTA nodes lblSet(0, 0)
+
+LS for 1st access:
+L+ = empty;
+LS for 2nd access:
+L+ = empty;
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1094 31143 w/ func: thread_process_client
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+****
+Possible race between access to:
+
+[REP: 1].refs and
+[REP: 1].refs
+	Cluster ID: 2
+	Escapes? true / true 
+	Accessed at locs:
+	[knot_comb.c:511:(23.f), knot_comb.c:525:(24.f), knot_comb.c:526:(24.f)] and
+	[knot_comb.c:511:(23.f), knot_comb.c:525:(24.f)]
+
+	Confidence: used PTA nodes lblSet(19, 19)
+
+LS for 1st access:
+L+ = empty;
+	made empty at: knot_comb.c:990
+LS for 2nd access:
+L+ = empty;
+	made empty at: knot_comb.c:990
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+
+Different possible paths & LS (first 4):
+
+(0)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(1)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1217 34086 w/ func: thread_main_autospawn
+(2)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+(3)
+	Th. 1 spawned: knot_comb.c:1233 34783 w/ func: thread_main
+	Th. 2 spawned: knot_comb.c:1233 34783 w/ func: thread_main
 
 
 $$$$$$
-Total Warnings: 28
+Total Warnings: 54
 Elapsed time (secs): 0.076004
-Top heap size (MB): 1
-Current heap size (MB): 1
-Lifetime allocated bytes (MB): 4
-Collections -- minor: 15 major: 3 compactions: 0
+Top heap size (MB): 2
+Current heap size (MB): 2
+Lifetime allocated bytes (MB): 6
+Collections -- minor: 11 major: 3 compactions: 0
 Bytes per word: 4
-Mon Oct 12 14:20:40 PDT 2009
+Elapsed time (secs): 0.076004
+Top heap size (MB): 2
+Current heap size (MB): 2
+Lifetime allocated bytes (MB): 6
+Collections -- minor: 11 major: 3 compactions: 0
+Bytes per word: 4
+Tue Jan 19 22:00:59 PST 2010

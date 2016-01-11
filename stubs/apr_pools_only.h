@@ -13,8 +13,6 @@ extern "C" {
 
   /**********/
 
-#include <stdlib.h>
-
 /*
  * Initialization
  */
@@ -36,7 +34,7 @@ extern "C" {
                                   apr_pool_t *parent,
                                   apr_abortfunc_t abort_fn,
                                   apr_allocator_t *allocator) {
-    return rand();
+    return 0;
   }
   //#define apr_pool_create_ex nopStat4
 
@@ -46,16 +44,16 @@ extern "C" {
                                         apr_abortfunc_t abort_fn,
                                         apr_allocator_t *allocator,
                                         const char *file_line) {
-    return rand();
+    return 0;
   }
 
   //#define apr_pool_create_ex_debug nopStat5
 
 #define apr_pool_create(newpool, parent) \
-    apr_pool_create_ex(newpool, parent, NULL, NULL)
+    apr_pool_create_ex(newpool, parent, 0, 0)
 
   apr_allocator_t * apr_pool_allocator_get(apr_pool_t *pool) {
-    return NULL;
+    return 0;
   }
   //#define apr_pool_allocator_get nopPtr1
 
@@ -126,17 +124,17 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
   //#define apr_pool_abort_set nop2
 
   apr_abortfunc_t apr_pool_abort_get(apr_pool_t *pool) {
-    return NULL; // pick one, or actually rip it from pool?
+    return 0; // pick one, or actually rip it from pool?
   }
   //#define apr_pool_abort_get nopPtr1
 
   apr_pool_t * apr_pool_parent_get(apr_pool_t *pool) {
-    return NULL; // ? 
+    return 0; // ? 
   }
   //#define apr_pool_parent_get nopPtr1
 
   int apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b) {
-    return rand();
+    return 0;
   }
   //#define apr_pool_is_ancestor nopPtr2
 
@@ -151,7 +149,7 @@ apr_status_t apr_pool_userdata_set(
                                    const char *key,
                                    apr_status_t (*cleanup)(void *),
                                    apr_pool_t *pool) {
-  return rand();
+  return 0;
 }
   //#define apr_pool_userdata_set nopStat4
 
@@ -161,14 +159,14 @@ apr_status_t apr_pool_userdata_setn(
                                     const char *key,
                                     apr_status_t (*cleanup)(void *),
                                     apr_pool_t *pool) {
-  return rand();
+  return 0;
 }
   //#define apr_pool_userdata_setn nopStat4
 
 
   apr_status_t apr_pool_userdata_get(void **data, const char *key,
                                      apr_pool_t *pool) {
-    return rand();
+    return 0;
   }                                             
   //#define apr_pool_userdata_get nopStat3
 
@@ -205,12 +203,12 @@ apr_status_t apr_pool_userdata_setn(
                                     apr_pool_t *p,
                                     void *data,
                                     apr_status_t (*cleanup)(void *)) {
-    return rand();
+    return 0;
   }
   //#define apr_pool_cleanup_run nopStat3
 
   apr_status_t apr_pool_cleanup_null(void *data) {
-    return rand();
+    return 0;
   }
   //#define apr_pool_cleanup_null nopStat1
   
@@ -226,13 +224,13 @@ apr_status_t apr_pool_userdata_setn(
   //#define apr_pool_join nop2
 
   apr_pool_t * apr_pool_find(const void *mem) {
-    return NULL;
+    return 0;
   }
   //#define apr_pool_find nopPtr1
 
 
   apr_size_t apr_pool_num_bytes(apr_pool_t *p, int recurse) {
-    return rand();
+    return 0;
   }
   //#define apr_pool_num_bytes nopStat2
 

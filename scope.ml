@@ -40,6 +40,7 @@
 
 open Cil
 open Logging
+open Cildump
 
 (***************************************************
  * Tracking scope
@@ -113,8 +114,9 @@ let decideScopeVar curFunc vi : scope =
 
 
 let badScopeDebug vi =
-  logError ("BadScope: " ^ vi.vname ^ ":" ^ string_of_int vi.vid ^ 
-                "   loc: " ^ (Cildump.string_of_loc !currentLoc)) 
+  logErrorF "BadScope: %s:%s:%s   loc: %s\n"
+    vi.vname (string_of_int vi.vid) (string_of_loc vi.vdecl)
+    (string_of_loc !currentLoc)
     
 (** Decipher the scope annotation that is attached to the var.
     Be careful about alias analysis representative nodes, 
@@ -199,12 +201,12 @@ class scopeVisitor = object (self)
     match oldScope with
       STBD ->
         logStatusF "Overriding scopes %s:%d:%s - %s vs %s\n"
-          vi.vname vi.vid (Cildump.string_of_loc vi.vdecl)
+          vi.vname vi.vid (string_of_loc vi.vdecl)
           (string_of_scope oldScope) (string_of_scope newScope);
         setScope newScope vi
     | _ ->
         logErrorF "Unclear how to override scopes %s:%d:%s - %s vs %s\n"
-          vi.vname vi.vid (Cildump.string_of_loc vi.vdecl)
+          vi.vname vi.vid (string_of_loc vi.vdecl)
           (string_of_scope oldScope) (string_of_scope newScope);
         
 

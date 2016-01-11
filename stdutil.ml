@@ -44,12 +44,6 @@ open Logging
  * Augment the standard library
  ***************************************************)
 
-(** Enhance the exit() function to print stats first *)
-let quit exit_code =
-  Mystats.print Pervasives.stdout "STATS:\n";
-  Gc_stats.printStatistics ();
-  exit exit_code
-
 
 (** Return a string for printing command-line usage of programs.
     (Prepends the program name to the supplied [tail] string) *)
@@ -109,6 +103,7 @@ let seqToString iter seq doElem sep =
 
 let mapToList fold m =
   fold (fun k v cur -> (k, v) :: cur) m []
+
 
 (***************************************************
  * File / resource functions

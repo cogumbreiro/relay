@@ -65,6 +65,90 @@ let ifSuccs (s:stmt) : stmt * stmt =
   | _-> E.s (bug "ifSuccs on a non-If Statement.")
 
 
+(************************************************************)
+(* Util for tracking per program point data *)
+
+module type PPIn = sig
+
+  type t
+  val name : string
+
+end
+
+module type PPTrackType = sig
+
+  type t
+
+  val clearPPData : unit -> unit
+    (** Clear the per-program-point data flow info before running "compute" *)
+
+  val getDataBefore: prog_point -> t
+    (** Look up the data before a particular program point *)
+
+
+  val getDataAfter: prog_point -> t
+    (** Look up the data after a particular program point.
+        Currently only valid for instruction-based pps.
+        What it means to be after a stmt is unclear when
+        considering all the different kinds of stmts 
+        (e.g., what's after a Return stmt?)... *)
+  
+  val setDataBefore: prog_point -> t -> unit
+    (** Replace the data available before a particular program point *)
+    
+  val setDataAfter: prog_point -> t -> unit
+    (** Replace the data available after a particular program point.
+        Currently only valid for instruction-based pps *)
+end
+
+module PPTrack (T:PPIn) : PPTrackType with type t = T.t = struct
+
+  type t = T.t
+
+  let ppBeforeState: T.t PPH.t = PPH.create 11
+
+  (** Clear the per-program-point dataflow info before running "compute" *)
+  let clearPPData () =
+    PPH.clear ppBeforeState
+
+  (** Look up the data before a particular program point *)
+  let getDataBefore (pp:prog_point) =
+    try PPH.find ppBeforeState pp
+    with Not_found ->
+      E.bug "DF(%s): no data before prog. point %s" T.name
+        (string_of_pp pp);
+      raise Not_found
+
+
+  (** Look up the data after a particular program point.
+      Currently only valid for instruction-based pps.
+      What it means to be after a stmt is unclear when
+      considering all the different kinds of stmts 
+      (e.g., what's after a Return stmt?)... *)
+  let getDataAfter (pp:prog_point) =
+    let succPP = { pp with pp_instr = pp.pp_instr + 1; } in
+    try PPH.find ppBeforeState succPP
+    with Not_found ->
+      E.bug "DF(%s): no data after prog. point %s" T.name
+        (string_of_pp pp);
+      raise Not_found
+
+
+  (** Replace the data available before a particular program point *)
+  let setDataBefore (pp:prog_point) d =
+    PPH.replace ppBeforeState pp d
+      (* Not updating SID based table... *)
+
+
+  (** Replace the data available after a particular program point.
+      Currently only valid for instruction-based pps *)
+  let setDataAfter (pp:prog_point) d =
+    let succPP = { pp with pp_instr = pp.pp_instr + 1; } in
+    PPH.replace ppBeforeState succPP d
+
+
+end
+
 
 (******************************************************************
  **********
@@ -131,50 +215,12 @@ end
 module ForwardsDataFlow = 
   functor (T : ForwardsTransfer) ->
   struct
+    include PPTrack (T) 
 
     (** Keep a worklist of statements to process. It is best to keep a queue, 
      * because this way it is more likely that we are going to process all 
      * predecessors of a statement before the statement itself. *)
     let worklist: Cil.stmt Queue.t = Queue.create ()
-
-    (** Track data for each program point (by tracking data before each
-        program point). Look up data after program point by finding
-        the next program point (if it's an instruction) *)
-    let ppBeforeState: T.t PPH.t = PPH.create 11
-
-
-    (** Look up the data before a particular program point *)
-    let getDataBefore (pp:prog_point) =
-      try PPH.find ppBeforeState pp
-      with Not_found ->
-        E.bug "FF(%s): no data before prog. point" T.name;
-        raise Not_found
-
-
-    (** Look up the data after a particular program point.
-        Currently only valid for instruction-based pps.
-        What it means to be after a stmt is unclear when
-        considering all the different kinds of stmts 
-        (e.g., what's after a Return stmt?)... *)
-    let getDataAfter (pp:prog_point) =
-      let succPP = { pp with pp_instr = pp.pp_instr + 1; } in
-      try PPH.find ppBeforeState succPP
-      with Not_found ->
-        E.bug "FF(%s): no data after prog. point" T.name;
-        raise Not_found
-
-
-    (** Replace the data available before a particular program point *)
-    let setDataBefore (pp:prog_point) d =
-      PPH.replace ppBeforeState pp d
-      (* Not updating SID based table... *)
-
-
-    (** Replace the data available after a particular program point.
-        Currently only valid for instruction-based pps *)
-    let setDataAfter (pp:prog_point) d =
-      let succPP = { pp with pp_instr = pp.pp_instr + 1; } in
-      PPH.replace ppBeforeState succPP d
 
 
     (** We call this function when we have encountered a statement, with some 
@@ -213,8 +259,7 @@ module ForwardsDataFlow =
       in
       E.popContext ();
       match newdata with 
-        None ->
-          ()
+        None -> ()
       | Some d' ->
           IH.replace T.stmtStartData s.sid d';
           let pp = getCurrentPP () in
@@ -328,7 +373,6 @@ module ForwardsDataFlow =
     (** Compute the data flow. Must have the CFG initialized *)
     let compute (sources: stmt list) = 
       Queue.clear worklist;
-      PPH.clear ppBeforeState;
 
       List.iter (fun s -> Queue.add s worklist) sources;
 
@@ -348,13 +392,18 @@ module ForwardsDataFlow =
                     (docList (fun s -> num s.sid)) 
                     (List.rev
                        (Queue.fold (fun acc s -> s :: acc) [] worklist)));
-        try 
-          let s = Queue.take worklist in 
-          processStmt s;
-          fixedpoint ();
-        with Queue.Empty -> 
-          if !T.debug then 
-            ignore (E.log "FF(%s): done\n\n" T.name)
+        let keepgoing = 
+          try 
+            let s = Queue.take worklist in 
+            processStmt s;
+            true
+          with Queue.Empty -> 
+            if !T.debug then 
+              ignore (E.log "FF(%s): done\n\n" T.name);
+            false
+        in
+        if keepgoing then
+          fixedpoint ()
       in
       fixedpoint ()
 
@@ -383,6 +432,11 @@ module type BackwardsTransfer = sig
   val stmtStartData: t Inthash.t
   (** For each block id, the data at the start. This data structure must be 
    * initialized with the initial data for each block *)
+
+  val funcExitData: t
+  (** The data at function exit.  Used for statements with no successors.
+      This is usually bottom, since we'll also use doStmt on Return 
+      statements. *)
 
   val combineStmtStartData: Cil.stmt -> old:t -> t -> t option
   (** When the analysis reaches the start of a block, combine the old data 
@@ -419,21 +473,22 @@ module BackwardsDataFlow =
   functor (T : BackwardsTransfer) -> 
   struct
 
+    include PPTrack(T)
+
     let getStmtStartData (s: stmt) : T.t = 
       try IH.find T.stmtStartData s.sid
       with Not_found -> 
-        E.s (E.bug "BF(%s): stmtStartData is not initialized for %d"
-               T.name s.sid)
+        E.s (E.bug "BF(%s): stmtStartData is not initialized for %d: %a"
+               T.name s.sid d_stmt s)
 
     (** Process a statement and return true if the set of live return 
      * addresses on its entry has changed. *)
     let processStmt (s: stmt) : bool = 
       if !T.debug then 
-        ignore (E.log "FF(%s).stmt %d\n" T.name s.sid);
-
+        ignore (E.log "BF(%s).stmt %d\n" T.name s.sid);
 
       (* Find the state before the branch *)
-      currentLoc := get_stmtLoc s.skind;
+      setStmtLocation s;
       let d: T.t = 
         match T.doStmt s with 
            Done d -> d
@@ -441,33 +496,40 @@ module BackwardsDataFlow =
              (* Do the default one. Combine the successors *)
              let res = 
                match s.succs with 
-                 [] -> 
-                   E.s (E.bug "You must doStmt for the statements with no successors")
-                     (* JAN: why don't they use funcExitData? *)
+                 [] -> T.funcExitData
                | fst :: rest -> 
                    List.fold_left (fun acc succ ->
                      T.combineSuccessors acc (getStmtStartData succ))
                      (getStmtStartData fst)
                      rest
              in
+
              (* Now do the instructions *)
              let res' = 
                match s.skind with 
                  Instr il -> 
                    (* Now scan the instructions in reverse order. This may 
                     * Stack_overflow on very long blocks ! *)
-                   let handleInstruction (i: instr) (s: T.t) : T.t = 
-                     currentLoc := get_instrLoc i;
+                   let handleInstruction (i: instr) ((s , index): T.t * int ) 
+                       : (T.t * int) = 
+                     setInstrLocation i index;
                      (* First handle the instruction itself *)
                      let action = T.doInstr i s in 
-                     match action with 
-                     | Done s' -> s'
-                     | Default -> s (* do nothing *)
-                     | Post f -> f s
+                     let newS = match action with 
+                       | Done s' -> s'
+                       | Default -> s (* do nothing *)
+                       | Post f -> f s in
+
+                     let pp = getCurrentPP () in
+                     setDataBefore pp newS;
+                     (newS, index - 1)
                    in
                    (* Handle instructions starting with the last one *)
-                   List.fold_right handleInstruction il res
-
+                   let result, _ = 
+                     List.fold_right handleInstruction il 
+                       (res, List.length il - 1) in
+                   result
+ 
                | _ -> res
              in
              match action with 
@@ -476,11 +538,17 @@ module BackwardsDataFlow =
          end
       in
 
+      (* Reset pp to the beginning of this statement *)
+      setStmtLocation s;
+
       (* See if the state has changed. The only changes are that it may grow.*)
       let s0 = getStmtStartData s in 
 
       match T.combineStmtStartData s ~old:s0 d with 
         None -> (* The old data is good enough *)
+          (* Set Data before Just in case *)
+          let pp = getCurrentPP () in
+          setDataBefore pp s0;
           false
 
       | Some d' -> 
@@ -489,16 +557,17 @@ module BackwardsDataFlow =
             ignore (E.log "BF(%s): set data for block %d: %a\n" 
                       T.name s.sid T.pretty d');
           IH.replace T.stmtStartData s.sid d';
+          let pp = getCurrentPP () in
+          setDataBefore pp d';
           true
 
-
-          (** Compute the data flow. Must have the CFG initialized *)
+            
+    (** Compute the data flow. Must have the CFG initialized *)
     let compute (sinks: stmt list) = 
       let worklist: Cil.stmt Queue.t = Queue.create () in
       List.iter (fun s -> Queue.add s worklist) sinks;
       if !T.debug && not (Queue.is_empty worklist) then
-        ignore (E.log "\nBF(%s): processing\n" 
-                  T.name); 
+        ignore (E.log "\nBF(%s): processing\n" T.name); 
       let rec fixedpoint () = 
         if !T.debug &&  not (Queue.is_empty worklist) then 
           ignore (E.log "BF(%s): worklist= %a\n" 
@@ -506,27 +575,33 @@ module BackwardsDataFlow =
                     (docList (fun s -> num s.sid)) 
                     (List.rev
                        (Queue.fold (fun acc s -> s :: acc) [] worklist)));
-        try 
-          let s = Queue.take worklist in 
-          let changes = processStmt s in 
-          if changes then begin
-            (* We must add all predecessors of block b, only if not already 
-             * in and if the filter accepts them. *)
-            List.iter 
-              (fun p ->
-                if not (Queue.fold (fun exists s' -> exists || p.sid = s'.sid) 
-                          false worklist) &&
-                  T.filterStmt p s then 
-                  Queue.add p worklist)
-              s.preds;
-          end;
-          fixedpoint ();
+        let keepgoing = 
+          try 
+            let s = Queue.take worklist in 
+            let changes = processStmt s in 
+            if changes then begin
+              (* We must add all predecessors of block b, only if not already 
+               * in and if the filter accepts them. *)
+              List.iter 
+                (fun p ->
+                   if not (Queue.fold 
+                             (fun exists s' -> exists || p.sid = s'.sid) 
+                             false worklist) &&
+                     T.filterStmt p s then 
+                       Queue.add p worklist)
+                s.preds;
+            end;
+            true
 
-        with Queue.Empty -> 
-          if !T.debug then 
-            ignore (E.log "BF(%s): done\n\n" T.name)
+          with Queue.Empty -> 
+            if !T.debug then 
+              ignore (E.log "BF(%s): done\n\n" T.name);
+            false
+        in
+        if keepgoing then
+          fixedpoint ();
       in
       fixedpoint ();
-          
+      
   end
 

@@ -316,16 +316,16 @@ let rec foldRightStructFields
       let off' = addOffset (Field(f, NoOffset)) off in 
       match unrollType f.ftype with 
         TComp (comp, _) when comp.cstruct -> (* struct type: recurse *)
-          if (List.exists (fun f -> isArrayType f.ftype) comp.cfields) then
+          if (List.exists (fun f -> isArrayType f.ftype) (!getCfields comp)) then
             begin
               E.log ("%a:  Simplify: Not splitting struct %s because one"
                      ^^" of its fields is an array.\n") 
-                d_loc (List.hd comp.cfields).floc
+                d_loc (List.hd (!getCfields comp)).floc
                 comp.cname;
               (doit off' f.fname f.ftype) :: post
             end
           else
-            foldRightStructFields doit off' post comp.cfields
+            foldRightStructFields doit off' post (!getCfields comp)
       | _ -> 
           (doit off' f.fname f.ftype) :: post)
     fields
@@ -338,7 +338,7 @@ let rec foldStructFields
     : 'a list = 
   match unrollType t with 
     TComp (comp, _) when comp.cstruct -> 
-      foldRightStructFields doit NoOffset [] comp.cfields
+      foldRightStructFields doit NoOffset [] (!getCfields comp)
   | _ -> []
       
       

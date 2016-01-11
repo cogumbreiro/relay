@@ -45,9 +45,14 @@ class type modSum = object
 
   method getMods : sumKey -> (aLval * Scope.scope ) list
 
+  method getGlobalMods : sumKey -> LvalSet.t
+  method getLocalMods : sumKey -> (aLval * Scope.scope) list
+
   method iterMods : sumKey -> (aLval * Scope.scope -> unit) -> unit
 
   method foldMods : 'a.  sumKey -> (aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a
+
+  method evictSummaries : unit
 
 end
 
@@ -60,12 +65,21 @@ class absModSumm : modSum = object
   method getMods fkey =
     failwith init_error_msg
 
+  method getGlobalMods fkey =
+    failwith init_error_msg
+
+  method getLocalMods fkey =
+    failwith init_error_msg
+
   method iterMods fkey foo =
     failwith init_error_msg
 
   method foldMods : 'a.  sumKey -> (aLval * Scope.scope -> 'a -> 'a) -> 'a -> 'a =
     fun fkey foo acc ->
       failwith init_error_msg
+
+  method evictSummaries =
+    failwith init_error_msg
 
 end
 

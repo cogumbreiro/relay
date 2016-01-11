@@ -1,0 +1,2 @@
+duppy -c a.c -o ./a.o
+duppy -o a.exe a.o

@@ -75,7 +75,7 @@ class ['a] fcache (ld : string -> 'a) (rt:string) (sz:int) = object (self)
     C.resize cache i
 
   method addFile fname newF =
-    C.add cache fname newF
+    ignore (C.add cache fname newF)
 
   method getFile fname =
     try

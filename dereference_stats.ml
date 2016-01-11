@@ -1,8 +1,8 @@
 open Cil
 open Fstructs
 open Stdutil
+open Logging
 
-module L = Logging
 module NW = Null_warnings
 module WarnR = NW.WarnR
 
@@ -10,11 +10,7 @@ module LocHash = Hashtbl.Make(
   struct
     type t = location
     let equal l1 l2 = (compareLoc l1 l2) = 0
-    (*let hash = Hashtbl.hash*)
-    let hash l =
-      Hashtbl.hash l.line
-      lxor Hashtbl.hash l.file
-      lxor Hashtbl.hash l.byte
+    let hash l = Hashtbl.hash l
   end
 )
 
@@ -45,16 +41,13 @@ let usageMsg = getUsageString "-safe filename -unsafe filename\n"
 
 (* triple contains counts for safe, unsafe, and non-blobby unsafe derefs *)
 let locTable : (int * int * int) LocHash.t = LocHash.create 300
-let locCount = ref 0
 
-let addToTable t loc da db dc =
-  if LocHash.mem t loc then
-    let a, b, c = LocHash.find t loc in
-    LocHash.replace t loc (a + da, b + db, c + dc)
-  else begin
-    locCount := !locCount + 1;
-    LocHash.add t loc (da, db, dc)
-  end
+let addToTable t loc safe unsafe unsafeNonBlob =
+  let a, b, c = 
+    try LocHash.find t loc
+    with Not_found -> 0, 0, 0
+  in
+  LocHash.replace t loc (a + safe, b + unsafe, c + unsafeNonBlob)
 
 let notBlobby data =
   match data.NW.nullImprec with
@@ -66,7 +59,7 @@ let notBlobby data =
       )
   | NW.NotShown -> true
 
-let combine () =
+let combineSafeUnsafe () =
   let safe = WarnR.deserialize !safe_file in
   let unsafe = WarnR.deserialize !unsafe_file in
 
@@ -83,8 +76,9 @@ let combine () =
       (List.filter notBlobby cluster) in
     addToTable locTable loc 0 len len2
   in
-    WarnR.KH.iter processSafe safe#getData;
-    WarnR.KH.iter processUnsafe unsafe#getData
+
+  WarnR.KH.iter processSafe safe#getData;
+  WarnR.KH.iter processUnsafe unsafe#getData
 
 (* computes weighted and unweighted (safe, unsafe) counts *)
 let count withBlobs : (float * float) * (int * int) =
@@ -108,28 +102,29 @@ let count withBlobs : (float * float) * (int * int) =
 
       (* update unweighted counts *)
       if unsafeCount = 0 then
-        uSafe := !uSafe + 1
+        incr uSafe
       else
-        uUnsafe := !uUnsafe + 1
+        incr uUnsafe
     end
 
     else
       (* this branch can only be taken in the withBlobs = false case.
          need to keep track of the locations that have 0 safe and
          0 non-blobby safe.  these locations shouldn't be counted. *)
-      locsWithNoCount := !locsWithNoCount + 1
+      incr locsWithNoCount
 
   ) locTable;
 
-  let locs = !locCount - !locsWithNoCount in
+  let locCount = LocHash.length locTable in
+  let locs = locCount - !locsWithNoCount in
   (* sanity checks *)
   let err = !wSafe +. !wUnsafe -. (float_of_int locs) in
   if err > 0.01 then
-    L.logStatusF "error: weighted counts don't sum to locCount! err=%f\n" err;
+    logErrorF "weighted counts don't sum to locCount! err=%f\n" err;
   if !uSafe + !uUnsafe <> locs then
-    L.logStatus "error: unweighted counts don't sum to locCount|\n";
+    logError "unweighted counts don't sum to locCount|\n";
   if !wSafe < float_of_int !uSafe then
-    L.logStatus "error: weighted safe < unweight safe\n";
+    logError " weighted safe < unweight safe\n";
 
   (* return counts *)
   (!wSafe, !wUnsafe), (!uSafe, !uUnsafe)
@@ -137,9 +132,9 @@ let count withBlobs : (float * float) * (int * int) =
 
 let print ((wS, wU), (uS, uU)) blobCaption =
   NW.printDerefReportF (!caption ^ ", " ^ blobCaption ^ ", weighted") wS wU; 
-  L.logStatus "";
+  logStatus "";
   NW.printDerefReport (!caption ^ ", " ^ blobCaption ^ ", unweighted") uS uU;
-  L.logStatus ""
+  logStatus ""
   
   
 
@@ -159,13 +154,18 @@ let main () =
     else
       begin
         Stdutil.printCmdline ();
-        combine ();
+        combineSafeUnsafe ();
         print (count true) "with blobs";
         print (count false) "without blobs";
+
+        (* Debug .. *)
+
+
+
         exit 0;
       end
   with e -> 
-    L.logError ("Exc. in : " ^ (Printexc.to_string e));
+    logError ("Exc. in : " ^ (Printexc.to_string e));
     raise e
 ;;
 main () ;;

@@ -60,7 +60,7 @@ let rec containsArray (t:typ) : bool =  (* does this type contain an array? *)
   match unrollType t with
     TArray _ -> true
   | TComp(ci, _) -> (* look at the types of the fields *)
-      List.exists (fun fi -> containsArray fi.ftype) ci.cfields
+      List.exists (fun fi -> containsArray fi.ftype) (!getCfields ci)
   | _ -> 
     (* Ignore other types, including TInt and TPtr.  We don't care whether
        there are arrays in the base types of pointers; only about whether
@@ -120,7 +120,7 @@ class heapifyAnalyzeVisitor f alloc free = object
                 (* each local var becomes a field *)
 		(fun (vi,i) -> vi.vname,vi.vtype,None,[],vi.vdecl) !varlist) [] in
         let vi = makeLocalVar fundec name (TPtr(TComp(ci,[]),[])) in
-        let modify = new heapifyModifyVisitor (Var(vi)) ci.cfields
+        let modify = new heapifyModifyVisitor (Var(vi)) (!getCfields ci)
 	    !varlist free fundec in (* rewrite accesses to local vars *)
         fundec.sbody <- visitCilBlock modify fundec.sbody ;
         let alloc_stmt = mkStmt (* allocate the big struct on the heap *)

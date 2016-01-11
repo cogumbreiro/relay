@@ -1,0 +1,57 @@
+[Er]: Checkpoint: No left-over status file
+[Er]: Checkpoint: No left-over status file
+[Er]: Checkpoint: No left-over status file
+[Er]: makeSimpleLock: Couldn't find global kernel_sem
+[Er]: makeSimpleLock: Couldn't find global kernel_flag
+[Er]: Multiple lock summaries for 153.f
+[Er]: Multiple lock summaries for 154.f
+[Er]: Multiple lock summaries for 152.f
+[Er]: Request fault handler with Connection refused
+[Er]: Request retrying
+[Er]: retry succeeded!
+
+[Er]: Checkpoint: No left-over status file
+[Er]: SS: modSumm is BOTTOM: 443.f
+[Er]: SS: modSumm is BOTTOM: 442.f
+[Er]: SS: modSumm is BOTTOM: 441.f
+[Er]: SS: modSumm is BOTTOM: 448.f
+[Er]: SS: modSumm is BOTTOM: 462.f
+[Er]: SS: modSumm is BOTTOM: 462.f
+[Er]: SS: modSumm is BOTTOM: 431.f
+[Er]: handleAssign: trying to store to a non-ptr: *((*rect__heapify__0 + 0) + 0)
+[Er]: handleAssign: trying to store to a non-ptr: *((*rect__heapify__0 + 1) + 0)
+[Er]: handleAssign: trying to store to a non-ptr: *((*rect__heapify__0 + 0) + 1)
+[Er]: handleAssign: trying to store to a non-ptr: *((*rect__heapify__0 + 1) + 1)
+[Er]: handleCallArgs: origTarget constant? (*((unsigned char *)0))
+[Er]: handleCallArgs: origTarget constant? (*((unsigned char *)0))
+[Er]: handleCallArgs: origTarget constant? (*((unsigned char *)0))
+[Er]: handleCallArgs: origTarget constant? (*((unsigned char *)0))
+[Er]: derefLvalAtInstr: eval returned non-ptr for ptrexp (*(((*rect__heapify__0) + 0) + 0))
+[Er]: derefLvalAtInstr: eval returned non-ptr for ptrexp (*(((*rect__heapify__0) + 1) + 0))
+[Er]: derefLvalAtInstr: eval returned non-ptr for ptrexp (*(((*rect__heapify__0) + 0) + 1))
+[Er]: derefLvalAtInstr: eval returned non-ptr for ptrexp (*(((*rect__heapify__0) + 1) + 1))
+[Er]: substActForm returned 0 results for: (*src)#f1:526
+[Er]: substActForm returned 0 results for: (*Vendor)#f2:537
+[Er]: substActForm returned 0 results for: (*Model)#f3:538
+[Er]: substActForm returned 0 results for: (*Revision)#f4:539
+[Er]: substActForm returned 0 results for: (*SerialNumber)#f5:540
+[Er]: substActForm returned 0 results for: InquiryStandardData->PeripheralDeviceType#f0:535
+[Er]: substActForm returned 0 results for: InquiryStandardData->ProductIdentification[0]#f0:535
+[Er]: substActForm returned 0 results for: InquiryStandardData->ProductRevisionLevel[0]#f0:535
+[Er]: substActForm returned 0 results for: InquiryStandardData->VendorIdentification[0]#f0:535
+[Er]: substActForm returned 0 results for: InquiryUnitSerialNumber->PageLength#f1:536
+[Er]: substActForm returned 0 results for: InquiryUnitSerialNumber->PeripheralDeviceType#f1:536
+[Er]: substActForm returned 0 results for: InquiryUnitSerialNumber->ProductSerialNumber[0]#f1:536
+[Er]: regenNodeinfo l:606:lock
+[Er]: nodeInfo not found for: l:606:lock
+[Er]: nodeInfo not found for: l:606:lock
+[Er]: nodeInfo not found for: l:606:lock
+[Er]: lookupVal: given null addr
+[Er]: lookupVal: given null addr
+[Er]: lookupVal: given null addr
+[Er]: lookupVal: given null addr
+[Er]: lookupVal: given null addr
+[Er]: lookupVal: given null addr
+[Er]: lookupVal: given null addr
+[Er]: lookupVal: given null addr
+[Er]: No entry-points file!

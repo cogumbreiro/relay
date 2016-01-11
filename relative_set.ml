@@ -95,6 +95,8 @@ module type S = sig
 
   val doMinus : relSet -> key -> value -> relSet
 
+  val doMinusCancel : relSet -> key -> value -> relSet
+
   val getPlus : relSet -> value S.t
 
   val getMinus : relSet -> value S.t 
@@ -181,14 +183,21 @@ module Make (T:RelType) = struct
        (S.subset T.compareV a.minus b.minus))
 
   let doPlus s k v =
-    { plus = S.add k v s.plus;        (* replaces if already existed *)
+    { plus = S.add k v s.plus;
       minus = S.remove k s.minus;
     }
 
   let doMinus s k v =
     { plus = S.remove k s.plus;
-      minus = S.add k v s.minus;      (* replaces *)
+      minus = S.add k v s.minus;
     }
+
+  let doMinusCancel s k v =
+    if S.mem k s.plus then
+      { s with plus = S.remove k s.plus; }
+    else 
+      { plus = S.remove k s.plus;
+        minus = S.add k v s.minus; }
 
   let getPlus s = 
     s.plus
@@ -198,20 +207,11 @@ module Make (T:RelType) = struct
 
   (*********** Hash to single copies of these sets *************)
 
-  (** TODO: factor out to a general MapSet hash, 
-      or use Hashtbl.hash_param ... *)
+  let hashElem k v =
+    T.hashK k
+
   let hashOne s =
-    if (S.is_empty s) then 0
-    else (* Hash on size, and a sample of possibly 3 keys *)
-      let size = S.cardinal s in
-      let size_h = Hashtbl.hash size in
-      if size == 1 then
-        size_h lxor T.hashK (fst (S.choose s)) (* Not hashing value *)
-      else
-        let min_k_h = T.hashK (fst (S.min_binding s)) in
-        let med_k_h = T.hashK (fst (S.choose s)) in
-        let max_k_h = T.hashK (fst (S.max_binding s)) in
-        size_h lxor min_k_h lxor med_k_h lxor max_k_h
+    S.sampleHash hashElem s
 
   (** Hash function for S that only samples it *)
   let hash (x:relSet) =

@@ -1160,7 +1160,7 @@ let deref_nodes nodes =
   try NsCache.find derefCache nodes 
   with Not_found ->
     let result = do_deref_nodes nodes in
-    NsCache.add derefCache nodes result;
+    ignore (NsCache.add derefCache nodes result);
     result
     
 

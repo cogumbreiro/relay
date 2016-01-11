@@ -616,8 +616,8 @@ and matchCompInfo (oldfidx: int) (oldci: compinfo)
     let ci = cinode.ndata in
     let fidx = cinode.nfidx in
     
-    let old_len = List.length oldci.cfields in
-    let len = List.length ci.cfields in
+    let old_len = List.length (!getCfields oldci) in
+    let len = List.length (!getCfields ci) in
     (* It is easy to catch here the case when the new structure is undefined 
      * and the old one was defined. We just reuse the old *)
     (* More complicated is the case when the old one is not defined but the 
@@ -660,7 +660,7 @@ and matchCompInfo (oldfidx: int) (oldci: compinfo)
             (* Change the type in the representative *)
             oldf.ftype <- newtype;
           ) 
-          oldci.cfields ci.cfields
+          (!getCfields oldci) (!getCfields ci)
       with Failure reason -> begin
         (* Our assumption was wrong. Forget the isomorphism *)
         undo ();
@@ -679,7 +679,7 @@ and matchCompInfo (oldfidx: int) (oldci: compinfo)
        * empty, copy over the fields from the new one. Won't this result in 
        * all sorts of undefined types??? *)
       if old_len = 0 then 
-        oldci.cfields <- ci.cfields;
+        !setCfields oldci (!getCfields ci);
     end;
     (* We get here when we succeeded checking that they are equal, or one of 
      * them was empty *)
@@ -1073,12 +1073,12 @@ class renameVisitorClass = object (self)
                 | f' :: rest when f' == f -> i
                 | _ :: rest -> indexOf (i + 1) rest
               in
-              let index = indexOf 0 f.fcomp.cfields in
-              if List.length ci'.cfields <= index then 
+              let index = indexOf 0 (!getCfields f.fcomp) in
+              if List.length (!getCfields ci') <= index then 
                 E.s (bug "Too few fields in replacement %s(%d) for %s(%d)\n"
                        (compFullName ci') oldfidx
                        (compFullName f.fcomp) !currentFidx);
-              let f' = List.nth ci'.cfields index in 
+              let f' = List.nth (!getCfields ci') index in 
               ChangeDoChildrenPost (Field (f', o), fun x -> x)
           end
         end

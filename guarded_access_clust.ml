@@ -11,11 +11,9 @@ open Pretty
 open Callg
 open Guarded_access_base
 open Access_info
+open Logging
 
-module D = Cildump
 module LS = Lockset
-module L = Logging
-module Stat = Mystats
 module Lv = Lvals
 
 (************************************************************)
@@ -72,7 +70,7 @@ let cmEQ = CMap.equal corrExactEQ
 
 let combineAccesses a1 a2 =
   { corrAccesses = combineAccs a1.corrAccesses a2.corrAccesses;
-    corrPseudo = PAS.union a1.corrPseudo a2.corrPseudo;
+    corrPseudo = combinePseudos a1.corrPseudo a2.corrPseudo;
   }
 
 (** Combine two correlations by intersection. Assumes lvals match *) 
@@ -118,9 +116,10 @@ let hcStraints (old:straintMap) : straintMap =
   let mapped = CMap.map 
     (fun corrs ->
        let mappedLSes = LMap.mapk (fun ls -> LS.LS.unique ls) corrs in
-       let _ = LMap.map (fun acc -> 
-                           acc.corrAccesses <- hcAccesses acc.corrAccesses;
-                        ) mappedLSes in
+       let _ = LMap.map 
+         (fun acc -> 
+            acc.corrAccesses <- hcAccesses acc.corrAccesses;
+         ) mappedLSes in
        mappedLSes
     ) mappedLvals in
   mapped
@@ -143,7 +142,7 @@ let clearCache () = begin
 end
 
 let printCacheStats () = begin
-  L.logStatus (Stdutil.string_of_hashstats CMHash.stats
+  logStatus (Stdutil.string_of_hashstats CMHash.stats
     cmCache "Golden GAs");
 end
 
@@ -161,7 +160,7 @@ let addCorr ?(pseudo=None) lv curLocks location fk curMap =
       try 
         let oldAccs = LMap.find curLocks oldLSM in
         { corrAccesses = Locs.add (fk, location) oldAccs.corrAccesses;
-          corrPseudo = PAS.union pseudo oldAccs.corrPseudo; }
+          corrPseudo = combinePseudos pseudo oldAccs.corrPseudo; }
       with Not_found ->
         { corrAccesses = Locs.singleton (fk, location);
           corrPseudo = pseudo;
@@ -204,6 +203,24 @@ let scopeCorrelation curFunc scopeLocks
 let scopeStraintMap curFunc scopeLocks (cmap:straintMap) =
   CMap.fold (scopeCorrelation curFunc scopeLocks) cmap cmap
 
+let corrMentionsFormal corr =
+  let setHasFormal set = 
+    LS.LS.S.exists
+      (fun lv _ -> 
+         match Lvals.getScope lv with
+           Scope.SFormal _ -> true
+         | Scope.SGlobal | Scope.SFunc | Scope.STBD -> false) set
+  in
+  LMap.fold
+    (fun locks _ has ->
+       has || 
+         setHasFormal (LS.LS.getPlus locks) ||   
+         setHasFormal (LS.LS.getMinus locks)
+    ) corr false
+
+let splitGlobalsFormals cmap =
+  splitGlobalsFormalsBase corrMentionsFormal cmap
+
 
 (************** Race warnings stuff ****************)
 
@@ -227,8 +244,8 @@ let printCorrMap cm printLocks =
     (fun clval corr ->
        LMap.iter 
          (fun ls c ->
-            L.logStatus ((Lv.string_of_lvscope clval) ^ ": " ^ 
+            logStatus ((Lv.string_of_lvscope clval) ^ ": " ^ 
                            (string_of_accesses c.corrAccesses) ^ "~");
             printLocks ls;
-            L.logStatus "") corr
+            logStatus "") corr
     ) cm

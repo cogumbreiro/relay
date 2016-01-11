@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Takes a file and splits it into N files if there are N "divider lines" 
 # (divider line defined by a given pattern)

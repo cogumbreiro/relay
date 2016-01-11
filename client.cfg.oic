@@ -1,0 +1,22 @@
+include(client.cfg.basic)
+
+ALIAS_ANALYSIS {
+
+FUNPTRS : oic
+EXPS : anders
+LVALS : anders
+MAY_ALIAS : anders
+
+}
+
+ENTRY_POINTS {
+
+USE_ROOTS : true
+
+}
+
+SYM_EX {
+
+ADJUST : true
+
+}

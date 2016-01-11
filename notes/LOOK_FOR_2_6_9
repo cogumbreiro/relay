@@ -1,0 +1,884 @@
+races to look for in kernel version 2.6.9, based on changes in 2.6.10
+
+<stern@rowland.harvard.edu>
+	[PATCH] USB: Updated USB device locking
+	
+	This patch reintroduces the USB device locking code we tried out
+	earlier.  As before, it solves the problem of effectively locking all
+	the devices while drivers are registered and unregistered by introducing
+	an rwsem.  Unlike the earlier attempt, this version does not ever try to
+	acquire a lock re-entrantly.  I trust that will eliminate the races and
+	hang-ups you observed with the earlier version.  There are also copious
+	comments explaining exactly how things should work.
+	
+	The patch interacts slightly with the locktree() code introduced by
+	David for suspend/resume support.  It doesn't change the functionality
+	at all; it just updates the routine to follow the new locking rules.
+
+
+Hmmm... harder to find the patch info (what was changed) than for newer 
+kernels w/ that mercurial db
+
+<jesse.brandeburg@intel.com>
+	[PATCH] e100: fix NAPI race with watchdog
+	
+	While polling in NAPI mode, we were occassionally getting interrupts
+	re-enabled by the watchdog trying to generate a software interrupt.  Fix
+	is to add a spinlock around that shared hardware register to allow a
+	read-modify-write operation.  This was nasty nasty.  I don't like the
+	spinlock in the hot path but i see no other way.  Comments are welcome.
+	Updates the driver version as well.
+	
+<sfeldma@pobox.com>
+	[PATCH] janitor: net/sis900: pci_find_device to pci_get_device
+	
+	Replace pci_find_device with pci_get_device/pci_dev_put to plug
+	race with pci_find_device.  Compile tested.
+
+
+<marcel@holtmann.org>
+	[Bluetooth] Fix race when unlinking incoming connections
+	
+	When the user space applications don't call accept() it can happen that
+	incoming connections stay in the accept queue and block further connection
+	attempts until the server is restarted. On a disconnect it is necessary
+	that the connection is removed from the accept queue. This can't be the
+	job of a cleanup function.
+
+
+
+
+
+<aia21@cantab.net>
+	NTFS: - Fix two race conditions in fs/ntfs/inode.c::ntfs_put_inode().
+	
+	- Fix race condition in fs/ntfs/inode.c::ntfs_put_inode() by moving the
+	  index inode bitmap inode release code from there to
+	  fs/ntfs/inode.c::ntfs_clear_big_inode().  (Thanks to Christoph
+	  Hellwig for spotting this.)
+	- Fix race condition in fs/ntfs/inode.c::ntfs_put_inode() by taking the
+	  inode semaphore around the code thst sets ni->itype.index.bmp_ino to
+	  NULL and reorganize the code to optimize it a bit.  (Thanks to
+	  Christoph Hellwig for spotting this.)
+
+
+oland@redhat.com>
+	[PATCH] make rlimit settings per-process instead of per-thread
+	
+	POSIX specifies that the limit settings provided by getrlimit/setrlimit are
+	shared by the whole process, not specific to individual threads.  This
+	patch changes the behavior of those calls to comply with POSIX.
+	
+	I've moved the struct rlimit array from task_struct to signal_struct, as it
+	has the correct sharing properties.  (This reduces kernel memory usage per
+	thread in multithreaded processes by around 100/200 bytes for 32/64
+	machines respectively.)  I took a fairly minimal approach to the locking
+	issues with the newly shared struct rlimit array.  It turns out that all
+	the code that is checking limits really just needs to look at one word at a
+	time (one rlim_cur field, usually).  It's only the few places like
+	getrlimit itself (and fork), that require atomicity in accessing a whole
+	struct rlimit, so I just used a spin lock for them and no locking for most
+	of the checks.  If it turns out that readers of struct rlimit need more
+	atomicity where they are now cheap, or less overhead where they are now
+	atomic (e.g. fork), then seqcount is certainly the right thing to use for
+	them instead of readers using the spin lock.  Though it's in signal_struct,
+	I didn't use siglock since the access to rlimits never needs to disable
+	irqs and doesn't overlap with other siglock uses.  Instead of adding
+	something new, I overloaded task_lock(task->group_leader) for this; it is
+	used for other things that are not likely to happen simultaneously with
+	limit tweaking.  To me that seems preferable to adding a word, but it would
+	be trivial (and arguably cleaner) to add a separate lock for these users
+	(or e.g. just use seqlock, which adds two words but is optimal for readers).
+	
+	Most of the changes here are just the trivial s/->rlim/->signal->rlim/. 
+	
+	I stumbled across what must be a long-standing bug, in reparent_to_init.
+	It does:
+		memcpy(current->rlim, init_task.rlim, sizeof(*(current->rlim)));
+	when surely it was intended to be:
+		memcpy(current->rlim, init_task.rlim, sizeof(current->rlim));
+	As rlim is an array, the * in the sizeof expression gets the size of the
+	first element, so this just changes the first limit (RLIMIT_CPU).  This is
+	for kernel threads, where it's clear that resetting all the rlimits is what
+	you want.  With that fixed, the setting of RLIMIT_FSIZE in nfsd is
+	superfluous since it will now already have been reset to RLIM_INFINITY.
+	
+	The other subtlety is removing:
+		tsk->rlim[RLIMIT_CPU].rlim_cur = RLIM_INFINITY;
+	in exit_notify, which was to avoid a race signalling during self-reaping
+	exit.  As the limit is now shared, a dying thread should not change it for
+	others.  Instead, I avoid that race by checking current->state before the
+	RLIMIT_CPU check.  (Adding one new conditional in that path is now required
+	one way or another, since if not for this check there would also be a new
+	race with self-reaping exit later on clearing current->signal that would
+	have to be checked for.)
+	
+	The one loose end left by this patch is with process accounting.
+	do_acct_process temporarily resets the RLIMIT_FSIZE limit while writing the
+	accounting record.  I left this as it was, but it is now changing a limit
+	that might be shared by other threads still running.  I left this in a
+	dubious state because it seems to me that processing accounting may already
+	be more generally a dubious state when it comes to NPTL threads.  I would
+	think you would want one record per process, with aggregate data about all
+	threads that ever lived in it, not a separate record for each thread.
+	I don't use process accounting myself, but if anyone is interested in
+	testing it out I could provide a patch to change it this way.
+	
+	One final note, this is not 100% to POSIX compliance in regards to rlimits.
+	POSIX specifies that RLIMIT_CPU refers to a whole process in aggregate, not
+	to each individual thread.  I will provide patches later on to achieve that
+	change, assuming this patch goes in first.
+	
+
+<roland@redhat.com>
+	[PATCH] fix PTRACE_ATTACH race with real parent's wait calls
+	
+	There is a race between PTRACE_ATTACH and the real parent calling wait. 
+	For a moment, the task is put in PT_PTRACED but with its parent still
+	pointing to its real_parent.  In this circumstance, if the real parent
+	calls wait without the WUNTRACED flag, he can see a stopped child status,
+	which wait should never return without WUNTRACED when the caller is not
+	using ptrace.  Here it is not the caller that is using ptrace, but some
+	third party.
+	
+	This patch avoids this race condition by adding the PT_ATTACHED flag to
+	distinguish a real parent from a ptrace_attach parent when PT_PTRACED is
+	set, and then having wait use this flag to confirm that things are in order
+	and not consider the child ptraced when its ->ptrace flags are set but its
+	parent links have not yet been switched.  (ptrace_check_attach also uses it
+	similarly to rule out a possible race with a bogus ptrace call by the real
+	parent during ptrace_attach.)
+	
+	While looking into this, I noticed that every arch's sys_execve has:
+	
+			current->ptrace &= ~PT_DTRACE;
+	
+	with no locking at all.  So, if an exec happens in a race with
+	PTRACE_ATTACH, you could wind up with ->ptrace not having PT_PTRACED set
+	because this store clobbered it.  That will cause later BUG hits because
+	the parent links indicate ptracedness but the flag is not set.  The patch
+	corrects all the places I found to use task_lock around diddling ->ptrace
+	when it's possible to be racing with ptrace_attach.  (The ptrace operation
+	code itself doesn't have this issue because it already excludes anyone else
+	being in ptrace_attach.)
+
+
+
+<mingo@elte.hu>
+	[PATCH] softirqs: fix latency of softirq processing
+	
+	The attached patch fixes a local_bh_enable() buglet: we first enabled
+	softirqs then did we do local_softirq_pending() - often this is preemptible
+	code.  So this task could be preempted and there's no guarantee that
+	softirq processing will occur (except the periodic timer tick).
+	
+	The race window is small but existent.  This could result in packet
+	processing latencies or timer expiration latencies - hard to detect and
+	annoying bugs.
+	
+	The fix is to invoke softirqs with softirqs enabled but preemption still
+	disabled.  Patch is against 2.6.9-rc2-mm1.
+	
+
+<Lev_Makhlis@bmc.com>
+	[PATCH] show aggregate per-process counters in /proc/PID/stat 2
+	
+	Add up resource usage counters for live and dead threads to show aggregate
+	per-process usage in /proc/<pid>/stat.  This mirrors the new getrusage()
+	semantics.  /proc/<pid>/task/<tid>/stat still has the per-thread usage.
+	
+	After moving the counter aggregation loop inside a task->sighand lock to
+	avoid nasty race conditions, it has survived stress-testing with '(while
+	true; do sleep 1 & done) & top -d 0.1'
+	
+
+<axboe@suse.de>
+	[PATCH] invalidate page race fix
+	
+	invalidate_inode_pages() and invalidate_inode_pages2() can mark pages not
+	uptodate while read() is trying to read from them.  This is interpreted as
+	an I/O error.
+	
+	Fix that by teaching the invalidate code to leave the page alone if someone
+	else has a ref on it.
+
+
+
+
+<hirofumi@mail.parknet.co.jp>
+	[PATCH] FAT: Fix the race bitween fat_free() and fat_get_cluster()
+	
+	This patch fixes the race condition
+	
+	  |      fat_free                |    fat_get_cluster
+	  +------------------------------+-----------------------
+	                                     fat_cache_lookup()
+	                                     (get the copy of cache)
+	   fat_cache_inval_inode()
+	(invalidate caches on inode)
+	                                     fat_cache_add()
+	                                     (update/add the getted cache)
+	
+	The above race has possible that invalidated cache is added.
+	
+	This patch fixes the race condition by adding the cache-id to copy of cache.
+
+<neilb@cse.unsw.edu.au>
+	[PATCH] md: remove md_flush_all
+	
+	Following are 7 patches for md
+	
+	They all grew out of a desire to redo the locking in unplug_slave.  Getting
+	and dropping a spinlock so often for very little gain (it would be nearly
+	impossible to lose the relevant race) really bothered me.
+	
+I finally figured that I could reply it with rcu locking which is very light
+wait, and quite up to the task.
+	
+One the way I found an number of inconsistencies that needed cleaning up and
+even a few bugs to fix.  The first 6 patches deal with these inconsistencies
+and bugs.  The last redoes the locking for adding/removing/accessing devices
+within md personalities.
+	
+	
+<roland@redhat.com>
+	[PATCH] acct: report single record for multithreaded process
+	
+	This patch changes process accounting to write just one record for a
+	process with many NPTL threads, rather than one record for each thread.  No
+	record is written until the last thread exits.  The process's record shows
+	the cumulative time of all the threads that ever lived in that process
+	(thread group).  This seems like the clearly right thing and I assume it is
+	what anyone using process accounting really would like to see.
+	
+	There is a race condition between multiple threads exiting at the same time
+	to decide which one should write the accounting record.  I couldn't think
+	of anything clever using existing bookkeeping that would get this right, so
+	I added another counter for this.  (There may be some potential to clean up
+	existing places that figure out how many non-zombie threads are in the
+	group, now that this count is available.)
+
+
+
+<roland@redhat.com>
+	[PATCH] Wake up signalled tasks when exiting ptrace
+	
+	In general it is not safe to do any non-ptrace wakeup of a thread in
+	TASK_TRACED, because the waking thread could race with a ptrace call
+	that could be doing things like mucking directly with its kernel stack. 
+	
+	AFAIK noone has established that whatever clobberation ptrace can do to
+	a running thread is safe even if it will never return to user mode, so
+	we can't allow this even for SIGKILL.
+	
+	What we _can_ safely do is make a thread switching out of TASK_TRACED
+	resume rather than sitting in TASK_STOPPED if it has a pending SIGKILL
+	or SIGCONT.  The following patch does this.
+	
+	This should be sufficient for the shutdown case.  When killing all
+	processes, if the tracer gets killed first, the tracee goes into
+	TASK_STOPPED and will be woken and killed by the SIGKILL (same as
+	before).  If the tracee gets killed first, it gets a pending SIGKILL and
+	doesn't wake up immediately--but, now, when the tracer gets killed, the
+	tracee will then wake up to die. 
+	
+	This will also fix the (same) situations that can arise now where you
+	have used gdb (or whatever ptrace caller), killed -9 the gdb and the
+	process being debugged, but still have to kill -CONT the process before
+	it goes away (now it should just go away either the first time or when
+	you kill gdb). 
+
+
+<marcel@holtmann.org>
+	[Bluetooth] Fix another disconnect race
+	
+	When the selecting of the alternate setting for the SCO audio support
+	fails, the hci_usb_disconnect() will dereference a NULL pointer. To
+	avoid this, the isoc_iface variable must be set before releasing the
+	interface and unset afterwards.
+	
+
+<aia21@cantab.net>
+	NTFS: In fs/ntfs/aops.c::ntfs_writepage(), if t he page is fully outside
+	      i_size, i.e. race with truncate, invalidate the buffers on the page
+	      so that they become freeable and hence the page does not leak.
+	
+
+<jmorris@redhat.com>
+	[PATCH] SELinux: fix netif bugs and simplify.
+	
+	This patch fixes and simplifies locking in the SELiunux netif cache.
+	
+	An old problem (which I forgot about) is fixed where a netif lookup can be
+	followed by a preemption, causing a race against sel_netif_put().  Kaigai
+	Kohei discovered a problem where netif lookups were also not protected
+	against races with sel_netif_flush().
+	
+	The code has now been reworked to fix these problems, eliminate the
+	refcounting and remove atomic operations entirely from the read path
+	(generally making better use of RCU).  The avc entry ref has been removed
+	as part of this simplification in anticipation of an RCU scalability patch
+	which removes them in general.
+
+
+<paulmck@us.ibm.com>
+	[PATCH] RCU: eliminating explicit memory barriers from SysV IPC
+	
+This patch uses the rcu_assign_pointer() API to eliminate a number of explicit
+memory barriers from the SysV IPC code that uses RCU.  It also restructures
+the ipc_ids structure so that the array size is stored in the same memory
+block as the array itself (see the new struct ipc_id_ary).  This prevents the
+race that the earlier code was subject to, where a reader could see a mismatch
+between the size and the actual array.  With the size stored with the array,
+the possibility of mismatch is eliminated -- with out the need for careful
+ordering and explicit memory barriers.  This has been tested successfully on
+i386 and ppc64.
+
+
+
+
+<akpm@osdl.org>
+	[PATCH] Fix race in sysfs_read_file() and sysfs_write_file()
+	
+	
+	- fixes the race between threads by adding a semaphore in sysfs_buffer
+	
+	- allocates the buffer upon call to pread().  We still call again
+	  fill_read_buffer() if the file is "rewinded" to offset zero.
+	
+	- fixes the comparison in flush_read_buffer().
+
+<akpm@osdl.org>
+	[PATCH] Possible race in sysfs_read_file() and sysfs_write_file()
+	
+	
+Add a `needs_read_fill' field in sysfs_buffer so that reading after a write in
+a sysfs file returns valid data. 
+(instead of the data that have been written, that may be invalid or at the
+wrong offset)
+	
+
+<matthew@wil.cx>
+	[PATCH] parisc: signal race fixes
+	
+	Signal race fixes
+
+
+
+<miles@gnu.org>
+	[PATCH] v850: signal handling race fix
+
+
+
+<rusty@rustcorp.com.au>
+	[PATCH] Don't ignore try_stop_module return
+	
+	Since 2.6.4 we've been ignoring the failure of try_stop_module: it will
+	normally fail if the module reference count is non-zero.  This would have
+	been mainly unnoticed, since "modprobe -r" checks the usage count before
+	calling sys_delete_module(), however there is a race which would cause a
+	hang in this case.
+	
+
+<prasanna@in.ibm.com>
+	[PATCH] kprobes: kprobes ported to x86_64
+	
+	Adopted from i386 architecture.
+	
+	Kprobes:
+	
+	Helps developers to trap at almost any kernel code address, specifying a
+	handler routine to be invoked when the breakpoint is hit.  Useful for
+	analysing the Linux kernel by collecting debugging information
+	non-disruptively.  Employs single-stepping out-of-line to avoid probe
+	misses on SMP and may be especially useful in aiding debugging elusive
+	races and problems on live systems.  More elaborate dynamic tracing tools
+	can be built over the kprobes interface.
+	
+	Sample usage:
+		To place a probe on __blockdev_direct_IO:
+		static int probe_handler(struct kprobe *p, struct pt_regs *)
+		{
+			... whatever ...
+		}
+		struct kprobe kp = {
+			.addr = __blockdev_direct_IO,
+			.pre_handler = probe_handler
+		};
+		register_kprobe(&kp);
+	
+	Jprobes:
+	
+	A special kprobe type which can be placed on function entry points, and
+	employs a simple mirroring principle to allow seamless access to the
+	arguments of a function being probed.  The probe handler routine should
+	have the same prototype as the function being probed.
+	
+	The way it works is that when the probe is hit, the breakpoint handler
+	simply irets to the probe handler's rip while retaining register and stack
+	state corresponding to the function entry.  After it is done, the probe
+	handler calls jprobe_return() which traps again to restore processor state
+	and switch back to the probed function.  Linus noted correctly at KS that
+	we need to be careful as gcc assumes that the callee owns arguments.  We
+	save and restore enough stack bytes to cover argument space.
+	
+	Sample Usage:
+		static int jip_queue_xmit(struct sk_buff *skb, int ipfragok)
+		{
+			... whatever ...
+			jprobe_return();
+			return 0;
+		}
+	
+		struct jprobe jp = {
+			{.addr = (kprobe_opcode_t *) ip_queue_xmit},
+			.entry = (kprobe_opcode_t *) jip_queue_xmit
+		};
+		register_jprobe(&jp);
+	
+
+
+<herbert@gondor.apana.org.au>
+	[IPV6]: Close small race in ip6_del_rt
+	
+	There is a small SMP race in ip6_del_rt where we maybe dereferencing a dst
+	that has been freed.  This patch fixes it.
+	
+
+<kaber@trash.net>
+	[PKT_SCHED]: Fix scheduler/classifier module unload race.
+	
+	This patch fixes an scheduler/classifier module unload race.
+	struct Qdisc_ops which includes the owner field is also part
+	of the module's memory, so ops might already be freed when
+	try_module_get(ops->owner) is called outside of the locked
+	section.
+
+
+
+<aia21@cantab.net>
+	NTFS: 2.1.22 - Many bug and race fixes and error handling improvements.
+	
+	- Cleanup fs/ntfs/aops.c::ntfs_{read,write}page() since we know that a
+	  resident attribute will be smaller than a page which makes the code
+	  simpler.  Also make the code more tolerant to concurrent ->truncate.
+	
+
+<dino@in.ibm.com>
+	[PATCH] Fix do_wait race
+	
+	Only set the flag in the cases when the exit state is not either
+	TASK_DEAD or TASK_ZOMBIE.
+	
+	(TASK_DEAD or TASK_ZOMBIE will either race or we'll return the 
+	information, so no need to note them).
+	
+	I confirmed that this fixes the problem and I also ran some LTP tests
+	
+
+<kolya@MIT.EDU>
+	[PATCH] ext3 umount hang
+	
+	When an ext3 partition is mounted and then quickly unmounted, the journal
+	thread never gets around to checking the JFS_UNMOUNT flag (it immediately
+	goes into a loop waiting for a new sequence number), causing the umount
+	process to hang in journal_kill_thread().
+	
+	The problem can be easily reproduced by roughly the following steps:
+	
+		dd if=/dev/zero of=/tmp/qf bs=1024k count=10
+		yes | mke2fs -j /tmp/qf
+		losetup /dev/loop0 /tmp/qf
+		mkdir /mnt/qf
+		mount -t ext3 /dev/loop0 /mnt/qf ; umount /mnt/qf
+	
+	The patch below moves the check for JFS_UNMOUNT to the beginning of the
+	journal thread loop, thereby preventing this race condition.
+	
+
+<david-b@pacbell.net>
+	[PATCH] USB: usb PM updates, root hub stuff (2/4)
+	
+	Makes usbcore handle some suspend scenarios more consistently, especially
+	when talking with root hubs.
+	
+	 - Use usb_device->state, not device->power.power_state.  (The driver model
+	   power_state is still needed for interfaces.)  With USB_SUSPEND=n, there
+	   are also cases where the HCD_STATE_SUSPENDED needs to be used instead
+	   of testing for USB_STATE_SUSPENDED.
+	
+	 - Updates usb_device->state for root hubs during suspend/resume.
+	
+	 - Fixes a locking bug (extra "up") that got merged recently, affecting
+	   CONFIG_USB_SUSPEND.
+	
+	 - Recover one of the "HC died" cases better.
+	
+	 - Root hub timer updates, handling various suspend transitions more
+	   consistently:  don't duplicate earlier submit checks, only work
+	   when hub is configured, address various submit/resume races.
+	
+	Together, these help hubs work better regardless of whether USB_SUSPEND
+	has been enabled (that's the only way USB_STATE_SUSPENDED appears), and
+	whether or not the HCD is marked as suspended (or maybe Alan would
+	want to call that "half suspended").
+	
+
+<alborchers@steinerpoint.com>
+	[PATCH] USB: io_ti new devices, circular buffer, flow control, misc fixes
+	
+	- Updated to version 0.7.
+	
+	- Added support for Edgeport 4s, 221c, 22c, 21c, 1, 1i, Watchports,
+	  Plus Power Port HP4CD, and Plus Power Port PCI.
+	
+	- Added a circular write buffer and locking to protect it.  This fixes
+	  OPOST processing problems.
+	
+	- Rewrote TIChase to wait for the circular buffer to drain, to wait
+	  up to the closing wait time, and to wait for the last character out.
+	
+	- Fixed hardware flow control by having it stop and restart reads
+	  and set and clear tty->hw_stopped.
+	
+	- Removed the RELEVANT_IFLAG macro which mistakenly filtered out the
+	  software flow control stty flags.
+	
+	- Added a semaphore to to protect num_ports_open to fix a race
+	  during simultaneous opens--two opens could both try to submit
+	  the interrupt urb, an error.
+
+...
+
+
+
+<schwidefsky@de.ibm.com>
+	[PATCH] s390: zfcp host adapter
+	
+	From: Andreas Herrmann <aherrman@de.ibm.com>
+	
+	zfcp host adapter change:
+	 - Avoid usage of unregister debug feature.
+	 - Avoid race when unregistering debug feature.
+	 - Corrected some log messages for WKA ports.
+	 - Don't pass NULL pointer to debug_register_view and debug_set_level.
+	 - Some coding style cleanup.
+	 - Fix race between scsi_add_device and deregistration of the adapter.
+	 - Shorten & rename zfcp_els/zfcp_els_handler.
+	 - Remove unused code for unused ELS commands.
+	 - Evaluate response instead of request in adisc handler.
+	 - Allocate qdio queue structures below 2GB.
+	 - Remove ifdefs around ioctl32.h.
+	 - Use CONFIG_COMPAT instead of CONFIG_S390_SUPPORT.
+	 - Use semaphore in zfcp_ccw_shutdown.
+	 - Strip down debug_register/debug_unregister.
+	
+
+
+<brking@us.ibm.com>
+	[PATCH] sg: Fix oops of sg_cmd_done and sg_release race
+	
+	The following patch fixes a race condition in sg of sg_cmd_done racing
+	with sg_release. I've seen this bug hit several times on test machines
+	and the following patch fixes it. The race is that if srp->done is set
+	and the waiting thread gets a spurious wakeup immediately afterwards,
+	then the waiting thread can end up executing and completing, then getting
+	closed, freeing sfp before the wake_up_interruptible is called, which
+	then will result in an oops. The oops is fixed by locking around the
+	setting srp->done to 1 and the wake_up, and also locking around the
+	checking of srp->done, which guarantees that the wake_up_interruptible
+	will always occur before the sleeping thread gets a chance to run.
+	
+
+<andrea@novell.com>
+	[PATCH] fix for mpol mm corruption on tmpfs
+	
+	With the inline symlink shmem_inode_info structure is overwritten with data
+	until vfs_inode, and that caused the ->policy to be a corrupted pointer
+	during unlink.  It wasn't immediatly easy to see what was going on due the
+	random mm corruption that generated a weird oops, it looked more like a
+	race condition on freed memory at first.
+	
+	There's simply no need to set a policy for inodes, since the idx is always
+	zero.  All we have to do is to initialize the data structure (the semaphore
+	may need to run during the page allocation for the non-inline symlink) but
+	we don't need to allocate the rb nodes.  This way we don't need to call
+	mpol_free during the destroy_inode (not doable at all if the policy rbtree
+	is corrupt by the inline symlink ;).
+	
+	An equivalent version of this patch based on a 2.6.5 tree with additional
+	numa features on top of this (i.e.  interleaved by default, and that's
+	prompted me to add a comment in the LNK init path), works fine in a numa
+	simulation on my laptop (untested on the bare hardware).
+
+
+
+<clameter@sgi.com>
+	[PATCH] mmtimer driver update
+	
+	- reduce processing in timer interrupt through the use of a tasklet
+	- fix various race conditions
+	- use the correct interrupt vector for the SN2 RTC
+	
+
+
+
+<benh@kernel.crashing.org>
+	[PATCH] del_timer() vs. mod_timer() SMP race
+	
+We just spent some days fighting a rare race in one of the distro's 
+who backported some of timer.c from 2.6 to 2.4 (though they missed a bit).
+	
+The actual race we found didn't happen in 2.6 _but_ code inspection 
+showed that a similar race is still present in 2.6, explanation below:
+	
+Code removing a timer from a list (run_timers or del_timer) takes that CPU list
+lock, does list_del, then timer->base = NULL.
+	
+It is mandatory that this timer->base = NULL is visible to other CPUs 
+only after the list_del() is complete. If not, then mod timer could see 
+it NULL, thus take it's own CPU list lock and not the one for the CPU the 
+timer was beeing removed from the list, and thus the list_add in 
+mod_timer() could race with the list_del() from run_timers() or del_timer().
+	
+Our race happened with run_timers(), which _DOES_ contain a proper 
+smp_wmb() in the right spot in 2.6, but didn't in the "backport" we 
+were fighting with.
+	
+However, del_timer() doesn't have such a barrier, and thus is subject to 
+this race in 2.6 as well. This patch fixes it.
+	
+
+
+<pmeda@akamai.com>
+	[PATCH] /proc/cmdline missing mmput
+	
+	Fix the mmput bug introduced while fixing cmdline race.
+	
+
+<yoshfuji@linux-ipv6.org>
+[IPV6] Fix a race when dad completed during shutting down its owner interface.
+	
+
+<axboe@suse.de>
+	[PATCH] cfq-iosched: fix allocation increment race #3
+	
+	There is a stupid error in cfq-iosched that spews a warning on
+	(typically) SMP systems because cfqq->allocated[rw] goes below zero. The
+	error is that the increment on alloc happens outside of the queue lock.
+	
+
+<mingo@elte.hu>
+	[PATCH] floppy boot-time detection fix
+	
+	When the FDC hardware is initialized, it sometimes generates a floppy
+	interrupt right away - without being told to.  This interrupt can hit
+	the detection code that executes right after the initialization code, in
+	particular it can get intermixed with user_reset_fdc() that the
+	detection code uses.  The fd driver is fundamentally single-threaded
+	when it comes to handling events: an unexpected irq that arrives in the
+	wrong moment can confuse the reset_fdc() code, which, with softirq and
+	hardirq threading on, executes in keventd.
+	
+	In the stock kernel this stale irq doesnt seem to hit the detection code
+	in the wrong moment, but i think under certain circumstances it may
+	still happen.  One of the typical incarnations of the race was the
+	following message:
+	
+	 reset set in interrupt, calling c0258400
+	
+	and googling for "reset set in interrupt, calling" does turn up a fair
+	number of bootlogs (most of them 2.4 ones) that show such a detection
+	failure, so i think upstream wants to have the fix too.
+	
+	the fix is simple: delay a bit after initialization, to make sure the
+	stale irq does not interfere with the detection code. It will be safely
+	ignored, since do_floppy is still NULL. It might look sloppy that i went
+	for a delay, but delay i think it is better than waiting for the irq to
+	occur, because i dont think there's a guarantee that fdc initialization
+	triggers an interrupt, so waiting for it could hang the boot process. A
+	delay OTOH is totally harmless.
+	
+	The attached patch implements this fix, which resolves the detection
+	problem on my testbox.
+	
+	here's again how a failure looks like:
+	
+	 Floppy drive(s): fd0 is 1.44M
+	 reset set in interrupt, calling c0258400
+	 floppy0: no floppy controllers found
+	
+	and this is how it works with the fix:
+	
+	 Floppy drive(s): fd0 is 1.44M
+	 FDC 0 is a post-1991 82077
+
+
+
+<yoshfuji@linux-ipv6.org>
+	[IPV6]: Fix races in ip6_route_{input,output}()
+	
+	We need to hold refcnt before releasing rt6_lock
+
+
+<rusty@rustcorp.com.au>
+	[PATCH] Remove Futex Warning
+	
+	If we're waiting on a futex and we are woken up, it's either because
+	someone did FUTEX_WAKE, we timed out, or have been signalled.  However, the
+	WARN_ON(!signal_pending(current)) test is overzealous: with threads (a
+	common use of futexes), we share the signal handler and the other
+	thread might get to the signal before us.  In addition, exit_notify()
+	can do a recalc_sigpending_tsk() on us, which will then clear our
+	TIF_SIGPENDING bit, making signal_pending(current) return false.
+	
+	Returning EINTR is a little strange in this case, since this thread
+	hasn't handled a signal.  However, with threads it's the best we can
+	do: there's always a race where another thread could have been the
+	actual one to handle the signal.
+	
+
+
+<schwidefsky@de.ibm.com>
+	[PATCH] s390: core changes
+	
+	
+	s390 core changes:
+	 - Remove defines for kernel_stack_size and async_stack_size.
+	 - Reserve system call number for kexec.
+	 - Add cc-option check for new gcc option packed-stack.
+	 - Fix race on no_hz_cpu_mask in stop_hz_timer.
+	 - Fix ptrace to make it send a SIGTRAP before the first instruction
+	   of a single stepped signal handler is executed.
+	 - Use force_sig_info with a full siginfo structure for illegal operation.
+	 - Remove verbatim copy of si_codes from asm-s390/siginfo.h. Use the
+	   generic definitions.
+	 - Regenerate default configuration.
+	
+
+<schwidefsky@de.ibm.com>
+	[PATCH] s390: network driver
+	
+	
+	network driver changes:
+	 - qeth: return -EINVAL if an skb is too large.
+	 - qeth: don't call netif_stop_queue after cable pull. Drop the
+	   packets instead.
+	 - qeth: fix race between SET_IP and SET_MC kernel thread by removing
+	   SET_MC thread and let the SET_IP thread do multicast requests as well.
+	 - qeth: make it compile without CONFIG_VLAN.
+	 - ctc: avoid compiler warnings.
+	 - lcs: write package sequence number to skb->cb.
+	
+
+<santil@us.ibm.com>
+	[PATCH] fix buffer starvation race in ibmveth
+	
+	There's a chance that the receive buffers are being consumed at the same
+	rate as they are being replenished in ibmveth_replenish_task()... 
+	Meanwhile, the calls to schedule_replenishing() from ibmveth_poll() won't
+	schedule another replenishing cycle (because the not_replenishing flag is
+	zero), starving the buffers and making the adapter unable to receive
+	packets unless the module is reloaded...  Here's a small patch that will
+	fix it by scheduling another replenishing task after toggling the
+	not_replenishing flag.
+	
+
+<david-b@pacbell.net>
+	[PATCH] USB: EHCI qh update race fix
+	
+	This makes the EHCI driver stop trying to update a live QH ... it's
+	not like OHCI, that can't be done safely because of a hardware race.
+	The fix:
+	
+	    - Unlinks the QH before updating it; only the tail can safely be
+	      updated "live", not the queue head.  The async schedule (all
+	      control/bulk QHs) and periodic schedule (interrupt QH) work a
+	      bit differently ... high bandwidth transfers will hiccup.
+	
+	    - Moves "update QH" and "clear toggle" logic into one new
+	      qh_refresh() routine, used in several places.
+	
+	The race shows readily enough under load with the right hardware.
+	The controller silicon might be relatively slow, or maybe it's the
+	bus that's slow/busy:
+	
+		Host			Controller
+		---			----------
+					reads two TD pointers
+		update two TD pointers
+		wmb()
+		activate QH
+					reads rest of QH
+	
+	Net result is that the HC treated old TD pointers as valid, and things
+	started misbehaving.  Busy controllers would misbehave worse; some systems
+	wouldn't notice more than a slowdown, especially with light USB loads.
+	
+	This affects behavior in two cases.  The uncommon one is when an endpoint
+	gets an error and halts.  The more common one happens when the controller
+	runs off the end of its queue and overlays an inactive "dummy" TD into
+	the QH ... something the spec says shouldn't happen, but which more
+	silicon seems to be doing.  (Presumably to reduce DMA chatter.)
+
+
+<bzolnier@trik.(none)>
+	[ide] ide-cd: fix possible race in PIO mode
+	
+	When we issue an ide command the status bits don't become valid for
+	400nS. In the DMA case ide_execute_command handles this but in the PIO
+	case we don't do the needed locking, use OUTBSYNC to avoid posting or
+	delay. This means that in some situations we can execute the command
+	handler in PIO mode before the command status bits are valid and the
+	handler may read and act wrongly.
+
+
+<hch@sgi.com>
+	[XFS] handle inode creating race
+	
+	SGI-PV: 921072
+	SGI-Modid: xfs-linux:xfs-kern:181657a
+
+
+<hunold@linuxtv.org>
+	[PATCH] dvb: av7110 driver update
+	
+    ...
+	
+	- av7110: Fixed race condition between driver and av7110 while 
+    accessing the COMMAND register in DPRAM.  See
+	  http://www.linuxtv.org/mailinglists/vdr/2004/01-2004/msg00331.html
+	
+	- budget: various cleanups by Adrian bunk 
+
+
+
+
+<roland@redhat.com>
+	[PATCH] fix bogus ECHILD return from wait* with zombie group leader
+	
+	Klaus Dittrich observed this bug and posted a test case for it.
+	
+	This patch fixes both that failure mode and some others possible.  What
+	Klaus saw was a false negative (i.e.  ECHILD when there was a child)
+	when the group leader was a zombie but delayed because other children
+	live; in the test program this happens in a race between the two threads
+	dying on a signal.
+	
+	The change to the TASK_TRACED case avoids a potential false positive
+	(blocking, or WNOHANG returning 0, when there are really no children
+	left), in the race condition where my_ptrace_child returns zero.
+	
+
+<nanhai.zou@intel.com>
+	[PATCH] Fix a race condition in pty.c
+	
+There is a race condition int pty.c when pty_close wakes up waiter on its
+pair device before set TTY_OTHER_CLOSED flag.
+	
+It is possible on SMP or preempt kernel, waiter wakes up too early that it
+will not get TTY_OTHER_CLOSED flag then fall into sleep again - missed wakeup.
+	
+hjl reports that this bug will hang some expect scripts on SMP machines.
+	
+

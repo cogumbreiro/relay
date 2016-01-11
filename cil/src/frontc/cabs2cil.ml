@@ -167,7 +167,7 @@ let isTransparentUnion (t: typ) : fieldinfo option =
     TComp (comp, _) when not comp.cstruct -> 
       (* Turn transparent unions into the type of their first field *)
       if hasAttribute "transparent_union" (typeAttrs t) then begin
-        match comp.cfields with
+        match (!getCfields comp) with
           f :: _ -> Some f
         | _ -> E.s (unimp "Empty transparent union: %s" (compFullName comp))
       end else 
@@ -612,7 +612,7 @@ let rec stripConstLocalType (t: typ) : typ =
                       f.fname (compFullName ci));
             f.ftype <- t'
           end)
-        ci.cfields;
+        (!getCfields ci);
       let a' = dc a in if a != a' then TComp(ci, a') else t
 
     (* We never assign functions either *)
@@ -1502,8 +1502,8 @@ let rec combineTypes (what: combineWhat) (oldt: typ) (t: typ) : typ =
         else begin
           (* If one has 0 fields (undefined) while the other has some fields 
            * we accept it *)
-          let oldci_nrfields = List.length oldci.cfields in
-          let ci_nrfields = List.length ci.cfields in
+          let oldci_nrfields = List.length (!getCfields oldci) in
+          let ci_nrfields = List.length (!getCfields ci) in
           if oldci_nrfields = 0 then
             TComp (ci, comb_a)
           else if ci_nrfields = 0 then
@@ -1530,7 +1530,7 @@ let rec combineTypes (what: combineWhat) (oldt: typ) (t: typ) : typ =
                   raise (Failure "different structs(field attributes)");
                 (* Make sure the types are compatible *)
                 ignore (combineTypes CombineOther oldf.ftype f.ftype);
-                ) oldci.cfields ci.cfields
+                ) (!getCfields oldci) (!getCfields ci)
             with Failure _ as e -> begin 
               (* Our assumption was wrong. Forget the isomorphism *)
               ignore (E.log "\tFailed in our assumption that %s and %s are isomorphic\n"
@@ -1816,7 +1816,7 @@ let rec setOneInit (this: preInit)
               | f' :: _ when f'.fname = f.fname -> idx
               | _ :: restf -> loop (idx + 1) restf
             in
-            loop 0 f.fcomp.cfields, off
+            loop 0 (!getCfields f.fcomp), off
         | _ -> E.s (bug "setOneInit: non-constant index")
       in
       let pMaxIdx, pArray = 
@@ -1917,7 +1917,7 @@ let rec collectInitializer
                 in
                 (Field(f, NoOffset), thisi) :: collect (idx + 1) restf
         in
-        CompoundInit (thistype, collect 0 comp.cfields), thistype
+        CompoundInit (thistype, collect 0 (!getCfields comp)), thistype
 
     | TComp (comp, _), CompoundPre (pMaxIdx, pArray) when not comp.cstruct ->
         (* Find the field to initialize *)
@@ -1932,7 +1932,7 @@ let rec collectInitializer
         in
         if !msvcMode && !pMaxIdx != 0 then 
           ignore (warn "On MSVC we can initialize only the first field of a union");
-        CompoundInit (thistype, [ findField 0 comp.cfields ]), thistype
+        CompoundInit (thistype, [ findField 0 (!getCfields comp) ]), thistype
 
     | _ -> E.s (unimp "collectInitializer")
                       
@@ -2044,7 +2044,7 @@ let fieldsToInit
     : fieldinfo list = 
   (* Never look at anonymous fields *)
   let flds1 = 
-    List.filter (fun f -> f.fname <> missingFieldName) comp.cfields in
+    List.filter (fun f -> f.fname <> missingFieldName) (!getCfields comp) in
   let flds2 = 
     match designator with 
       None -> flds1
@@ -3024,7 +3024,7 @@ and makeCompType (isstruct: bool)
 
 
   let flds = List.concat (List.map doFieldGroup nglist) in
-  if comp.cfields <> [] then begin
+  if (!getCfields comp) <> [] then begin
     (* This appears to be a multiply defined structure. This can happen from 
     * a construct like "typedef struct foo { ... } A, B;". This is dangerous 
     * because at the time B is processed some forward references in { ... } 
@@ -3032,12 +3032,12 @@ and makeCompType (isstruct: bool)
     * the type structure. We do a thourough check and then we reuse the type 
     * for A *)
     let fieldsSig fs = List.map (fun f -> typeSig f.ftype) fs in 
-    if not (Util.equals (fieldsSig comp.cfields) (fieldsSig flds)) then
+    if not (Util.equals (fieldsSig (!getCfields comp)) (fieldsSig flds)) then
       ignore (error "%s seems to be multiply defined" (compFullName comp))
   end else 
-    comp.cfields <- flds;
-
-(*  ignore (E.log "makeComp: %s: %a\n" comp.cname d_attrlist a); *)
+    !setCfields comp flds;
+  
+  (*  ignore (E.log "makeComp: %s: %a\n" comp.cname d_attrlist a); *)
   comp.cattr <- a;
   let res = TComp (comp, []) in
   (* This compinfo is defined, even if there are no fields *)
@@ -3170,7 +3170,7 @@ and doExp (asconst: bool)   (* This expression is used as a constant *)
       | fid :: rest when prefix annonCompFieldName fid.fname -> begin
           match unrollType fid.ftype with 
             TComp (ci, _) -> 
-              let off = search ci.cfields in
+              let off = search (!getCfields ci) in
               if off = NoOffset then 
                 search rest  (* Continue searching *)
               else
@@ -3280,7 +3280,7 @@ and doExp (asconst: bool)   (* This expression is used as a constant *)
         in
         let field_offset = 
           match unrollType t' with
-            TComp (comp, _) -> findField str comp.cfields
+            TComp (comp, _) -> findField str (!getCfields comp)
           | _ -> E.s (error "expecting a struct with field %s" str)
         in
         let lv' = Lval(addOffsetLval field_offset lv) in
@@ -3300,7 +3300,7 @@ and doExp (asconst: bool)   (* This expression is used as a constant *)
         in
         let field_offset = 
           match unrollType pointedt with 
-            TComp (comp, _) -> findField str comp.cfields
+            TComp (comp, _) -> findField str (!getCfields comp)
           | x -> 
               E.s (error 
                      "expecting a struct with field %s. Found %a. t1 is %a" 
@@ -4976,7 +4976,7 @@ and doInit
            -> fi
         | _ :: rest -> findField rest
       in
-      let fi = findField ci.cfields in
+      let fi = findField (!getCfields ci) in
       (* Change the designator and redo *)
       doInit isconst setone so acc [(A.INFIELD_INIT (fi.fname, A.NEXT_INIT),
                                      A.SINGLE_INIT oneinit)]

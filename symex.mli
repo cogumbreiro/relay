@@ -11,7 +11,7 @@ val fullLattice : symLatt
 val sumIsFinal : Summary_keys.sumKey -> bool 
   (* shouldn't this depend on the sumType? *)
 
-class symSummarizer : symLatt -> (SS.data) -> [SS.sumval, symState] summarizer
+class symSummarizer : symLatt -> (SS.data) -> [symState, SS.sumval] summarizer
 
 class symTransFunc : (symState, SS.sumval) stateLattice -> 
   object

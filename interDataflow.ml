@@ -102,7 +102,7 @@ module FunIndex = struct
   let equal (s1:t) (s2:t) = s1 = s2
   let to_string (s:t) = s
   let getTime () = Stat.getWCTime ()
-  let prefix = "TIMES : "
+  let prefix = "FUN TIMES : "
 
 end
 
@@ -135,8 +135,12 @@ module BottomUpDataflow = functor (T : ProcTransfer) -> struct
           FQ.addOnce targetFunc funWork;
       end
     with Not_found ->
-      logError ("Function not in callgraph: " ^ (fid_to_string targetFunc))
+      logError ("Function not in callgraph (1): " ^ (fid_to_string targetFunc))
         
+  exception NoFuncInCallg
+
+  let funsDone = ref 0 
+
   (** Process funWork until a fixed-point is reached *) 
   let fixedPoint curSCC =
     while (not (FQ.is_empty funWork)) do
@@ -146,20 +150,26 @@ module BottomUpDataflow = functor (T : ProcTransfer) -> struct
         let curNode =
           try FMap.find curKey !theCG
           with Not_found ->
-            (logErrorF "Function not in callgraph: %s\n" (fid_to_string curKey);
-             raise Not_found)
+            (logErrorF "Function not in callgraph (2): %s\n" 
+               (fid_to_string curKey);
+             raise NoFuncInCallg)
         in
         let funLabel = "FUN:" ^ fid_to_string curKey in
-        match (FunTime.time funLabel (T.doFunc curKey) curNode) with
-            NoChange -> ()
-          | NewOutput (i,o) -> 
-              let mayNotify = curNode.ccallers in
-              let toNotify = List.filter 
-                (fun nk -> FSet.mem nk curSCC.scc_nodes)
-                mayNotify in
-              List.iter (propagateOut o) toNotify
+        (match (FunTime.time funLabel (T.doFunc curKey) curNode) with
+           NoChange -> ()
+         | NewOutput (i,o) -> 
+             let mayNotify = curNode.ccallers in
+             let toNotify = List.filter 
+               (fun nk -> FSet.mem nk curSCC.scc_nodes)
+               mayNotify in
+             List.iter (propagateOut o) toNotify);
+
+        incr funsDone;
+        if !funsDone mod 50 == 0 then begin
+          FunTime.printTimes ();
+          Stat.print stdout "STATS:\n";
+        end;
       end;
-      Stat.print stdout "STATS:\n";
     done
 
 
@@ -178,17 +188,12 @@ module BottomUpDataflow = functor (T : ProcTransfer) -> struct
     logStatus ("=================================");          
     flushStatus ();
 
-    FunTime.reset ();
-
-    let sccLabel = "SCC:" ^ string_of_int curSCC.scc_num in
     (try
-       FunTime.time sccLabel fixedPoint curSCC;
+       fixedPoint curSCC;
      with e ->
        logError "InterDF: fixed-pointing died?";
        raise e
     );
-
-    FunTime.printTimes ();
 
     logStatus ("=================================");
     logStatus ("Finished an SCC (" ^ sccSize ^ ")");
@@ -218,6 +223,7 @@ module BottomUpDataflow = functor (T : ProcTransfer) -> struct
   (** Iterate through the call graph in bottom-up order and
       compute the fixedpoint of summaries *)
   let compute cg sccCG =
+    FunTime.reset ();
     let isDone = ref false in
     theCG := cg;
     checkRecoverCrash sccCG;

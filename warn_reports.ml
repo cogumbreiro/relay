@@ -104,6 +104,10 @@ module MakeRep (W:WarnCluster) = struct
     | OnlySecond of warnCluster
     | BothButDiff of warnCluster * warnCluster
 
+  (** Identify new vs duplicate warnings *)
+  type dupeKind = 
+      OldCluster | MaxWarnings | DupeWarning
+
   type warnData = warnCluster KH.t
 
   class report 
@@ -209,38 +213,40 @@ module MakeRep (W:WarnCluster) = struct
 
         
     (** Add a report to the current set (and cluster "duplicates").
-        Return true if a new cluster was started *)
-    method addWarning k d : bool =
+        @return None if a new cluster was started
+        or return Some dupeKind if the warning is a duplicate / max warnings
+        already accumulated, etc.  *)
+    method addWarning k d : dupeKind option =
       try
         let oldCluster = KH.find data k in
-        if limitWarnings && 
-          List.length oldCluster >= maxWarningsPerKey then false
-        else if (List.exists 
-                   (fun oldD -> W.equalData d oldD) oldCluster) then false
+        if limitWarnings && List.length oldCluster >= maxWarningsPerKey then 
+          Some MaxWarnings
+        else if (List.exists (fun oldD -> W.equalData d oldD) oldCluster) then 
+          Some DupeWarning
         else
           let newD = W.hashConsData d in
           KH.replace data k (newD :: oldCluster);
-          false
+          Some OldCluster
       with Not_found ->
         let newK = W.hashConsKey k in
         let newD = W.hashConsData d in
         KH.add data newK [ newD ];
-        true
+        None
           
     (** Make a pretty print document of the clusters out as XML *)
-    method pXML () =
-      let doc = text "<?xml version=\"1.0\"?>" ++ line ++
-        text "<run>" ++ line in
-      let doc = KH.fold
-        (fun key cluster doc ->
-           doc ++ text "<cluster>" ++ line ++
-             indent 1 (List.fold_left
-                         (fun doc info -> 
-                            (doc ++ W.pDataXML info ++ line)) nil cluster)
-           ++ text "</cluster>" ++ line
-        ) data doc
-      in
-      doc ++ text "</run>" ++ line ++ text "</xml>" 
+    method pXML oc =
+      fprint oc 80 
+        (text "<?xml version=\"1.0\"?>" ++ line ++ text "<run>" ++ line);
+      KH.iter
+        (fun key cluster ->
+           fprint oc 80 
+             (text "<cluster>" ++ line ++
+                indent 1 (List.fold_left
+                            (fun doc info -> 
+                               (doc ++ W.pDataXML info ++ line)) nil cluster)
+              ++ text "</cluster>" ++ line)
+        ) data;
+      fprint oc 80 (text "</run>" ++ line ++ text "</xml>")
         
     method private serializeChan oc : unit =
       Marshal.to_channel oc 
@@ -259,8 +265,7 @@ module MakeRep (W:WarnCluster) = struct
       open_in_bin_for fname self#deserializeChan
 
     method private writeXMLTo oc =
-      let doc = self#pXML () in
-      fprint oc 80 doc
+      self#pXML oc
         
     method saveToXML (fname:string) = 
       open_out_for fname self#writeXMLTo

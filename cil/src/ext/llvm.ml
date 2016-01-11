@@ -109,7 +109,8 @@ let generate (f:file) : doc =
 
   and gStruct (ci:compinfo) : doc = 
     let pfield f = gType f.ftype in
-    dprintf "%%struct.%s = type { %a }\n" ci.cname (docList pfield) ci.cfields
+    dprintf "%%struct.%s = type { %a }\n" ci.cname (docList pfield) 
+      (!getCfields ci)
 
   (* Generate LLVM initializer from CIL initializer 'i' for type 't' *)
   and giInit (t:typ) (initexp:init) : doc = 

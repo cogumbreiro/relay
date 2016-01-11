@@ -117,6 +117,8 @@ type instStats = {
   mutable offsetOf : int ;   (* Instances of (0)->field *)
   mutable ptr2int : int;     (* pointer -> int conversions *)
   mutable int2ptr : int;     (* int -> pointer conversions  *)
+
+  mutable numGlobalVars: int;
 }
 
 let freshStats () =
@@ -133,6 +135,7 @@ let freshStats () =
     offsetOf = 0;
     ptr2int = 0;
     int2ptr = 0;
+    numGlobalVars = 0;
   }
 
 let addInstr s =
@@ -173,6 +176,9 @@ let addPtr2Int s =
 let addInt2Ptr s =
   s.int2ptr <- s.int2ptr + 1
 
+let addGlobalVar s =
+  s.numGlobalVars <- s.numGlobalVars + 1
+
 let combineStats s1 s2 =
   s1.numCalls <- s1.numCalls + s2.numCalls;
   s1.numFPCalls <- s1.numFPCalls + s2.numFPCalls;
@@ -185,7 +191,8 @@ let combineStats s1 s2 =
   s1.dataAddrTaken <- s1.dataAddrTaken + s2.dataAddrTaken;
   s1.offsetOf <- s1.offsetOf + s2.offsetOf;
   s1.ptr2int <- s1.ptr2int + s2.ptr2int;
-  s1.int2ptr <- s1.int2ptr + s2.int2ptr
+  s1.int2ptr <- s1.int2ptr + s2.int2ptr;
+  s1.numGlobalVars <- s1.numGlobalVars + s2.numGlobalVars
 
 let rec hasArithExp e =
   match e with 
@@ -288,22 +295,15 @@ type perFunc = {
   mutable funNumInsts : int;
   mutable funLoops : int;
   mutable funIfs : int;
+  mutable funFP : int;
 }
 
 let freshPerFunc () =
   { funNumInsts = 0;
     funLoops = 0;
-    funIfs = 0; }
-
-let addInstrPerFunc (fname, fk, pf) =
-  pf.funNumInsts <- pf.funNumInsts + 1
-
-let addControlPerFunc (fname, fk, pf) skind =
-  match skind with
-    If _ | Switch _ -> pf.funIfs <- pf.funIfs + 1
-  | Loop _ -> pf.funLoops <- pf.funLoops + 1
-  | Goto _ | Break _ | Continue _ | Block  _ | TryFinally _ 
-  | TryExcept _ | Return _ | Instr _ -> ()
+    funIfs = 0; 
+    funFP = 0;
+  }
 
 let combinePFStats pfs1 pfs2 =
   (* Assume disjoint keys *)
@@ -347,17 +347,32 @@ class statGatherer = object(self)
     curPerFunc <- Some (fdec.svar.vname, fdec.svar.vid, freshPerFunc ());
     DoChildren
 
+  method addPerFuncOrNot foo =
+    match curPerFunc with 
+      None -> failwith "no cur func?"
+    | Some x -> foo x
+
   method private addInstr () =
     addInstr stats;
-    match curPerFunc with 
-      None -> failwith "addInstr has no cur func?"
-    | Some x -> addInstrPerFunc x
-
+    self#addPerFuncOrNot 
+      (fun (fname, fk, pf) ->
+         pf.funNumInsts <- pf.funNumInsts + 1)
+      
   method private addControl skind =
     addControl stats;
-    match curPerFunc with 
-      None -> failwith "addInstr has no cur func?"
-    | Some x -> addControlPerFunc x skind
+    self#addPerFuncOrNot 
+      (fun (fname, fk, pf) ->
+         match skind with
+           If _ | Switch _ -> pf.funIfs <- pf.funIfs + 1
+         | Loop _ -> pf.funLoops <- pf.funLoops + 1
+         | Goto _ | Break _ | Continue _ | Block  _ | TryFinally _ 
+         | TryExcept _ | Return _ | Instr _ -> ()
+      )
+
+  method private addFPCall =
+    addFPCall stats;
+    self#addPerFuncOrNot 
+      (fun (fname, fk, pf) -> pf.funFP <- pf.funFP + 1)
 
   (* visit an instruction; *)
   method vinst (i:instr) : instr list visitAction =
@@ -374,11 +389,11 @@ class statGatherer = object(self)
 
           (* Indirect call *)
           | Lval(Mem(derefExp),_) ->
-              addFPCall stats
+              self#addFPCall 
 
           (* Other indirect call? *)
           | _ ->
-              addFPCall stats
+              self#addFPCall
              
          );
          
@@ -426,6 +441,11 @@ class statGatherer = object(self)
     );
     DoChildren
 
+  method vvdec varinfo =
+    if varinfo.vglob && not (isFunctionType varinfo.vtype) 
+       && not (Trans_alloc.isAllocVar varinfo.vname) then
+      addGlobalVar stats;
+    DoChildren
 
 end
 
@@ -453,6 +473,7 @@ let printStats s =
   logStatusF "offsetOf pattern: %d\n" s.offsetOf;
   logStatusF "ptr 2 int: %d\n" s.ptr2int;
   logStatusF "int 2 ptr: %d\n" s.int2ptr;
+  logStatusF "num global vars: %d\n" s.numGlobalVars;
   logStatus "\n"
 
 
@@ -464,9 +485,10 @@ let printPFStats pfStats =
        Pervasives.compare d1.funNumInsts d2.funNumInsts) listed in
   logStatusD (seq_to_doc line List.iter
                   (fun ((fname, fkey), data) ->
-                     dprintf "%s:%d -> instrs %d, loops %d, ifs %d"
-                       fname fkey data.funNumInsts data.funLoops data.funIfs) 
-                  sorted nil);
+                     dprintf "%s:%d -> instrs %d, loops %d, ifs %d, fp %d"
+                       fname fkey 
+                       data.funNumInsts data.funLoops data.funIfs data.funFP
+                  ) sorted nil);
   logStatus ""
     
 let printAllStats (globStats, pfStats) =
@@ -510,7 +532,7 @@ let printFPFieldDecls () =
             let unrolledType = unrollTypeNoAttrs finfo.ftype in
             if hitsFunptr unrolledType then
               countIt unrolledType finfo
-         ) compinfo.cfields
+         ) (!Cil.getCfields compinfo)
     );
   Dist.printDistroSortFreq 
     unrolledDist (fun x -> x) "Funptr unrolled counts";

@@ -253,8 +253,10 @@ and node_of_absExp e =
     match e with
       CLval lv
     | CStartOf lv -> node_of_absLval lv (* StartOf?! *)
-    | CAddrOf lv -> 
-        raise Alias.UnknownLoc (* ... *)
+    | CAddrOf (CMem e1, o) -> node_of_absExp e1
+    | CAddrOf (CVar _, _) 
+    | CAddrOf (AbsHost _, _) -> 
+        raise Alias.UnknownLoc (* hmm ... *)
 
     | CBinOp (_, e1, _, _) -> node_of_absExp e1 (* should get a list *)
     | CUnOp (_, e1, _) 
@@ -377,6 +379,10 @@ and isAbsLocExp exp =
   | CConst _ | CSizeOfE _ | CSizeOfStr _ | CSizeOf _ | CAlignOfE _ 
   | CAlignOf _ -> None
 
+let isAbsVar (h, o) =
+  match h with
+    CVar _ | CMem _ -> None
+  | AbsHost h -> Some h
 
 let rec countOpsWithCount (curExp) (curCount) = 
   match curExp with
@@ -925,63 +931,104 @@ module ExpHash = Hashtbl.Make (HashedExp)
 module HashedLvalAttr = struct
   type t = aLval
   let equal a b = compare_lval_attr a b == 0
-  let hash = hash_lval_attr
+  let hash x = hash_lval_attr x
 end
 
 module LvHash = Weak.Make(HashedLvalAttr)
 
 let goldenLvals = LvHash.create 173
 
-(** Try to reduce the memory footprint of lvals. For now, just remove
-    decl information. Ignore attribute lists, etc. *)
-let rec distillLval = function
-    CVar(vi) as b, off ->
-      b, Cil_lvals.distillOff off
-
-  | CMem(exp), off ->
-      CMem (distillExp exp), Cil_lvals.distillOff off
-
-  | AbsHost h as b, off ->
-      b, Cil_lvals.distillOff off
-
+(** Try to reduce the memory footprint of lvals by removing "unneeded" 
+    parts of the CIL AST / sharing equivalent parts *)
+let rec distillLval lv =
+  let host, off = lv in
+  let newOff = Cil_lvals.distillOff off in
+  match host with
+    CVar _  | AbsHost _ -> 
+      if off == newOff
+      then lv
+      else (host, newOff)  
+  | CMem(exp)->
+      let newE = distillExp exp in
+      if off == newOff && exp == newE
+      then lv
+      else (CMem newE, newOff)
+          
 and distillExp e =
   match e with 
     CLval (l) ->
-      CLval (mergeLv l)
+      let newLv = mergeLv l in
+      if l == newLv 
+      then e
+      else CLval newLv
 
   | CAddrOf(l) ->
-      CAddrOf (mergeLv l)
+      let newLv = mergeLv l in
+      if l == newLv 
+      then e
+      else CAddrOf newLv
 
   | CStartOf(l) -> 
-      CStartOf (mergeLv l)
+      let newLv = mergeLv l in
+      if l == newLv 
+      then e
+      else CStartOf newLv
 
   | CConst (CEnum (ce, name, ei)) ->
       Cil_lvals.distillEnuminfo ei;
-      CConst (CEnum (Cil_lvals.distillExp ce, name, ei))
+      let newCE = Cil_lvals.distillExp ce in
+      if ce == newCE 
+      then e
+      else CConst (CEnum (newCE, name, ei))
 
-  | CSizeOfE (e) ->
-      CSizeOfE (distillExp e)
+  | CSizeOfE (exp) ->
+      let newE = distillExp exp in
+      if exp == newE
+      then e
+      else CSizeOfE newE
 
-  | CAlignOfE (e) ->
-      CAlignOfE (distillExp e)
+  | CAlignOfE (exp) ->
+      let newE = distillExp exp in
+      if exp == newE
+      then e
+      else CAlignOfE newE
 
   | CConst _
-  | CSizeOfStr _ ->
-      e
+  | CSizeOfStr _ -> e
 
   | CSizeOf (t) ->
-      CSizeOf (Cil_lvals.mergeType t)
+      let newT = Cil_lvals.mergeType t in
+      if t == newT 
+      then e
+      else CSizeOf newT
+
   | CAlignOf (t) -> 
-      CAlignOf (Cil_lvals.mergeType t)
+      let newT = Cil_lvals.mergeType t in
+      if t == newT 
+      then e
+      else CAlignOf newT
 
-  | CCastE (t, e) ->
-      CCastE (Cil_lvals.mergeType t, distillExp e)
+  | CCastE (t, exp) ->
+      let newE = distillExp exp in
+      let newT = Cil_lvals.mergeType t in
+      if t == newT && exp == newE 
+      then e
+      else CCastE (newT, newE)
 
-  | CUnOp(op, e, t) ->
-      CUnOp(op, distillExp e, Cil_lvals.mergeType t)
+  | CUnOp(op, exp, t) ->
+      let newE = distillExp exp in
+      let newT = Cil_lvals.mergeType t in
+      if t == newT && exp == newE 
+      then e
+      else CUnOp(op, newE, newT)
 
   | CBinOp(op, e1, e2, t) ->
-      CBinOp(op, distillExp e1, distillExp e2, Cil_lvals.mergeType t)
+      let newE1 = distillExp e1 in
+      let newE2 = distillExp e2 in
+      let newT = Cil_lvals.mergeType t in
+      if t == newT && e1 == newE1 && e2 == newE2
+      then e
+      else CBinOp(op, newE1, newE2, newT)
 
 
 and mergeLv lv = 
@@ -991,7 +1038,6 @@ and mergeLv lv =
     let newLv = distillLval lv in
     LvHash.add goldenLvals newLv;
     newLv
-
 
 let printHashStats () =
   let hashStats = Stdutil.string_of_hashstats LvHash.stats goldenLvals 
@@ -1035,8 +1081,8 @@ and typeOfLvalUnsafe = function
       Cil_lvals.typeOffsetUnsafe (var_of_abs vid).vtype off
   | CMem addr, off ->
       (match Cil_lvals.unrollTypeNoAttrs (typeOfUnsafe addr) with
-         TPtr (t, _) -> Cil_lvals.unrollTypeNoAttrs 
-           (Cil_lvals.typeOffsetUnsafe t off)
+         TPtr (t, _) -> 
+           Cil_lvals.unrollTypeNoAttrs (Cil_lvals.typeOffsetUnsafe t off)
        | t ->
            (match off with
               NoOffset ->
@@ -1204,7 +1250,7 @@ let rec doSimplifyLv (lv:aLval) :
       (try 
          let (_, simplerLv) = List.find 
            (fun (seenTyp, _) -> 
-              ((Ciltools.compare_type curTyp seenTyp) == 0)
+              Ciltools.equal_type curTyp seenTyp
            ) seenTypes in
          if (Cil.isVoidType curTyp) then
            (simplerLv, seenTypes, true) (* TODO limit the number of void *)
@@ -1219,10 +1265,44 @@ let rec doSimplifyLv (lv:aLval) :
 
 and doSimplifyExp (exp:aExp) : aExp * (Cil.typ * aLval) list * bool =
   match exp with
-    CLval(lv) ->
+    CLval lv ->
       let simplerLv, seenTypes, changed = doSimplifyLv lv in
       (CLval (simplerLv), seenTypes, changed)
-  | _ ->
+  | CAddrOf lv ->
+      let simplerLv, seenTypes, changed = doSimplifyLv lv in
+      (CAddrOf (simplerLv), seenTypes, changed)
+  | CStartOf lv ->
+      let simplerLv, seenTypes, changed = doSimplifyLv lv in
+      (CStartOf (simplerLv), seenTypes, changed)
+
+  | CCastE (t, e) ->
+      (* strip the cast ? *)
+      let simplerExp, seenTypes, changed = doSimplifyExp e in
+      (simplerExp, seenTypes, changed)
+
+  | CUnOp (op, e, t) ->
+      let simplerExp, seenTypes, changed = doSimplifyExp e in
+      (CUnOp (op, simplerExp, t), seenTypes, changed)
+      
+
+  | CBinOp (op, e1, e2, t) ->
+      (match op with
+         PlusPI | IndexPI | MinusPI | PlusA ->
+           (* drop the offset expression... *)
+           let simplerExp, seenTypes, changed = doSimplifyExp e1 in
+           (simplerExp, seenTypes, changed)
+       | _ ->
+           let e1', seenTypes1, changed1 = doSimplifyExp e1 in
+           let e2', seenTypes2, changed2 = doSimplifyExp e2 in
+           let seenTypes = List_utils.unionEq 
+             (fun (t1, l1) (t2, l2) ->
+                Ciltools.equal_type t1 t2 && compare_lval l1 l2 == 0)
+             seenTypes1 seenTypes2 in
+           (CBinOp (op, e1', e2', t), seenTypes, changed1 || changed2)
+      )
+        
+  | CConst _  | CSizeOf _ | CSizeOfE _  | CSizeOfStr _ 
+  | CAlignOf _ | CAlignOfE _  ->
       (exp, [], false)
 
 (** May eliminate redundant parts of lval access path. Returns the 
@@ -1231,7 +1311,9 @@ let simplifyLval (lv:aLval) : aLval * bool =
   let simplerLv, _, changed = doSimplifyLv lv in
   (simplerLv, changed)
 
-
+let simplifyExp (exp:aExp) : aExp * bool =
+  let simplerExp, _, changed = doSimplifyExp exp in
+  (simplerExp, changed)
 
 (******************* High-level compare ********************)
 
@@ -1384,41 +1466,6 @@ let rec sameHost h1 h2 =
   )
 
 
-(* OLD... only works for Steens? *)
-(*
-  (try
-     let n1s = nodesOf h1 in
-     let n2s = nodesOf h2 in
-     let nodeSizes = 
-       (List.fold_left
-          (fun found n1 -> 
-             List.fold_left
-               (fun found n2 -> 
-                  match found with 
-                    None -> 
-                      if (Alias.Abs.compare n1 n2 == 0) then
-                        let s1 = Alias.Abs.pts_size n1 in
-                        let s2 = Alias.Abs.pts_size n2 in
-                        Some (s1, s2)
-                      else
-                        None
-                  | Some _ -> found
-               )  found n2s)
-          None n1s) in
-     match nodeSizes with
-       None -> None
-     | Some (a, b) -> Some (PtsToSame (a, b))
-   with 
-     Alias.UnknownLoc ->
-       logError "sameHost UnknownLoc\n";
-       tryType h1 h2
-   | Not_found ->
-       logError "sameHost Not_found\n";
-       tryType h1 h2         
-  )
-*)
-
-
 and tryType h1 h2 =
   (* couldn't resolve aliases; try an approximation! *)
   try
@@ -1431,27 +1478,22 @@ and tryType h1 h2 =
       None
         
 and typeBasedCheck typ1 typ2 =
-  if (Ciltools.compare_type typ1 typ2 == 0) then
-    Some (SameType)
-  else
-    None
+  if (Ciltools.equal_type typ1 typ2) then Some (SameType)
+  else None
 
 and typeOf = function
     CVar v -> (var_of_abs v).vtype
   | CMem e -> typeAfterDeref e
   | AbsHost _ -> TVoid []
       
-and nodesOf = function
-    CVar v -> [Alias.Abs.getNodeVar (var_of_abs v)]
-  | CMem e -> deref_absExp e
-  | AbsHost h -> [h]
-
 (* non-syntactic match or uses Abs alias nodes *)
 let sameLvalAbs lv1 lv2 =
-  if (Ciltools.compare_type
-        (typeOfLvalUnsafe lv1) 
-        (typeOfLvalUnsafe lv2) == 0) then
-    let (h1, o1), (h2, o2) = lv1, lv2 in
+  let t1 = typeOfLvalUnsafe lv1 in
+  let t2 = typeOfLvalUnsafe lv2 in
+  if (isVoidType t1 || isVoidType t2 || 
+        Ciltools.equal_type t1 t2 ) then
+    let (h1, o1) = lv1 in
+    let (h2, o2) = lv2 in
     if (Ciltools.compare_offset o1 o2 == 0) then         
       (* ignores case when ptr points to some offset *)
       sameHost h1 h2 
@@ -1461,10 +1503,27 @@ let sameLvalAbs lv1 lv2 =
     None
 
 let sameLval lv1 lv2 : imprecision option =
-  match isAbsLval lv1, isAbsLval lv2 with
-    Some _, _
+(*  match isAbsLval lv1, isAbsLval lv2 with *)
+  match isAbsVar lv1, isAbsVar lv2 with
+    Some _, _ 
   | None, Some _ ->
       sameLvalAbs lv1 lv2
+(*
+  | Some _, None ->
+      let h1, o1  = lv1 in
+      if o1 = NoOffset then
+        let h2, _ = lv2 in
+        sameHost h1 h2
+      else 
+        sameLvalAbs lv1 lv2
+  | None, Some _ -> 
+      let h2, o2  = lv2 in
+      if o2 = NoOffset then
+        let h1, _ = lv1 in
+        sameHost h1 h2
+      else 
+        sameLvalAbs lv1 lv2
+*)
   | None, None ->
       if compare_lval lv1 lv2 == 0 then Some (Syntactic)
       else sameLvalAbs lv1 lv2

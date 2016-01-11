@@ -1,0 +1,4014 @@
+Changes from 2.6.15 to 2.6.16
+
+-----------------------
+
+Not seeing many of these warnings...
+
+problem may be that we're not treating entry points as threads, but
+
+15000/48000 functions are callgraph roots when using per-file FP
+analysis...  most are actually called through FPs (so they aren't
+really callgraph roots) check again w/ the sound FP analysis?
+
+if not, what would funs called through FP use as starting lock states?
+
+
+
+-----------------------
+
+optimization:
+
+Don't keep locks in unlocked set unless needed. Record in a global 
+table where one was discarded. Once we detect that it's needed, 
+repeat the functions w/ the unlocked set tracked ?
+
+
+--------------------------------------------------------------------
+
+
+commit a904f7478561464f9fe74929b81fec237b6ff4c3
+Author: Ralf Baechle <ralf@linux-mips.org>
+Date:   Wed Mar 15 00:03:29 2006 +0000
+
+    [MIPS] Sibyte: Fix race in sb1250_gettimeoffset().
+        
+    From Dave Johnson <djohnson+linuxmips@sw.starentnetworks.com>:
+        
+    sb1250_gettimeoffset() simply reads the current cpu 0 timer remaining
+    value, however once this counter reaches 0 and the interrupt is raised,
+    it immediately resets and begins to count down again.
+        
+    If sb1250_gettimeoffset() is called on cpu 1 via do_gettimeofday() after
+    the timer has reset but prior to cpu 0 processing the interrupt and
+    taking write_seqlock() in timer_interrupt() it will return a full value
+    (or close to it) causing time to jump backwards 1ms. Once cpu 0 handles
+    the interrupt and timer_interrupt() gets far enough along it will jump
+    forward 1ms.
+        
+    Fix this problem by implementing mips_hpt_*() on sb1250 using a spare
+    timer unrelated to the existing periodic interrupt timers. It runs at
+    1Mhz with a full 23bit counter.  This eliminated the custom
+    do_gettimeoffset() for sb1250 and allowed use of the generic
+    fixed_rate_gettimeoffset() using mips_hpt_*() and timerhi/timerlo.
+
+http://linux.junsun.net/patches/oss.sgi.com/submitted/030610.a-smp-gettimeoffset-fix.patch
+
+it's a MIPS thing?
+
+
+
+
+
+commit 265a92856b17524c87da0258ac0d3cec80ae1d35
+Author: Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>
+Date:   Fri Mar 17 16:05:43 2006 -0800
+
+
+    [NET]: Fix race condition in sk_wait_event().
+    
+    It is broken, the condition is checked out of socket lock. It is
+    wonderful the bug survived for so long time.
+    
+    [ This fixes bugzilla #6233:
+      race condition in tcp_sendmsg when connection became established ]
+
+
+--- a/include/net/sock.h	Fri Mar 17 23:51:26 2006 +0800
++++ b/include/net/sock.h	Sat Mar 18 08:05:43 2006 +0800
+@@ -478,9 +478,9 @@ static inline void sk_add_backlog(struct ...
+
+#define sk_wait_event(__sk, __timeo, __condition)		\
+({	int rc;							\
+ 	rc = __condition;					\
+ 	if (!rc) {						\
+ 		*(__timeo) = schedule_timeout(*(__timeo));	\
+-		rc = __condition;				\
+ 	}							\
+ 	lock_sock(__sk);					\
++	rc = __condition;					\
+ 	rc;							\
+ })
+
+used by several (see LXRC)
+
+Usually the condition part of the macro is a call to a getter fun to check
+sk->sk_state
+
+seems like even w/ the fix it should have caught a race on the first read...
+
+it's basically an implementation of condition variables
+
+CHECK IT: not reachable from thread root unless funptrs cross file, not checking callgraph entry points as thread roots
+
+
+----
+
+commit 5b40dc780ed996162f3af8712eb03beb24dcdbef
+Author: Christoph Lameter <clameter@sgi.com>
+Date:   Thu Mar 16 23:04:07 2006 -0800
+
+
+    [PATCH] fix race in pagevec_strip?
+    
+    We can call try_to_release_page() with PagePrivate off and a valid
+    page->mapping This may cause all sorts of trouble for the filesystem
+    *_releasepage() handlers.  XFS bombs out in that case.
+    
+    Lock the page before checking for page private.
+    
+
+Index: linux-2.6.16-rc6/mm/swap.c
+===================================================================
+--- linux-2.6.16-rc6.orig/mm/swap.c	2006-03-11 14:12:55.000000000 -0800
++++ linux-2.6.16-rc6/mm/swap.c	2006-03-16 10:15:23.000000000 -0800
+
+actually on line 351 for me
+
+@@ -392,8 +392,9 @@ void pagevec_strip(struct pagevec *pvec)
+ 	for (i = 0; i < pagevec_count(pvec); i++) {
+ 		struct page *page = pvec->pages[i];
+ 
+-		if (PagePrivate(page) && !TestSetPageLocked(page)) {
+-			try_to_release_page(page, 0);
++		if (TestSetPageLocked(page)) {
++			if (PagePrivate(page))
++				try_to_release_page(page, 0);
+ 			unlock_page(page);
+ 		}
+ 	}
+-
+
+race on PagePrivate
+
+CHECK IT: FOUND (maybe) in the form of bitops (page-flags.h) that get flagged...
+
+filtered out by filters though!
+
+
+
+#define PagePrivate(page)    test_bit(PG_private, &(page)->flags)
+
+Possible race between access to:
+        _a126_415156_aio->flags : fs/aio.c:103 and
+        _a126_415156_aio->flags : fs/aio.c:103
+        Accessed at locs:
+        mm/page_alloc.c:135 and
+        include/asm/bitops.h:252
+
+
+Possible race between access to:
+        _a126_415156_aio->flags : fs/aio.c:103 and
+        _a126_415156_aio->flags : fs/aio.c:103
+        Accessed at locs:
+        include/asm/bitops.h:252 and
+        mm/page_alloc.c:135
+
+Possible race between access to:
+REP_NODE.flags and
+REP_NODE.flags
+        Accessed at locs:
+        mm/page_alloc.c:135 and
+        include/asm/bitops.h:252
+        Possible paths & LS (first 3):
+
+Possible race between access to:
+REP_NODE.flags and
+REP_NODE.flags
+        Accessed at locs:
+        mm/slab.c:1448 and
+        mm/slab.c:1755
+
+
+Possible race between access to:
+REP_NODE.flags and
+REP_NODE.flags
+        Accessed at locs:
+        include/linux/pagemap.h:33 and
+        fs/inode.c:148
+        Possible paths & LS (first 3):
+
+Possible race between access to:
+(((_a581_569941_audit.skb)->end)->frags[0].page)->flags @ kernel/audit.c:564 and
+mem_map->flags @ include/linux/mm.h:507
+        Accessed at locs:
+        [mm/page_alloc.c:135, ] and
+        [include/asm/bitops.h:252, mm/page_alloc.c:129, mm/page_alloc.c:135, mm/
+page_alloc.c:339, ]
+
+
+Possible race between access to:
+(((tr->blkcore_priv)->rq)->flush_rq)->flags : drivers/mtd/mtd_blkdevs.c:372 and
+(((tr->blkcore_priv)->rq)->flush_rq)->flags : drivers/mtd/mtd_blkdevs.c:372
+        Accessed at locs:
+        block/ll_rw_blk.c:390 and
+        block/elevator.c:335
+
+
+
+
+
+commit a488edc914aa1d766a4e2c982b5ae03d5657ec1b
+Author: Dave Kleikamp <shaggy@austin.ibm.com>
+Date:   Tue Mar 14 13:44:00 2006 -0600
+
+
+    [PATCH] JFS: Take logsync lock before testing mp->lsn
+    
+    This fixes a race where lsn could be cleared before taking the lock
+
+diff --git a/fs/jfs/jfs_dmap.c b/fs/jfs/jfs_dmap.c
+index 4fb3ed1..c161c98 100644
+--- a/fs/jfs/jfs_dmap.c
++++ b/fs/jfs/jfs_dmap.c
+@@ -532,10 +532,10 @@ dbUpdatePMap(struct inode *ipbmap,
+ 
+ 		lastlblkno = lblkno;
+ 
++		LOGSYNC_LOCK(log, flags);
+ 		if (mp->lsn != 0) {
+ 			/* inherit older/smaller lsn */
+ 			logdiff(diffp, mp->lsn, log);
+-			LOGSYNC_LOCK(log, flags);
+ 			if (difft < diffp) {
+ 				mp->lsn = lsn;
+ 
+@@ -548,20 +548,17 @@ dbUpdatePMap(struct inode *ipbmap,
+ 			logdiff(diffp, mp->clsn, log);
+ 			if (difft > diffp)
+ 				mp->clsn = tblk->clsn;
+-			LOGSYNC_UNLOCK(log, flags);
+ 		} else {
+ 			mp->log = log;
+ 			mp->lsn = lsn;
+ 
+ 			/* insert bp after tblock in logsync list */
+-			LOGSYNC_LOCK(log, flags);
+-
+ 			log->count++;
+ 			list_add(&mp->synclist, &tblk->synclist);
+ 
+ 			mp->clsn = tblk->clsn;
+-			LOGSYNC_UNLOCK(log, flags);
+ 		}
++		LOGSYNC_UNLOCK(log, flags);
+ 	}
+ 
+ 	/* write the last buffer. */
+diff --git a/fs/jfs/jfs_imap.c b/fs/jfs/jfs_imap.c
+index 87dd86c..b62a048 100644
+--- a/fs/jfs/jfs_imap.c
++++ b/fs/jfs/jfs_imap.c
+@@ -2844,11 +2844,11 @@ diUpdatePMap(struct inode *ipimap,
+ 	 */
+ 	lsn = tblk->lsn;
+ 	log = JFS_SBI(tblk->sb)->log;
++	LOGSYNC_LOCK(log, flags);
+ 	if (mp->lsn != 0) {
+ 		/* inherit older/smaller lsn */
+ 		logdiff(difft, lsn, log);
+ 		logdiff(diffp, mp->lsn, log);
+-		LOGSYNC_LOCK(log, flags);
+ 		if (difft < diffp) {
+ 			mp->lsn = lsn;
+ 			/* move mp after tblock in logsync list */
+@@ -2860,17 +2860,15 @@ diUpdatePMap(struct inode *ipimap,
+ 		logdiff(diffp, mp->clsn, log);
+ 		if (difft > diffp)
+ 			mp->clsn = tblk->clsn;
+-		LOGSYNC_UNLOCK(log, flags);
+ 	} else {
+ 		mp->log = log;
+ 		mp->lsn = lsn;
+ 		/* insert mp after tblock in logsync list */
+-		LOGSYNC_LOCK(log, flags);
+ 		log->count++;
+ 		list_add(&mp->synclist, &tblk->synclist);
+ 		mp->clsn = tblk->clsn;
+-		LOGSYNC_UNLOCK(log, flags);
+ 	}
++	LOGSYNC_UNLOCK(log, flags);
+ 	write_metapage(mp);
+ 	return (0);
+ }
+
+
+CHECK IT: not part of callgraph even w/ make allyesconfig
+
+
+
+commit 67963132638e67ad3c5aa16765e6f3f2f3cdd85c
+Author: Maneesh Soni <maneesh@in.ibm.com>
+Date:   Tue Mar 14 15:03:14 2006 +0530
+
+
+    [PATCH] Plug kdump shutdown race window
+    
+    lapic_shutdown() re-enables interrupts which is un-desirable for panic
+    case, so use local_irq_save() and local_irq_restore() to keep the irqs
+    disabled for kexec on panic case, and close a possible race window while
+    kdump shutdown as shown in this stack trace
+    
+       -- BUG: spinlock lockup on CPU#1, bash/4396, c52781a0
+       [<c01c1870>] _raw_spin_lock+0xb7/0xd2
+       [<c029e148>] _spin_lock+0x6/0x8
+       [<c011b33f>] scheduler_tick+0xe7/0x328
+       [<c0128a7c>] update_process_times+0x51/0x5d
+       [<c0114592>] smp_apic_timer_interrupt+0x4f/0x58
+       [<c01141ff>] lapic_shutdown+0x76/0x7e
+       [<c0104d7c>] apic_timer_interrupt+0x1c/0x30
+       [<c01141ff>] lapic_shutdown+0x76/0x7e
+       [<c0116659>] machine_crash_shutdown+0x83/0xaa
+       [<c013cc36>] crash_kexec+0xc1/0xe3
+       [<c029e148>] _spin_lock+0x6/0x8
+       [<c013cc22>] crash_kexec+0xad/0xe3
+       [<c0215280>] __handle_sysrq+0x84/0xfd
+       [<c018d937>] write_sysrq_trigger+0x2c/0x35
+       [<c015e47b>] vfs_write+0xa2/0x13b
+       [<c015ea73>] sys_write+0x3b/0x64
+       [<c0103c69>] syscall_call+0x7/0xb
+
+diff -puN arch/i386/kernel/apic.c~kdump-shutdown-hang-fix arch/i386/kernel/apic.c
+--- linux-2.6.16-rc5-git14/arch/i386/kernel/apic.c~kdump-shutdown-hang-fix 2006-03-10 17:42:48.473188808 +0530
++++ linux-2.6.16-rc5-git14-maneesh/arch/i386/kernel/apic.c 2006-03-10 17:43:40.390296208 +0530
+@@ -570,16 +570,18 @@ void __devinit setup_local_APIC(void)
+*/
+void lapic_shutdown(void)
+{
++ unsigned long flags;
++
+if (!cpu_has_apic)
+return;
+
+- local_irq_disable();
++ local_irq_save(flags);
+clear_local_APIC();
+
+if (enabled_via_apicbase)
+disable_local_APIC();
+
+- local_irq_enable();
++ local_irq_restore(flags);
+}
+
+
+$SCOPE probably won't catch this since we don't model the irq flags
+
+
+
+commit f9a3879abf2f1a27c39915e6074b8ff15a24cb55
+Author: GOTO Masanori <gotom@sanori.org>
+Date:   Mon Mar 13 21:20:44 2006 -0800
+
+    [PATCH] Fix sigaltstack corruption among cloned threads
+    
+    This patch fixes alternate signal stack corruption among cloned threads
+    with CLONE_SIGHAND (and CLONE_VM) for linux-2.6.16-rc6.
+    
+    The value of alternate signal stack is currently inherited after a call of
+    clone(...  CLONE_SIGHAND | CLONE_VM).  But if sigaltstack is set by a
+    parent thread, and then if multiple cloned child threads (+ parent threads)
+    call signal handler at the same time, some threads may be conflicted -
+    because they share to use the same alternative signal stack region.
+    Finally they get sigsegv.  It's an undesirable race condition.  Note that
+    child threads created from NPTL pthread_create() also hit this conflict
+    when the parent thread uses sigaltstack, without my patch.
+    
+    To fix this problem, this patch clears the child threads' sigaltstack
+    information like exec().  This behavior follows the SUSv3 specification.
+    In SUSv3, pthread_create() says "The alternate stack shall not be inherited
+    (when new threads are initialized)".  It means that sigaltstack should be
+    cleared when sigaltstack memory space is shared by cloned threads with
+    CLONE_SIGHAND.
+    
+    Note that I chose "if (clone_flags & CLONE_SIGHAND)" line because:
+    - If clone_flags line is not existed, fork() does not inherit sigaltstack.
+    - CLONE_VM is another choice, but vfork() does not inherit sigaltstack.
+    - CLONE_SIGHAND implies CLONE_VM, and it looks suitable.
+    - CLONE_THREAD is another candidate, and includes CLONE_SIGHAND + CLONE_VM,
+        but this flag has a bit different semantics.
+    I decided to use CLONE_SIGHAND.
+    
+    [ Changed to test for CLONE_VM && !CLONE_VFORK after discussion --Linus ]
+
+
+--- linux-2.6.16-rc6.gotom/kernel/fork.c	2006-03-13 14:45:50.686049000 +0900
++++ linux-2.6.16-rc6/kernel/fork.c	2006-03-13 14:47:24.162839240 +0900
+@@ -1062,6 +1062,13 @@ static task_t *copy_process(unsigned lon
+ 	p->clear_child_tid = (clone_flags & CLONE_CHILD_CLEARTID) ? child_tidptr: NULL;
+ 
+ 	/*
++	 * sigaltstack should be cleared when CLONE_SIGHAND (and CLONE_VM) is
++	 * specified.
++	 */
++	if (clone_flags & CLONE_SIGHAND)
++		p->sas_ss_sp = p->sas_ss_size = 0;
++
++	/*
+ 	 * Syscall tracing should be turned off in the child regardless
+ 	 * of CLONE_PTRACE.
+ 	 */
+-
+
+
+
+$SCOPE outside of our scope... didn't model thread creation at this level
+
+
+
+
+commit d8117ce5a679ff1f48df247da30fb62c16d562c5
+Author: Christoph Lameter <clameter@engr.sgi.com>
+Date:   Tue Mar 7 19:05:32 2006 -0800
+
+    [IA64] Fix race in the accessed/dirty bit handlers
+    
+    A pte may be zapped by the swapper, exiting process, unmapping or page
+    migration while the accessed or dirty bit handers are about to run. In that
+   case the accessed bit or dirty is set on an zeroed pte which leads the VM to
+    conclude that this is a swap pte. This may lead to
+    
+    - Messages from the vm like
+    
+    swap_free: Bad swap file entry 4000000000000000
+    
+    - Processes being aborted
+    
+    swap_dup: Bad swap file entry 4000000000000000
+    VM: killing process ....
+    
+    Page migration is particular suitable for the creation of this race since
+    it needs to remove and restore page table entries.
+    
+    The fix here is to check for the present bit and simply not update
+    the pte if the page is not present anymore. If the page is not present
+    then the fault handler should run next which will take care of the problem
+    by bringing the page back and then mark the page dirty or move it onto the
+    active list.
+
+
+IA64 stuff...
+    
+
+commit d32439c0d4cec5c4101477989ee8c7ee1ebfbb0e
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Fri Mar 3 17:15:34 2006 -0800
+
+    [BRIDGE]: port timer initialization
+    
+    Initialize the STP timers for a port when it is created,
+    rather than when it is enabled. This will prevent future race conditions
+    where timer gets started before port is enabled.
+    
+
+
+-- a/net/bridge/br_if.c	Sun Mar  5 13:06:19 2006 +0800
++++ b/net/bridge/br_if.c	Sun Mar  5 13:06:21 2006 +0800
+@@ -277,8 +277,9 @@ static struct net_bridge_port *new_nbp(s
+ 	br_init_port(p);
+ 	p->state = BR_STATE_DISABLED;
+ 	INIT_WORK(&p->carrier_check, port_carrier_check, dev);
++	br_stp_port_timer_init(p);
++
+ 	kobject_init(&p->kobj);
+-
+ 	kobject_set_name(&p->kobj, SYSFS_BRIDGE_PORT_ATTR);
+ 	p->kobj.ktype = &brport_ktype;
+ 	p->kobj.parent = &(dev->class_dev.kobj);
+
+--- a/net/bridge/br_stp_if.c	Sun Mar  5 13:06:19 2006 +0800
++++ b/net/bridge/br_stp_if.c	Sun Mar  5 13:06:21 2006 +0800
+@@ -39,8 +39,6 @@ void br_init_port(struct net_bridge_port
+ 	p->state = BR_STATE_BLOCKING;
+ 	p->topology_change_ack = 0;
+ 	p->config_pending = 0;
+-
+-	br_stp_port_timer_init(p);
+ }
+ 
+ /* called under bridge lock */
+
+
+// race is on p->state = BR_STATE_DISABLED? they made the p obj escape
+// with br_stp_port_timer_init(p) before that part was set?
+
+CHECK IT: not reachable from thread root unless funptrs cross file, not checking callgraph entry points as thread roots
+
+
+
+
+
+
+
+commit 35dc2585fa32a2b300307ffa9f17122b13ccef97
+Author: Andreas Herrmann <aherrman@de.ibm.com>
+Date:   Thu Mar 2 21:28:54 2006 +0100
+
+    [SCSI] zfcp: correctly set this_id for hosts
+    
+    It fixes a bug in zfcp which provokes a race
+    in scsi_scan.c. Finally this can lead to an Oops like:
+    
+    kernel BUG at fs/sysfs/symlink.c:87!
+    
+    Correctly set this_id for the host. Otherwise we provoke
+    a race between scsi_target_reap_work and concurrent
+    scsi_add_device.
+
+diff --git a/drivers/s390/scsi/zfcp_scsi.c b/drivers/s390/scsi/zfcp_scsi.c
+index 9f6b4d7..a2de3c9 100644
+--- a/drivers/s390/scsi/zfcp_scsi.c
++++ b/drivers/s390/scsi/zfcp_scsi.c
+@@ -68,7 +68,7 @@ struct zfcp_data zfcp_data = {
+ 	      eh_host_reset_handler:   zfcp_scsi_eh_host_reset_handler,
+ 			               /* FIXME(openfcp): Tune */
+ 	      can_queue:               4096,
+-	      this_id:	               0,
++	      this_id:	               -1,
+ 	      /*
+ 	       * FIXME:
+ 	       * one less? can zfcp_create_sbale cope with it?
+diff --git a/drivers/scsi/pcmcia/Kconfig b/drivers/scsi/pcmcia/Kconfig
+index df52190..eac8e17 100644
+--- a/drivers/scsi/pcmcia/Kconfig
++++ b/drivers/scsi/pcmcia/Kconfig
+@@ -8,6 +8,7 @@ menu "PCMCIA SCSI adapter support"
+ config PCMCIA_AHA152X
+ 	tristate "Adaptec AHA152X PCMCIA support"
+ 	depends on m && !64BIT
++	select SCSI_SPI_ATTRS
+ 	help
+ 	  Say Y here if you intend to attach this type of PCMCIA SCSI host
+ 	  adapter to your computer.
+diff --git a/drivers/scsi/scsi_devinfo.c b/drivers/scsi/scsi_devinfo.c
+index f01ec0a..84c3937 100644
+--- a/drivers/scsi/scsi_devinfo.c
++++ b/drivers/scsi/scsi_devinfo.c
+@@ -126,6 +126,7 @@ static struct {
+ 	{"ADAPTEC", "Adaptec 5400S", NULL, BLIST_FORCELUN},
+ 	{"AFT PRO", "-IX CF", "0.0>", BLIST_FORCELUN},
+ 	{"BELKIN", "USB 2 HS-CF", "1.95",  BLIST_FORCELUN | BLIST_INQUIRY_36},
++	{"BROWNIE", "1600U3P", NULL, BLIST_NOREPORTLUN},
+ 	{"CANON", "IPUBJD", NULL, BLIST_SPARSELUN},
+ 	{"CBOX3", "USB Storage-SMC", "300A", BLIST_FORCELUN | BLIST_INQUIRY_36},
+ 	{"CMD", "CRA-7280", NULL, BLIST_SPARSELUN},	/* CMD RAID Controller */
+
+
+$SCOPE (need to interpret value of this_id?)
+
+
+
+commit 7b14e3b52fe5a2fb1dfa2f1f7dae4fd5f7d3fc47
+Author: Jens Axboe <axboe@suse.de>
+Date:   Tue Feb 28 09:35:11 2006 +0100
+
+    [PATCH] cfq-iosched: slice expiry fixups
+    
+    During testing of SLES10, we encountered a hang in the CFQ io scheduler.
+    Turns out the deferred slice expiry logic is buggy, so remove that for
+    now.  We could be left with an idle queue that would never wake up.  So
+    kill that logic, always expire immediately.  Also fix a potential timer
+    race condition.
+    
+    Patch looks bigger than it is, because it moves a function.
+    
+
+ block/cfq-iosched.c |  151 ++++++++++++++++++++--------------------------------
+ 1 files changed, 60 insertions(+), 91 deletions(-)
+
+diff --git a/block/cfq-iosched.c b/block/cfq-iosched.c
+index 74fae2d..c8dbe38 100644
+--- a/block/cfq-iosched.c
++++ b/block/cfq-iosched.c
+
+...
+
+-
+ static int cfq_arm_slice_timer(struct cfq_data *cfqd, struct cfq_queue *cfqq)
+ 
+ {
++	unsigned long sl;
++
+ 	WARN_ON(!RB_EMPTY(&cfqq->sort_list));
+ 	WARN_ON(cfqq != cfqd->active_queue);
+ 
+@@ -916,13 +900,8 @@ static int cfq_arm_slice_timer(struct cf
+ 	cfq_mark_cfqq_must_dispatch(cfqq);
+ 	cfq_mark_cfqq_wait_request(cfqq);
+ 
+-	if (!timer_pending(&cfqd->idle_slice_timer)) {
+-		unsigned long slice_left = min(cfqq->slice_end - 1, (unsigned long) cfqd->cfq_slice_idle);
+-
+-		cfqd->idle_slice_timer.expires = jiffies + slice_left;
+-		add_timer(&cfqd->idle_slice_timer);
+-	}
+-
++	sl = min(cfqq->slice_end - 1, (unsigned long) cfqd->cfq_slice_idle);
++	mod_timer(&cfqd->idle_slice_timer, jiffies + sl);
+ 	return 1;
+ }
+ 
+
+
+CHECK IT: not part of callgraph even w/ make allyesconfig
+
+
+
+
+commit fb5c594c2acc441f0d2d8f457484a0e0e9285db3
+Author: Michal Ostrowski <mostrows@watson.ibm.com>
+Date:   Sat Feb 18 09:29:59 2006 -0500
+
+    [PATCH] Fix race condition in hvc console.
+    
+  tty_schedule_flip() would schedule a thread that would call flush_to_ldisc().
+    If tty_buffer_request_room() gets called prior to that thread running --
+    which is likely in this loop in hvc_poll(), it would set the active flag
+    in the tty buffer and consequently flush_to_ldisc() would ignore it.
+    
+    The result is that input on the hvc console is not processed.
+    
+    This fix calls tty_flip_buffer_push (and flags the tty as
+    "low_latency").  The push to the ldisc thus happens synchronously.
+
+
+    
+diff --git a/drivers/char/hvc_console.c b/drivers/char/hvc_console.c
+index 1994a92..67f368f 100644
+--- a/drivers/char/hvc_console.c
++++ b/drivers/char/hvc_console.c
+@@ -335,6 +335,8 @@  static int hvc_open(struct tty_struct *t
+ 	} /* else count == 0 */
+ 
+ 	tty->driver_data = hp;
++	tty->low_latency = 1; /* Makes flushes to ldisc synchronous. */
++
+ 	hp->tty = tty;
+ 	/* Save for request_irq outside of spin_lock. */
+ 	irq = hp->irq;
+@@ -633,9 +635,6 @@  static int hvc_poll(struct hvc_struct *h
+ 			tty_insert_flip_char(tty, buf[i], 0);
+ 		}
+ 
+-		if (count)
+-			tty_schedule_flip(tty);
+-
+ 		/*
+ 		 * Account for the total amount read in one loop, and if above
+ 		 * 64 bytes, we do a quick schedule loop to let the tty grok
+@@ -656,6 +655,10 @@  static int hvc_poll(struct hvc_struct *h
+  bail:
+ 	spin_unlock_irqrestore(&hp->lock, flags);
+ 
++	if (read_total) {
++		tty_flip_buffer_push(tty);
++	}
++	
+ 	return poll_mask;
+ }
+
+CHECK IT: not in callgraph even with make allyesconfig
+
+
+
+commit 80dd857daca1cf541b10118991569470d62c1d38
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Wed Feb 22 10:28:35 2006 -0800
+
+    skge: protect interrupt mask
+    
+    There is a race between updating the irq mask and setting it
+    which can be triggered on SMP with a bad cable.
+    Similar patch from Ingo Molnar and Thomas Gleixner
+
+--- a/drivers/net/skge.c	Thu Feb 23 21:07:07 2006 -0100
++++ b/drivers/net/skge.c	Thu Feb 23 21:07:08 2006 -0100
+@@ -2185,8 +2185,10 @@ static int skge_up(struct net_device *de
+ 	skge->tx_avail = skge->tx_ring.count - 1;
+ 
+ 	/* Enable IRQ from port */
++	spin_lock_irq(&hw->hw_lock);
+ 	hw->intr_mask |= portirqmask[port];
+ 	skge_write32(hw, B0_IMSK, hw->intr_mask);
++	spin_unlock_irq(&hw->hw_lock);
+ 
+ 	/* Initialize MAC */
+ 	spin_lock_bh(&hw->phy_lock);
+@@ -2244,8 +2246,10 @@ static int skge_down(struct net_device *
+ 	else
+ 		yukon_stop(skge);
+ 
++	spin_lock_irq(&hw->hw_lock);
+ 	hw->intr_mask &= ~portirqmask[skge->port];
+ 	skge_write32(hw, B0_IMSK, hw->intr_mask);
++	spin_unlock_irq(&hw->hw_lock);
+ 
+ 	/* Stop transmitter */
+ 	skge_write8(hw, Q_ADDR(txqaddr[port], Q_CSR), CSR_STOP);
+@@ -2701,10 +2705,11 @@ static int skge_poll(struct net_device *
+ 	if (work_done >=  to_do)
+ 		return 1; /* not done */
+ 
+-	netif_rx_complete(dev);
+-	hw->intr_mask |= portirqmask[skge->port];
+-	skge_write32(hw, B0_IMSK, hw->intr_mask);
+-	skge_read32(hw, B0_IMSK);
++	spin_lock_irq(&hw->hw_lock);
++	__netif_rx_complete(dev);
++  	hw->intr_mask |= portirqmask[skge->port];
++  	skge_write32(hw, B0_IMSK, hw->intr_mask);
++ 	spin_unlock_irq(&hw->hw_lock);
+ 
+ 	return 0;
+ }
+@@ -2864,10 +2869,10 @@ static void skge_extirq(unsigned long da
+ 	}
+ 	spin_unlock(&hw->phy_lock);
+ 
+-	local_irq_disable();
++	spin_lock_irq(&hw->hw_lock);
+ 	hw->intr_mask |= IS_EXT_REG;
+ 	skge_write32(hw, B0_IMSK, hw->intr_mask);
+-	local_irq_enable();
++	spin_unlock_irq(&hw->hw_lock);
+ }
+ 
+ static irqreturn_t skge_intr(int irq, void *dev_id, struct pt_regs *regs)
+@@ -2878,7 +2883,7 @@ static irqreturn_t skge_intr(int irq, vo
+ 	if (status == 0 || status == ~0) /* hotplug or shared irq */
+ 		return IRQ_NONE;
+ 
+-	status &= hw->intr_mask;
++	spin_lock(&hw->hw_lock);
+ 	if (status & IS_R1_F) {
+ 		skge_write8(hw, Q_ADDR(Q_R1, Q_CSR), CSR_IRQ_CL_F);
+ 		hw->intr_mask &= ~IS_R1_F;
+@@ -2930,6 +2935,7 @@ static irqreturn_t skge_intr(int irq, vo
+ 	}
+ 
+ 	skge_write32(hw, B0_IMSK, hw->intr_mask);
++	spin_unlock(&hw->hw_lock);
+ 
+ 	return IRQ_HANDLED;
+ }
+@@ -3298,6 +3304,7 @@ static int __devinit skge_probe(struct p
+ 
+ 	hw->pdev = pdev;
+ 	spin_lock_init(&hw->phy_lock);
++	spin_lock_init(&hw->hw_lock);
+ 	tasklet_init(&hw->ext_tasklet, skge_extirq, (unsigned long) hw);
+ 
+ 	hw->regs = ioremap_nocache(pci_resource_start(pdev, 0), 0x4000);
+
+--- a/drivers/net/skge.h	Thu Feb 23 21:07:07 2006 -0100
++++ b/drivers/net/skge.h	Thu Feb 23 21:07:08 2006 -0100
+@@ -2402,6 +2402,7 @@ struct skge_hw {
+ 
+ 	struct tasklet_struct ext_tasklet;
+ 	spinlock_t	     phy_lock;
++	spinlock_t	     hw_lock;
+ };
+
+
+$CHECK IT: not found in callgraph even w/ make allyesconfig
+
+
+
+
+commit a9cdab869ec343ccc601484fb535813e16c25f70
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Wed Feb 22 10:28:33 2006 -0800
+
+    skge: NAPI/irq race fix
+    
+    Fix a race in the receive NAPI, irq handling. The interrupt clear and the
+    start need to be separated.  Otherwise there is a window between the last
+    frame received and the NAPI done level handling.
+    
+--- a/drivers/net/skge.c	Thu Feb 23 21:06:48 2006 -0100
++++ b/drivers/net/skge.c	Thu Feb 23 21:07:07 2006 -0100
+@@ -2678,8 +2678,7 @@ static int skge_poll(struct net_device *
+ 
+ 	/* restart receiver */
+ 	wmb();
+-	skge_write8(hw, Q_ADDR(rxqaddr[skge->port], Q_CSR),
+-		    CSR_START | CSR_IRQ_CL_F);
++	skge_write8(hw, Q_ADDR(rxqaddr[skge->port], Q_CSR), CSR_START);
+ 
+ 	*budget -= work_done;
+ 	dev->quota -= work_done;
+@@ -2856,14 +2855,6 @@ static void skge_extirq(unsigned long da
+ 	local_irq_enable();
+ }
+ 
+-static inline void skge_wakeup(struct net_device *dev)
+-{
+-	struct skge_port *skge = netdev_priv(dev);
+-
+-	prefetch(skge->rx_ring.to_clean);
+-	netif_rx_schedule(dev);
+-}
+-
+ static irqreturn_t skge_intr(int irq, void *dev_id, struct pt_regs *regs)
+ {
+ 	struct skge_hw *hw = dev_id;
+@@ -2874,13 +2865,15 @@ static irqreturn_t skge_intr(int irq, vo
+ 
+ 	status &= hw->intr_mask;
+ 	if (status & IS_R1_F) {
++		skge_write8(hw, Q_ADDR(Q_R1, Q_CSR), CSR_IRQ_CL_F);
+ 		hw->intr_mask &= ~IS_R1_F;
+-		skge_wakeup(hw->dev[0]);
++		netif_rx_schedule(hw->dev[0]);
+ 	}
+ 
+ 	if (status & IS_R2_F) {
++		skge_write8(hw, Q_ADDR(Q_R2, Q_CSR), CSR_IRQ_CL_F);
+ 		hw->intr_mask &= ~IS_R2_F;
+-		skge_wakeup(hw->dev[1]);
++		netif_rx_schedule(hw->dev[1]);
+ 	}
+ 
+ 	if (status & IS_XA1_F)
+
+
+$CHECK IT: not found in callgraph even w/ make allyesconfig
+
+
+
+
+commit 791917deb63c6d8beb3f347ea0911371deff1624
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Wed Feb 22 11:45:03 2006 -0800
+
+    [PATCH] sky2: close race on IRQ mask update.
+    
+    Need to avoid race in updating IRQ mask.  This can probably be replaced
+    smarter use of the interrupt control registers (if/when chipset
+    docs are available).
+    
+
+--- a/drivers/net/sky2.c	Wed Feb 22 23:25:23 2006 -0100
++++ b/drivers/net/sky2.c	Wed Feb 22 23:25:26 2006 -0100
+@@ -1079,8 +1079,10 @@ static int sky2_up(struct net_device *de
+ 		goto err_out;
+ 
+ 	/* Enable interrupts from phy/mac for port */
++	spin_lock_irq(&hw->hw_lock);
+ 	hw->intr_mask |= (port == 0) ? Y2_IS_PORT_1 : Y2_IS_PORT_2;
+ 	sky2_write32(hw, B0_IMSK, hw->intr_mask);
++	spin_unlock_irq(&hw->hw_lock);
+ 	return 0;
+ 
+ err_out:
+@@ -1380,10 +1382,10 @@ static int sky2_down(struct net_device *
+ 	netif_stop_queue(dev);
+ 
+ 	/* Disable port IRQ */
+-	local_irq_disable();
++	spin_lock_irq(&hw->hw_lock);
+ 	hw->intr_mask &= ~((sky2->port == 0) ? Y2_IS_IRQ_PHY1 : Y2_IS_IRQ_PHY2);
+ 	sky2_write32(hw, B0_IMSK, hw->intr_mask);
+-	local_irq_enable();
++	spin_unlock_irq(&hw->hw_lock);
+ 
+ 	flush_scheduled_work();
+ 
+@@ -1665,10 +1667,10 @@ out:
+ out:
+ 	up(&sky2->phy_sema);
+ 
+-	local_irq_disable();
++	spin_lock_irq(&hw->hw_lock);
+ 	hw->intr_mask |= (sky2->port == 0) ? Y2_IS_IRQ_PHY1 : Y2_IS_IRQ_PHY2;
+ 	sky2_write32(hw, B0_IMSK, hw->intr_mask);
+-	local_irq_enable();
++	spin_unlock_irq(&hw->hw_lock);
+ }
+ 
+ 
+@@ -1994,9 +1996,13 @@ exit_loop:
+ 	}
+ 
+ 	if (likely(work_done < to_do)) {
+-		netif_rx_complete(dev0);
++		spin_lock_irq(&hw->hw_lock);
++		__netif_rx_complete(dev0);
++
+ 		hw->intr_mask |= Y2_IS_STAT_BMU;
+ 		sky2_write32(hw, B0_IMSK, hw->intr_mask);
++		spin_unlock_irq(&hw->hw_lock);
++
+ 		return 0;
+ 	} else {
+ 		*budget -= work_done;
+@@ -2128,6 +2134,7 @@ static void sky2_phy_intr(struct sky2_hw
+ 
+ 	hw->intr_mask &= ~(port == 0 ? Y2_IS_IRQ_PHY1 : Y2_IS_IRQ_PHY2);
+ 	sky2_write32(hw, B0_IMSK, hw->intr_mask);
++
+ 	schedule_work(&sky2->phy_task);
+ }
+ 
+@@ -2141,6 +2148,7 @@ static irqreturn_t sky2_intr(int irq, vo
+ 	if (status == 0 || status == ~0)
+ 		return IRQ_NONE;
+ 
++	spin_lock(&hw->hw_lock);
+ 	if (status & Y2_IS_HW_ERR)
+ 		sky2_hw_intr(hw);
+ 
+@@ -2169,7 +2177,7 @@ static irqreturn_t sky2_intr(int irq, vo
+ 
+ 	sky2_write32(hw, B0_Y2_SP_ICR, 2);
+ 
+-	sky2_read32(hw, B0_IMSK);
++	spin_unlock(&hw->hw_lock);
+ 
+ 	return IRQ_HANDLED;
+ }
+@@ -3241,6 +3249,7 @@ static int __devinit sky2_probe(struct p
+ 		goto err_out_free_hw;
+ 	}
+ 	hw->pm_cap = pm_cap;
++	spin_lock_init(&hw->hw_lock);
+ 
+ #ifdef __BIG_ENDIAN
+ 	/* byte swap descriptors in hardware */
+
+--- a/drivers/net/sky2.h	Wed Feb 22 23:25:23 2006 -0100
++++ b/drivers/net/sky2.h	Wed Feb 22 23:25:26 2006 -0100
+@@ -1876,8 +1876,9 @@ struct sky2_hw {
+ struct sky2_hw {
+ 	void __iomem  	     *regs;
+ 	struct pci_dev	     *pdev;
++	struct net_device    *dev[2];
++	spinlock_t	     hw_lock;
+ 	u32		     intr_mask;
+-	struct net_device    *dev[2];
+ 
+ 	int		     pm_cap;
+ 	int		     msi;
+
+
+Kernel didn't come with sky2.c
+
+commit a8fd6266dafd564bae6758cb78c8c152e7d4115e
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Wed Feb 22 11:45:00 2006 -0800
+
+    [PATCH] sky2: poke coalescing timer to fix hang
+    
+   Need to restart the interrupt coalescing timer after clearing the interrupt,
+   to avoid races with interrupt timer and processing.
+    
+   Patch from Carl-Daniel Halfinger
+
+Kernel didn't come with sky2.c
+
+
+commit dadac81b1b86196fcc48fb87620403c4a7174f06
+Author: Oleg Nesterov <oleg@tv-sign.ru>
+Date:   Wed Feb 15 22:13:26 2006 +0300
+
+    [PATCH] fix kill_proc_info() vs fork() theoretical race
+    
+    copy_process:
+    
+    	attach_pid(p, PIDTYPE_PID, p->pid);
+    	attach_pid(p, PIDTYPE_TGID, p->tgid);
+    
+    What if kill_proc_info(p->pid) happens in between?
+    
+    copy_process() holds current->sighand.siglock, so we are safe
+    in CLONE_THREAD case, because current->sighand == p->sighand.
+    
+    Otherwise, p->sighand is unlocked, the new process is already
+    visible to the find_task_by_pid(), but have a copy of parent's
+    'struct pid' in ->pids[PIDTYPE_TGID].
+    
+    This means that __group_complete_signal() may hang while doing
+    
+    	do ... while (next_thread() != p)
+    
+    We can solve this problem if we reverse these 2 attach_pid()s:
+    
+    	attach_pid() does wmb()
+    
+    	group_send_sig_info() calls spin_lock(), which
+    	provides a read barrier. // Yes ?
+    
+    I don't think we can hit this race in practice, but still.
+
+
+--- 2.6.16-rc3/kernel/fork.c~2_HANG 2006-02-15 23:21:51.000000000 +0300
++++ 2.6.16-rc3/kernel/fork.c 2006-02-16 00:03:20.000000000 +0300
+@@ -1173,8 +1173,6 @@ static task_t *copy_process(unsigned lon
+if (unlikely(p->ptrace & PT_PTRACED))
+__ptrace_link(p, current->parent);
+
+- attach_pid(p, PIDTYPE_PID, p->pid);
+- attach_pid(p, PIDTYPE_TGID, p->tgid);
+if (thread_group_leader(p)) {
+p->signal->tty = current->signal->tty;
+p->signal->pgrp = process_group(current);
+@@ -1184,6 +1182,8 @@ static task_t *copy_process(unsigned lon
+if (p->pid)
+__get_cpu_var(process_counts)++;
+}
++ attach_pid(p, PIDTYPE_TGID, p->tgid);
++ attach_pid(p, PIDTYPE_PID, p->pid);
+
+nr_threads++;
+total_forks++;
+
+
+
+$CHECK IT: FOUND (at different lines?) did get warnings on p->tgid & pid, solution involves memory barriers, so we probably wouldn't stop warning?
+
+filtered out by init filter though
+
+Possible race between access to:
+_a164_620707_fork.tgid @ kernel/fork.c:157 and
+_a164_620707_fork.tgid @ kernel/fork.c:157
+        Accessed at locs:
+        [kernel/fork.c:976, kernel/fork.c:978, ] and
+        [drivers/connector/cn_proc.c:62, drivers/connector/cn_proc.c:64, kernel/
+ptrace.c:37, kernel/ptrace.c:39, kernel/auditsc.c:539, kernel/fork.c:1123, kerne
+l/fork.c:1128, kernel/fork.c:1129, ]
+
+
+
+
+
+commit 3f17da699431ec48540beabc55c54d4b5e66c8e7
+Author: Oleg Nesterov <oleg@tv-sign.ru>
+Date:   Wed Feb 15 22:13:24 2006 +0300
+
+    [PATCH] fix kill_proc_info() vs CLONE_THREAD race
+    
+    There is a window after copy_process() unlocks ->sighand.siglock
+    and before it adds the new thread to the thread list.
+    
+    In that window __group_complete_signal(SIGKILL) will not see the
+    new thread yet, so this thread will start running while the whole
+    thread group was supposed to exit.
+    
+    I beleive we have another good reason to place attach_pid(PID/TGID)
+    under ->sighand.siglock. We can do the same for
+    
+    	release_task()->__unhash_process()
+    
+    	de_thread()->switch_exec_pids()
+    
+    After that we don't need tasklist_lock to iterate over the thread
+    list, and we can simplify things, see for example do_sigaction()
+    or sys_times().
+    
+
+--- 2.6.16-rc3/kernel/fork.c~1_KILL	2006-02-15 22:52:07.000000000 +0300
++++ 2.6.16-rc3/kernel/fork.c	2006-02-15 23:21:51.000000000 +0300
+@@ -1123,8 +1123,8 @@ static task_t *copy_process(unsigned lon
+ 		p->real_parent = current;
+ 	p->parent = p->real_parent;
+ 
++	spin_lock(&current->sighand->siglock);
+ 	if (clone_flags & CLONE_THREAD) {
+-		spin_lock(&current->sighand->siglock);
+ 		/*
+ 		 * Important: if an exit-all has been started then
+ 		 * do not create this new thread - the whole thread
+@@ -1162,8 +1162,6 @@ static task_t *copy_process(unsigned lon
+ 			 */
+ 			p->it_prof_expires = jiffies_to_cputime(1);
+ 		}
+-
+-		spin_unlock(&current->sighand->siglock);
+ 	}
+ 
+ 	/*
+@@ -1189,6 +1187,7 @@ static task_t *copy_process(unsigned lon
+ 
+ 	nr_threads++;
+ 	total_forks++;
++	spin_unlock(&current->sighand->siglock);
+ 	write_unlock_irq(&tasklist_lock);
+ 	proc_fork_connector(p);
+ 	return p;
+-
+
+
+$CHECK IT: FOUND did get warnings in copy_process (and on line 1123!), but code looks slightly different around there!
+
+gets filtered by init filter
+
+Possible race between access to:
+_a164_620707_fork.tgid @ kernel/fork.c:157 and
+_a164_620707_fork.tgid @ kernel/fork.c:157
+        Accessed at locs:
+        [kernel/fork.c:976, kernel/fork.c:978, ] and
+        [drivers/connector/cn_proc.c:62, drivers/connector/cn_proc.c:64, kernel/
+ptrace.c:37, kernel/ptrace.c:39, kernel/auditsc.c:539, kernel/fork.c:1123, kerne
+l/fork.c:1128, kernel/fork.c:1129, ]
+
+
+
+
+commit 61c41823c50302ca6cd455c48a1395f944c61f8f
+Author: Andreas Herrmann <aherrman@de.ibm.com>
+Date:   Sat Feb 11 01:43:55 2006 +0100
+
+    [SCSI] zfcp: fix: avoid race between fc_remote_port_add and scsi_add_device
+    
+    Flush workqueue of a scsi host after a remote port for that host
+    is registered at the fc transport class. Otherwise immediate
+    registration of a scsi device on that host is racy.
+    
+
+--- a/drivers/s390/scsi/zfcp_erp.c	Sun Feb 12 23:12:20 2006 +0600
++++ b/drivers/s390/scsi/zfcp_erp.c	Sun Feb 12 23:12:38 2006 +0600
+@@ -3415,6 +3415,8 @@ zfcp_erp_action_cleanup(int action, stru
+ 						"(adapter %s, wwpn=0x%016Lx)\n",
+ 						zfcp_get_busid_by_port(port),
+ 						port->wwpn);
++			else
++				scsi_flush_work(adapter->scsi_host);
+ 		}
+ 		zfcp_port_put(port);
+ 		break;
+
+
+$CHECK IT: not in callgraph even w/ make allyesconfig
+
+
+
+commit 7bcb974ef6a0ae903888272c92c66ea779388c01
+Author: Michael S. Tsirkin <mst@mellanox.co.il>
+Date:   Tue Feb 7 16:39:26 2006 -0800
+
+    IPoIB: Fix another send-only join race
+    
+    Further, there's an additional issue that I saw in testing:
+    ipoib_mcast_send may get called when priv->broadcast is NULL (e.g. if
+    the device was downed and then upped internally because of a port
+    event).
+    
+    If this happends and the send-only join request gets completed before
+    priv->broadcast is set, we get an oops.
+   
+--- 
+ drivers/infiniband/ulp/ipoib/ipoib_multicast.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+7bcb974ef6a0ae903888272c92c66ea779388c01
+diff --git a/drivers/infiniband/ulp/ipoib/ipoib_multicast.c b/drivers/infiniband/ulp/ipoib/ipoib_multicast.c
+index 1c71482..932bf13 100644
+--- a/drivers/infiniband/ulp/ipoib/ipoib_multicast.c
++++ b/drivers/infiniband/ulp/ipoib/ipoib_multicast.c
+@@ -701,7 +701,7 @@ void ipoib_mcast_send(struct net_device 
+ 	 */
+ 	spin_lock(&priv->lock);
+ 
+-	if (!test_bit(IPOIB_MCAST_STARTED, &priv->flags)) {
++	if (!test_bit(IPOIB_MCAST_STARTED, &priv->flags) || !priv->broadcast) {
+ 		++priv->stats.tx_dropped;
+ 		dev_kfree_skb_any(skb);
+ 		goto unlock;
+-- 
+
+
+$CHECK IT: code is different (and &priv->lock is held, so I'm not sure what lock the contender is holding and what location the contender is r/w'ing?) -- NOT IN WARNINGS : file doesn't show up
+
+
+
+
+
+commit 479a079663bd4c5f3d2714643b1b8c406aaba3e0
+Author: Michael S. Tsirkin <mst@mellanox.co.il>
+Date:   Tue Feb 7 16:37:08 2006 -0800
+
+    IPoIB: Don't start send-only joins while multicast thread is stopped
+    
+    Fix the following race scenario:
+      - Device is up.
+      - Port event or set mcast list triggers ipoib_mcast_stop_thread,
+        this cancels the query and waits on mcast "done" completion.
+      - Completion is called and "done" is set.
+      - Meanwhile, ipoib_mcast_send arrives and starts a new query,
+        re-initializing "done".
+    
+    Fix this by adding a "multicast started" bit and checking it before
+    starting a send-only join.
+
+---
+ drivers/infiniband/ulp/ipoib/ipoib.h           |    1 +
+ drivers/infiniband/ulp/ipoib/ipoib_multicast.c |   15 +++++++++++++++
+ 2 files changed, 16 insertions(+), 0 deletions(-)
+479a079663bd4c5f3d2714643b1b8c406aaba3e0
+diff --git a/drivers/infiniband/ulp/ipoib/ipoib.h b/drivers/infiniband/ulp/ipoib/ipoib.h
+index e0a5412..2f85a9a 100644
+--- a/drivers/infiniband/ulp/ipoib/ipoib.h
++++ b/drivers/infiniband/ulp/ipoib/ipoib.h
+@@ -78,6 +78,7 @@ enum {
+ 	IPOIB_FLAG_SUBINTERFACE   = 4,
+ 	IPOIB_MCAST_RUN 	  = 5,
+ 	IPOIB_STOP_REAPER         = 6,
++	IPOIB_MCAST_STARTED       = 7,
+ 
+ 	IPOIB_MAX_BACKOFF_SECONDS = 16,
+ 
+diff --git a/drivers/infiniband/ulp/ipoib/ipoib_multicast.c b/drivers/infiniband/ulp/ipoib/ipoib_multicast.c
+index ccaa0c3..1c71482 100644
+--- a/drivers/infiniband/ulp/ipoib/ipoib_multicast.c
++++ b/drivers/infiniband/ulp/ipoib/ipoib_multicast.c
+@@ -601,6 +601,10 @@ int ipoib_mcast_start_thread(struct net_
+ 		queue_work(ipoib_workqueue, &priv->mcast_task);
+ 	mutex_unlock(&mcast_mutex);
+ 
++	spin_lock_irq(&priv->lock);
++	set_bit(IPOIB_MCAST_STARTED, &priv->flags);
++	spin_unlock_irq(&priv->lock);
++
+ 	return 0;
+ }
+ 
+@@ -611,6 +615,10 @@ int ipoib_mcast_stop_thread(struct net_d
+ 
+ 	ipoib_dbg_mcast(priv, "stopping multicast thread\n");
+ 
++	spin_lock_irq(&priv->lock);
++	clear_bit(IPOIB_MCAST_STARTED, &priv->flags);
++	spin_unlock_irq(&priv->lock);
++
+ 	mutex_lock(&mcast_mutex);
+ 	clear_bit(IPOIB_MCAST_RUN, &priv->flags);
+ 	cancel_delayed_work(&priv->mcast_task);
+@@ -693,6 +701,12 @@ void ipoib_mcast_send(struct net_device 
+ 	 */
+ 	spin_lock(&priv->lock);
+ 
++	if (!test_bit(IPOIB_MCAST_STARTED, &priv->flags)) {
++		++priv->stats.tx_dropped;
++		dev_kfree_skb_any(skb);
++		goto unlock;
++	}
++
+ 	mcast = __ipoib_mcast_find(dev, mgid);
+ 	if (!mcast) {
+ 		/* Let's create a new send only group now */
+@@ -754,6 +768,7 @@ out:
+ 		ipoib_send(dev, skb, mcast->ah, IB_MULTICAST_QPN);
+ 	}
+ 
++unlock:
+ 	spin_unlock(&priv->lock);
+ }
+ 
+--
+
+
+$CHECK IT Not sure what lval is affected -- NOT IN WARNINGS : file doesn't show up
+
+
+
+
+
+commit 1fcbf053e55e961112f237dc690129f0858156f1
+Author: Kyle McMartin <kyle@mcmartin.ca>
+Date:   Tue Feb 7 12:58:47 2006 -0800
+
+    [PATCH] sys_hpux: fix strlen_user() race
+    
+    Userspace can alter the string after the kernel has run strlen_user().
+    
+    Also: the strlen_user() return value includes the \0, so fix that.
+    
+    Also: handle EFAULT from strlen_user().
+    
+    It's unlikely anyone is using this code.  Very, very unlikely.  If I
+    remember correctly, CONFIG_HPUX turns this code on, but one would actually
+    need CONFIG_BINFMT_SOM to load a binary that could cause a problem, and
+    BINFMT_SOM has had an #error in it for quite some time.
+    
+--- a/arch/parisc/hpux/sys_hpux.c	Wed Feb  8 08:12:33 2006 +0800
++++ b/arch/parisc/hpux/sys_hpux.c	Wed Feb  8 08:12:33 2006 +0800
+@@ -468,18 +468,22 @@ int hpux_sysfs(int opcode, unsigned long
+ 	if ( opcode == 1 ) { /* GETFSIND */	
+ 		len = strlen_user((char *)arg1);
+ 		printk(KERN_DEBUG "len of arg1 = %d\n", len);
+-
+-		fsname = (char *) kmalloc(len+1, GFP_KERNEL);
++		if (len == 0)
++			return 0;
++		fsname = (char *) kmalloc(len, GFP_KERNEL);
+ 		if ( !fsname ) {
+ 			printk(KERN_DEBUG "failed to kmalloc fsname\n");
+ 			return 0;
+ 		}
+ 
+-		if ( copy_from_user(fsname, (char *)arg1, len+1) ) {
++		if ( copy_from_user(fsname, (char *)arg1, len) ) {
+ 			printk(KERN_DEBUG "failed to copy_from_user fsname\n");
+ 			kfree(fsname);
+ 			return 0;
+ 		}
++
++		/* String could be altered by userspace after strlen_user() */
++		fsname[len] = '\0';
+ 
+ 		printk(KERN_DEBUG "that is '%s' as (char *)\n", fsname);
+ 		if ( !strcmp(fsname, "hfs") ) {
+
+
+PARISC / HPUX thing...
+
+
+commit 387f96b4d9391bf3ce6928fb9cd90c9c7df37291
+Author: andrew.vasquez@qlogic.com <andrew.vasquez@qlogic.com>
+Date:   Tue Feb 7 08:45:45 2006 -0800
+
+[PATCH] qla2xxx: Close window on race between rport removal and fcport transition.
+    
+    Fcport visibility is recognized during interrupt time, but,
+    rport removal can only occur during a process
+    (sleeping)-context.  Return a DID_IMM_RETRY status for
+    commands submitted within this window to insure I/Os do not
+    prematurely run-out of retries.
+
+
+
+diff --git a/drivers/scsi/scsi_transport_fc.c b/drivers/scsi/scsi_transport_fc.c
+index 929032e..3d09920 100644
+--- a/drivers/scsi/scsi_transport_fc.c
++++ b/drivers/scsi/scsi_transport_fc.c
+@@ -1649,6 +1649,8 @@ fc_remote_port_delete(struct fc_rport  *
+                return;
+        }
+
++       /* flush any scan work */ /* which can sleep */
++       scsi_flush_work(rport_to_shost(rport));
+        scsi_target_block(&rport->dev); 
+
+
+
+$CHECK IT: SHOWS UP in the 3_8_2007 warnings
+
+
+Possible race between access to:
+(_a1708_506691_qla_init.rport)->port_state @ drivers/scsi/qla2xxx/qla_init.c:170
+3 and
+(_a1708_506691_qla_init.rport)->port_state @ drivers/scsi/qla2xxx/qla_init.c:170
+3
+
+gets filtered by init filter though
+
+
+
+commit f9a66c7f5fa2262656a1a38ae9b57a2a89980f36
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Mon Jan 30 11:37:58 2006 -0800
+
+    [PATCH] sky2: clear irq race
+    
+    Move the interrupt clear to before processing, this avoids a
+    possible races with status delaying.
+    
+
+Don't have sky2.c
+
+
+commit 7128ec2a747d7a5f3c764c37bef17081ccc2374c
+Author: Miklos Szeredi <miklos@szeredi.hu>
+Date:   Sat Feb 4 23:27:40 2006 -0800
+
+    [PATCH] fuse: fix request_end() vs fuse_reset_request() race
+    
+    The last fix for this function in fact opened up a much more often
+    triggering race.
+    
+    It was uncommented tricky code, that was buggy.  Add comment, make it less
+    tricky and fix bug.
+
+
+diff -ru linux/fs/fuse/dev.c ../t/linux-fuse/fs/fuse/dev.c
+--- linux/fs/fuse/dev.c 2006-02-02 17:42:38.000000000 +0100
++++ ../t/linux-fuse/fs/fuse/dev.c 2006-02-02 17:42:28.000000000 +0100
+@@ -120,9 +120,9 @@
+return do_get_request(fc);
+}
+
++/* Must be called with fuse_lock held */
+static void fuse_putback_request(struct fuse_conn *fc, struct fuse_req *req)
+{
+- spin_lock(&fuse_lock);
+if (req->preallocated) {
+atomic_dec(&fc->num_waiting);
+list_add(&req->list, &fc->unused_list);
+@@ -134,11 +134,19 @@
+fc->outstanding_debt--;
+else
+up(&fc->outstanding_sem);
+- spin_unlock(&fuse_lock);
+}
+
+void fuse_put_request(struct fuse_conn *fc, struct fuse_req *req)
+{
++ if (atomic_dec_and_test(&req->count)) {
++ spin_lock(&fuse_lock);
++ fuse_putback_request(fc, req);
++ spin_unlock(&fuse_lock);
++ }
++}
++
++static void fuse_put_request_locked(struct fuse_conn *fc, struct fuse_req *req)
++{
+if (atomic_dec_and_test(&req->count))
+fuse_putback_request(fc, req);
+}
+@@ -162,27 +170,37 @@
+* stored objects are released. The requester thread is woken up (if
+* still waiting), the 'end' callback is called if given, else the
+* reference to the request is released
++ *
++ * Releasing extra reference for foreground requests must be done
++ * within the same locked region as setting state to finished. This
++ * is because fuse_reset_request() may be called after request is
++ * finished and it must be the sole possessor. If request is
++ * interrupted and put in the background, it will return with an error
++ * and hence never be reset and reused.
+*
+* Called with fuse_lock, unlocks it
+*/
+static void request_end(struct fuse_conn *fc, struct fuse_req *req)
+{
+- void (*end) (struct fuse_conn *, struct fuse_req *) = req->end;
+- req->end = NULL;
+list_del(&req->list);
+req->state = FUSE_REQ_FINISHED;
+- spin_unlock(&fuse_lock);
+- if (req->background) {
++ if (!req->background) {
++ wake_up(&req->waitq);
++ fuse_put_request_locked(fc, req);
++ spin_unlock(&fuse_lock);
++ } else {
++ void (*end) (struct fuse_conn *, struct fuse_req *) = req->end;
++ req->end = NULL;
++ spin_unlock(&fuse_lock);
+down_read(&fc->sbput_sem);
+if (fc->mounted)
+fuse_release_background(req);
+up_read(&fc->sbput_sem);
++ if (end)
++ end(fc, req);
++ else
++ fuse_put_request(fc, req);
+}
+- wake_up(&req->waitq);
+- if (end)
+- end(fc, req);
+- else
+- fuse_put_request(fc, req);
+}
+
+/*
+
+
+$CHECK IT : file not found
+
+
+
+commit 14c3f8558717adb192c364f58b0d63dfc850ecca
+Author: Andi Kleen <ak@suse.de>
+Date:   Fri Feb 3 21:51:56 2006 +0100
+
+    [PATCH] x86_64: Let impossible CPUs point to reference per cpu data
+    
+    Hack for 2.6.16. In 2.6.17 all code that uses NR_CPUs should
+    be audited and changed to only touch possible CPUs.
+    
+    Don't mark the reference per cpu data init data (so it stays
+    around after boot) and point all impossible CPUs to it. This way
+    they reference some valid - although shared memory. Usually
+    this is only initialization like INIT_LIST_HEADs and there
+    won't be races because these CPUs never run. Still somewhat hackish.
+
+
+x86_64 thing...
+
+
+commit 371e8bc2af11b0571982390932bc07b5ffed9aba
+Author: Francois Romieu <romieu@fr.zoreil.com>
+Date:   Tue Jan 31 01:04:33 2006 +0100
+
+    8139too: fix a TX timeout watchdog thread against NAPI softirq race
+    
+    Ingo's stealth lock validator detected that both thread acquire
+    dev->xmit_lock and tp->rx_lock in reverse order.
+
+
+471819cf98a56751ae0387400542fe2997855327
+diff --git a/drivers/net/8139too.c b/drivers/net/8139too.c
+index adfba44..2beac55 100644
+--- a/drivers/net/8139too.c
++++ b/drivers/net/8139too.c
+@@ -586,6 +586,7 @@ struct rtl8139_private {
+ 	dma_addr_t tx_bufs_dma;
+ 	signed char phys[4];		/* MII device addresses. */
+ 	char twistie, twist_row, twist_col;	/* Twister tune state. */
++	unsigned int watchdog_fired : 1;
+ 	unsigned int default_port : 4;	/* Last dev->if_port value. */
+ 	unsigned int have_thread : 1;
+ 	spinlock_t lock;
+@@ -638,6 +639,7 @@ static void rtl8139_set_rx_mode (struct 
+ static void __set_rx_mode (struct net_device *dev);
+ static void rtl8139_hw_start (struct net_device *dev);
+ static void rtl8139_thread (void *_data);
++static void rtl8139_tx_timeout_task(void *_data);
+ static struct ethtool_ops rtl8139_ethtool_ops;
+ 
+ /* write MMIO register, with flush */
+@@ -1598,13 +1600,14 @@ static void rtl8139_thread (void *_data)
+ {
+ 	struct net_device *dev = _data;
+ 	struct rtl8139_private *tp = netdev_priv(dev);
+-	unsigned long thr_delay;
++	unsigned long thr_delay = next_tick;
+ 
+-	if (rtnl_shlock_nowait() == 0) {
++	if (tp->watchdog_fired) {
++		tp->watchdog_fired = 0;
++		rtl8139_tx_timeout_task(_data);
++	} else if (rtnl_shlock_nowait() == 0) {
+ 		rtl8139_thread_iter (dev, tp, tp->mmio_addr);
+ 		rtnl_unlock ();
+-
+-		thr_delay = next_tick;
+ 	} else {
+ 		/* unlikely race.  mitigate with fast poll. */
+ 		thr_delay = HZ / 2;
+@@ -1631,7 +1634,8 @@ static void rtl8139_stop_thread(struct r
+ 	if (tp->have_thread) {
+ 		cancel_rearming_delayed_work(&tp->thread);
+ 		tp->have_thread = 0;
+-	}
++	} else
++		flush_scheduled_work();
+ }
+ 
+ static inline void rtl8139_tx_clear (struct rtl8139_private *tp)
+@@ -1642,14 +1646,13 @@ static inline void rtl8139_tx_clear (str
+ 	/* XXX account for unsent Tx packets in tp->stats.tx_dropped */
+ }
+ 
+-
+-static void rtl8139_tx_timeout (struct net_device *dev)
++static void rtl8139_tx_timeout_task (void *_data)
+ {
++	struct net_device *dev = _data;
+ 	struct rtl8139_private *tp = netdev_priv(dev);
+ 	void __iomem *ioaddr = tp->mmio_addr;
+ 	int i;
+ 	u8 tmp8;
+-	unsigned long flags;
+ 
+ 	printk (KERN_DEBUG "%s: Transmit timeout, status %2.2x %4.4x %4.4x "
+ 		"media %2.2x.\n", dev->name, RTL_R8 (ChipCmd),
+@@ -1670,23 +1673,34 @@ static void rtl8139_tx_timeout (struct n
+ 	if (tmp8 & CmdTxEnb)
+ 		RTL_W8 (ChipCmd, CmdRxEnb);
+ 
+-	spin_lock(&tp->rx_lock);
++	spin_lock_bh(&tp->rx_lock);
+ 	/* Disable interrupts by clearing the interrupt mask. */
+ 	RTL_W16 (IntrMask, 0x0000);
+ 
+ 	/* Stop a shared interrupt from scavenging while we are. */
+-	spin_lock_irqsave (&tp->lock, flags);
++	spin_lock_irq(&tp->lock);
+ 	rtl8139_tx_clear (tp);
+-	spin_unlock_irqrestore (&tp->lock, flags);
++	spin_unlock_irq(&tp->lock);
+ 
+ 	/* ...and finally, reset everything */
+ 	if (netif_running(dev)) {
+ 		rtl8139_hw_start (dev);
+ 		netif_wake_queue (dev);
+ 	}
+-	spin_unlock(&tp->rx_lock);
++	spin_unlock_bh(&tp->rx_lock);
+ }
+ 
++static void rtl8139_tx_timeout (struct net_device *dev)
++{
++	struct rtl8139_private *tp = netdev_priv(dev);
++
++	if (!tp->have_thread) {
++		INIT_WORK(&tp->thread, rtl8139_tx_timeout_task, dev);
++		schedule_delayed_work(&tp->thread, next_tick);
++	} else
++		tp->watchdog_fired = 1;
++
++}
+ 
+ static int rtl8139_start_xmit (struct sk_buff *skb, struct net_device *dev)
+ {
+
+but we don't model the differences between the lock funs
+
+
+$CHECK IT: not found: can't find functions in ciltrees (even after make allyesconfig!)
+
+
+
+commit d62b1b87a7d1c3a21dddabed4251763090be3182
+Author: Chris Mason <mason@suse.com>
+Date:   Wed Feb 1 03:06:47 2006 -0800
+
+    [PATCH] resierfs: fix reiserfs_invalidatepage race against data=ordered
+
+    After a transaction has closed but before it has finished commit, there is
+    a window where data=ordered mode requires invalidatepage to pin pages
+    instead of freeing them.  This patch fixes a race between the
+    invalidatepage checks and data=ordered writeback, and it also adds a check
+    to the reiserfs write_ordered_buffers routines to write any anonymous
+    buffers that were dirtied after its first writeback loop.
+
+    That bug works like this:
+
+    proc1: transaction closes and a new one starts
+    proc1: write_ordered_buffers starts processing data=ordered list
+    proc1: buffer A is cleaned and written
+    proc2: buffer A is dirtied by another process
+    proc2: File is truncated to zero, page A goes through invalidatepage
+    proc2: reiserfs_invalidatepage sees dirty buffer A with reiserfs
+           journal head, pins it
+    proc1: write_ordered_buffers frees the journal head on buffer A
+
+    At this point, buffer A stays dirty forever
+
+--- a/fs/reiserfs/inode.c	Thu Feb  2 00:53:25 2006 +0800
++++ b/fs/reiserfs/inode.c	Thu Feb  2 00:53:26 2006 +0800
+@@ -2743,6 +2743,7 @@ static int invalidatepage_can_drop(struc
+ 	int ret = 1;
+ 	struct reiserfs_journal *j = SB_JOURNAL(inode->i_sb);
+ 
++	lock_buffer(bh);
+ 	spin_lock(&j->j_dirty_buffers_lock);
+ 	if (!buffer_mapped(bh)) {
+ 		goto free_jh;
+@@ -2758,7 +2759,7 @@ static int invalidatepage_can_drop(struc
+ 		if (buffer_journaled(bh) || buffer_journal_dirty(bh)) {
+ 			ret = 0;
+ 		}
+-	} else if (buffer_dirty(bh) || buffer_locked(bh)) {
++	} else  if (buffer_dirty(bh)) {
+ 		struct reiserfs_journal_list *jl;
+ 		struct reiserfs_jh *jh = bh->b_private;
+ 
+@@ -2784,6 +2785,7 @@ static int invalidatepage_can_drop(struc
+ 		reiserfs_free_jh(bh);
+ 	}
+ 	spin_unlock(&j->j_dirty_buffers_lock);
++	unlock_buffer(bh);
+ 	return ret;
+ }
+ 
+
+--- a/fs/reiserfs/journal.c	Thu Feb  2 00:53:25 2006 +0800
++++ b/fs/reiserfs/journal.c	Thu Feb  2 00:53:26 2006 +0800
+@@ -876,6 +876,19 @@ static int write_ordered_buffers(spinloc
+ 		}
+ 		if (!buffer_uptodate(bh)) {
+ 			ret = -EIO;
++		}
++		/* ugly interaction with invalidatepage here.
++		 * reiserfs_invalidate_page will pin any buffer that has a valid
++		 * journal head from an older transaction.  If someone else sets
++		 * our buffer dirty after we write it in the first loop, and
++		 * then someone truncates the page away, nobody will ever write
++		 * the buffer. We're safe if we write the page one last time
++		 * after freeing the journal header.
++		 */
++		if (buffer_dirty(bh) && unlikely(bh->b_page->mapping == NULL)) {
++			spin_unlock(lock);
++			ll_rw_block(WRITE, 1, &bh);
++			spin_lock(lock);
+ 		}
+ 		put_bh(bh);
+ 		cond_resched_lock(lock);
+
+$CHECK IT
+
+
+unsure what lval buffer_dirty(bh) checks... can't find defn' of buffer_dirty()
+anywhere (LXC, grep, callgraph)?!
+
+
+
+
+commit ff60a5dc4fa584d47022d2533bc5c53b80096fb5
+Author: akpm@osdl.org <akpm@osdl.org>
+Date:   Wed Feb 1 03:05:10 2006 -0800
+
+    [PATCH] hrtimers: fix posix-timer requeue race
+    
+    From: Steven Rostedtrostedt@goodmis.org <rostedt@goodmis.org>
+    
+    CPU0 expires a posix-timer and runs the callback function.  The signal is
+    queued.
+    
+    After releasing the posix-timer lock and before returning to 
+    hrtimer_run_queue
+    CPU0 gets interrupted.  CPU1 delivers the queued signal and rearms 
+    the timer.
+    CPU0 comes back to hrtimer_run_queue and sets the timer state to expired.
+    
+    The next modification of the timer can result in an oops, because the state
+    information is wrong.
+    
+    Keep track of state = RUNNING and check if the state has been in the return
+    path of hrtimer_run_queue.  In case the state has been changed, ignore a
+    restart request and do not touch the state variable.
+    
+
+--
+ include/linux/hrtimer.h |    1 +
+ kernel/hrtimer.c        |    5 +++++
+ 2 files changed, 6 insertions(+), 0 deletions(-)
+7a42511f275d3c895be54f4e578921fc35e25dd2
+diff --git a/include/linux/hrtimer.h b/include/linux/hrtimer.h
+index 089bfb1..c657f3d 100644
+--- a/include/linux/hrtimer.h
++++ b/include/linux/hrtimer.h
+@@ -40,6 +40,7 @@ enum hrtimer_restart {
+ enum hrtimer_state {
+ 	HRTIMER_INACTIVE,	/* Timer is inactive */
+ 	HRTIMER_EXPIRED,		/* Timer is expired */
++	HRTIMER_RUNNING,		/* Timer is running the callback function */
+ 	HRTIMER_PENDING,		/* Timer is pending */
+ };
+ 
+diff --git a/kernel/hrtimer.c b/kernel/hrtimer.c
+index f1c4155..f580dd9 100644
+--- a/kernel/hrtimer.c
++++ b/kernel/hrtimer.c
+@@ -550,6 +550,7 @@ static inline void run_hrtimer_queue(str
+ 		fn = timer->function;
+ 		data = timer->data;
+ 		set_curr_timer(base, timer);
++		timer->state = HRTIMER_RUNNING;
+ 		__remove_hrtimer(timer, base);
+ 		spin_unlock_irq(&base->lock);
+ 
+@@ -565,6 +566,10 @@ static inline void run_hrtimer_queue(...)
+ 
+ 		spin_lock_irq(&base->lock);
+ 
++		/* Another CPU has added back the timer */
++		if (timer->state != HRTIMER_RUNNING)
++			continue;
++
+ 		if (restart == HRTIMER_RESTART)
+ 			enqueue_hrtimer(timer, base);
+ 		else
+--
+
+
+$CHECK IT: not found: can't find kernel/hrtimer.c file & LXR has no reference to this either!
+
+
+
+
+commit 3f4cfc2d11c9e29709e6f0f3add54039614d847a
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Tue Jan 31 17:44:07 2006 -0800
+
+    [BRIDGE]: Fix device delete race.
+    
+    This is a simpler fix for the two races in bridge device removal.
+    The Xen race of delif and notify is managed now by a new deleted flag.
+    No need for barriers or other locking because of rtnl mutex.
+    
+    The del_timer_sync()'s are unnecessary, because br_stp_disable_port
+    delete's the timers, and they will finish running before RCU callback.
+
+net/bridge/br_if.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- linux-2.6.13.4.orig/net/bridge/br_if.c
++++ linux-2.6.13.4/net/bridge/br_if.c
+@@ -79,7 +79,6 @@ static void destroy_nbp(struct net_bridg
+ {
+        struct net_device *dev = p->dev;
+ 
+-       dev->br_port = NULL;
+        p->br = NULL;
+        p->dev = NULL;
+        dev_put(dev);
+@@ -100,6 +99,7 @@ static void del_nbp(struct net_bridge_po
+        struct net_bridge *br = p->br;
+        struct net_device *dev = p->dev;
+ 
++       dev->br_port = NULL;
+        dev_set_promiscuity(dev, -1);
+ 
+        spin_lock_bh(&br->lock);
+
+(just repositioned stuff -- still outside of crit section)
+
+$CHECK IT not found: can't find anything about "br_port"
+
+
+
+
+ommit 7add2a439868d636910fb6a216b12c7392778956
+Author: David L Stevens <dlstevens@us.ibm.com>
+Date:   Tue Jan 24 13:06:39 2006 -0800
+
+    [IPV6] MLDv2: fix change records when transitioning to/from inactive
+    
+    The following patch fixes these problems in MLDv2:
+    
+    1) Add/remove "delete" records for sending change reports when
+            addition of a filter results in that filter transitioning to/from
+            inactive. [same as recent IPv4 IGMPv3 fix]
+    2) Remove 2 redundant "group_type" checks (can't be IPV6_ADDR_ANY
+            within that loop, so checks are always true)
+    3) change an is_in() "return 0" to "return type == MLD2_MODE_IS_INCLUDE".
+            It should always be "0" to get here, but it improves code locality 
+            to not assume it, and if some race allowed otherwise, doing
+            the check would return the correct result.
+
+
+-- a/net/ipv6/mcast.c	Wed Jan 25 04:57:19 2006 +0800
++++ b/net/ipv6/mcast.c	Wed Jan 25 05:06:39 2006 +0800
+@@ -1252,8 +1252,7 @@ int igmp6_event_query(struct sk_buff *sk
+ 		}
+ 	} else {
+ 		for (ma = idev->mc_list; ma; ma=ma->next) {
+-			if (group_type != IPV6_ADDR_ANY &&
+-			    !ipv6_addr_equal(group, &ma->mca_addr))
++			if (!ipv6_addr_equal(group, &ma->mca_addr))
+ 				continue;
+ 			spin_lock_bh(&ma->mca_lock);
+ 			if (ma->mca_flags & MAF_TIMER_RUNNING) {
+@@ -1268,11 +1267,10 @@ int igmp6_event_query(struct sk_buff *sk
+ 					ma->mca_flags &= ~MAF_GSQUERY;
+ 			}
+ 			if (!(ma->mca_flags & MAF_GSQUERY) ||
+-			   mld_marksources(ma, ntohs(mlh2->nsrcs), mlh2->srcs))
++			    mld_marksources(ma, ntohs(mlh2->nsrcs), mlh2->srcs))
+ 				igmp6_group_queried(ma, max_delay);
+ 			spin_unlock_bh(&ma->mca_lock);
+-			if (group_type != IPV6_ADDR_ANY)
+-				break;
++			break;
+ 		}
+ 	}
+ 	read_unlock_bh(&idev->lock);
+@@ -1351,7 +1349,7 @@ static int is_in(struct ifmcaddr6 *pmc, 
+ 			 * in all filters
+ 			 */
+ 			if (psf->sf_count[MCAST_INCLUDE])
+-				return 0;
++				return type == MLD2_MODE_IS_INCLUDE;
+ 			return pmc->mca_sfcount[MCAST_EXCLUDE] ==
+ 				psf->sf_count[MCAST_EXCLUDE];
+ 		}
+@@ -1966,7 +1964,7 @@ static void sf_markstate(struct ifmcaddr
+ 
+ static int sf_setstate(struct ifmcaddr6 *pmc)
+ {
+-	struct ip6_sf_list *psf;
++	struct ip6_sf_list *psf, *dpsf;
+ 	int mca_xcount = pmc->mca_sfcount[MCAST_EXCLUDE];
+ 	int qrv = pmc->idev->mc_qrv;
+ 	int new_in, rv;
+@@ -1978,8 +1976,48 @@ static int sf_setstate(struct ifmcaddr6 
+ 				!psf->sf_count[MCAST_INCLUDE];
+ 		} else
+ 			new_in = psf->sf_count[MCAST_INCLUDE] != 0;
+-		if (new_in != psf->sf_oldin) {
+-			psf->sf_crcount = qrv;
++		if (new_in) {
++			if (!psf->sf_oldin) {
++				struct ip6_sf_list *prev = 0;
++
++				for (dpsf=pmc->mca_tomb; dpsf;
++				     dpsf=dpsf->sf_next) {
++					if (ipv6_addr_equal(&dpsf->sf_addr,
++					    &psf->sf_addr))
++						break;
++					prev = dpsf;
++				}
++				if (dpsf) {
++					if (prev)
++						prev->sf_next = dpsf->sf_next;
++					else
++						pmc->mca_tomb = dpsf->sf_next;
++					kfree(dpsf);
++				}
++				psf->sf_crcount = qrv;
++				rv++;
++			}
++		} else if (psf->sf_oldin) {
++			psf->sf_crcount = 0;
++			/*
++			 * add or update "delete" records if an active filter
++			 * is now inactive
++			 */
++			for (dpsf=pmc->mca_tomb; dpsf; dpsf=dpsf->sf_next)
++				if (ipv6_addr_equal(&dpsf->sf_addr,
++				    &psf->sf_addr))
++					break;
++			if (!dpsf) {
++				dpsf = (struct ip6_sf_list *)
++					kmalloc(sizeof(*dpsf), GFP_ATOMIC);
++				if (!dpsf)
++					continue;
++				*dpsf = *psf;
++				/* pmc->mca_lock held by callers */
++				dpsf->sf_next = pmc->mca_tomb;
++				pmc->mca_tomb = dpsf;
++			}
++			dpsf->sf_crcount = qrv;
+ 			rv++;
+ 		}
+ 	}
+
+what's the lval? (the read that they moved?)
+err... i guess the patch isn't about a race; they're worried a race can happen
+
+$CHECK IT
+
+at least finds race on sf_crcount, but in IPV4 files, not IPV6 files?
+
+Possible race between access to:
+[REP: 0].sf_crcount and
+[REP: 0].sf_crcount
+        Accessed at locs:
+        [net/ipv4/igmp.c:1593, ] and
+        [net/ipv4/igmp.c:1593, ]
+
+
+
+
+commit f91a3715db2bb44fcf08cec642e68f919b70f7f4
+Author: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Date:   Sat Jan 21 14:59:12 2006 +0000
+
+    [SERIAL] 8250 serial console fixes
+    
+    This patch resolves most of the problems with an SMP serial console race
+    with output via the tty path. At the end of the serial console print we
+    force enable the tx int in case we clobbered the tx interrupt status
+    racing between the console and tty output. That way the extra tx
+    interrupt causes the transmit path to restart not hang.
+    
+    It also makes the serial console printk use the FIFO. This is neccessary
+    because some remote management devices fake serial console with FIFO and
+    are confused into sending one packet per character over ethernet when we
+    stall rather than filling the FIFO.
+    
+    In order to preserve existing reliability semantics the function waits
+    for the serial queue to completely empty before returning.
+    
+    Both of these problems were identified by a Red Hat partner.
+
+
+--- drivers/serial/8250.c~ 2006-05-02 14:28:05.430397240 +0100
++++ drivers/serial/8250.c 2006-05-02 14:28:05.430397240 +0100
+@@ -2201,7 +2201,18 @@
+{
+struct uart_8250_port *up = &serial8250_ports[co->index];
+unsigned int ier;
++ unsigned long flags;
++ int locked = 1;
+
++ if (unlikely(oops_in_progress)) {
++ /* We want our private lock to be ignored during an oops. This
++ might cause a serial console stall afterwards but the oops data
++ is the critical information to get out */
++ local_irq_save(flags);
++ locked = spin_trylock(&up->port.lock);
++ } else
++ spin_lock_irqsave(&up->port.lock, flags);
++
+touch_nmi_watchdog();
+
+/*
+@@ -2221,8 +2232,12 @@
+* and restore the IER
+*/
+wait_for_xmitr(up, BOTH_EMPTY);
+- up->ier |= UART_IER_THRI;
+- serial_out(up, UART_IER, ier | UART_IER_THRI);
++ serial_out(up, UART_IER, ier);
++
++ if (locked)
++ spin_unlock_irqrestore(&up->port.lock, flags);
++ else
++ local_irq_restore(flags);
+}
+
+static int serial8250_console_setup(struct console *co, char *options)
+
+in serial8250_start_tx?
+
+(looks like there's some path sensitivity)
+
+$CHECK IT not found: root isn't counted as a thread
+
+
+
+commit 71c8d4c3aad3132765d30b05dce98bb8a9508f02
+Author: Paolo 'Blaisorblade' Giarrusso <blaisorblade@yahoo.it>
+Date:   Wed Jan 18 17:42:56 2006 -0800
+
+    [PATCH] uml: fix spinlock recursion and sleep-inside-spinlock in error path
+    
+ In this error path, when the interface has had a problem, we call dev_close(),
+    which is disallowed for two reasons:
+    
+    *) takes again the UML internal spinlock, inside the ->stop method of this
+       device
+    *) can be called in process context only, while we're in interrupt context.
+    
+    I've also thought that calling dev_close() may be a wrong policy to follow,
+    but it's not up to me to decide that.
+    
+    However, we may end up with multiple dev_close() queued on the same device.
+   But the initial test for (dev->flags & IFF_UP) makes this harmless, though -
+    and dev_close() is supposed to care about races with itself.  So there's no
+    harm in delaying the shutdown, IMHO.
+    
+   Something to mark the interface as "going to shutdown" would be appreciated,
+    but dev_deactivate has the same problems as dev_close(), so we can't use it
+    either.
+   
+
+---
+ arch/um/drivers/net_kern.c |   15 +++++++++++++--
+ 1 files changed, 13 insertions(+), 2 deletions(-)
+diff --git a/arch/um/drivers/net_kern.c b/arch/um/drivers/net_kern.c
+index 98350bb..178f68b 100644
+--- a/arch/um/drivers/net_kern.c
++++ b/arch/um/drivers/net_kern.c
+@@ -68,6 +68,11 @@ static int uml_net_rx(struct net_device 
+ 	return pkt_len;
+ }
+ 
++static void uml_dev_close(void* dev)
++{
++	dev_close( (struct net_device *) dev);
++}
++
+ irqreturn_t uml_net_interrupt(int irq, void *dev_id, struct pt_regs *regs)
+ {
+ 	struct net_device *dev = dev_id;
+@@ -80,15 +85,21 @@ irqreturn_t uml_net_interrupt(int irq, v
+ 	spin_lock(&lp->lock);
+ 	while((err = uml_net_rx(dev)) > 0) ;
+ 	if(err < 0) {
++		DECLARE_WORK(close_work, uml_dev_close, dev);
+ 		printk(KERN_ERR 
+ 		       "Device '%s' read returned %d, shutting it down\n", 
+ 		       dev->name, err);
+-		dev_close(dev);
++		/* dev_close can't be called in interrupt context, and takes
++		 * again lp->lock.
++		 * And dev_close() can be safely called multiple times on the
++		 * same device, since it tests for (dev->flags & IFF_UP). So
++		 * there's no harm in delaying the device shutdown. */
++		schedule_work(&close_work);
+ 		goto out;
+ 	}
+ 	reactivate_fd(lp->fd, UM_ETH_IRQ);
+ 
+- out:
++out:
+ 	spin_unlock(&lp->lock);
+ 	return(IRQ_HANDLED);
+ }
+
+Hmm... usermode linux?
+
+
+commit d88992f660936049f5f38d74ea5a86b5c1491a48
+Author: David Chinner <dgc@sgi.com>
+Date:   Wed Jan 18 13:38:12 2006 +1100
+
+    [XFS] Fix a race in xfs_submit_ioend() where we can be completing I/O for
+    a page while we are still submitting other buffers on the same page for
+    I/O.
+
+
+--- a/fs/xfs/linux-2.6/xfs_aops.c	Wed Jan 18 09:00:04 2006 +0000
++++ b/fs/xfs/linux-2.6/xfs_aops.c	Tue Jan 17 15:38:12 2006 -1100
+@@ -336,24 +336,47 @@ static inline int bio_add_buffer(struct 
+ }
+ 
+ /*
+- * Submit all of the bios for all of the ioends we have saved up,
+- * covering the initial writepage page and also any probed pages.
++ * Submit all of the bios for all of the ioends we have saved up, covering the
++ * initial writepage page and also any probed pages.
++ *
++ * Because we may have multiple ioends spanning a page, we need to start
++ * writeback on all the buffers before we submit them for I/O. If we mark the
++ * buffers as we got, then we can end up with a page that only has buffers
++ * marked async write and I/O complete on can occur before we mark the other
++ * buffers async write.
++ *
++ * The end result of this is that we trip a bug in end_page_writeback() because
++ * we call it twice for the one page as the code in end_buffer_async_write()
++ * assumes that all buffers on the page are started at the same time.
++ *
++ * The fix is two passes across the ioend list - one to start writeback on the
++ * bufferheads, and then the second one submit them for I/O.
+  */
+ STATIC void
+ xfs_submit_ioend(
+ 	xfs_ioend_t		*ioend)
+ {
++	xfs_ioend_t		*head = ioend;
+ 	xfs_ioend_t		*next;
+ 	struct buffer_head	*bh;
+ 	struct bio		*bio;
+ 	sector_t		lastblock = 0;
+ 
++	/* Pass 1 - start writeback */
++	do {
++		next = ioend->io_list;
++		for (bh = ioend->io_buffer_head; bh; bh = bh->b_private) {
++			xfs_start_buffer_writeback(bh);
++		}
++	} while ((ioend = next) != NULL);
++
++	/* Pass 2 - submit I/O */
++	ioend = head;
+ 	do {
+ 		next = ioend->io_list;
+ 		bio = NULL;
+ 
+ 		for (bh = ioend->io_buffer_head; bh; bh = bh->b_private) {
+-			xfs_start_buffer_writeback(bh);
+ 
+ 			if (!bio) {
+  retry:
+    
+
+$CHECK IT fix changes ordering, not locks... (and don't have this file!)
+
+
+
+
+commit 302d12522a36790858ce93b69ebf2220f9e5173a
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Tue Jan 17 13:43:20 2006 -0800
+
+    [PATCH] sky2: more conservative transmit locking
+    
+    Be more careful about transmit locking, this solves a possible race
+    between tx_complete and transmit, that would cause a tx timeout.
+    
+no sky2.c
+
+
+commit 9eb3394bf2037120881a8846bc67064f49325366
+Author: Richard Mortimer <richm@oldelvet.org.uk>
+Date:   Tue Jan 17 15:21:01 2006 -0800
+
+    [SPARC64]: Eliminate race condition reading Hummingbird STICK register
+    
+    Ensure a consistent value is read from the STICK register by ensuring
+    that both high and low are read without high changing due to a roll
+    over of the low register.
+    
+    Various Debian/SPARC users (myself include) have noticed problems with
+    Hummingbird based systems. The symptoms are that the system time is
+    seen to jump forward 3 days, 6 hours, 11 minutes give or take a few
+    seconds. In many cases the system then hangs some time afterwards.
+    
+    I've spotted a race condition in the code to read the STICK register.
+    I could not work out why 3d, 6h, 11m is important but guess that it is
+    due to the 2^32 jump of STICK (forwards on one read and then the next
+    read will seem to be backwards) during a timer interrupt. I'm guessing
+    that a change of -2^32 will get converted to a large unsigned
+    increment after the arithmetic manipulation between STICK,
+    nanoseconds, jiffies etc.
+    
+    I did a test where I modified __hbird_read_stick to artificially
+    inject rollover faults forcefully every few seconds. With this I saw
+    the clock jump over 6 times in 12 hours compared to once every month
+    or so.
+
+SPARC64... assembly stuff
+
+
+commit c4d2444e992c4eda1d7fc3287e93ba58295bf6b9
+Author: Sridhar Samudrala <sri@us.ibm.com>
+Date:   Tue Jan 17 11:56:26 2006 -0800
+
+    [SCTP]: Fix couple of races between sctp_peeloff() and sctp_rcv().
+    
+    Validate and update the sk in sctp_rcv() to avoid the race where an
+    assoc/ep could move to a different socket after we get the sk, but before
+    the skb is added to the backlog.
+    
+    Also migrate the skb's in backlog queue to new sk when doing a peeloff.
+
+
+-- a/include/net/sctp/sctp.h	Wed Jan 18 03:55:57 2006 +0800
++++ b/include/net/sctp/sctp.h	Wed Jan 18 03:56:26 2006 +0800
+@@ -175,6 +175,8 @@ void sctp_icmp_proto_unreachable(struct 
+ void sctp_icmp_proto_unreachable(struct sock *sk,
+ 				 struct sctp_association *asoc,
+ 				 struct sctp_transport *t);
++void sctp_backlog_migrate(struct sctp_association *assoc,
++			  struct sock *oldsk, struct sock *newsk);
+ 
+ /*
+  *  Section:  Macros, externs, and inlines
+
+--- a/net/sctp/input.c	Wed Jan 18 03:55:57 2006 +0800
++++ b/net/sctp/input.c	Wed Jan 18 03:56:26 2006 +0800
+@@ -257,12 +257,21 @@ int sctp_rcv(struct sk_buff *skb)
+ 	 */
+ 	sctp_bh_lock_sock(sk);
+ 
++	/* It is possible that the association could have moved to a different
++	 * socket if it is peeled off. If so, update the sk.
++	 */ 
++	if (sk != rcvr->sk) {
++		sctp_bh_lock_sock(rcvr->sk);
++		sctp_bh_unlock_sock(sk);
++		sk = rcvr->sk;
++	}
++
+ 	if (sock_owned_by_user(sk))
+ 		sk_add_backlog(sk, skb);
+ 	else
+ 		sctp_backlog_rcv(sk, skb);
+ 
+-	/* Release the sock and the sock ref we took in the lookup calls. 
++	/* Release the sock and the sock ref we took in the lookup calls.
+ 	 * The asoc/ep ref will be released in sctp_backlog_rcv.
+ 	 */
+ 	sctp_bh_unlock_sock(sk);
+@@ -297,6 +306,9 @@ int sctp_backlog_rcv(struct sock *sk, st
+  	struct sctp_ep_common *rcvr = NULL;
+ 
+  	rcvr = chunk->rcvr;
++
++	BUG_TRAP(rcvr->sk == sk);
++
+  	if (rcvr->dead) {
+  		sctp_chunk_free(chunk);
+  	} else {
+@@ -311,6 +323,27 @@ int sctp_backlog_rcv(struct sock *sk, st
+  		sctp_endpoint_put(sctp_ep(rcvr));
+   
+         return 0;
++}
++
++void sctp_backlog_migrate(struct sctp_association *assoc, 
++			  struct sock *oldsk, struct sock *newsk)
++{
++	struct sk_buff *skb;
++	struct sctp_chunk *chunk;
++
++	skb = oldsk->sk_backlog.head;
++	oldsk->sk_backlog.head = oldsk->sk_backlog.tail = NULL;
++	while (skb != NULL) {
++		struct sk_buff *next = skb->next;
++
++		chunk = SCTP_INPUT_CB(skb)->chunk;
++		skb->next = NULL;
++		if (&assoc->base == chunk->rcvr)
++			sk_add_backlog(newsk, skb);
++		else
++			sk_add_backlog(oldsk, skb);
++		skb = next;
++	}
+ }
+ 
+ /* Handle icmp frag needed error. */
+
+--- a/net/sctp/socket.c	Wed Jan 18 03:55:57 2006 +0800
++++ b/net/sctp/socket.c	Wed Jan 18 03:56:26 2006 +0800
+@@ -5602,8 +5602,12 @@ static void sctp_sock_migrate(struct soc
+ 	 */
+ 	newsp->type = type;
+ 
++	spin_lock_bh(&oldsk->sk_lock.slock);
++	/* Migrate the backlog from oldsk to newsk. */
++	sctp_backlog_migrate(assoc, oldsk, newsk);
+ 	/* Migrate the association to the new socket. */
+ 	sctp_assoc_migrate(assoc, newsk);
++	spin_unlock_bh(&oldsk->sk_lock.slock);
+ 
+ 	/* If the association on the newsk is already closed before accept()
+ 	 * is called, set RCV_SHUTDOWN flag.
+
+    
+$CHECK IT ^^^
+
+does get races on sk_backlog.next,  etc. (but sctp_rcv uses locks around
+those accesses)
+
+looked at what sctp_assoc_migrate (in net/sctp/associola.c) does, but
+none of the accesses (except w/ list_del_init and sk_ack_backlog) show up
+
+(accesses are recorded in summary though)
+
+
+
+commit 7a48f923b8b27bfaa5f7b2a449a6fe268724ddd5
+Author: Sridhar Samudrala <sri@us.ibm.com>
+Date:   Tue Jan 17 11:51:28 2006 -0800
+
+    [SCTP]: Fix potential race condition between sctp_close() and sctp_rcv().
+    
+    Do not release the reference to association/endpoint if an incoming skb is
+    added to backlog. Instead release it after the chunk is processed in
+    sctp_backlog_rcv().
+    
+
+--- a/net/sctp/input.c	Wed Jan 18 09:00:04 2006 +0000
++++ b/net/sctp/input.c	Wed Jan 18 03:51:28 2006 +0800
+@@ -262,15 +262,12 @@ int sctp_rcv(struct sk_buff *skb)
+ 	else
+ 		sctp_backlog_rcv(sk, skb);
+ 
+-	/* Release the sock and any reference counts we took in the
+-	 * lookup calls.
++	/* Release the sock and the sock ref we took in the lookup calls. 
++	 * The asoc/ep ref will be released in sctp_backlog_rcv.
+ 	 */
+ 	sctp_bh_unlock_sock(sk);
+-	if (asoc)
+-		sctp_association_put(asoc);
+-	else
+-		sctp_endpoint_put(ep);
+ 	sock_put(sk);
++
+ 	return ret;
+ 
+ discard_it:
+@@ -296,9 +293,23 @@ int sctp_backlog_rcv(struct sock *sk, st
+ int sctp_backlog_rcv(struct sock *sk, struct sk_buff *skb)
+ {
+ 	struct sctp_chunk *chunk = SCTP_INPUT_CB(skb)->chunk;
+-	struct sctp_inq *inqueue = &chunk->rcvr->inqueue;
+-
+-	sctp_inq_push(inqueue, chunk);
++ 	struct sctp_inq *inqueue = NULL;
++ 	struct sctp_ep_common *rcvr = NULL;
++
++ 	rcvr = chunk->rcvr;
++ 	if (rcvr->dead) {
++ 		sctp_chunk_free(chunk);
++ 	} else {
++ 		inqueue = &chunk->rcvr->inqueue;
++ 		sctp_inq_push(inqueue, chunk);
++ 	}
++
++	/* Release the asoc/ep ref we took in the lookup calls in sctp_rcv. */ 
++ 	if (SCTP_EP_TYPE_ASSOCIATION == rcvr->type)
++ 		sctp_association_put(sctp_assoc(rcvr));
++ 	else
++ 		sctp_endpoint_put(sctp_ep(rcvr));
++  
+         return 0;
+ }
+
+
+$CHECK IT (fix moved reads?)
+
+sees the refcnt mods in summaries, but not in warnings...
+
+
+
+--- a/net/sctp/inqueue.c	Wed Jan 18 09:00:04 2006 +0000
++++ b/net/sctp/inqueue.c	Wed Jan 18 03:51:28 2006 +0800
+@@ -73,8 +73,10 @@ void sctp_inq_free(struct sctp_inq *queu
+ 	/* If there is a packet which is currently being worked on,
+ 	 * free it as well.
+ 	 */
+-	if (queue->in_progress)
++	if (queue->in_progress) {
+ 		sctp_chunk_free(queue->in_progress);
++		queue->in_progress = NULL;
++	}
+ 
+ 	if (queue->malloced) {
+ 		/* Dump the master memory segment.  */
+
+$CHECK IT
+
+
+//can't find *.in_progress
+
+
+
+commit 095da6cbb6a1c54c19b11190218eb0fbac666b6d
+Author: Miklos Szeredi <miklos@szeredi.hu>
+Date:   Mon Jan 16 22:14:52 2006 -0800
+
+    [PATCH] fuse: fix bitfield race
+    
+    Fix race in setting bitfields of fuse_conn.  Spotted by Andrew Morton.
+    
+    The two fields ->connected and ->mounted were always changed with the
+    fuse_lock held.  But other bitfields in the same structure were changed
+    without the lock.  In theory this could lead to losing the assignment of
+    even the ones under lock.  The chosen solution is to change these two
+    fields to be a full unsigned type.  The other bitfields aren't "important"
+    enough to warrant the extra complexity of full locking or changing them to
+    bitops.
+    
+    For all bitfields document why they are safe wrt. concurrent
+    assignments.
+    
+    Also make the initialization of the 'num_waiting' atomic counter explicit.
+    
+
+--- a/fs/fuse/fuse_i.h	Tue Jan 17 15:15:31 2006 +0800
++++ b/fs/fuse/fuse_i.h	Tue Jan 17 15:15:31 2006 +0800
+@@ -94,6 +94,11 @@ struct fuse_out {
+ 	/** Header returned from userspace */
+ 	struct fuse_out_header h;
+ 
++	/*
++	 * The following bitfields are not changed during the request
++	 * processing
++	 */
++
+ 	/** Last argument is variable length (can be shorter than
+ 	    arg->size) */
+ 	unsigned argvar:1;
+@@ -135,6 +140,12 @@ struct fuse_req {
+ 
+ 	/** refcount */
+ 	atomic_t count;
++
++	/*
++	 * The following bitfields are either set once before the
++	 * request is queued or setting/clearing them is protected by
++	 * fuse_lock
++	 */
+ 
+ 	/** True if the request has reply */
+ 	unsigned isreply:1;
+@@ -250,14 +261,21 @@ struct fuse_conn {
+ 	u64 reqctr;
+ 
+ 	/** Mount is active */
+-	unsigned mounted : 1;
++	unsigned mounted;
+ 
+ 	/** Connection established, cleared on umount, connection
+ 	    abort and device release */
+-	unsigned connected : 1;
+-
+-	/** Connection failed (version mismatch) */
++	unsigned connected;
++
++	/** Connection failed (version mismatch).  Cannot race with
++	    setting other bitfields since it is only set once in INIT
++	    reply, before any other request, and never cleared */
+ 	unsigned conn_error : 1;
++
++	/*
++	 * The following bitfields are only for optimization purposes
++	 * and hence races in setting them will not cause malfunction
++	 */
+ 
+ 	/** Is fsync not implemented by fs? */
+ 	unsigned no_fsync : 1;
+
+--- a/fs/fuse/inode.c	Tue Jan 17 15:15:31 2006 +0800
++++ b/fs/fuse/inode.c	Tue Jan 17 15:15:31 2006 +0800
+@@ -397,6 +397,7 @@ static struct fuse_conn *new_conn(void)
+ 		init_rwsem(&fc->sbput_sem);
+ 		kobj_set_kset_s(fc, connections_subsys);
+ 		kobject_init(&fc->kobj);
++		atomic_set(&fc->num_waiting, 0);
+ 		for (i = 0; i < FUSE_MAX_OUTSTANDING; i++) {
+ 			struct fuse_req *req = fuse_request_alloc();
+ 			if (!req) {
+@@ -492,6 +493,7 @@ static void fuse_send_init(struct fuse_c
+ 	   to be exactly one request available */
+ 	struct fuse_req *req = fuse_get_request(fc);
+ 	struct fuse_init_in *arg = &req->misc.init_in;
++
+ 	arg->major = FUSE_KERNEL_VERSION;
+ 	arg->minor = FUSE_KERNEL_MINOR_VERSION;
+ 	req->in.h.opcode = FUSE_INIT;
+
+
+
+$CHECK IT (not sure if our thing would remove the warning after the fix)
+
+can't find accesses to any of those bit fields...
+
+
+
+commit 5af47b2ff124fdad9ba84baeb9f7eeebeb227b43
+Author: Jay Vosburgh <fubar@us.ibm.com>
+Date:   Mon Jan 9 12:14:00 2006 -0800
+
+    [PATCH] bonding: UPDATED hash-table corruption in bond_alb.c
+    
+    	I believe I see the race Michael refers to (tlb_choose_channel
+    may set head, which tlb_init_slave clears), although I was not able to
+    reproduce it.  I have updated his patch for the current netdev-2.6.git
+    tree and added a version update.  His original comment follows:
+    
+    Our systems have been crashing during testing of PCI HotPlug
+    support in the various networking components.  We've faulted in
+    the bonding driver due to a bug in bond_alb.c:tlb_clear_slave()
+    
+    In that routine, the last modification to the TLB hash table is
+    made without protection of the lock, allowing a race that can lead
+    tlb_choose_channel() to select an invalid table element.
+    
+    	-J
+
+
+--- a/drivers/net/bonding/bond_alb.c	Fri Jan 13 02:34:24 2006 +0500
++++ b/drivers/net/bonding/bond_alb.c	Fri Jan 13 02:35:39 2006 +0500
+@@ -169,9 +169,9 @@ static void tlb_clear_slave(struct bondi
+ 		index = next_index;
+ 	}
+ 
++	tlb_init_slave(slave);
++
+ 	_unlock_tx_hashtbl(bond);
+-
+-	tlb_init_slave(slave);
+ }
+ 
+ /* Must be called before starting the monitor timer */
+
+--- a/drivers/net/bonding/bonding.h	Fri Jan 13 02:34:24 2006 +0500
++++ b/drivers/net/bonding/bonding.h	Fri Jan 13 02:35:39 2006 +0500
+@@ -22,8 +22,8 @@
+ #include "bond_3ad.h"
+ #include "bond_alb.h"
+ 
+-#define DRV_VERSION	"3.0.0"
+-#define DRV_RELDATE	"November 8, 2005"
++#define DRV_VERSION	"3.0.1"
++#define DRV_RELDATE	"January 9, 2006"
+ #define DRV_NAME	"bonding"
+ #define DRV_DESCRIPTION	"Ethernet Channel Bonding Driver"
+ 
+
+$CHECK IT
+
+can't find any mods associated w/ tlb_init_slave
+
+
+
+
+commit 5388fb1025443ec223ba556b10efc4c5f83f8682
+Author: Paul Mackerras <paulus@samba.org>
+Date:   Wed Jan 11 22:11:39 2006 +1100
+
+    [PATCH] powerpc: Avoid potential FP corruption with preempt and UP
+    
+    Heikki Lindholm pointed out that there was a potential race with the
+    lazy CPU state (FP, VR, EVR) stuff if preempt is enabled.  The race
+    is that in the process of restoring FP state on sigreturn, the task
+    gets preempted by a user task that wants to use the FPU.  It will take
+    an FP unavailable exception, which will write the current FPU state
+    to the thread_struct, overwriting the values which sigreturn has
+    stored.  Note that this can only happen on UP since we don't implement
+    lazy CPU state on SMP.
+    
+    The fix is to flush the lazy CPU state before updating the
+    thread_struct.  To do this we re-use the flush_lazy_cpu_state()
+    function from process.c.
+    
+
+powerpc thing
+
+
+commit 329d400f47ddfe8ff599823d739c5c5565da3207
+Author: Zwane Mwaikambo <zwane@arm.linux.org.uk>
+Date:   Wed Jan 11 22:43:09 2006 +0100
+
+    [PATCH] x86_64/i386: Remove preempt disable calls in lowlevel IPI
+    
+    I noticed that some lowlevel send_IPI_mask helpers had a hotplug/preempt
+    race whereupon the cpu_online_map was read before disabling preemption;
+    
+    ...
+    cpumask_t mask = cpu_online_map;
+    int cpu = get_cpu();
+    cpu_clear(cpu, mask);
+    ...
+    
+    But then i realised that there is no need for these lowlevel functions to
+    be going through all this trouble when all the callers are already made
+    hotplug/preempt safe.
+    
+x86_64 thing
+
+
+commit eb3a72921c8276bf2cd028a458bb83435f16c91c
+Author: Keshavamurthy Anil S <anil.s.keshavamurthy@intel.com>
+Date:   Wed Jan 11 12:17:42 2006 -0800
+
+    [PATCH] kprobes: fix race in recovery of reentrant probe
+    
+    There is a window where a probe gets removed right after the probe is hit
+    on some different cpu.  In this case probe handlers can't find a matching
+    probe instance related to break address.  In this case we need to read the
+    original instruction at break address to see if that is not a break/int3
+    instruction and recover safely.
+    
+    Previous code had a bug where we were not checking for the above race in
+    case of reentrant probes and the below patch fixes this race.
+    
+    Tested on IA64, Powerpc, x86_64.
+
+
+--- a/arch/i386/kernel/kprobes.c	Thu Jan 12 10:42:12 2006 +0800
++++ b/arch/i386/kernel/kprobes.c	Thu Jan 12 10:42:12 2006 +0800
+@@ -188,6 +188,19 @@ static int __kprobes kprobe_handler(stru
+ 			kcb->kprobe_status = KPROBE_REENTER;
+ 			return 1;
+ 		} else {
++			if (regs->eflags & VM_MASK) {
++			/* We are in virtual-8086 mode. Return 0 */
++				goto no_kprobe;
++			}
++			if (*addr != BREAKPOINT_INSTRUCTION) {
++			/* The breakpoint instruction was removed by
++			 * another cpu right after we hit, no further
++			 * handling of this interrupt is appropriate
++			 */
++				regs->eip -= sizeof(kprobe_opcode_t);
++				ret = 1;
++				goto no_kprobe;
++			}
+ 			p = __get_cpu_var(current_kprobe);
+ 			if (p->break_handler && p->break_handler(p, regs)) {
+ 				goto ss_probe;
+
+
+$CHECK IT (Not fixed by locking... more like catch the race and recover?)
+
+nothing found for *.eflags, but found something for *.eip (unrelated)
+nothing found in kprobes.c
+
+
+
+
+
+commit 9a5d3023e626a0baf86ac6b892c983b3db13f22b
+Author: Oren Laadan <orenl@cs.columbia.edu>
+Date:   Sun Jan 8 01:03:51 2006 -0800
+
+    [PATCH] fork: fix race in setting child's pgrp and tty
+    
+    In fork, child should recopy parent's pgrp/tty after it has tasklist_lock.
+    Otherwise following a setpgid() on the parent, *after* copy_signal(), the
+    child will own a stale pgrp (which may be reused); (eg.  if copy_mm()
+    sleeps a long while due to memory pressure).  Similar issue for the tty.
+    
+--- a/kernel/fork.c	Mon Jan  9 12:14:00 2006 +0800
++++ b/kernel/fork.c	Mon Jan  9 12:14:00 2006 +0800
+@@ -811,9 +811,6 @@ static inline int copy_signal(unsigned l
+ 	sig->it_prof_expires = cputime_zero;
+ 	sig->it_prof_incr = cputime_zero;
+ 
+-	sig->tty = current->signal->tty;
+-	sig->pgrp = process_group(current);
+-	sig->session = current->signal->session;
+ 	sig->leader = 0;	/* session leadership doesn't inherit */
+ 	sig->tty_old_pgrp = 0;
+ 
+@@ -1136,14 +1133,14 @@ static task_t *copy_process(unsigned lon
+ 	attach_pid(p, PIDTYPE_PID, p->pid);
+ 	attach_pid(p, PIDTYPE_TGID, p->tgid);
+ 	if (thread_group_leader(p)) {
++		p->signal->tty = current->signal->tty;
++		p->signal->pgrp = process_group(current);
++		p->signal->session = current->signal->session;
+ 		attach_pid(p, PIDTYPE_PGID, process_group(p));
+ 		attach_pid(p, PIDTYPE_SID, p->signal->session);
+ 		if (p->pid)
+ 			__get_cpu_var(process_counts)++;
+ 	}
+-
+-	if (!current->signal->tty && p->signal->tty)
+-		p->signal->tty = NULL;
+ 
+ 	nr_threads++;
+ 	total_forks++;
+
+
+$CHECK IT (interesting... only the group leader does the mods? or did
+they move it to a section w/ locks?)
+
+found race on *.pgrp and *.tty in fork.c on the exact lines (806, 807, 1137)!!!
+
+
+
+Possible race between access to:
+REP_NODE.pgrp and
+REP_NODE.pgrp
+        Accessed at locs:
+        kernel/fork.c:807 and
+        kernel/fork.c:807
+        Possible paths & LS (first 3):
+
+REP_NODE.tty and
+REP_NODE.tty
+        Accessed at locs:
+        kernel/fork.c:1136 and
+        kernel/fork.c:1137
+
+
+
+=========================================================
+
+
+commit b4b2641843db124637fa3d2cb2101982035dcc82
+Author: Paul Jackson <pj@sgi.com>
+Date:   Sun Jan 8 01:01:53 2006 -0800
+
+   [PATCH] cpuset: fork hook fix
+    
+    Fix obscure, never seen in real life, cpuset fork race.  The cpuset_fork()
+    call in fork.c was setting up the correct task->cpuset pointer after the
+ tasklist_lock was dropped, which briefly exposed the newly forked process with
+ an unsafe (copied from parent without locks or usage counter increment) cpuset
+    pointer.
+    
+    In theory, that exposed cpuset pointer could have been pointing at a cpuset
+  that was already freed and removed, and in theory another task that had been
+    sitting on the tasklist_lock waiting to scan the task list could have raced
+ down the entire tasklist, found our new child at the far end, and dereferenced
+    that bogus cpuset pointer.
+    
+    To fix, setup up the correct cpuset pointer in the new child by calling
+  cpuset_fork() before the new task is linked into the tasklist, and with that,
+  add a fork failure case, to dereference that cpuset, if the fork fails along
+    the way, after cpuset_fork() was called.
+    
+  Had to remove a BUG_ON() from cpuset_exit(), because it was no longer valid -
+    the call to cpuset_exit() from a failed fork would not have PF_EXITING set.
+     
+
+--- a/kernel/cpuset.c	Mon Jan  9 12:13:43 2006 +0800
++++ b/kernel/cpuset.c	Mon Jan  9 12:13:43 2006 +0800
+@@ -1821,14 +1821,12 @@ void cpuset_fork(struct task_struct *chi
+  *
+  * We don't need to task_lock() this reference to tsk->cpuset,
+  * because tsk is already marked PF_EXITING, so attach_task() won't
+- * mess with it.
++ * mess with it, or task is a failed fork, never visible to attach_task.
+  **/
+ 
+ void cpuset_exit(struct task_struct *tsk)
+ {
+ 	struct cpuset *cs;
+-
+-	BUG_ON(!(tsk->flags & PF_EXITING));
+ 
+ 	cs = tsk->cpuset;
+ 	tsk->cpuset = NULL;
+
+--- a/kernel/fork.c	Mon Jan  9 12:13:43 2006 +0800
++++ b/kernel/fork.c	Mon Jan  9 12:13:43 2006 +0800
+@@ -972,12 +972,13 @@ static task_t *copy_process(unsigned lon
+ 	p->io_context = NULL;
+ 	p->io_wait = NULL;
+ 	p->audit_context = NULL;
++	cpuset_fork(p);
+ #ifdef CONFIG_NUMA
+  	p->mempolicy = mpol_copy(p->mempolicy);
+  	if (IS_ERR(p->mempolicy)) {
+  		retval = PTR_ERR(p->mempolicy);
+  		p->mempolicy = NULL;
+- 		goto bad_fork_cleanup;
++ 		goto bad_fork_cleanup_cpuset;
+  	}
+ #endif
+ 
+@@ -1148,7 +1149,6 @@ static task_t *copy_process(unsigned lon
+ 	total_forks++;
+ 	write_unlock_irq(&tasklist_lock);
+ 	proc_fork_connector(p);
+-	cpuset_fork(p);
+ 	retval = 0;
+ 
+ fork_out:
+@@ -1180,7 +1180,9 @@ bad_fork_cleanup_policy:
+ bad_fork_cleanup_policy:
+ #ifdef CONFIG_NUMA
+ 	mpol_free(p->mempolicy);
++bad_fork_cleanup_cpuset:
+ #endif
++	cpuset_exit(p);
+ bad_fork_cleanup:
+ 	if (p->binfmt)
+ 		module_put(p->binfmt->module);
+
+$CHECK IT (moved stuff, added cleanup code?)
+
+
+
+commit 15316ba81aee6775d6079fb46c66c801989e7d10
+Author: Christoph Lameter <clameter@engr.sgi.com>
+Date:   Sun Jan 8 01:00:43 2006 -0800
+
+    [PATCH] add schedule_on_each_cpu()
+    
+    swap migration's isolate_lru_page() currently uses an IPI to notify other
+    processors that the lru caches need to be drained if the page cannot be
+    found on the LRU.  The IPI interrupt may interrupt a processor that is just
+    processing lru requests and cause a race condition.
+    
+    This patch introduces a new function run_on_each_cpu() that uses the
+    keventd() to run the LRU draining on each processor.  Processors disable
+    preemption when dealing the LRU caches (these are per processor) and thus
+    executing LRU draining from another process is safe.
+    
+    Thanks to Lee Schermerhorn <lee.schermerhorn@hp.com> for finding this race
+    condition.
+
+-- a/include/linux/workqueue.h	Mon Jan  9 12:12:40 2006 +0800
++++ b/include/linux/workqueue.h	Mon Jan  9 12:12:40 2006 +0800
+@@ -65,6 +65,7 @@ extern int FASTCALL(schedule_delayed_wor
+ extern int FASTCALL(schedule_delayed_work(struct work_struct *work, unsigned long delay));
+ 
+ extern int schedule_delayed_work_on(int cpu, struct work_struct *work, unsigned long delay);
++extern int schedule_on_each_cpu(void (*func)(void *info), void *info);
+ extern void flush_scheduled_work(void);
+ extern int current_is_keventd(void);
+ extern int keventd_up(void);
+
+--- a/kernel/workqueue.c	Mon Jan  9 12:12:40 2006 +0800
++++ b/kernel/workqueue.c	Mon Jan  9 12:12:40 2006 +0800
+@@ -419,6 +419,25 @@ int schedule_delayed_work_on(int cpu,
+ 	return ret;
+ }
+ 
++int schedule_on_each_cpu(void (*func) (void *info), void *info)
++{
++	int cpu;
++	struct work_struct *work;
++
++	work = kmalloc(NR_CPUS * sizeof(struct work_struct), GFP_KERNEL);
++
++	if (!work)
++		return -ENOMEM;
++	for_each_online_cpu(cpu) {
++		INIT_WORK(work + cpu, func, info);
++		__queue_work(per_cpu_ptr(keventd_wq->cpu_wq, cpu),
++				work + cpu);
++	}
++	flush_workqueue(keventd_wq);
++	kfree(work);
++	return 0;
++}
++
+ void flush_scheduled_work(void)
+ {
+ 	flush_workqueue(keventd_wq);
+
+
+Just adds a new function for people to use in the future
+
+
+commit 59d6d39f30f4460b7e6489831caf7fbfe371941a
+Author: Arnd Bergmann <arnd@arndb.de>
+Date:   Fri Dec 9 19:04:15 2005 +0100
+
+    [PATCH] spufs: fix module refcount race
+    
+    One of the two users of spufs_calls.owner still has a race
+    when calling try_module_get while the module is removed.
+    This makes it use the correct instance of owner.
+    
+    Noticed by Milton Miller.
+
+--- a/arch/powerpc/platforms/cell/spu_syscalls.c	Sun Jan  8 16:53:08 2006 -1100
++++ b/arch/powerpc/platforms/cell/spu_syscalls.c	Sun Jan  8 16:53:11 2006 -1100
+@@ -40,7 +40,7 @@ asmlinkage long sys_spu_create(const cha
+ 	struct module *owner = spufs_calls.owner;
+ 
+ 	ret = -ENOSYS;
+-	if (owner && try_module_get(spufs_calls.owner)) {
++	if (owner && try_module_get(owner)) {
+ 		ret = spufs_calls.create_thread(name, flags, mode);
+ 		module_put(owner);
+ 	}
+
+Cell processor stuff?
+
+
+
+commit 5473af049d8b3556874174e61ce1986c9b5e8fa6
+Author: Mark Nutter <mnutter@us.ibm.com>
+Date:   Tue Nov 15 15:53:49 2005 -0500
+
+    [PATCH] spufs: switchable spu contexts
+    
+    Add some infrastructure for saving and restoring the context of an
+    SPE. This patch creates a new structure that can hold the whole
+    state of a physical SPE in memory. It also contains code that
+    avoids races during the context switch and the binary code that
+    is loaded to the SPU in order to access its registers.
+    
+    The actual PPE- and SPE-side context switch code are two separate
+    patches.
+    
+
+commit 64a318ee2af9000df482d7a125c3b3e1f1007404
+Author: J. Bruce Fields <bfields@fieldses.org>
+Date:   Tue Jan 3 09:55:46 2006 +0100
+
+    NLM: Further cancel fixes
+    
+     If the server receives an NLM cancel call and finds no waiting lock to
+     cancel, then chances are the lock has already been applied, and the client
+     just hadn't yet processed the NLM granted callback before it sent the
+     cancel.
+    
+    The Open Group text, for example, perimts a server to return either success
+    (LCK_GRANTED) or failure (LCK_DENIED) in this case.  But returning an error
+     seems more helpful; the client may be able to use it to recognize that a
+     race has occurred and to recover from the race.
+    
+     So, modify the relevant functions to return an error in this case.
+
+
+commit 969b7f2522c90dfed5d0d2553a91522bda2c3bf3
+Author: Trond Myklebust <Trond.Myklebust@netapp.com>
+Date:   Tue Jan 3 09:55:36 2006 +0100
+
+    SUNRPC: Fix a potential race in rpc_pipefs.
+
+--- a/net/sunrpc/rpc_pipe.c	Sat Jan  7 00:58:50 2006 +0500
++++ b/net/sunrpc/rpc_pipe.c	Sat Jan  7 00:58:51 2006 +0500
+@@ -70,8 +70,11 @@ rpc_timeout_upcall_queue(void *data)
+ 	struct inode *inode = &rpci->vfs_inode;
+ 
+ 	down(&inode->i_sem);
++	if (rpci->ops == NULL)
++		goto out;
+ 	if (rpci->nreaders == 0 && !list_empty(&rpci->pipe))
+ 		__rpc_purge_upcall(inode, -ETIMEDOUT);
++out:
+ 	up(&inode->i_sem);
+ }
+ 
+@@ -113,8 +116,6 @@ rpc_close_pipes(struct inode *inode)
+ {
+ 	struct rpc_inode *rpci = RPC_I(inode);
+ 
+-	cancel_delayed_work(&rpci->queue_timeout);
+-	flush_scheduled_work();
+ 	down(&inode->i_sem);
+ 	if (rpci->ops != NULL) {
+ 		rpci->nreaders = 0;
+@@ -127,6 +128,8 @@ rpc_close_pipes(struct inode *inode)
+ 	}
+ 	rpc_inode_setowner(inode, NULL);
+ 	up(&inode->i_sem);
++	cancel_delayed_work(&rpci->queue_timeout);
++	flush_scheduled_work();
+ }
+ 
+ static struct inode *
+@@ -166,7 +169,7 @@ static int
+ static int
+ rpc_pipe_release(struct inode *inode, struct file *filp)
+ {
+-	struct rpc_inode *rpci = RPC_I(filp->f_dentry->d_inode);
++	struct rpc_inode *rpci = RPC_I(inode);
+ 	struct rpc_pipe_msg *msg;
+ 
+ 	down(&inode->i_sem);
+
+
+Just more helpful error messages if a race occurred?
+
+
+commit 4b2f0260c74324abca76ccaa42d426af163125e7
+Author: Herbert Xu <herbert@gondor.apana.org.au>
+Date:   Fri Jan 6 00:09:47 2006 -0800
+
+    [PATCH] nbd: fix TX/RX race condition
+    
+    Janos Haar of First NetCenter Bt.  reported numerous crashes involving the
+    NBD driver.  With his help, this was tracked down to bogus bio vectors
+    which in turn was the result of a race condition between the
+    receive/transmit routines in the NBD driver.
+    
+    The bug manifests itself like this:
+    
+    CPU0				CPU1
+    do_nbd_request
+    	add req to queuelist
+    	nbd_send_request
+    		send req head
+    		for each bio
+    			kmap
+    			send
+    				nbd_read_stat
+    					nbd_find_request
+    					nbd_end_request
+    			kunmap
+    
+    When CPU1 finishes nbd_end_request, the request and all its associated
+    bio's are freed.  So when CPU0 calls kunmap whose argument is derived from
+    the last bio, it may crash.
+    
+    Under normal circumstances, the race occurs only on the last bio.  However,
+    if an error is encountered on the remote NBD server (such as an incorrect
+    magic number in the request), or if there were a bug in the server, it is
+    possible for the nbd_end_request to occur any time after the request's
+    addition to the queuelist.
+    
+    The following patch fixes this problem by making sure that requests are not
+    added to the queuelist until after they have been completed transmission.
+    
+    In order for the receiving side to be ready for responses involving
+    requests still being transmitted, the patch introduces the concept of the
+    active request.
+    
+    When a response matches the current active request, its processing is
+    delayed until after the tranmission has come to a stop.
+    
+    This has been tested by Janos and it has been successful in curing this
+    race condition.
+    
+    From: Herbert Xu <herbert@gondor.apana.org.au>
+    
+      Here is an updated patch which removes the active_req wait in
+      nbd_clear_queue and the associated memory barrier.
+    
+      I've also clarified this in the comment.
+
+
+--- a/drivers/block/nbd.c	Sat Jan  7 00:33:20 2006 +0800
++++ b/drivers/block/nbd.c	Sat Jan  7 00:33:20 2006 +0800
+@@ -54,11 +54,15 @@
+ #include <linux/errno.h>
+ #include <linux/file.h>
+ #include <linux/ioctl.h>
++#include <linux/compiler.h>
++#include <linux/err.h>
++#include <linux/kernel.h>
+ #include <net/sock.h>
+ 
+ #include <linux/devfs_fs_kernel.h>
+ 
+ #include <asm/uaccess.h>
++#include <asm/system.h>
+ #include <asm/types.h>
+ 
+ #include <linux/nbd.h>
+@@ -229,14 +233,6 @@ static int nbd_send_req(struct nbd_devic
+ 	request.from = cpu_to_be64((u64) req->sector << 9);
+ 	request.len = htonl(size);
+ 	memcpy(request.handle, &req, sizeof(req));
+-
+-	down(&lo->tx_lock);
+-
+-	if (!sock || !lo->sock) {
+-		printk(KERN_ERR "%s: Attempted send on closed socket\n",
+-				lo->disk->disk_name);
+-		goto error_out;
+-	}
+ 
+ 	dprintk(DBG_TX, "%s: request %p: sending control (%s@%llu,%luB)\n",
+ 			lo->disk->disk_name, req,
+@@ -276,11 +272,9 @@ static int nbd_send_req(struct nbd_devic
+ 			}
+ 		}
+ 	}
+-	up(&lo->tx_lock);
+ 	return 0;
+ 
+ error_out:
+-	up(&lo->tx_lock);
+ 	return 1;
+ }
+ 
+@@ -289,8 +283,13 @@ static struct request *nbd_find_request(
+ 	struct request *req;
+ 	struct list_head *tmp;
+ 	struct request *xreq;
++	int err;
+ 
+ 	memcpy(&xreq, handle, sizeof(xreq));
++
++	err = wait_event_interruptible(lo->active_wq, lo->active_req != xreq);
++	if (unlikely(err))
++		goto out;
+ 
+ 	spin_lock(&lo->queue_lock);
+ 	list_for_each(tmp, &lo->queue_head) {
+@@ -302,7 +301,11 @@ static struct request *nbd_find_request(
+ 		return req;
+ 	}
+ 	spin_unlock(&lo->queue_lock);
+-	return NULL;
++
++	err = -ENOENT;
++
++out:
++	return ERR_PTR(err);
+ }
+ 
+ static inline int sock_recv_bvec(struct socket *sock, struct bio_vec *bvec)
+@@ -331,7 +334,11 @@ static struct request *nbd_read_stat(str
+ 		goto harderror;
+ 	}
+ 	req = nbd_find_request(lo, reply.handle);
+-	if (req == NULL) {
++	if (unlikely(IS_ERR(req))) {
++		result = PTR_ERR(req);
++		if (result != -ENOENT)
++			goto harderror;
++
+ 		printk(KERN_ERR "%s: Unexpected reply (%p)\n",
+ 				lo->disk->disk_name, reply.handle);
+ 		result = -EBADR;
+@@ -395,19 +402,24 @@ static void nbd_clear_que(struct nbd_dev
+ 
+ 	BUG_ON(lo->magic != LO_MAGIC);
+ 
+-	do {
+-		req = NULL;
+-		spin_lock(&lo->queue_lock);
+-		if (!list_empty(&lo->queue_head)) {
+-			req = list_entry(lo->queue_head.next, struct request, queuelist);
+-			list_del_init(&req->queuelist);
+-		}
+-		spin_unlock(&lo->queue_lock);
+-		if (req) {
+-			req->errors++;
+-			nbd_end_request(req);
+-		}
+-	} while (req);
++	/*
++	 * Because we have set lo->sock to NULL under the tx_lock, all
++	 * modifications to the list must have completed by now.  For
++	 * the same reason, the active_req must be NULL.
++	 *
++	 * As a consequence, we don't need to take the spin lock while
++	 * purging the list here.
++	 */
++	BUG_ON(lo->sock);
++	BUG_ON(lo->active_req);
++
++	while (!list_empty(&lo->queue_head)) {
++		req = list_entry(lo->queue_head.next, struct request,
++				 queuelist);
++		list_del_init(&req->queuelist);
++		req->errors++;
++		nbd_end_request(req);
++	}
+ }
+ 
+ /*
+@@ -435,11 +447,6 @@ static void do_nbd_request(request_queue
+ 
+ 		BUG_ON(lo->magic != LO_MAGIC);
+ 
+-		if (!lo->file) {
+-			printk(KERN_ERR "%s: Request when not-ready\n",
+-					lo->disk->disk_name);
+-			goto error_out;
+-		}
+ 		nbd_cmd(req) = NBD_CMD_READ;
+ 		if (rq_data_dir(req) == WRITE) {
+ 			nbd_cmd(req) = NBD_CMD_WRITE;
+@@ -453,31 +460,33 @@ static void do_nbd_request(request_queue
+ 		req->errors = 0;
+ 		spin_unlock_irq(q->queue_lock);
+ 
+-		spin_lock(&lo->queue_lock);
+-
+-		if (!lo->file) {
+-			spin_unlock(&lo->queue_lock);
+-			printk(KERN_ERR "%s: failed between accept and semaphore, file lost\n",
+-					lo->disk->disk_name);
++		down(&lo->tx_lock);
++		if (unlikely(!lo->sock)) {
++			up(&lo->tx_lock);
++			printk(KERN_ERR "%s: Attempted send on closed socket\n",
++			       lo->disk->disk_name);
+ 			req->errors++;
+ 			nbd_end_request(req);
+ 			spin_lock_irq(q->queue_lock);
+ 			continue;
+ 		}
+ 
+-		list_add(&req->queuelist, &lo->queue_head);
+-		spin_unlock(&lo->queue_lock);
++		lo->active_req = req;
+ 
+ 		if (nbd_send_req(lo, req) != 0) {
+ 			printk(KERN_ERR "%s: Request send failed\n",
+ 					lo->disk->disk_name);
+-			if (nbd_find_request(lo, (char *)&req) != NULL) {
+-				/* we still own req */
+-				req->errors++;
+-				nbd_end_request(req);
+-			} else /* we're racing with nbd_clear_que */
+-				printk(KERN_DEBUG "nbd: can't find req\n");
+-		}
++			req->errors++;
++			nbd_end_request(req);
++		} else {
++			spin_lock(&lo->queue_lock);
++			list_add(&req->queuelist, &lo->queue_head);
++			spin_unlock(&lo->queue_lock);
++		}
++
++		lo->active_req = NULL;
++		up(&lo->tx_lock);
++		wake_up_all(&lo->active_wq);
+ 
+ 		spin_lock_irq(q->queue_lock);
+ 		continue;
+@@ -529,17 +538,10 @@ static int nbd_ioctl(struct inode *inode
+ 		down(&lo->tx_lock);
+ 		lo->sock = NULL;
+ 		up(&lo->tx_lock);
+-		spin_lock(&lo->queue_lock);
+ 		file = lo->file;
+ 		lo->file = NULL;
+-		spin_unlock(&lo->queue_lock);
+ 		nbd_clear_que(lo);
+-		spin_lock(&lo->queue_lock);
+-		if (!list_empty(&lo->queue_head)) {
+-			printk(KERN_ERR "nbd: disconnect: some requests are in progress -> please try again.\n");
+-			error = -EBUSY;
+-		}
+-		spin_unlock(&lo->queue_lock);
++		BUG_ON(!list_empty(&lo->queue_head));
+ 		if (file)
+ 			fput(file);
+ 		return error;
+@@ -598,24 +600,19 @@ static int nbd_ioctl(struct inode *inode
+ 			lo->sock = NULL;
+ 		}
+ 		up(&lo->tx_lock);
+-		spin_lock(&lo->queue_lock);
+ 		file = lo->file;
+ 		lo->file = NULL;
+-		spin_unlock(&lo->queue_lock);
+ 		nbd_clear_que(lo);
+ 		printk(KERN_WARNING "%s: queue cleared\n", lo->disk->disk_name);
+ 		if (file)
+ 			fput(file);
+ 		return lo->harderror;
+ 	case NBD_CLEAR_QUE:
+-		down(&lo->tx_lock);
+-		if (lo->sock) {
+-			up(&lo->tx_lock);
+-			return 0; /* probably should be error, but that would
+-				   * break "nbd-client -d", so just return 0 */
+-		}
+-		up(&lo->tx_lock);
+-		nbd_clear_que(lo);
++		/*
++		 * This is for compatibility only.  The queue is always cleared
++		 * by NBD_DO_IT or NBD_CLEAR_SOCK.
++		 */
++		BUG_ON(!lo->sock && !list_empty(&lo->queue_head));
+ 		return 0;
+ 	case NBD_PRINT_DEBUG:
+ 		printk(KERN_INFO "%s: next = %p, prev = %p, head = %p\n",
+@@ -688,6 +685,7 @@ static int __init nbd_init(void)
+ 		spin_lock_init(&nbd_dev[i].queue_lock);
+ 		INIT_LIST_HEAD(&nbd_dev[i].queue_head);
+ 		init_MUTEX(&nbd_dev[i].tx_lock);
++		init_waitqueue_head(&nbd_dev[i].active_wq);
+ 		nbd_dev[i].blksize = 1024;
+ 		nbd_dev[i].bytesize = 0x7ffffc00ULL << 10; /* 2TB */
+ 		disk->major = NBD_MAJOR;
+
+--- a/include/linux/nbd.h	Sat Jan  7 00:33:20 2006 +0800
++++ b/include/linux/nbd.h	Sat Jan  7 00:33:20 2006 +0800
+@@ -37,9 +37,13 @@ enum {
+ /* userspace doesn't need the nbd_device structure */
+ #ifdef __KERNEL__
+ 
++#include <linux/wait.h>
++
+ /* values for flags field */
+ #define NBD_READ_ONLY 0x0001
+ #define NBD_WRITE_NOCHK 0x0002
++
++struct request;
+ 
+ struct nbd_device {
+ 	int flags;
+@@ -47,8 +51,12 @@ struct nbd_device {
+ 	struct socket * sock;
+ 	struct file * file; 	/* If == NULL, device is not ready, yet	*/
+ 	int magic;
++
+ 	spinlock_t queue_lock;
+ 	struct list_head queue_head;/* Requests are added here...	*/
++	struct request *active_req;
++	wait_queue_head_t active_wq;
++
+ 	struct semaphore tx_lock;
+ 	struct gendisk *disk;
+ 	int blksize;
+
+
+$CHECK IT (complex... fix removes several locks, adds back 1 spin 1 sem)
+
+commit d4d6bb41e09f07668ca2655da707eab936e8e8f0
+Author: Pablo Neira Ayuso <pablo@netfilter.org>
+Date:   Thu Jan 5 12:18:25 2006 -0800
+
+    [NETFILTER]: ctnetlink: fix conntrack mark race
+    
+    Set conntrack mark before it is in hashes.
+    
+
+--- a/net/ipv4/netfilter/ip_conntrack_netlink.c	Fri Jan  6 04:18:08 2006 +0800
++++ b/net/ipv4/netfilter/ip_conntrack_netlink.c	Fri Jan  6 04:18:25 2006 +0800
+@@ -1031,18 +1031,18 @@ ctnetlink_create_conntrack(struct nfattr
+ 			return err;
+ 	}
+ 
+-	ct->helper = ip_conntrack_helper_find_get(rtuple);
+-
+-	add_timer(&ct->timeout);
+-	ip_conntrack_hash_insert(ct);
+-
+-	if (ct->helper)
+-		ip_conntrack_helper_put(ct->helper);
+-
+ #if defined(CONFIG_IP_NF_CONNTRACK_MARK)
+ 	if (cda[CTA_MARK-1])
+ 		ct->mark = ntohl(*(u_int32_t *)NFA_DATA(cda[CTA_MARK-1]));
+ #endif
++
++	ct->helper = ip_conntrack_helper_find_get(rtuple);
++
++	add_timer(&ct->timeout);
++	ip_conntrack_hash_insert(ct);
++
++	if (ct->helper)
++		ip_conntrack_helper_put(ct->helper);
+ 
+ 	DEBUGP("conntrack with id %u inserted\n", ct->id);
+ 	return 0;
+
+
+
+$CHECK IT (updated field before it was aliased to a globally accessible hash)
+
+
+commit fd586bacf439f36dea9b9bf6e6133ac87df2730c
+Author: Kay Sievers <kay.sievers@vrfy.org>
+Date:   Mon Dec 19 01:42:56 2005 +0100
+
+    [PATCH] net: swich device attribute creation to default attrs
+    
+    Recent udev versions don't longer cover bad sysfs timing with built-in
+    logic. Explicit rules are required to do that. For net devices, the
+    following is needed:
+      ACTION=="add", SUBSYSTEM=="net", WAIT_FOR_SYSFS="address"
+    to handle access to net device properties from an event handler without
+    races.
+
+--- a/net/core/net-sysfs.c	Thu Jan  5 08:18:10 2006 +0800
++++ b/net/core/net-sysfs.c	Thu Jan  5 08:18:10 2006 +0800
+@@ -84,16 +84,11 @@ static ssize_t netdev_store(struct class
+ 	return ret;
+ }
+ 
+-/* generate a read-only network device class attribute */
+-#define NETDEVICE_ATTR(field, format_string)				\
+-NETDEVICE_SHOW(field, format_string)					\
+-static CLASS_DEVICE_ATTR(field, S_IRUGO, show_##field, NULL)		\
+-
+-NETDEVICE_ATTR(addr_len, fmt_dec);
+-NETDEVICE_ATTR(iflink, fmt_dec);
+-NETDEVICE_ATTR(ifindex, fmt_dec);
+-NETDEVICE_ATTR(features, fmt_long_hex);
+-NETDEVICE_ATTR(type, fmt_dec);
++NETDEVICE_SHOW(addr_len, fmt_dec);
++NETDEVICE_SHOW(iflink, fmt_dec);
++NETDEVICE_SHOW(ifindex, fmt_dec);
++NETDEVICE_SHOW(features, fmt_long_hex);
++NETDEVICE_SHOW(type, fmt_dec);
+ 
+ /* use same locking rules as GIFHWADDR ioctl's */
+ static ssize_t format_addr(char *buf, const unsigned char *addr, int len)
+@@ -136,10 +131,6 @@ static ssize_t show_carrier(struct class
+ 	return -EINVAL;
+ }
+ 
+-static CLASS_DEVICE_ATTR(address, S_IRUGO, show_address, NULL);
+-static CLASS_DEVICE_ATTR(broadcast, S_IRUGO, show_broadcast, NULL);
+-static CLASS_DEVICE_ATTR(carrier, S_IRUGO, show_carrier, NULL);
+-
+ /* read-write attributes */
+ NETDEVICE_SHOW(mtu, fmt_dec);
+ 
+@@ -153,8 +144,6 @@ static ssize_t store_mtu(struct class_de
+ 	return netdev_store(dev, buf, len, change_mtu);
+ }
+ 
+-static CLASS_DEVICE_ATTR(mtu, S_IRUGO | S_IWUSR, show_mtu, store_mtu);
+-
+ NETDEVICE_SHOW(flags, fmt_hex);
+ 
+ static int change_flags(struct net_device *net, unsigned long new_flags)
+@@ -167,8 +156,6 @@ static ssize_t store_flags(struct class_
+ 	return netdev_store(dev, buf, len, change_flags);
+ }
+ 
+-static CLASS_DEVICE_ATTR(flags, S_IRUGO | S_IWUSR, show_flags, store_flags);
+-
+ NETDEVICE_SHOW(tx_queue_len, fmt_ulong);
+ 
+ static int change_tx_queue_len(struct net_device *net, unsigned long new_len)
+@@ -182,9 +169,6 @@ static ssize_t store_tx_queue_len(struct
+ 	return netdev_store(dev, buf, len, change_tx_queue_len);
+ }
+ 
+-static CLASS_DEVICE_ATTR(tx_queue_len, S_IRUGO | S_IWUSR, show_tx_queue_len, 
+-			 store_tx_queue_len);
+-
+ NETDEVICE_SHOW(weight, fmt_dec);
+ 
+ static int change_weight(struct net_device *net, unsigned long new_weight)
+@@ -198,24 +182,21 @@ static ssize_t store_weight(struct class
+ 	return netdev_store(dev, buf, len, change_weight);
+ }
+ 
+-static CLASS_DEVICE_ATTR(weight, S_IRUGO | S_IWUSR, show_weight, 
+-			 store_weight);
+-
+-
+-static struct class_device_attribute *net_class_attributes[] = {
+-	&class_device_attr_ifindex,
+-	&class_device_attr_iflink,
+-	&class_device_attr_addr_len,
+-	&class_device_attr_tx_queue_len,
+-	&class_device_attr_features,
+-	&class_device_attr_mtu,
+-	&class_device_attr_flags,
+-	&class_device_attr_weight,
+-	&class_device_attr_type,
+-	&class_device_attr_address,
+-	&class_device_attr_broadcast,
+-	&class_device_attr_carrier,
+-	NULL
++static struct class_device_attribute net_class_attributes[] = {
++	__ATTR(addr_len, S_IRUGO, show_addr_len, NULL),
++	__ATTR(iflink, S_IRUGO, show_iflink, NULL),
++	__ATTR(ifindex, S_IRUGO, show_ifindex, NULL),
++	__ATTR(features, S_IRUGO, show_features, NULL),
++	__ATTR(type, S_IRUGO, show_type, NULL),
++	__ATTR(address, S_IRUGO, show_address, NULL),
++	__ATTR(broadcast, S_IRUGO, show_broadcast, NULL),
++	__ATTR(carrier, S_IRUGO, show_carrier, NULL),
++	__ATTR(mtu, S_IRUGO | S_IWUSR, show_mtu, store_mtu),
++	__ATTR(flags, S_IRUGO | S_IWUSR, show_flags, store_flags),
++	__ATTR(tx_queue_len, S_IRUGO | S_IWUSR, show_tx_queue_len,
++	       store_tx_queue_len),
++	__ATTR(weight, S_IRUGO | S_IWUSR, show_weight, store_weight),
++	{}
+ };
+ 
+ /* Show a given an attribute in the statistics group */
+@@ -407,6 +388,7 @@ static struct class net_class = {
+ static struct class net_class = {
+ 	.name = "net",
+ 	.release = netdev_release,
++	.class_dev_attrs = net_class_attributes,
+ #ifdef CONFIG_HOTPLUG
+ 	.uevent = netdev_uevent,
+ #endif
+@@ -431,8 +413,6 @@ int netdev_register_sysfs(struct net_dev
+ int netdev_register_sysfs(struct net_device *net)
+ {
+ 	struct class_device *class_dev = &(net->class_dev);
+-	int i;
+-	struct class_device_attribute *attr;
+ 	int ret;
+ 
+ 	class_dev->class = &net_class;
+@@ -441,12 +421,6 @@ int netdev_register_sysfs(struct net_dev
+ 	strlcpy(class_dev->class_id, net->name, BUS_ID_SIZE);
+ 	if ((ret = class_device_register(class_dev)))
+ 		goto out;
+-
+-	for (i = 0; (attr = net_class_attributes[i]) != NULL; i++) {
+-		if ((ret = class_device_create_file(class_dev, attr)))
+-		    goto out_unreg;
+-	}
+-
+ 
+ 	if (net->get_stats &&
+ 	    (ret = sysfs_create_group(&class_dev->kobj, &netstat_group)))
+
+
+$CHECK IT (not sure where the race is, sounds like the fix is to
+change funptrs so that handler is a race-free on instead)
+
+
+
+commit 8a4613f01f5bb850cab34e3db572d97251d997b3
+Author: Luiz Fernando Capitulino <lcapitulino@mandriva.com.br>
+Date:   Mon Nov 28 19:16:07 2005 -0200
+
+    [PATCH] USB: usbserial: race-condition fix.
+    
+    There is a race-condition in usb-serial driver that can be triggered if
+    a processes does 'port->tty->driver_data = NULL' in serial_close() while
+    other processes is in kernel-space about to call serial_ioctl() on the
+    same port.
+    
+    This happens because a process can open the device while there is
+    another one closing it.
+    
+    The patch below fixes that by adding a semaphore to ensure that no
+    process will open the device while another process is closing it.
+    
+    Note that we can't use spinlocks here, since serial_open() and
+    serial_close() can sleep.
+
+--- a/drivers/usb/serial/usb-serial.c	Thu Jan  5 05:48:35 2006 +0800
++++ b/drivers/usb/serial/usb-serial.c	Thu Jan  5 05:48:35 2006 +0800
+@@ -30,6 +30,7 @@
+ #include <linux/list.h>
+ #include <linux/smp_lock.h>
+ #include <asm/uaccess.h>
++#include <asm/semaphore.h>
+ #include <linux/usb.h>
+ #include "usb-serial.h"
+ #include "pl2303.h"
+@@ -190,6 +191,9 @@ static int serial_open (struct tty_struc
+ 	port = serial->port[portNumber];
+ 	if (!port)
+ 		return -ENODEV;
++
++	if (down_interruptible(&port->sem))
++		return -ERESTARTSYS;
+ 	 
+ 	++port->open_count;
+ 
+@@ -215,6 +219,7 @@ static int serial_open (struct tty_struc
+ 			goto bailout_module_put;
+ 	}
+ 
++	up(&port->sem);
+ 	return 0;
+ 
+ bailout_module_put:
+@@ -222,6 +227,7 @@ bailout_kref_put:
+ bailout_kref_put:
+ 	kref_put(&serial->kref, destroy_serial);
+ 	port->open_count = 0;
++	up(&port->sem);
+ 	return retval;
+ }
+ 
+@@ -234,8 +240,10 @@ static void serial_close(struct tty_stru
+ 
+ 	dbg("%s - port %d", __FUNCTION__, port->number);
+ 
++	down(&port->sem);
++
+ 	if (port->open_count == 0)
+-		return;
++		goto out;
+ 
+ 	--port->open_count;
+ 	if (port->open_count == 0) {
+@@ -253,6 +261,9 @@ static void serial_close(struct tty_stru
+ 	}
+ 
+ 	kref_put(&port->serial->kref, destroy_serial);
++
++out:
++	up(&port->sem);
+ }
+ 
+ static int serial_write (struct tty_struct * tty, const unsigned char *buf, int count)
+@@ -774,6 +785,7 @@ int usb_serial_probe(struct usb_interfac
+ 		port->number = i + serial->minor;
+ 		port->serial = serial;
+ 		spin_lock_init(&port->lock);
++		sema_init(&port->sem, 1);
+ 		INIT_WORK(&port->work, usb_serial_port_softint, port);
+ 		serial->port[i] = port;
+ 	}
+
+--- a/drivers/usb/serial/usb-serial.h	Thu Jan  5 05:48:35 2006 +0800
++++ b/drivers/usb/serial/usb-serial.h	Thu Jan  5 05:48:35 2006 +0800
+@@ -16,6 +16,7 @@
+ 
+ #include <linux/config.h>
+ #include <linux/kref.h>
++#include <asm/semaphore.h>
+ 
+ #define SERIAL_TTY_MAJOR	188	/* Nice legal number now */
+ #define SERIAL_TTY_MINORS	255	/* loads of devices :) */
+@@ -30,6 +31,8 @@
+  * @serial: pointer back to the struct usb_serial owner of this port.
+  * @tty: pointer to the corresponding tty for this port.
+  * @lock: spinlock to grab when updating portions of this structure.
++ * @sem: semaphore used to synchronize serial_open() and serial_close()
++ *	access for this port.
+  * @number: the number of the port (the minor number).
+  * @interrupt_in_buffer: pointer to the interrupt in buffer for this port.
+  * @interrupt_in_urb: pointer to the interrupt in struct urb for this port.
+@@ -60,6 +63,7 @@ struct usb_serial_port {
+ 	struct usb_serial *	serial;
+ 	struct tty_struct *	tty;
+ 	spinlock_t		lock;
++	struct semaphore        sem;
+ 	unsigned char		number;
+ 
+ 	unsigned char *		interrupt_in_buffer;
+
+
+$CHECK IT
+
+
+
+commit b32425ac93370e1ba5556110e662f896b2e143b3
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Fri Nov 18 18:52:14 2005 +0100
+
+    [ALSA] Fix possible races in timer callbacks
+    
+    Fix possible races in timer callbacks.
+
+
+--- a/sound/core/timer.c	Tue Jan  3 10:29:04 2006 -0100
++++ b/sound/core/timer.c	Tue Jan  3 10:29:08 2006 -0100
+@@ -662,12 +662,13 @@ void snd_timer_interrupt(struct snd_time
+ 	struct snd_timer_instance *ti, *ts;
+ 	unsigned long resolution, ticks;
+ 	struct list_head *p, *q, *n, *ack_list_head;
++	unsigned long flags;
+ 	int use_tasklet = 0;
+ 
+ 	if (timer == NULL)
+ 		return;
+ 
+-	spin_lock(&timer->lock);
++	spin_lock_irqsave(&timer->lock, flags);
+ 
+ 	/* remember the current resolution */
+ 	if (timer->hw.c_resolution)
+@@ -752,7 +753,7 @@ void snd_timer_interrupt(struct snd_time
+ 
+ 	/* do we have any slow callbacks? */
+ 	use_tasklet = !list_empty(&timer->sack_list_head);
+-	spin_unlock(&timer->lock);
++	spin_unlock_irqrestore(&timer->lock, flags);
+ 
+ 	if (use_tasklet)
+ 		tasklet_hi_schedule(&timer->task_queue);
+
+--- a/sound/drivers/dummy.c	Tue Jan  3 10:29:04 2006 -0100
++++ b/sound/drivers/dummy.c	Tue Jan  3 10:29:08 2006 -0100
+@@ -231,8 +231,9 @@ static void snd_card_dummy_pcm_timer_fun
+ static void snd_card_dummy_pcm_timer_function(unsigned long data)
+ {
+ 	struct snd_dummy_pcm *dpcm = (struct snd_dummy_pcm *)data;
++	unsigned long flags;
+ 	
+-	spin_lock(&dpcm->lock);
++	spin_lock_irqsave(&dpcm->lock, flags);
+ 	dpcm->timer.expires = 1 + jiffies;
+ 	add_timer(&dpcm->timer);
+ 	dpcm->pcm_irq_pos += dpcm->pcm_jiffie;
+@@ -240,11 +241,10 @@ static void snd_card_dummy_pcm_timer_fun
+ 	dpcm->pcm_buf_pos %= dpcm->pcm_size;
+ 	if (dpcm->pcm_irq_pos >= dpcm->pcm_count) {
+ 		dpcm->pcm_irq_pos %= dpcm->pcm_count;
+-		spin_unlock(&dpcm->lock);
++		spin_unlock_irqrestore(&dpcm->lock, flags);
+ 		snd_pcm_period_elapsed(dpcm->substream);
+-		spin_lock(&dpcm->lock);
+-	}
+-	spin_unlock(&dpcm->lock);
++	} else
++		spin_unlock_irqrestore(&dpcm->lock, flags);
+ }
+ 
+ static snd_pcm_uframes_t snd_card_dummy_pcm_pointer(struct snd_pcm_substream *substream)
+
+--- a/sound/drivers/mpu401/mpu401_uart.c	Tue Jan  3 10:29:04 2006 -0100
++++ b/sound/drivers/mpu401/mpu401_uart.c	Tue Jan  3 10:29:08 2006 -0100
+@@ -133,12 +133,13 @@ static void snd_mpu401_uart_timer(unsign
+ static void snd_mpu401_uart_timer(unsigned long data)
+ {
+ 	struct snd_mpu401 *mpu = (struct snd_mpu401 *)data;
+-
+-	spin_lock(&mpu->timer_lock);
++	unsigned long flags;
++
++	spin_lock_irqsave(&mpu->timer_lock, flags);
+ 	/*mpu->mode |= MPU401_MODE_TIMER;*/
+ 	mpu->timer.expires = 1 + jiffies;
+ 	add_timer(&mpu->timer);
+-	spin_unlock(&mpu->timer_lock);
++	spin_unlock_irqrestore(&mpu->timer_lock, flags);
+ 	if (mpu->rmidi)
+ 		_snd_mpu401_uart_interrupt(mpu);
+ }
+
+--- a/sound/drivers/opl3/opl3_midi.c	Tue Jan  3 10:29:04 2006 -0100
++++ b/sound/drivers/opl3/opl3_midi.c	Tue Jan  3 10:29:08 2006 -0100
+@@ -238,10 +238,11 @@ void snd_opl3_timer_func(unsigned long d
+ {
+ 
+ 	struct snd_opl3 *opl3 = (struct snd_opl3 *)data;
++	unsigned long flags;
+ 	int again = 0;
+ 	int i;
+ 
+-	spin_lock(&opl3->sys_timer_lock);
++	spin_lock_irqsave(&opl3->sys_timer_lock, flags);
+ 	for (i = 0; i < opl3->max_voices; i++) {
+ 		struct snd_opl3_voice *vp = &opl3->voices[i];
+ 		if (vp->state > 0 && vp->note_off_check) {
+@@ -257,7 +258,7 @@ void snd_opl3_timer_func(unsigned long d
+ 	} else {
+ 		opl3->sys_timer_status = 0;
+ 	}
+-	spin_unlock(&opl3->sys_timer_lock);
++	spin_unlock_irqrestore(&opl3->sys_timer_lock, flags);
+ }
+ 
+ /*
+
+--- a/sound/pci/korg1212/korg1212.c	Tue Jan  3 10:29:04 2006 -0100
++++ b/sound/pci/korg1212/korg1212.c	Tue Jan  3 10:29:08 2006 -0100
+@@ -609,8 +609,9 @@ static void snd_korg1212_timer_func(unsi
+ static void snd_korg1212_timer_func(unsigned long data)
+ {
+         struct snd_korg1212 *korg1212 = (struct snd_korg1212 *) data;
++	unsigned long flags;
+ 	
+-	spin_lock(&korg1212->lock);
++	spin_lock_irqsave(&korg1212->lock, flags);
+ 	if (korg1212->sharedBufferPtr->cardCommand == 0) {
+ 		/* ack'ed */
+ 		korg1212->stop_pending_cnt = 0;
+@@ -632,7 +633,7 @@ static void snd_korg1212_timer_func(unsi
+ 					   stateName[korg1212->cardState]);
+ 		}
+ 	}
+-	spin_unlock(&korg1212->lock);
++	spin_unlock_irqrestore(&korg1212->lock, flags);
+ }
+ 
+ static int snd_korg1212_TurnOnIdleMonitor(struct snd_korg1212 *korg1212)
+
+--- a/sound/synth/emux/emux_synth.c	Tue Jan  3 10:29:04 2006 -0100
++++ b/sound/synth/emux/emux_synth.c	Tue Jan  3 10:29:08 2006 -0100
+@@ -205,9 +205,10 @@ void snd_emux_timer_callback(unsigned lo
+ {
+ 	struct snd_emux *emu = (struct snd_emux *) data;
+ 	struct snd_emux_voice *vp;
++	unsigned long flags;
+ 	int ch, do_again = 0;
+ 
+-	spin_lock(&emu->voice_lock);
++	spin_lock_irqsave(&emu->voice_lock, flags);
+ 	for (ch = 0; ch < emu->max_voices; ch++) {
+ 		vp = &emu->voices[ch];
+ 		if (vp->state == SNDRV_EMUX_ST_PENDING) {
+@@ -225,7 +226,7 @@ void snd_emux_timer_callback(unsigned lo
+ 		emu->timer_active = 1;
+ 	} else
+ 		emu->timer_active = 0;
+-	spin_unlock(&emu->voice_lock);
++	spin_unlock_irqrestore(&emu->voice_lock, flags);
+ }
+ 
+ /*
+
+
+$SCOPE - Didn't model difference between vanilla and irq_save versions
+vanilla spinlock does nothing on uni-processor non-pre-emptible? but
+what happens when pre-emptible and the interrupt handler comes by? deadlock?
+
+
+
+
+
+commit a2a7a662f80d8b7f2295a36de1f9b033ed0b910c
+Author: Tejun Heo <htejun@gmail.com>
+Date:   Tue Dec 13 14:48:31 2005 +0900
+
+    [PATCH] libata: implement ata_exec_internal()
+    
+    This patch implements ata_exec_internal() function which performs
+    libata internal command execution.  Previously, this was done by each
+    user by manually initializing a qc, issueing it, waiting for its
+    completion and handling errors.  In addition to obvious code
+    factoring, using ata_exec_internal() fixes the following bugs.
+    
+    * qc not freed on issue failure
+    * ap->qactive clearing could race with the next internal command
+    * race between timeout handling and irq
+    * ignoring error condition not represented in tf->status
+    
+    Also, qc & hardware are not accessed anymore once it's completed,
+    making internal commands more conformant with general semantics.
+    ata_exec_internal() also makes it easy to issue internal commands from
+    multiple threads if that becomes necessary.
+    
+    This patch only implements ata_exec_internal().  A following patch
+    will convert all users.
+    
+
+
+$CHECK IT - can't find the patch for more details...
+
+
+
+commit 8c463ef7928d7a42bb9ca410df9b294dc01c1850
+Author: Stephen Hemminger <shemminger@osdl.org>
+Date:   Fri Dec 9 11:35:08 2005 -0800
+
+    [PATCH] sky2: quiet ring full message in case of race
+    
+    Don't print ring full message if we lose race.
+
+
+commit 018d1c667ef4dce5299dd79d38447840789c97d6
+Author: shemminger@osdl.org <shemminger@osdl.org>
+Date:   Wed Nov 30 11:45:18 2005 -0800
+
+    [PATCH] sky2: race with MTU change
+    
+    Avoid possible race conditions when doing MTU and change and shutdown.
+    
+
+--- a/drivers/net/sky2.c	Thu Dec  1 12:20:20 2005 +0500
++++ b/drivers/net/sky2.c	Thu Dec  1 12:20:20 2005 +0500
+@@ -1298,7 +1298,15 @@ static int sky2_down(struct net_device *
+ 	if (netif_msg_ifdown(sky2))
+ 		printk(KERN_INFO PFX "%s: disabling interface\n", dev->name);
+ 
++	/* Stop more packets from being queued */
+ 	netif_stop_queue(dev);
++
++	/* Disable port IRQ */
++	local_irq_disable();
++	hw->intr_mask &= ~((sky2->port == 0) ? Y2_IS_IRQ_PHY1 : Y2_IS_IRQ_PHY2);
++	sky2_write32(hw, B0_IMSK, hw->intr_mask);
++	local_irq_enable();
++
+ 
+ 	sky2_phy_reset(hw, port);
+ 
+@@ -1345,6 +1353,8 @@ static int sky2_down(struct net_device *
+ 
+ 	/* turn off LED's */
+ 	sky2_write16(hw, B0_Y2LED, LED_STAT_OFF);
++
++	synchronize_irq(hw->pdev->irq);
+ 
+ 	sky2_tx_clean(sky2);
+ 	sky2_rx_clean(sky2);
+@@ -1586,8 +1596,11 @@ static int sky2_change_mtu(struct net_de
+ 		return 0;
+ 	}
+ 
+-	local_irq_disable();
+ 	sky2_write32(hw, B0_IMSK, 0);
++
++	dev->trans_start = jiffies;	/* prevent tx timeout */
++	netif_stop_queue(dev);
++	netif_poll_disable(hw->dev[0]);
+ 
+ 	ctl = gma_read16(hw, sky2->port, GM_GP_CTRL);
+ 	gma_write16(hw, sky2->port, GM_GP_CTRL, ctl & ~GM_GPCR_RX_ENA);
+@@ -1608,9 +1621,10 @@ static int sky2_change_mtu(struct net_de
+ 	err = sky2_rx_start(sky2);
+ 	gma_write16(hw, sky2->port, GM_GP_CTRL, ctl);
+ 
++	netif_poll_disable(hw->dev[0]);
++	netif_wake_queue(dev);
+ 	sky2_write32(hw, B0_IMSK, hw->intr_mask);
+-	sky2_read32(hw, B0_IMSK);
+-	local_irq_enable();
++
+ 	return err;
+ }
+ 
+
+Hmm... i don't even have that source file!
+
+
+
+commit 760559e1330a58cc5b320154a20e64b8444143c0
+Author: Jeff Garzik <jgarzik@pobox.com>
+Date:   Thu Nov 10 04:31:55 2005 -0500
+
+    [netdrvr 8139too] fast poll for thread, if an unlikely race occurs
+    
+    The rtl8139 thread is triggered only on rare 8139 hardware, the race
+    itself is unlikely, and the impact of racing is low.  We don't care
+    enough to create a more-complex race-free solution.
+    
+    Rather, if the trylock fails, we now simply poll twice a second until
+    we do get the lock.
+
+
+--- a/drivers/net/8139too.c	Thu Nov 10 14:12:10 2005 +0500
++++ b/drivers/net/8139too.c	Thu Nov 10 14:31:55 2005 +0500
+@@ -1598,13 +1598,19 @@ static void rtl8139_thread (void *_data)
+ {
+ 	struct net_device *dev = _data;
+ 	struct rtl8139_private *tp = netdev_priv(dev);
++	unsigned long thr_delay;
+ 
+ 	if (rtnl_shlock_nowait() == 0) {
+ 		rtl8139_thread_iter (dev, tp, tp->mmio_addr);
+ 		rtnl_unlock ();
+-	}
+-
+-	schedule_delayed_work(&tp->thread, next_tick);
++
++		thr_delay = next_tick;
++	} else {
++		/* unlikely race.  mitigate with fast poll. */
++		thr_delay = HZ / 2;
++	}
++
++	schedule_delayed_work(&tp->thread, thr_delay);
+ }
+ 
+ static void rtl8139_start_thread(struct rtl8139_private *tp)
+
+
+
+$CHECK IT ("unlikely race. mitigate with fast poll" ???)
+
+
+
+commit bea86103313fae2e29f2d6eb9a4bd7cbeabd4d32
+Author: shemminger@osdl.org <shemminger@osdl.org>
+Date:   Wed Oct 26 12:16:10 2005 -0700
+
+    [PATCH] sky2: fix NAPI and receive handling
+    
+    Speed up the receive and interrupt processing and eliminate a
+    couple of race conditions from NAPI code.
+
+
+
+
+//////////////////////////////////////////////////////////
+
+58 patches
+
+31 potentially checkable by us...
+
+/////////////////////////////////////////////////////////
+
+Almost as many instances of "race" as there are "*trace*" in the change log
+
+94 lines w/ " race"
+
+vs
+
+70 lines w/ "trace"
+
+well... it is the change log, not a bug report
+
+
+
+/////////////////////////////////////////////////////////
+
+
+
+not many racey accesses solved by using "atomic" update functions?
+we won't warn if the access is done in assembly, so it probably doesn't show up
+
+- seqlocks not modelled (asks user to do stuff like double-checked locking)
+  doesn't work for pointer data structures (reader may have started traversing)
+
+- read-copy-update (RCU) stuff not modelled

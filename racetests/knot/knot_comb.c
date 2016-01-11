@@ -543,7 +543,12 @@ extern  __attribute__((__noreturn__)) void __assert_fail(char const   *__asserti
                                                          char const   *__function ) ;
 extern char *strcpy(char * __restrict  __dest , char const   * __restrict  __src ) ;
 extern int strcmp(char const   *__s1 , char const   *__s2 )  __attribute__((__pure__)) ;
-extern char *strchr(char const   *__s , int __c )  __attribute__((__pure__)) ;
+
+// JAN: defining strchr actually helps precision (fewer unknown "blobs")...
+//extern char *strchr(char const   *__s , int __c )  __attribute__((__pure__)) ;
+//#define strchr(__s,__c)                       \
+//  __s
+
 extern size_t strlen(char const   *__s )  __attribute__((__pure__)) ;
 void input_init(input_state *state , int socket___0 ) ;
 char *input_get_line(input_state *state ) ;

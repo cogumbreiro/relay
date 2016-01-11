@@ -91,6 +91,9 @@ let loadSharedState root =
 
 (************************************************************)
 
+let isAllocVar vid =
+  let vi = Cilinfos.getVarinfo vid in
+  Trans_alloc.isAllocVar vi.vname
 
 (** true if the lval is based on a global but not a function... *)
 let rec isGlobalLv (lv : ptaLv) : bool =
@@ -98,7 +101,8 @@ let rec isGlobalLv (lv : ptaLv) : bool =
   match host.HC.node with
     PVar v ->
       (match v.HC.node with
-         PGlobal (id, _) -> not (isFunc id)
+         PGlobal (id, _) -> 
+           not (isFunc id) && not (isAllocVar id)
        | _ -> false
       )
   | PDeref ptrRv ->

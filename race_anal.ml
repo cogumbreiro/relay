@@ -44,13 +44,11 @@ open Pretty
 open Logging
 open Stdutil
 
-module RS = Racesummary
 module Race = Racestate
+module RS = Race.RS
 module SPTA = Race.SPTA
-module Th = Threads
 module BS = Backed_summary  
 module Warn = Race_warnings
-module Dis = Distributed
 
 (***************************************************)
 (* Commandline handling                            *)
@@ -108,27 +106,28 @@ let printKnownFuns cg =
 
 (** Initialize function summaries, and watchlist of special 
     functions (e.g., pthread_create) *)
-let initSettings () : Callg.callG =
+let initSettings () : Callg.callG * Scc_cg.sccGraph =
   Cilinfos.reloadRanges !cgDir;
   let settings = Config.initSettings !configFile in
   Request.init settings;
   Request.setUser !userName;
   Checkpoint.init !statusFile;
   Default_cache.makeLCaches (!cgDir);
-  Th.initSettings settings;
+  Threads.initSettings settings;
   Alias.initSettings settings !cgDir;
   let cgFile = Dumpcalls.getCallsFile !cgDir in
   let cg = Callg.readCalls cgFile in
+  let sccCG = Scc_cg.getSCCGraph cg in
 
   (* DEBUG *)
 (*
   printKnownFuns cg;
 *)
 
-  let () = BS.init settings !cgDir cg in
+  let () = BS.init settings !cgDir cg sccCG in
 
   SPTA.init settings cg (RS.sum :> Modsummaryi.modSum);
-  Dis.init settings !cgDir;
+  Distributed.init settings !cgDir;
   Entry_points.initSettings settings;
   let _ = File_serv.init settings in (* ignore thread created *)
   let gen_num = Request.initServer () in
@@ -138,49 +137,49 @@ let initSettings () : Callg.callG =
     BS.clearState gen_num;
     Request.clearState gen_num;
   end;
-  cg
+  (cg, sccCG)
 
 
 (** Initiate analysis *)
-let doRaceAnal () : unit =
-  let cg = initSettings () in
-  let sccCG = Scc_cg.getSCCGraph cg in begin
-    
-    (* Then do a bottom-up analysis *)
-    Race.RaceBUTransfer.initStats cg sccCG;
+let doRaceAnal () : unit = begin
+  let cg, sccCG = initSettings () in
+  
+  (* Then do a bottom-up analysis *)
+  Race.RaceBUTransfer.initStats cg sccCG;
 
-    logStatus "Starting bottomup analysis";
+  logStatus "Starting bottomup analysis";
+  logStatus "-----";
+  flushStatus ();
+
+  Race.BUDataflow.compute cg sccCG;
+
+  logStatus "Bottomup analysis complete";
+  logStatus "-----";
+  flushStatus ();
+  
+  if (not !no_warn) then begin
+    logStatus "\n\n\nBeginning Thread Analysis:";
+    logStatus "-----";
+    flushStatus ();  
+    Warn.flagRacesFromSumms cg !cgDir;
+
+    (* Try printing alias example requests *)
+    logStatus "\n\nPrinting Alias assumptions used by warnings";
     logStatus "-----";
     flushStatus ();
-
-    Race.BUDataflow.compute cg sccCG;
-
-    logStatus "Bottomup analysis complete";
-    logStatus "-----";
-    flushStatus ();
-    
-    if (not !no_warn) then begin
-      logStatus "\n\n\nBeginning Thread Analysis:";
-      logStatus "-----";
-      flushStatus ();  
-      Warn.flagRacesFromSumms cg !cgDir;
-
-      (* Try printing alias example requests *)
-      logStatus "\n\nPrinting Alias assumptions used by warnings";
-      logStatus "-----";
-      flushStatus ();
-      Warn.printAliasUses ();
-    end;
-    
-    Alias.finalizeAll ();
-  end
-
+    Warn.printAliasUses ();
+  end;
+  
+  Alias.finalizeAll ();
+end
+ 
 
 let printStatistics () = begin
 (*
   Lvals.printHashStats ();
   Cil_lvals.printHashStats ();
 *)
+  Mystats.print stdout "STATS:\n";
   Gc_stats.printStatistics ();
   flushStatus ()
 end
@@ -203,6 +202,7 @@ let main () =
          setErrLog !logDir;
         )
       ;
+      combineLogs (); (* Make sure errors show up in the right place *)
       Stdutil.printCmdline ();
       Pervasives.at_exit printStatistics;
       Cil.initCIL ();
@@ -211,7 +211,6 @@ let main () =
       logStatus "Checking for data races";
       logStatus "-----";
       doRaceAnal ();
-      Mystats.print stdout "STATS:\n";
       exit 0;
     end
 
